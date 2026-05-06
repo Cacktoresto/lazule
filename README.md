@@ -88,7 +88,7 @@ Comando:
 npm run scrape:supplier
 ```
 
-O script usa Playwright para carregar o catálogo renderizado via JavaScript, acessar categorias do fornecedor, extrair produtos, deduplicar por nome normalizado, baixar imagens e atualizar `src/data/products.js`.
+O script usa Playwright para carregar o catálogo renderizado via JavaScript, acessar categorias do fornecedor, aguardar o DOM com `domcontentloaded`, esperar alguns segundos pela renderização, fazer scroll progressivo até o fim da página, extrair produtos, deduplicar por nome normalizado, baixar imagens e atualizar `src/data/products.js`.
 
 Categorias configuradas inicialmente:
 
@@ -106,7 +106,9 @@ O scraper imprime logs claros durante a execução, por exemplo:
 ```txt
 [LAZULE scraper] Fonte: https://rjperfumaria.catalog.kyte.site/
 [LAZULE scraper] Iniciando categoria: Masculinos
-[LAZULE scraper] Blocos candidatos em Masculinos: 40
+[LAZULE scraper] Aguardando renderização inicial por 4000ms em Masculinos.
+[LAZULE scraper] Scroll 1: y=900 altura=5200
+[LAZULE scraper] Candidatos em Masculinos: produtos=40, retailElements=40, roots=40, selectors=38, bodyText=12000
 [LAZULE scraper] Produtos válidos em Masculinos: 38
 [LAZULE scraper] Total bruto: 180
 [LAZULE scraper] Total após deduplicação por nome: 160
@@ -115,6 +117,18 @@ O scraper imprime logs claros durante a execução, por exemplo:
 ```
 
 Quando um produto tiver mais de um preço antes do varejo sugerido, o scraper registra aviso e usa o primeiro preço como `costPrice`.
+
+### Debug
+
+O scraper não depende de `networkidle`, porque o catálogo Kyte pode manter conexões abertas e causar timeout. A navegação usa `domcontentloaded`, continua mesmo se a navegação não finalizar perfeitamente e só aborta o processo se nenhuma categoria gerar produtos válidos.
+
+Quando uma categoria retorna 0 candidatos ou candidatos que não viram produtos válidos, o script salva arquivos de diagnóstico em:
+
+```txt
+tmp/scraper-debug
+```
+
+Os snapshots incluem HTML e, quando possível, screenshot da página renderizada. Esse diretório é ignorado pelo Git.
 
 ### Imagens
 

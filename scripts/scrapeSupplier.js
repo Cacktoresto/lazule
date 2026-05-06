@@ -7,6 +7,7 @@ const SUPPLIER_URL = 'https://rjperfumaria.catalog.kyte.site/';
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'src/data/products.js');
 const IMAGE_DIR = path.join(ROOT_DIR, 'public/products');
+const DEBUG_DIR = path.join(ROOT_DIR, 'tmp/scraper-debug');
 const LOG_PREFIX = '[LAZULE scraper]';
 const CATEGORY_PATHS = [
   { name: 'Masculinos', path: '/masculinos' },
@@ -17,6 +18,8 @@ const CATEGORY_PATHS = [
   { name: 'Pastas Isabelle', path: '/pastas-isabelle' },
 ];
 const CATEGORY_BY_TEXT = new Set(['All', ...CATEGORY_PATHS.map((category) => category.name)]);
+const INITIAL_RENDER_WAIT_MS = 4_000;
+const PRODUCT_TEXT_MAX_LENGTH = 1_600;
 
 function log(message) {
   console.log(`${LOG_PREFIX} ${message}`);
@@ -76,6 +79,10 @@ function extractMoneyValues(text) {
     .filter((price) => Number.isFinite(price));
 }
 
+function countRetailMarkers(text) {
+  return (text.match(/varejo/gi) ?? []).length;
+}
+
 function inferBrand(name) {
   if (name.includes('|')) {
     return name.split('|')[0].trim();
@@ -131,6 +138,14 @@ function extractOlfactoryReference(description) {
   return match?.[1]?.trim() || '';
 }
 
+function isProductNameLine(line) {
+  const isCategory = CATEGORY_BY_TEXT.has(line);
+  const isPrice = /R\$|varejo/i.test(line);
+  const isUiText = /^(início|inicio|catálogo|catalogo|comprar|ver mais|whatsapp|buscar|menu|all)$/i.test(line);
+  const isLongDescription = line.length > 160;
+  return !isCategory && !isPrice && !isUiText && !isLongDescription && line.length > 2;
+}
+
 function parseProduct(rawProduct, fallbackCategory, sourceUrl) {
   const lines = rawProduct.text
     .split('\n')
@@ -138,12 +153,7 @@ function parseProduct(rawProduct, fallbackCategory, sourceUrl) {
     .filter(Boolean);
 
   const category = lines.find((line) => CATEGORY_BY_TEXT.has(line)) || fallbackCategory;
-  const name = lines.find((line) => {
-    const isCategory = CATEGORY_BY_TEXT.has(line);
-    const isPrice = /R\$|varejo/i.test(line);
-    const isUiText = /^(início|inicio|catálogo|catalogo|comprar|ver mais|whatsapp)$/i.test(line);
-    return !isCategory && !isPrice && !isUiText && line.length > 2;
-  });
+  const name = lines.find(isProductNameLine);
 
   if (!name) {
     warn(`Produto ignorado sem nome em ${sourceUrl}.`);
@@ -201,27 +211,44 @@ function parseProduct(rawProduct, fallbackCategory, sourceUrl) {
 }
 
 async function autoScroll(page) {
+  let stableRounds = 0;
   let previousHeight = 0;
+  let previousScrollY = -1;
 
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const currentHeight = await page.evaluate(() => document.body.scrollHeight);
+  for (let attempt = 1; attempt <= 30; attempt += 1) {
+    const metrics = await page.evaluate(() => {
+      const step = Math.max(650, Math.floor(window.innerHeight * 0.75));
+      window.scrollBy(0, step);
+      return {
+        height: document.body.scrollHeight,
+        scrollY: window.scrollY,
+        viewport: window.innerHeight,
+      };
+    });
 
-    if (currentHeight === previousHeight && attempt > 1) {
+    log(`Scroll ${attempt}: y=${Math.round(metrics.scrollY)} altura=${metrics.height}`);
+    await page.waitForTimeout(750);
+
+    const reachedBottom = metrics.scrollY + metrics.viewport >= metrics.height - 8;
+    const unchanged = metrics.height === previousHeight && Math.round(metrics.scrollY) === Math.round(previousScrollY);
+    stableRounds = unchanged || reachedBottom ? stableRounds + 1 : 0;
+
+    previousHeight = metrics.height;
+    previousScrollY = metrics.scrollY;
+
+    if (stableRounds >= 3) {
       break;
     }
-
-    previousHeight = currentHeight;
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(900);
   }
 
   await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(500);
 }
 
 async function extractRawProducts(page) {
-  return page.evaluate(() => {
+  return page.evaluate((maxLength) => {
     function visibleText(element) {
-      return element.innerText?.replace(/\u00a0/g, ' ').trim() || '';
+      return element.innerText?.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n').trim() || '';
     }
 
     function getImage(element) {
@@ -229,27 +256,104 @@ async function extractRawProducts(page) {
       return image?.currentSrc || image?.src || image?.getAttribute('data-src') || '';
     }
 
-    const selectors = [
+    function countRetail(text) {
+      return (text.match(/varejo/gi) ?? []).length;
+    }
+
+    function hasProductPriceShape(text) {
+      return /R\$/i.test(text) && /varejo/i.test(text) && (text.match(/R\$/gi) ?? []).length >= 2;
+    }
+
+    function findProductRoot(element) {
+      let candidate = element;
+      let current = element;
+
+      while (current?.parentElement) {
+        const parent = current.parentElement;
+        const parentText = visibleText(parent);
+        const parentRetailCount = countRetail(parentText);
+
+        if (parentRetailCount > 1 || parentText.length > maxLength) {
+          break;
+        }
+
+        if (hasProductPriceShape(parentText)) {
+          candidate = parent;
+        }
+
+        current = parent;
+      }
+
+      return candidate;
+    }
+
+    const retailElements = [...document.querySelectorAll('body *')]
+      .filter((element) => {
+        const text = visibleText(element);
+        return hasProductPriceShape(text) && countRetail(text) === 1 && text.length <= maxLength;
+      });
+
+    const roots = new Set(retailElements.map((element) => findProductRoot(element)));
+    const rootCandidates = [...roots]
+      .map((element) => ({ element, text: visibleText(element), image: getImage(element) }))
+      .filter((candidate) => hasProductPriceShape(candidate.text))
+      .filter((candidate) => countRetail(candidate.text) === 1)
+      .filter((candidate) => candidate.text.length <= maxLength);
+
+    const selectorCandidates = [...document.querySelectorAll([
       'article',
       'li',
+      '[role="listitem"]',
       '[class*="product" i]',
       '[class*="card" i]',
+      '[class*="item" i]',
       '[data-testid*="product" i]',
-      'main div',
-    ];
-    const candidates = [...document.querySelectorAll(selectors.join(','))]
+      '[data-cy*="product" i]',
+    ].join(','))]
       .map((element) => ({ element, text: visibleText(element), image: getImage(element) }))
-      .filter((candidate) => /R\$/i.test(candidate.text) && /varejo/i.test(candidate.text))
-      .filter((candidate) => candidate.text.length < 1200);
+      .filter((candidate) => hasProductPriceShape(candidate.text))
+      .filter((candidate) => countRetail(candidate.text) === 1)
+      .filter((candidate) => candidate.text.length <= maxLength);
 
-    return candidates
-      .filter((candidate) => {
-        return !candidates.some((other) => {
-          return other.element !== candidate.element && candidate.element.contains(other.element);
-        });
-      })
-      .map(({ text, image }) => ({ text, image }));
-  });
+    const candidatesByText = new Map();
+
+    for (const candidate of [...rootCandidates, ...selectorCandidates]) {
+      const key = candidate.text.replace(/\s+/g, ' ').trim();
+      if (!candidatesByText.has(key)) {
+        candidatesByText.set(key, { text: candidate.text, image: candidate.image });
+      } else if (!candidatesByText.get(key).image && candidate.image) {
+        candidatesByText.set(key, { text: candidate.text, image: candidate.image });
+      }
+    }
+
+    return {
+      bodyTextLength: document.body.innerText?.length || 0,
+      retailElementCount: retailElements.length,
+      rootCandidateCount: rootCandidates.length,
+      selectorCandidateCount: selectorCandidates.length,
+      products: [...candidatesByText.values()],
+    };
+  }, PRODUCT_TEXT_MAX_LENGTH);
+}
+
+async function saveDebugSnapshot(page, category, reason) {
+  try {
+    await mkdir(DEBUG_DIR, { recursive: true });
+    const baseName = `${slugify(category.name)}-${Date.now()}`;
+    const htmlPath = path.join(DEBUG_DIR, `${baseName}.html`);
+    const screenshotPath = path.join(DEBUG_DIR, `${baseName}.png`);
+
+    await writeFile(htmlPath, await page.content());
+
+    try {
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      warn(`${reason}. Snapshot salvo em ${path.relative(ROOT_DIR, htmlPath)} e ${path.relative(ROOT_DIR, screenshotPath)}.`);
+    } catch (error) {
+      warn(`${reason}. Snapshot HTML salvo em ${path.relative(ROOT_DIR, htmlPath)}; screenshot falhou: ${error.message}.`);
+    }
+  } catch (error) {
+    warn(`${reason}. Não foi possível salvar snapshot de debug: ${error.message}.`);
+  }
 }
 
 function chooseBetterDuplicate(currentProduct, nextProduct) {
@@ -362,15 +466,34 @@ async function scrapeCategory(page, category) {
   const categoryUrl = new URL(category.path, SUPPLIER_URL).toString();
   log(`Iniciando categoria: ${category.name} (${categoryUrl})`);
 
-  await page.goto(categoryUrl, { waitUntil: 'networkidle', timeout: 60000 });
+  try {
+    await page.goto(categoryUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+  } catch (error) {
+    warn(`goto não completou para ${category.name}: ${error.message}. Continuando com o DOM disponível.`);
+  }
+
+  log(`Aguardando renderização inicial por ${INITIAL_RENDER_WAIT_MS}ms em ${category.name}.`);
+  await page.waitForTimeout(INITIAL_RENDER_WAIT_MS);
   await autoScroll(page);
 
-  const rawProducts = await extractRawProducts(page);
-  log(`Blocos candidatos em ${category.name}: ${rawProducts.length}`);
+  const extraction = await extractRawProducts(page);
+  log(
+    `Candidatos em ${category.name}: produtos=${extraction.products.length}, retailElements=${extraction.retailElementCount}, roots=${extraction.rootCandidateCount}, selectors=${extraction.selectorCandidateCount}, bodyText=${extraction.bodyTextLength}`,
+  );
 
-  return rawProducts
+  if (extraction.products.length === 0) {
+    await saveDebugSnapshot(page, category, `Nenhum candidato a produto encontrado em ${category.name}`);
+  }
+
+  const parsedProducts = extraction.products
     .map((rawProduct) => parseProduct(rawProduct, category.name, categoryUrl))
     .filter(Boolean);
+
+  if (parsedProducts.length === 0 && extraction.products.length > 0) {
+    await saveDebugSnapshot(page, category, `Candidatos encontrados, mas nenhum produto válido parseado em ${category.name}`);
+  }
+
+  return parsedProducts;
 }
 
 async function main() {
@@ -379,6 +502,8 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
+  page.setDefaultTimeout(15_000);
+  page.setDefaultNavigationTimeout(45_000);
   const products = [];
 
   try {
@@ -389,6 +514,7 @@ async function main() {
         products.push(...categoryProducts);
       } catch (error) {
         warn(`Falha ao raspar categoria ${category.name}: ${error.message}`);
+        await saveDebugSnapshot(page, category, `Falha inesperada em ${category.name}`);
       }
     }
   } finally {
@@ -400,7 +526,7 @@ async function main() {
   log(`Total após deduplicação por nome: ${uniqueProducts.length}`);
 
   if (uniqueProducts.length === 0) {
-    throw new Error('Nenhum produto foi extraído do fornecedor.');
+    throw new Error('Nenhum produto foi extraído do fornecedor. Consulte tmp/scraper-debug para snapshots HTML/screenshot.');
   }
 
   await hydrateImages(uniqueProducts);
