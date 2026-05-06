@@ -21,6 +21,43 @@ const CATEGORY_BY_TEXT = new Set(['All', ...CATEGORY_PATHS.map((category) => cat
 const INITIAL_RENDER_WAIT_MS = 4_000;
 const PRODUCT_TEXT_MAX_LENGTH = 1_600;
 
+
+class SupplierBlockedError extends Error {
+  constructor(categoryName, evidence) {
+    super(
+      `Fornecedor bloqueou a automação com Cloudflare/Turnstile em "${categoryName}". ` +
+        'Não é possível extrair produtos do DOM/API enquanto a página exibida for o desafio antibot. ' +
+        'Use um endpoint/export autorizado do fornecedor ou execute o scraper em uma sessão/ambiente liberado pelo fornecedor.',
+    );
+    this.name = 'SupplierBlockedError';
+    this.categoryName = categoryName;
+    this.evidence = evidence;
+  }
+}
+
+function detectCloudflareChallenge(html, url = '') {
+  const evidence = [];
+  const checks = [
+    ['title', /<title>\s*Just a moment\.\.\.\s*<\/title>/i],
+    ['turnstile', /cf-turnstile|challenges\.cloudflare\.com\/turnstile/i],
+    ['challenge-platform', /\/cdn-cgi\/challenge-platform\//i],
+    ['cf-chl', /__cf_chl_|cf_chl_|_cf_chl_opt/i],
+    ['security-copy', /Performing security verification|verifies you are not a bot|Enable JavaScript and cookies to continue/i],
+    ['cloudflare-footer', /Performance and Security by\s*<a[^>]+Cloudflare/i],
+  ];
+
+  for (const [label, pattern] of checks) {
+    if (pattern.test(html) || pattern.test(url)) {
+      evidence.push(label);
+    }
+  }
+
+  return {
+    blocked: evidence.length >= 2,
+    evidence,
+  };
+}
+
 function log(message) {
   console.log(`${LOG_PREFIX} ${message}`);
 }
@@ -849,6 +886,18 @@ async function scrapeCategory(page, category) {
 
     const extraction = await extractRawProducts(page);
     const html = await page.content();
+    const challenge = detectCloudflareChallenge(html, page.url());
+
+    if (challenge.blocked) {
+      await networkCollector.saveSamples();
+      await saveDebugSnapshot(
+        page,
+        category,
+        `Cloudflare/Turnstile detectado em ${category.name}; evidências=${challenge.evidence.join(', ')}`,
+      );
+      throw new SupplierBlockedError(category.name, challenge.evidence);
+    }
+
     const htmlRawProducts = extractRawProductsFromHtml(html, category.name);
     const scriptPayloads = extractJsonPayloadsFromHtml(html);
     const scriptRawProducts = scriptPayloads.flatMap((payload) => collectRawProductsFromJson(payload.data, category.name));
@@ -902,6 +951,7 @@ async function main() {
   page.setDefaultTimeout(15_000);
   page.setDefaultNavigationTimeout(45_000);
   const products = [];
+  const blockedCategories = [];
 
   try {
     for (const category of CATEGORY_PATHS) {
@@ -910,12 +960,26 @@ async function main() {
         log(`Produtos válidos em ${category.name}: ${categoryProducts.length}`);
         products.push(...categoryProducts);
       } catch (error) {
+        if (error instanceof SupplierBlockedError) {
+          blockedCategories.push(error.categoryName);
+          warn(`Categoria bloqueada por Cloudflare/Turnstile: ${error.categoryName}. Evidências: ${error.evidence.join(', ')}.`);
+          break;
+        }
+
         warn(`Falha ao raspar categoria ${category.name}: ${error.message}`);
         await saveDebugSnapshot(page, category, `Falha inesperada em ${category.name}`);
       }
     }
   } finally {
     await browser.close();
+  }
+
+  if (blockedCategories.length > 0 && products.length === 0) {
+    throw new Error(
+      `Scraper interrompido: Cloudflare/Turnstile bloqueou ${blockedCategories.join(', ')}. ` +
+        'Consulte tmp/scraper-debug para HTML/screenshot/amostras de rede. ' +
+        'Use API/export autorizado do fornecedor ou uma sessão liberada; o script não tenta contornar desafio antibot.',
+    );
   }
 
   log(`Total bruto: ${products.length}`);

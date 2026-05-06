@@ -142,6 +142,18 @@ Quando o DOM vem vazio, o scraper tenta fontes alternativas na seguinte ordem co
 
 As respostas de rede inspecionadas são logadas e uma amostra limitada é salva em `tmp/scraper-debug/*-network-*.json` para facilitar a identificação de APIs internas do Kyte.
 
+### Bloqueio Cloudflare / Turnstile
+
+Se o snapshot HTML mostrar `<title>Just a moment...</title>`, `challenges.cloudflare.com`, `cf-turnstile`, `__cf_chl_*` ou a mensagem `Performing security verification`, o fornecedor está entregando uma página de desafio antibot em vez do catálogo. Nesse cenário, o scraper para com erro explícito, salva HTML/screenshot/amostras de rede em `tmp/scraper-debug` e não tenta contornar o desafio.
+
+Para extrair os dados nesse caso, use uma das alternativas autorizadas:
+
+- solicitar ao fornecedor um endpoint/API/export de produtos;
+- executar o scraper em uma sessão/ambiente previamente liberado pelo fornecedor;
+- importar manualmente um JSON/CSV autorizado e adaptar o parser para essa fonte.
+
+Enquanto a resposta for a tela do Cloudflare, não existem produtos no DOM, HTML ou XHR do catálogo para extrair.
+
 ### Imagens
 
 Quando uma imagem de produto estiver disponível, ela é baixada para:
