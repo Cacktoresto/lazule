@@ -186,6 +186,54 @@ Não use badges internos como `Fornecedor`. Os badges públicos devem ser termos
 - Pronta entrega
 - Presente
 
+
+## Extração manual pelo navegador
+
+Quando o catálogo do fornecedor estiver protegido por Cloudflare/Turnstile, o scraper automatizado pode receber apenas a tela `Just a moment...`. Nesse caso, use o navegador normal do usuário depois de passar pela verificação manual.
+
+Passo a passo:
+
+1. Abra o catálogo do fornecedor no Chrome normal:
+
+```txt
+https://rjperfumaria.catalog.kyte.site/
+```
+
+2. Passe pela verificação do Cloudflare, se aparecer.
+3. Navegue até a categoria desejada ou a listagem com os produtos visíveis.
+4. Abra o DevTools.
+5. Vá na aba Console.
+6. Copie todo o conteúdo de `tools/browserExtractor.js` e cole no Console.
+7. Aguarde o scroll automático terminar.
+8. O navegador vai baixar automaticamente o arquivo:
+
+```txt
+supplier-products.json
+```
+
+9. Salve ou mova esse arquivo para:
+
+```txt
+data/supplier-products.json
+```
+
+10. Importe o JSON para o catálogo local:
+
+```bash
+npm run import:supplier-json
+```
+
+O importador lê `data/supplier-products.json`, converte os produtos para `src/data/products.js`, deduplica por `name` normalizado e mantém imagens como URL externa inicialmente.
+
+Regras aplicadas no importador:
+
+- `costPrice` = primeiro preço antes de `Varejo`;
+- `supplierRetailPrice` = valor após `Varejo`;
+- `salePrice` = `supplierRetailPrice`;
+- preços como `number`;
+- deduplicação por nome normalizado;
+- campos internos continuam fora do front-end público.
+
 ## WhatsApp
 
 Os links de WhatsApp são centralizados em `src/utils/whatsapp.js`.
