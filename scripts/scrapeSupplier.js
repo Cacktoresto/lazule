@@ -356,6 +356,374 @@ async function saveDebugSnapshot(page, category, reason) {
   }
 }
 
+
+function normalizeHtmlText(value) {
+  return value
+    .replace(/\\u003c/gi, '<')
+    .replace(/\\u003e/gi, '>')
+    .replace(/\\u0026/gi, '&')
+    .replace(/\\n/g, '\n')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/<br\s*\/?\s*>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<[^>]+>/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
+}
+
+function createRawProductsFromText(text, fallbackCategory) {
+  const lines = text
+    .split('\n')
+    .map((line) => line.replace(/^#+\s*/, '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  const rawProducts = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+
+    if (!isProductNameLine(line)) {
+      continue;
+    }
+
+    const lookahead = lines.slice(index + 1, index + 9);
+    const hasRetail = lookahead.some((candidate) => /varejo/i.test(candidate));
+    const hasPrice = lookahead.some((candidate) => /R\$/i.test(candidate) && !/varejo/i.test(candidate));
+
+    if (!hasRetail || !hasPrice) {
+      continue;
+    }
+
+    const block = [line];
+
+    for (const candidate of lookahead) {
+      if (candidate !== line) {
+        block.push(candidate);
+      }
+
+      if (/varejo/i.test(candidate)) {
+        break;
+      }
+    }
+
+    if (!block.some((candidate) => CATEGORY_BY_TEXT.has(candidate))) {
+      block.splice(1, 0, fallbackCategory);
+    }
+
+    rawProducts.push({ text: block.join('\n'), image: '' });
+  }
+
+  return rawProducts;
+}
+
+function extractRawProductsFromHtml(html, fallbackCategory) {
+  const text = normalizeHtmlText(html);
+  return createRawProductsFromText(text, fallbackCategory);
+}
+
+
+function normalizeApiPrice(value) {
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  return value >= 10_000 ? value / 100 : value;
+}
+
+function findFirstString(object, keys) {
+  for (const key of keys) {
+    const value = object?.[key];
+
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return '';
+}
+
+function findFirstNumberLike(object, keys) {
+  for (const key of keys) {
+    const value = object?.[key];
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const moneyValue = value.includes('R$') ? extractMoneyValues(value)[0] : Number(value.replace(',', '.'));
+
+      if (Number.isFinite(moneyValue)) {
+        return moneyValue;
+      }
+    }
+  }
+
+  return null;
+}
+
+function findCategoryName(object, fallbackCategory) {
+  const directCategory = findFirstString(object, ['category', 'categoryName', 'department', 'collection']);
+
+  if (directCategory) {
+    return directCategory;
+  }
+
+  if (object.category && typeof object.category === 'object') {
+    return findFirstString(object.category, ['name', 'title', 'label']) || fallbackCategory;
+  }
+
+  if (Array.isArray(object.categories) && object.categories.length > 0) {
+    const category = object.categories.find((item) => item && typeof item === 'object') || object.categories[0];
+
+    if (typeof category === 'string') {
+      return category;
+    }
+
+    return findFirstString(category, ['name', 'title', 'label']) || fallbackCategory;
+  }
+
+  return fallbackCategory;
+}
+
+function findImageUrl(object) {
+  const directImage = findFirstString(object, ['image', 'imageUrl', 'imageURL', 'picture', 'pictureUrl', 'thumbnail', 'thumbnailUrl', 'photo', 'photoUrl']);
+
+  if (directImage) {
+    return directImage;
+  }
+
+  const images = object.images || object.pictures || object.photos || object.medias;
+
+  if (Array.isArray(images)) {
+    for (const image of images) {
+      if (typeof image === 'string' && image.trim()) {
+        return image.trim();
+      }
+
+      if (image && typeof image === 'object') {
+        const imageUrl = findFirstString(image, ['url', 'src', 'image', 'imageUrl', 'thumbnailUrl']);
+
+        if (imageUrl) {
+          return imageUrl;
+        }
+      }
+    }
+  }
+
+  return '';
+}
+
+function objectToRawProduct(object, fallbackCategory) {
+  const name = findFirstString(object, ['name', 'title', 'label', 'productName']);
+
+  if (!name || !isProductNameLine(name)) {
+    return null;
+  }
+
+  const description = [
+    findFirstString(object, ['description', 'details', 'body', 'notes', 'subtitle']),
+    findFirstString(object, ['additionalDescription', 'shortDescription']),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const retailFromDescription = description.match(/varejo\s*:?\s*(R\$\s*\d+(?:[.,]\d{2})?)/i)?.[1];
+  const retailPrice = normalizeApiPrice(
+    retailFromDescription
+      ? parseMoneyToNumber(retailFromDescription)
+      : findFirstNumberLike(object, ['supplierRetailPrice', 'retailPrice', 'suggestedRetailPrice', 'compareAtPrice', 'originalPrice']),
+  );
+  const costPrice = normalizeApiPrice(findFirstNumberLike(object, ['price', 'salePrice', 'amount', 'value', 'unitPrice']));
+
+  if (!Number.isFinite(costPrice) || !Number.isFinite(retailPrice)) {
+    return null;
+  }
+
+  const category = findCategoryName(object, fallbackCategory);
+  const text = [
+    name,
+    category,
+    `R$${costPrice.toFixed(2)}`,
+    `Varejo: R$ ${retailPrice.toFixed(2).replace('.', ',')}`,
+    description.replace(/#?\s*varejo\s*:?\s*R\$\s*\d+(?:[.,]\d{2})?/gi, '').trim(),
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return { text, image: findImageUrl(object) };
+}
+
+function collectRawProductsFromJson(value, fallbackCategory, rawProducts = [], seen = new WeakSet()) {
+  if (!value || typeof value !== 'object') {
+    return rawProducts;
+  }
+
+  if (seen.has(value)) {
+    return rawProducts;
+  }
+
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectRawProductsFromJson(item, fallbackCategory, rawProducts, seen);
+    }
+
+    return rawProducts;
+  }
+
+  const rawProduct = objectToRawProduct(value, fallbackCategory);
+
+  if (rawProduct) {
+    rawProducts.push(rawProduct);
+  }
+
+  for (const entryValue of Object.values(value)) {
+    collectRawProductsFromJson(entryValue, fallbackCategory, rawProducts, seen);
+  }
+
+  return rawProducts;
+}
+
+function tryParseJson(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function extractJsonPayloadsFromHtml(html) {
+  const payloads = [];
+  const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+
+  while ((match = scriptRegex.exec(html))) {
+    const scriptContent = match[1]?.trim();
+
+    if (!scriptContent) {
+      continue;
+    }
+
+    const directJson = tryParseJson(scriptContent);
+
+    if (directJson) {
+      payloads.push({ source: 'script-json', data: directJson });
+      continue;
+    }
+
+    for (const assignmentMatch of scriptContent.matchAll(/(?:window\.|globalThis\.)?[A-Z_a-z0-9$.]+\s*=\s*(\{[\s\S]*?\}|\[[\s\S]*?\]);?\s*$/g)) {
+      const parsedAssignment = tryParseJson(assignmentMatch[1]);
+
+      if (parsedAssignment) {
+        payloads.push({ source: 'script-assignment', data: parsedAssignment });
+      }
+    }
+  }
+
+  return payloads;
+}
+
+function createNetworkCollector(page, category) {
+  const jsonResponses = [];
+  const pending = [];
+
+  async function recordResponse(response) {
+    const request = response.request();
+    const resourceType = request.resourceType();
+    const url = response.url();
+    const contentType = response.headers()['content-type'] || '';
+    const shouldInspect =
+      contentType.includes('json') ||
+      /api|graphql|catalog|product|item|store|public/i.test(url) ||
+      resourceType === 'xhr' ||
+      resourceType === 'fetch';
+
+    if (!shouldInspect) {
+      return;
+    }
+
+    try {
+      const text = await response.text();
+      jsonResponses.push({
+        url,
+        status: response.status(),
+        resourceType,
+        contentType,
+        text: text.slice(0, 250_000),
+      });
+    } catch (error) {
+      jsonResponses.push({
+        url,
+        status: response.status(),
+        resourceType,
+        contentType,
+        error: error.message,
+        text: '',
+      });
+    }
+  }
+
+  function handler(response) {
+    pending.push(recordResponse(response));
+  }
+
+  page.on('response', handler);
+
+  return {
+    async stop() {
+      page.off('response', handler);
+      await Promise.allSettled(pending);
+    },
+    async saveSamples() {
+      const sampleResponses = jsonResponses.filter((response) => response.text || response.error);
+
+      if (sampleResponses.length === 0) {
+        return [];
+      }
+
+      await mkdir(DEBUG_DIR, { recursive: true });
+      const samplePath = path.join(DEBUG_DIR, `${slugify(category.name)}-network-${Date.now()}.json`);
+      const payload = sampleResponses.map((response) => ({
+        url: response.url,
+        status: response.status,
+        resourceType: response.resourceType,
+        contentType: response.contentType,
+        error: response.error,
+        sample: response.text.slice(0, 20_000),
+      }));
+      await writeFile(samplePath, JSON.stringify(payload, null, 2));
+      log(`Amostra de rede salva em ${path.relative(ROOT_DIR, samplePath)}.`);
+      return sampleResponses;
+    },
+    extractRawProducts() {
+      const rawProducts = [];
+
+      for (const response of jsonResponses) {
+        const parsedJson = tryParseJson(response.text);
+
+        if (parsedJson) {
+          rawProducts.push(...collectRawProductsFromJson(parsedJson, category.name));
+        } else if (response.text) {
+          rawProducts.push(...createRawProductsFromText(normalizeHtmlText(response.text), category.name));
+        }
+      }
+
+      return rawProducts;
+    },
+    endpoints() {
+      return [...new Set(jsonResponses.map((response) => `${response.status} ${response.resourceType} ${response.url}`))];
+    },
+  };
+}
+
 function chooseBetterDuplicate(currentProduct, nextProduct) {
   const currentScore = [currentProduct.category !== 'All', Boolean(currentProduct.image), Boolean(currentProduct.description)].filter(Boolean).length;
   const nextScore = [nextProduct.category !== 'All', Boolean(nextProduct.image), Boolean(nextProduct.description)].filter(Boolean).length;
@@ -464,36 +832,65 @@ async function writeProductsFile(products) {
 
 async function scrapeCategory(page, category) {
   const categoryUrl = new URL(category.path, SUPPLIER_URL).toString();
+  const networkCollector = createNetworkCollector(page, category);
   log(`Iniciando categoria: ${category.name} (${categoryUrl})`);
 
   try {
-    await page.goto(categoryUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
-  } catch (error) {
-    warn(`goto não completou para ${category.name}: ${error.message}. Continuando com o DOM disponível.`);
+    try {
+      await page.goto(categoryUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+    } catch (error) {
+      warn(`goto não completou para ${category.name}: ${error.message}. Continuando com o DOM disponível.`);
+    }
+
+    log(`Aguardando renderização inicial por ${INITIAL_RENDER_WAIT_MS}ms em ${category.name}.`);
+    await page.waitForTimeout(INITIAL_RENDER_WAIT_MS);
+    await autoScroll(page);
+    await networkCollector.stop();
+
+    const extraction = await extractRawProducts(page);
+    const html = await page.content();
+    const htmlRawProducts = extractRawProductsFromHtml(html, category.name);
+    const scriptPayloads = extractJsonPayloadsFromHtml(html);
+    const scriptRawProducts = scriptPayloads.flatMap((payload) => collectRawProductsFromJson(payload.data, category.name));
+    const networkRawProducts = networkCollector.extractRawProducts();
+    const networkEndpoints = networkCollector.endpoints();
+
+    if (networkEndpoints.length > 0) {
+      log(`Endpoints inspecionados em ${category.name}:`);
+      for (const endpoint of networkEndpoints.slice(0, 20)) {
+        log(`- ${endpoint}`);
+      }
+      await networkCollector.saveSamples();
+    } else {
+      log(`Nenhum endpoint XHR/fetch/JSON inspecionado em ${category.name}.`);
+    }
+
+    const rawProducts = [
+      ...extraction.products,
+      ...htmlRawProducts,
+      ...scriptRawProducts,
+      ...networkRawProducts,
+    ];
+    log(
+      `Candidatos em ${category.name}: dom=${extraction.products.length}, html=${htmlRawProducts.length}, scripts=${scriptRawProducts.length}, rede=${networkRawProducts.length}, retailElements=${extraction.retailElementCount}, roots=${extraction.rootCandidateCount}, selectors=${extraction.selectorCandidateCount}, bodyText=${extraction.bodyTextLength}`,
+    );
+
+    if (rawProducts.length === 0) {
+      await saveDebugSnapshot(page, category, `Nenhum candidato a produto encontrado em ${category.name}`);
+    }
+
+    const parsedProducts = rawProducts
+      .map((rawProduct) => parseProduct(rawProduct, category.name, categoryUrl))
+      .filter(Boolean);
+
+    if (parsedProducts.length === 0 && rawProducts.length > 0) {
+      await saveDebugSnapshot(page, category, `Candidatos encontrados, mas nenhum produto válido parseado em ${category.name}`);
+    }
+
+    return parsedProducts;
+  } finally {
+    await networkCollector.stop();
   }
-
-  log(`Aguardando renderização inicial por ${INITIAL_RENDER_WAIT_MS}ms em ${category.name}.`);
-  await page.waitForTimeout(INITIAL_RENDER_WAIT_MS);
-  await autoScroll(page);
-
-  const extraction = await extractRawProducts(page);
-  log(
-    `Candidatos em ${category.name}: produtos=${extraction.products.length}, retailElements=${extraction.retailElementCount}, roots=${extraction.rootCandidateCount}, selectors=${extraction.selectorCandidateCount}, bodyText=${extraction.bodyTextLength}`,
-  );
-
-  if (extraction.products.length === 0) {
-    await saveDebugSnapshot(page, category, `Nenhum candidato a produto encontrado em ${category.name}`);
-  }
-
-  const parsedProducts = extraction.products
-    .map((rawProduct) => parseProduct(rawProduct, category.name, categoryUrl))
-    .filter(Boolean);
-
-  if (parsedProducts.length === 0 && extraction.products.length > 0) {
-    await saveDebugSnapshot(page, category, `Candidatos encontrados, mas nenhum produto válido parseado em ${category.name}`);
-  }
-
-  return parsedProducts;
 }
 
 async function main() {

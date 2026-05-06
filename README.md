@@ -88,7 +88,7 @@ Comando:
 npm run scrape:supplier
 ```
 
-O script usa Playwright para carregar o catálogo renderizado via JavaScript, acessar categorias do fornecedor, aguardar o DOM com `domcontentloaded`, esperar alguns segundos pela renderização, fazer scroll progressivo até o fim da página, extrair produtos, deduplicar por nome normalizado, baixar imagens e atualizar `src/data/products.js`.
+O script usa Playwright para carregar o catálogo renderizado via JavaScript, acessar categorias do fornecedor, aguardar o DOM com `domcontentloaded`, esperar alguns segundos pela renderização, fazer scroll progressivo até o fim da página, registrar respostas XHR/fetch/JSON, tentar extrair produtos do DOM, do HTML, de scripts JSON embutidos e de respostas de rede, deduplicar por nome normalizado, baixar imagens e atualizar `src/data/products.js`.
 
 Categorias configuradas inicialmente:
 
@@ -108,7 +108,10 @@ O scraper imprime logs claros durante a execução, por exemplo:
 [LAZULE scraper] Iniciando categoria: Masculinos
 [LAZULE scraper] Aguardando renderização inicial por 4000ms em Masculinos.
 [LAZULE scraper] Scroll 1: y=900 altura=5200
-[LAZULE scraper] Candidatos em Masculinos: produtos=40, retailElements=40, roots=40, selectors=38, bodyText=12000
+[LAZULE scraper] Endpoints inspecionados em Masculinos:
+[LAZULE scraper] - 200 xhr https://...
+[LAZULE scraper] Amostra de rede salva em tmp/scraper-debug/masculinos-network-....json.
+[LAZULE scraper] Candidatos em Masculinos: dom=40, html=40, scripts=0, rede=40, retailElements=40, roots=40, selectors=38, bodyText=12000
 [LAZULE scraper] Produtos válidos em Masculinos: 38
 [LAZULE scraper] Total bruto: 180
 [LAZULE scraper] Total após deduplicação por nome: 160
@@ -129,6 +132,15 @@ tmp/scraper-debug
 ```
 
 Os snapshots incluem HTML e, quando possível, screenshot da página renderizada. Esse diretório é ignorado pelo Git.
+
+Quando o DOM vem vazio, o scraper tenta fontes alternativas na seguinte ordem combinada:
+
+- texto renderizado do DOM;
+- HTML completo da página;
+- scripts JSON embutidos;
+- respostas XHR/fetch/JSON capturadas pelo Playwright.
+
+As respostas de rede inspecionadas são logadas e uma amostra limitada é salva em `tmp/scraper-debug/*-network-*.json` para facilitar a identificação de APIs internas do Kyte.
 
 ### Imagens
 
