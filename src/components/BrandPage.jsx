@@ -26,7 +26,7 @@ function BrandNotFound() {
         </p>
         <a
           className="lazule-premium-button lazule-cta-shimmer mt-8 inline-flex rounded-full bg-lazule-gold px-7 py-3.5 font-semibold text-lazule-night shadow-aureate"
-          href="/#catalogo"
+          href="/catalogo"
         >
           Voltar ao catálogo
         </a>
@@ -56,7 +56,7 @@ export function BrandPage({ slug }) {
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:py-20">
       <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-slate-400" aria-label="Breadcrumb">
-        <a className="transition hover:text-lazule-gold" href="/#catalogo">Catálogo</a>
+        <a className="transition hover:text-lazule-gold" href="/catalogo">Catálogo</a>
         <span>/</span>
         <span className="text-lazule-gold">{brand.name}</span>
       </nav>
@@ -76,7 +76,7 @@ export function BrandPage({ slug }) {
             </span>
             <a
               className="lazule-premium-button inline-flex justify-center rounded-full border border-lazule-gold/40 bg-white/5 px-6 py-3 text-sm font-semibold text-lazule-gold backdrop-blur hover:border-lazule-gold/70"
-              href="/#catalogo"
+              href="/catalogo"
             >
               ← Voltar ao catálogo
             </a>
