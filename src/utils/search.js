@@ -7,6 +7,10 @@ const OLFACTORY_ALIASES = {
   aventus: ['creed aventus'],
   baccarat: ['maison francis kurkdjian baccarat rouge 540', 'baccarat rouge'],
   delina: ['parfums de marly delina'],
+  invictus: ['paco rabanne invictus', 'rabanne invictus'],
+  hacivat: ['nishane hacivat'],
+  erba: ['xerjoff erba pura'],
+  pura: ['xerjoff erba pura'],
 };
 
 export function normalizeSearchText(value) {

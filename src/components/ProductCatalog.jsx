@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
-import { isAvailableForImmediateFilter } from '../utils/availability';
 import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
-import { matchesSmartSearch, normalizeSearchText } from '../utils/search';
-import { AdvancedFilters, ALL_VALUE, PRICE_RANGES } from './AdvancedFilters';
+import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
+import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
 import { CatalogHighlights } from './CatalogHighlights';
@@ -15,6 +14,7 @@ const DEFAULT_FILTERS = {
   brand: ALL_VALUE,
   priceRange: 'all',
   imageMode: 'all',
+  availabilityStatus: 'all',
   availableOnly: false,
   sortBy: 'featured',
 };
@@ -23,32 +23,6 @@ const PRODUCTS_PER_PAGE = 24;
 
 function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-}
-
-function getPriceRange(value) {
-  return PRICE_RANGES.find((range) => range.value === value) ?? PRICE_RANGES[0];
-}
-
-function sortProducts(productsToSort, sortBy) {
-  const sortedProducts = [...productsToSort];
-
-  if (sortBy === 'price-asc') {
-    return sortedProducts.sort((a, b) => a.salePrice - b.salePrice);
-  }
-
-  if (sortBy === 'price-desc') {
-    return sortedProducts.sort((a, b) => b.salePrice - a.salePrice);
-  }
-
-  if (sortBy === 'name-asc') {
-    return sortedProducts.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  }
-
-  if (sortBy === 'brand-asc') {
-    return sortedProducts.sort((a, b) => a.brand.localeCompare(b.brand, 'pt-BR') || a.name.localeCompare(b.name, 'pt-BR'));
-  }
-
-  return sortedProducts.sort((a, b) => Number(b.featured) - Number(a.featured) || a.name.localeCompare(b.name, 'pt-BR'));
 }
 
 export function ProductCatalog() {
@@ -61,40 +35,16 @@ export function ProductCatalog() {
 
   const filterOptions = useMemo(() => {
     return {
-      categories: uniqueSorted(catalogProducts.map((product) => product.category)),
+      categories: uniqueSorted(catalogProducts.map((product) => product.catalogType)),
       genders: uniqueSorted(catalogProducts.map((product) => product.gender)),
       brands: uniqueSorted(catalogProducts.map((product) => product.brand)),
     };
   }, [catalogProducts]);
 
-  const filteredProducts = useMemo(() => {
-    const normalizedSearch = normalizeSearchText(searchTerm);
-    const priceRange = getPriceRange(filters.priceRange);
-
-    const matchedProducts = catalogProducts.filter((product) => {
-      const matchesCategory = filters.category === ALL_VALUE || product.category === filters.category;
-      const matchesGender = filters.gender === ALL_VALUE || product.gender === filters.gender;
-      const matchesBrand = filters.brand === ALL_VALUE || product.brand === filters.brand;
-      const matchesPrice = product.salePrice >= priceRange.min && product.salePrice <= priceRange.max;
-      const matchesImage =
-        filters.imageMode === 'all' ||
-        (filters.imageMode === 'with' && Boolean(product.image)) ||
-        (filters.imageMode === 'without' && !product.image);
-      const matchesAvailability = !filters.availableOnly || isAvailableForImmediateFilter(product);
-
-      return (
-        matchesSmartSearch(product, normalizedSearch) &&
-        matchesCategory &&
-        matchesGender &&
-        matchesBrand &&
-        matchesPrice &&
-        matchesImage &&
-        matchesAvailability
-      );
-    });
-
-    return sortProducts(matchedProducts, filters.sortBy);
-  }, [catalogProducts, filters, searchTerm]);
+  const filteredProducts = useMemo(
+    () => filterAndSortCatalogProducts(catalogProducts, filters, searchTerm),
+    [catalogProducts, filters, searchTerm],
+  );
 
   const visibleProducts = useMemo(() => filteredProducts.slice(0, visibleCount), [filteredProducts, visibleCount]);
   const hasMoreProducts = visibleProducts.length < filteredProducts.length;
@@ -165,7 +115,7 @@ export function ProductCatalog() {
             <SearchBar value={searchTerm} onChange={handleSearchChange} />
             <div className="flex flex-col gap-2 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
               <span>
-                <strong className="text-lazule-mist">{filteredProducts.length}</strong> fragrâncias encontradas
+                <strong className="text-lazule-mist">{filteredProducts.length}</strong> fragrâncias encontradas na seleção
               </span>
               <span>
                 Total no catálogo: <strong className="text-lazule-gold">{catalogProducts.length}</strong>
@@ -201,9 +151,9 @@ export function ProductCatalog() {
           ) : (
             <div className="rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-10 text-center shadow-mineral">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-lazule-gold">Curadoria LAZULE</p>
-              <h3 className="font-display text-3xl text-lazule-mist">Nenhuma fragrância encontrada com esses filtros.</h3>
+              <h3 className="font-display text-3xl text-lazule-mist">Não encontramos esse perfume no momento, mas nossa curadoria pode te ajudar pelo WhatsApp.</h3>
               <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-                Fale conosco no WhatsApp para uma curadoria personalizada.
+                Conte para nossa equipe a referência olfativa, ocasião ou faixa de investimento desejada e buscamos uma alternativa à altura.
               </p>
               <a
                 className="mt-7 inline-flex rounded-full bg-lazule-gold px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-[#dfbd68]"

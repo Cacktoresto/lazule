@@ -7,7 +7,7 @@ export function SearchBar({ value, onChange }) {
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Busque por perfume, marca ou referência olfativa..."
+        placeholder="Busque por perfume, marca ou referência olfativa (Sauvage, Hacivat, Erba Pura)..."
       />
     </label>
   );

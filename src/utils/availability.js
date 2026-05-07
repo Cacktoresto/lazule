@@ -14,6 +14,11 @@ const AVAILABILITY_STYLES = {
     className: 'border-lazule-gold/45 bg-lazule-gold/10 text-lazule-gold',
     availableOnly: true,
   },
+  indisponivel: {
+    label: 'Indisponível',
+    className: 'border-rose-300/35 bg-rose-400/10 text-rose-200',
+    availableOnly: false,
+  },
 };
 
 function normalizeAvailabilityText(value) {
@@ -33,12 +38,16 @@ export function getAvailabilityStatus(product) {
     return { key: 'ultimas', ...AVAILABILITY_STYLES.ultimas };
   }
 
+  if (searchableStatus.includes('indisponivel') || searchableStatus.includes('esgotado') || searchableStatus.includes('fora de estoque')) {
+    return { key: 'indisponivel', ...AVAILABILITY_STYLES.indisponivel };
+  }
+
   if (searchableStatus.includes('encomenda')) {
     return { key: 'encomenda', ...AVAILABILITY_STYLES.encomenda };
   }
 
   if (product?.available === false) {
-    return { key: 'encomenda', ...AVAILABILITY_STYLES.encomenda };
+    return { key: 'indisponivel', ...AVAILABILITY_STYLES.indisponivel };
   }
 
   return { key: 'pronta', ...AVAILABILITY_STYLES.pronta };
