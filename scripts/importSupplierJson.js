@@ -49,6 +49,16 @@ function normalizeName(value) {
     .trim();
 }
 
+function normalizeComparisonText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\b(?:ref\.?\s*olfativa|referencia\s*olfativa|ref\.?|referencia)\b/g, ' ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 function normalizeWhitespace(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -63,10 +73,115 @@ function normalizeRetailLine(value) {
 }
 
 function stripReferenceFromText(value) {
-  return normalizeWhitespace(value).replace(
-    /\b(?:ref(?:\.|\b)(?:\s*olfativa)?|refer[eê]ncia(?:\s*olfativa)?)\s*:?\s*.+$/i,
-    '',
-  ).trim();
+  return removeOlfactoryReferenceSegments(value);
+}
+
+function removeOlfactoryReferenceSegments(value) {
+  const description = normalizeWhitespace(value);
+  const cleanedDescription = description.replace(
+    /\b(?:ref(?:\.|\b)(?:\s*olfativa)?|refer[eê]ncia(?:\s*olfativa)?)\s*:?\s*[^\n\r]*/gi,
+    ' ',
+  );
+
+  if (cleanedDescription === description) {
+    return description;
+  }
+
+  return cleanedDescription
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/^[\s,.;:!?|/-]+|[\s,.;:!?|/-]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function createComparisonIndex(value) {
+  const source = String(value || '');
+  let normalized = '';
+  const positions = [];
+
+  for (let index = 0; index < source.length; index += 1) {
+    const normalizedCharacter = source[index]
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+
+    if (/^[a-z0-9]$/.test(normalizedCharacter)) {
+      normalized += normalizedCharacter;
+      positions.push({ start: index, end: index + 1 });
+      continue;
+    }
+
+    if (normalized && !normalized.endsWith(' ')) {
+      normalized += ' ';
+      positions.push({ start: index, end: index + 1 });
+    }
+  }
+
+  while (normalized.endsWith(' ')) {
+    normalized = normalized.slice(0, -1);
+    positions.pop();
+  }
+
+  return { normalized, positions, source };
+}
+
+function removeNormalizedTextSpan(value, normalizedNeedle) {
+  const comparisonIndex = createComparisonIndex(value);
+  const matchIndex = comparisonIndex.normalized.indexOf(normalizedNeedle);
+
+  if (matchIndex === -1) {
+    return value;
+  }
+
+  const start = comparisonIndex.positions[matchIndex]?.start;
+  const end = comparisonIndex.positions[matchIndex + normalizedNeedle.length - 1]?.end;
+
+  if (start === undefined || end === undefined) {
+    return value;
+  }
+
+  return comparisonIndex.source.slice(0, start) + comparisonIndex.source.slice(end);
+}
+
+function removeDuplicateReferenceText(description, olfactoryReference) {
+  let cleanedDescription = normalizeWhitespace(description);
+  const normalizedDescription = normalizeComparisonText(cleanedDescription);
+  const normalizedReference = normalizeComparisonText(olfactoryReference);
+
+  if (!cleanedDescription || !normalizedDescription) {
+    return '';
+  }
+
+  if (!normalizedReference) {
+    return cleanedDescription;
+  }
+
+  if (normalizedDescription === normalizedReference || normalizedReference.includes(normalizedDescription)) {
+    return '';
+  }
+
+  if (normalizedDescription.includes(normalizedReference)) {
+    cleanedDescription = normalizeWhitespace(
+      removeNormalizedTextSpan(cleanedDescription, normalizedReference)
+        .replace(/\s+([,.;:!?])/g, '$1')
+        .replace(/^[\s,.;:!?|/-]+|[\s,.;:!?|/-]+$/g, ''),
+    );
+  }
+
+  return normalizeComparisonText(cleanedDescription) === normalizedReference ? '' : cleanedDescription;
+}
+
+function cleanProductDescription(description, name, olfactoryReference) {
+  let cleanedDescription = removeOlfactoryReferenceSegments(description);
+  cleanedDescription = removeDuplicateReferenceText(cleanedDescription, olfactoryReference);
+
+  const normalizedDescription = normalizeComparisonText(cleanedDescription);
+
+  if (!normalizedDescription || normalizedDescription === normalizeComparisonText(name) || normalizedDescription === normalizeComparisonText(olfactoryReference)) {
+    return '';
+  }
+
+  return cleanedDescription;
 }
 
 function normalizeCategoryKey(value) {
@@ -299,7 +414,10 @@ function normalizeProduct(rawProduct, fallbackCategory = '', metrics = createImp
 
   const { name, wasPromotionalNameFixed } = resolveProductName(rawProduct);
   const originalDescription = normalizeWhitespace(rawProduct.description);
-  const description = name === originalDescription ? '' : originalDescription;
+  const explicitReference = normalizeWhitespace(rawProduct.olfactoryReference);
+  const extractedReference = extractOlfactoryReference(originalDescription, rawProduct.retailLine, rawProduct.rawText);
+  const olfactoryReference = explicitReference || extractedReference;
+  const description = cleanProductDescription(originalDescription, name, olfactoryReference);
   const category = getEffectiveCategory(rawProduct.category, fallbackCategory);
   const costPrice = getCostPrice(rawProduct);
   const supplierRetailPrice = getSupplierRetailPrice(rawProduct);
@@ -330,9 +448,6 @@ function normalizeProduct(rawProduct, fallbackCategory = '', metrics = createImp
   const gender = inferGender(category);
   const available = rawProduct.available ?? true;
   const image = String(rawProduct.image || '').trim();
-  const explicitReference = normalizeWhitespace(rawProduct.olfactoryReference);
-  const extractedReference = extractOlfactoryReference(description, rawProduct.retailLine, rawProduct.rawText);
-  const olfactoryReference = explicitReference || extractedReference;
 
   metrics.valid += 1;
 

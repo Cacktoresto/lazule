@@ -2,6 +2,32 @@ import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 
+function normalizeComparisonText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\b(?:ref\.?\s*olfativa|referencia\s*olfativa|ref\.?|referencia)\b/g, ' ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function shouldRenderDescription(description, olfactoryReference) {
+  const normalizedDescription = normalizeComparisonText(description);
+  const normalizedReference = normalizeComparisonText(olfactoryReference);
+
+  if (!normalizedDescription) {
+    return false;
+  }
+
+  if (!normalizedReference) {
+    return true;
+  }
+
+  return normalizedDescription !== normalizedReference;
+}
+
 function ProductImageFallback() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_28%_18%,rgba(200,162,77,0.22),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(37,99,235,0.34),transparent_28%),linear-gradient(135deg,#0F172A_0%,#1E3A8A_52%,#0F172A_100%)]">
@@ -37,6 +63,9 @@ function ProductImageSkeleton() {
 export function ProductCard({ product }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
   const message = createProductWhatsAppMessage(product.name);
+  const description = String(product.description || '').trim();
+  const olfactoryReference = String(product.olfactoryReference || '').trim();
+  const showDescription = shouldRenderDescription(description, olfactoryReference);
 
   return (
     <article className="lazule-product-card group flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur">
@@ -80,10 +109,10 @@ export function ProductCard({ product }) {
           ))}
         </div>
 
-        {product.description && <p className="text-sm leading-6 text-slate-300">{product.description}</p>}
-        {product.olfactoryReference && (
+        {showDescription && <p className="text-sm leading-6 text-slate-300">{description}</p>}
+        {olfactoryReference && (
           <p className="mt-4 text-sm text-slate-400">
-            <span className="text-lazule-gold">Referência olfativa:</span> {product.olfactoryReference}
+            <span className="text-lazule-gold">Referência olfativa:</span> {olfactoryReference}
           </p>
         )}
 

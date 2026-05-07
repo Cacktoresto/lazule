@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "scrape:supplier": "node scripts/scrapeSupplier.js",
-    "import:supplier-json": "node scripts/importSupplierJson.js"
+    "import:supplier-json": "node scripts/importSupplierJson.js",
+    "validate:products": "node scripts/validateProducts.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
