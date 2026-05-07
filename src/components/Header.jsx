@@ -4,7 +4,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-lazule-night/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-        <a href="#top" className="group flex items-center gap-3" aria-label="LAZULE FRAGRANCES">
+        <a href="/#top" className="group flex items-center gap-3" aria-label="LAZULE FRAGRANCES">
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-royal/30 text-lg font-semibold text-lazule-gold shadow-aureate">
             L
           </span>
@@ -19,13 +19,13 @@ export function Header() {
         </a>
 
         <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
-          <a className="transition hover:text-lazule-gold" href="#top">
+          <a className="transition hover:text-lazule-gold" href="/#top">
             Início
           </a>
-          <a className="transition hover:text-lazule-gold" href="#catalogo">
+          <a className="transition hover:text-lazule-gold" href="/#catalogo">
             Catálogo
           </a>
-          <a className="transition hover:text-lazule-gold" href="#atendimento">
+          <a className="transition hover:text-lazule-gold" href="/#atendimento">
             Atendimento
           </a>
         </nav>
