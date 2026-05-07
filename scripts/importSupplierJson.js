@@ -9,6 +9,17 @@ const OUTPUT_FILE = path.join(ROOT_DIR, 'src/data/products.js');
 const LOG_PREFIX = '[LAZULE import]';
 const GENERIC_CATEGORIES = new Set(['', 'catalogo', 'catálogo', 'todos', 'tudo', 'all', 'catalog']);
 
+function createImportMetrics() {
+  return {
+    raw: 0,
+    valid: 0,
+    discarded: 0,
+    promotionalNameFixed: 0,
+    olfactoryReferenceExtracted: 0,
+    withoutImage: 0,
+  };
+}
+
 function log(message) {
   console.log(`${LOG_PREFIX} ${message}`);
 }
@@ -36,6 +47,26 @@ function normalizeName(value) {
     .replace(/\s+/g, ' ')
     .replace(/[^a-z0-9 |.-]/g, '')
     .trim();
+}
+
+
+function normalizeWhitespace(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function isPromotionalName(value) {
+  return /^-?\s*\d+\s*%\s*off$/i.test(normalizeWhitespace(value));
+}
+
+function normalizeRetailLine(value) {
+  return normalizeWhitespace(value).replace(/(R\$\s*){2,}/gi, 'R$ ');
+}
+
+function stripReferenceFromText(value) {
+  return normalizeWhitespace(value).replace(
+    /\b(?:ref(?:\.|\b)(?:\s*olfativa)?|refer[eê]ncia(?:\s*olfativa)?)\s*:?\s*.+$/i,
+    '',
+  ).trim();
 }
 
 function normalizeCategoryKey(value) {
@@ -120,8 +151,8 @@ function parseMoneyToNumber(value) {
 }
 
 function extractMoneyValues(text) {
-  return String(text || '')
-    .match(/R\$\s*\d+(?:[.,]\d{2})?/gi)
+  return normalizeRetailLine(text)
+    .match(/R\$\s*\d+(?:\.\d{3})*(?:[.,]\d{2})?/gi)
     ?.map((match) => parseMoneyToNumber(match))
     ?.filter((price) => Number.isFinite(price)) ?? [];
 }
@@ -176,9 +207,64 @@ function getPublicBadges(category, gender, available) {
   return [...new Set(badges)].slice(0, 3);
 }
 
-function extractOlfactoryReference(description) {
-  const match = String(description || '').match(/(?:ref\.?\s*olfativa|refer[eê]ncia\s*olfativa)\s*:?\s*(.+)/i);
-  return match?.[1]?.trim() || '';
+function extractOlfactoryReference(...sources) {
+  for (const source of sources) {
+    const match = String(source || '').match(
+      /\b(?:ref(?:\.|\b)(?:\s*olfativa)?|refer[eê]ncia(?:\s*olfativa)?)\s*:?\s*([^\n\r]+)/i,
+    );
+
+    if (match?.[1]) {
+      return normalizeWhitespace(match[1])
+        .replace(/\s*(?:R\$|Varejo\b).+$/i, '')
+        .replace(/[.;,\s]+$/g, '')
+        .trim();
+    }
+  }
+
+  return '';
+}
+
+function getNameCandidates(rawProduct, originalName) {
+  const candidates = [rawProduct.description];
+  const rawTextLines = String(rawProduct.rawText || '').split(/\r?\n/);
+
+  for (const line of rawTextLines) {
+    candidates.push(line);
+  }
+
+  return candidates
+    .map((candidate) => stripReferenceFromText(candidate))
+    .map((candidate) => normalizeWhitespace(candidate))
+    .filter((candidate) => {
+      if (!candidate || candidate === originalName || isPromotionalName(candidate)) {
+        return false;
+      }
+
+      if (/^(?:varejo|cat[aá]logo|todos?|all|masculinos?|femininos?|nicho|[aá]rabes?|kit)$/i.test(candidate)) {
+        return false;
+      }
+
+      if (extractMoneyValues(candidate).length > 0) {
+        return false;
+      }
+
+      return /[\p{L}]/u.test(candidate);
+    });
+}
+
+function resolveProductName(rawProduct) {
+  const originalName = normalizeWhitespace(rawProduct.name);
+
+  if (originalName && !isPromotionalName(originalName)) {
+    return { name: originalName, wasPromotionalNameFixed: false };
+  }
+
+  const replacementName = getNameCandidates(rawProduct, originalName)[0] || '';
+
+  return {
+    name: replacementName,
+    wasPromotionalNameFixed: Boolean(originalName && replacementName && isPromotionalName(originalName)),
+  };
 }
 
 function getCostPrice(rawProduct) {
@@ -199,7 +285,7 @@ function getCostPrice(rawProduct) {
 }
 
 function getSupplierRetailPrice(rawProduct) {
-  const retailLinePrices = extractMoneyValues(rawProduct.retailLine);
+  const retailLinePrices = extractMoneyValues(normalizeRetailLine(rawProduct.retailLine));
 
   if (retailLinePrices.length > 0) {
     return retailLinePrices.at(-1);
@@ -208,37 +294,55 @@ function getSupplierRetailPrice(rawProduct) {
   return parseMoneyToNumber(rawProduct.supplierRetailPrice);
 }
 
-function normalizeProduct(rawProduct, fallbackCategory = '') {
-  const originalName = String(rawProduct.name || '').trim();
-  const originalDescription = String(rawProduct.description || '').trim();
-  const isDiscountName = /^\d+% OFF$/i.test(originalName);
-  const name = isDiscountName ? originalDescription : originalName;
-  const description = isDiscountName ? '' : originalDescription;
+function normalizeProduct(rawProduct, fallbackCategory = '', metrics = createImportMetrics()) {
+  metrics.raw += 1;
+
+  const { name, wasPromotionalNameFixed } = resolveProductName(rawProduct);
+  const originalDescription = normalizeWhitespace(rawProduct.description);
+  const description = name === originalDescription ? '' : originalDescription;
   const category = getEffectiveCategory(rawProduct.category, fallbackCategory);
   const costPrice = getCostPrice(rawProduct);
   const supplierRetailPrice = getSupplierRetailPrice(rawProduct);
 
   if (!name) {
-    warn(isDiscountName ? `Produto ignorado porque "${originalName}" não tinha descrição para usar como nome.` : 'Produto ignorado sem nome.');
+    metrics.discarded += 1;
+    warn('Produto ignorado sem nome válido.');
     return null;
   }
 
-  if (isDiscountName) {
-    log(`Nome promocional "${originalName}" substituído por descrição: "${name}".`);
+  if (wasPromotionalNameFixed) {
+    metrics.promotionalNameFixed += 1;
+    log(`Nome promocional "${normalizeWhitespace(rawProduct.name)}" substituído por nome real: "${name}".`);
   }
 
   if (!Number.isFinite(costPrice)) {
+    metrics.discarded += 1;
     warn(`Produto ignorado sem preço de atacado: "${name}".`);
     return null;
   }
 
   if (!Number.isFinite(supplierRetailPrice)) {
+    metrics.discarded += 1;
     warn(`Produto ignorado sem varejo sugerido: "${name}".`);
     return null;
   }
 
   const gender = inferGender(category);
   const available = rawProduct.available ?? true;
+  const image = String(rawProduct.image || '').trim();
+  const explicitReference = normalizeWhitespace(rawProduct.olfactoryReference);
+  const extractedReference = extractOlfactoryReference(description, rawProduct.retailLine, rawProduct.rawText);
+  const olfactoryReference = explicitReference || extractedReference;
+
+  metrics.valid += 1;
+
+  if (!explicitReference && extractedReference) {
+    metrics.olfactoryReferenceExtracted += 1;
+  }
+
+  if (!image) {
+    metrics.withoutImage += 1;
+  }
 
   return {
     id: slugify(name),
@@ -247,15 +351,12 @@ function normalizeProduct(rawProduct, fallbackCategory = '') {
     category,
     gender,
     salePrice: supplierRetailPrice,
-    costPrice,
-    supplierRetailPrice,
-    image: String(rawProduct.image || '').trim(),
+    image,
     badges: getPublicBadges(category, gender, available),
     description,
-    olfactoryReference: String(rawProduct.olfactoryReference || extractOlfactoryReference(description)).trim(),
+    olfactoryReference,
     available,
     featured: false,
-    sourceUrl: String(rawProduct.sourceUrl || '').trim(),
   };
 }
 
@@ -353,7 +454,7 @@ async function readImportFile(filePath) {
   };
 }
 
-function logReport(fileReports, rawProducts, normalizedProducts, products) {
+function logReport(fileReports, metrics, products) {
   log('Relatório de importação consolidada:');
   log(`Arquivos lidos: ${fileReports.length}`);
 
@@ -362,17 +463,18 @@ function logReport(fileReports, rawProducts, normalizedProducts, products) {
     log(`- ${path.relative(ROOT_DIR, report.filePath)}: ${report.rawCount} produtos brutos${categoryInfo}`);
   }
 
-  log(`Total bruto consolidado: ${rawProducts.length}`);
-  log(`Produtos válidos antes da deduplicação: ${normalizedProducts.length}`);
-  log(`Total após deduplicação: ${products.length}`);
-  log('Quantidade por categoria:');
+  log(`Produtos brutos: ${metrics.raw}`);
+  log(`Produtos válidos: ${metrics.valid}`);
+  log(`Produtos descartados: ${metrics.discarded}`);
+  log(`Produtos corrigidos por nome promocional: ${metrics.promotionalNameFixed}`);
+  log(`Produtos com referência olfativa extraída: ${metrics.olfactoryReferenceExtracted}`);
+  log(`Produtos sem imagem: ${metrics.withoutImage}`);
+  log(`Total final após deduplicação: ${products.length}`);
+  log('Quantidade final por categoria:');
 
   for (const [category, count] of [...countByCategory(products).entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))) {
     log(`- ${category}: ${count}`);
   }
-
-  log(`Produtos com imagem: ${products.filter((product) => Boolean(product.image)).length}`);
-  log(`Produtos sem imagem: ${products.filter((product) => !product.image).length}`);
 }
 
 async function main() {
@@ -381,8 +483,9 @@ async function main() {
   const rawProducts = filePayloads.flatMap((payload) =>
     payload.rawProducts.map((rawProduct) => ({ rawProduct, fallbackCategory: payload.fallbackCategory })),
   );
+  const metrics = createImportMetrics();
   const normalizedProducts = rawProducts
-    .map(({ rawProduct, fallbackCategory }) => normalizeProduct(rawProduct, fallbackCategory))
+    .map(({ rawProduct, fallbackCategory }) => normalizeProduct(rawProduct, fallbackCategory, metrics))
     .filter(Boolean);
   const products = deduplicateByName(normalizedProducts);
   const serializedProducts = products.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
@@ -390,8 +493,7 @@ async function main() {
   await writeFile(OUTPUT_FILE, `export const products = [\n${serializedProducts},\n];\n`);
   logReport(
     filePayloads.map((payload) => ({ filePath: payload.filePath, rawCount: payload.rawProducts.length, fallbackCategory: payload.fallbackCategory })),
-    rawProducts,
-    normalizedProducts,
+    metrics,
     products,
   );
   log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);

@@ -16,6 +16,27 @@ const DEFAULT_FILTERS = {
   sortBy: 'featured',
 };
 
+const PRODUCTS_PER_PAGE = 24;
+const PROMOTIONAL_NAME_PATTERN = /^-?\s*\d+\s*%\s*off$/i;
+
+function isPromotionalName(value) {
+  return PROMOTIONAL_NAME_PATTERN.test(String(value ?? '').trim());
+}
+
+function getSafeProductName(product) {
+  if (!isPromotionalName(product.name)) {
+    return product.name;
+  }
+
+  const description = String(product.description ?? '').trim();
+
+  if (description && !isPromotionalName(description)) {
+    return description;
+  }
+
+  return 'Fragrância LAZULE';
+}
+
 function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
@@ -58,11 +79,14 @@ function sortProducts(productsToSort, sortBy) {
 export function ProductCatalog() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
 
   const catalogProducts = useMemo(() => {
     return products.map((product) => {
-      const brand = product.brand || inferBrandFromName(product.name);
-      const enrichedProduct = { ...product, brand };
+      const safeName = getSafeProductName(product);
+      const inferredBrand = product.brand && !isPromotionalName(product.brand) ? product.brand : inferBrandFromName(safeName);
+      const brand = inferredBrand || inferBrandFromName(safeName);
+      const enrichedProduct = { ...product, name: safeName, originalName: product.name, brand };
 
       return {
         ...enrichedProduct,
@@ -111,13 +135,32 @@ export function ProductCatalog() {
     return sortProducts(matchedProducts, filters.sortBy);
   }, [catalogProducts, filters, searchTerm]);
 
+  const visibleProducts = useMemo(() => filteredProducts.slice(0, visibleCount), [filteredProducts, visibleCount]);
+  const hasMoreProducts = visibleProducts.length < filteredProducts.length;
+  const remainingProducts = filteredProducts.length - visibleProducts.length;
+
+  function resetPagination() {
+    setVisibleCount(PRODUCTS_PER_PAGE);
+  }
+
+  function handleSearchChange(value) {
+    setSearchTerm(value);
+    resetPagination();
+  }
+
   function handleFilterChange(filterName, value) {
     setFilters((currentFilters) => ({ ...currentFilters, [filterName]: value }));
+    resetPagination();
   }
 
   function resetFilters() {
     setFilters(DEFAULT_FILTERS);
     setSearchTerm('');
+    resetPagination();
+  }
+
+  function loadMoreProducts() {
+    setVisibleCount((currentCount) => currentCount + PRODUCTS_PER_PAGE);
   }
 
   return (
@@ -142,7 +185,7 @@ export function ProductCatalog() {
 
         <div>
           <div className="mb-6 grid gap-4">
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
+            <SearchBar value={searchTerm} onChange={handleSearchChange} />
             <div className="flex flex-col gap-2 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
               <span>
                 <strong className="text-lazule-mist">{filteredProducts.length}</strong> fragrâncias encontradas
@@ -154,11 +197,30 @@ export function ProductCatalog() {
           </div>
 
           {filteredProducts.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {visibleProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {hasMoreProducts && (
+                <div className="mt-10 flex flex-col items-center gap-3 text-center">
+                  <button
+                    type="button"
+                    className="lazule-premium-button lazule-cta-shimmer group relative inline-flex overflow-hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night shadow-aureate focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
+                    onClick={loadMoreProducts}
+                  >
+                    <span className="relative">Carregar mais fragrâncias</span>
+                  </button>
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
+                    Exibindo <strong className="text-lazule-mist">{visibleProducts.length}</strong> de{' '}
+                    <strong className="text-lazule-gold">{filteredProducts.length}</strong> fragrâncias — mais{' '}
+                    <strong className="text-lazule-mist">{Math.min(PRODUCTS_PER_PAGE, remainingProducts)}</strong> no próximo toque
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
             <div className="rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-10 text-center shadow-mineral">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-lazule-gold">Curadoria LAZULE</p>

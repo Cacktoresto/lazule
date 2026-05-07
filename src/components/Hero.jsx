@@ -17,13 +17,13 @@ export function Hero() {
           </p>
           <div className="mt-9 flex flex-col gap-4 sm:flex-row">
             <a
-              className="inline-flex items-center justify-center rounded-full bg-lazule-gold px-7 py-3.5 font-semibold text-lazule-night shadow-aureate transition hover:-translate-y-0.5 hover:bg-[#dfbd68]"
+              className="lazule-premium-button lazule-cta-shimmer inline-flex items-center justify-center rounded-full bg-lazule-gold px-7 py-3.5 font-semibold text-lazule-night shadow-aureate"
               href="#catalogo"
             >
               Ver catálogo
             </a>
             <a
-              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 py-3.5 font-semibold text-lazule-mist backdrop-blur transition hover:-translate-y-0.5 hover:border-lazule-gold/60 hover:text-lazule-gold"
+              className="lazule-premium-button inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 py-3.5 font-semibold text-lazule-mist backdrop-blur hover:border-lazule-gold/60 hover:text-lazule-gold"
               href={createWhatsAppLink('Olá! Quero uma recomendação premium da LAZULE FRAGRANCES.')}
               target="_blank"
               rel="noreferrer"

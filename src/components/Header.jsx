@@ -31,7 +31,7 @@ export function Header() {
         </nav>
 
         <a
-          className="hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-5 py-2.5 text-sm font-semibold text-lazule-night shadow-aureate transition hover:-translate-y-0.5 hover:bg-[#dfbd68] lg:inline-flex"
+          className="lazule-premium-button lazule-cta-shimmer hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-5 py-2.5 text-sm font-semibold text-lazule-night shadow-aureate lg:inline-flex"
           href={createWhatsAppLink('Olá! Quero conhecer o catálogo da LAZULE FRAGRANCES.')}
           target="_blank"
           rel="noreferrer"
