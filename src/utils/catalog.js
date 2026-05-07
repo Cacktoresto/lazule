@@ -1,5 +1,6 @@
 import { products } from '../data/products';
 import { getAvailabilityStatus } from './availability';
+import { inferCatalogType } from './catalogFilters';
 import { createSearchIndex, createSearchTokens, inferBrandFromName, normalizeSearchText } from './search';
 import { createBrandSlug } from './productRouting';
 
@@ -29,7 +30,8 @@ export function getCatalogProducts(sourceProducts = products) {
     const inferredBrand = product.brand && !isPromotionalName(product.brand) ? product.brand : inferBrandFromName(safeName);
     const brand = inferredBrand || inferBrandFromName(safeName);
     const availability = getAvailabilityStatus(product);
-    const enrichedProduct = { ...product, name: safeName, originalName: product.name, brand, availability };
+    const catalogType = inferCatalogType({ ...product, name: safeName, brand });
+    const enrichedProduct = { ...product, name: safeName, originalName: product.name, brand, availability, catalogType };
 
     return {
       ...enrichedProduct,

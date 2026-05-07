@@ -1,34 +1,27 @@
-const ALL_VALUE = 'Todos';
+import {
+  ALL_FILTER_VALUE,
+  AVAILABILITY_FILTER_OPTIONS,
+  CATALOG_TYPE_OPTIONS,
+  GENDER_OPTIONS,
+  PRICE_RANGES,
+  SORT_OPTIONS,
+} from '../utils/catalogFilters';
 
-const PRICE_RANGES = [
-  { label: 'Todos os preços', value: 'all', min: 0, max: Infinity },
-  { label: 'Até R$ 200', value: 'until-200', min: 0, max: 200 },
-  { label: 'R$ 200 a R$ 300', value: '200-300', min: 200, max: 300 },
-  { label: 'R$ 300 a R$ 500', value: '300-500', min: 300, max: 500 },
-  { label: 'Acima de R$ 500', value: 'above-500', min: 500, max: Infinity },
-];
-
-const SORT_OPTIONS = [
-  { label: 'Relevância premium', value: 'featured' },
-  { label: 'Menor preço', value: 'price-asc' },
-  { label: 'Maior preço', value: 'price-desc' },
-  { label: 'A-Z', value: 'name-asc' },
-  { label: 'Marca', value: 'brand-asc' },
-];
+const ALL_VALUE = ALL_FILTER_VALUE;
 
 const IMAGE_OPTIONS = [
-  { label: 'Todos', value: 'all' },
+  { label: 'Todas', value: 'all' },
   { label: 'Com imagem', value: 'with' },
   { label: 'Sem imagem', value: 'without' },
 ];
 
-function SelectField({ id, label, value, onChange, options }) {
+function SelectField({ id, label, value, onChange, options, helper }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-lazule-gold">{label}</span>
+      <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold">{label}</span>
       <select
         id={id}
-        className="w-full rounded-2xl border border-white/10 bg-lazule-night/80 px-4 py-3 text-sm text-lazule-mist outline-none transition focus:border-lazule-gold/70"
+        className="w-full rounded-2xl border border-lazule-gold/15 bg-lazule-night/85 px-4 py-3 text-sm text-lazule-mist outline-none shadow-inner shadow-lazule-blue/10 transition hover:border-lazule-gold/35 focus:border-lazule-gold/75 focus:bg-lazule-night"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
@@ -38,6 +31,7 @@ function SelectField({ id, label, value, onChange, options }) {
           </option>
         ))}
       </select>
+      {helper && <span className="mt-2 block text-xs leading-5 text-slate-400">{helper}</span>}
     </label>
   );
 }
@@ -45,61 +39,61 @@ function SelectField({ id, label, value, onChange, options }) {
 function FilterContent({ filters, options, onFilterChange, onReset }) {
   return (
     <div className="grid gap-5">
-      <SelectField
-        id="category-filter"
-        label="Categoria"
-        value={filters.category}
-        onChange={(value) => onFilterChange('category', value)}
-        options={[ALL_VALUE, ...options.categories]}
-      />
-      <SelectField
-        id="gender-filter"
-        label="Gênero"
-        value={filters.gender}
-        onChange={(value) => onFilterChange('gender', value)}
-        options={[ALL_VALUE, ...options.genders]}
-      />
-      <SelectField
-        id="brand-filter"
-        label="Marca"
-        value={filters.brand}
-        onChange={(value) => onFilterChange('brand', value)}
-        options={[ALL_VALUE, ...options.brands]}
-      />
-      <SelectField
-        id="price-filter"
-        label="Faixa de preço"
-        value={filters.priceRange}
-        onChange={(value) => onFilterChange('priceRange', value)}
-        options={PRICE_RANGES}
-      />
-      <SelectField
-        id="image-filter"
-        label="Imagem"
-        value={filters.imageMode}
-        onChange={(value) => onFilterChange('imageMode', value)}
-        options={IMAGE_OPTIONS}
-      />
-      <SelectField
-        id="sort-filter"
-        label="Ordenar por"
-        value={filters.sortBy}
-        onChange={(value) => onFilterChange('sortBy', value)}
-        options={SORT_OPTIONS}
-      />
-
-      <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-slate-200">
-        <input
-          className="h-4 w-4 accent-lazule-gold"
-          type="checkbox"
-          checked={filters.availableOnly}
-          onChange={(event) => onFilterChange('availableOnly', event.target.checked)}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+        <SelectField
+          id="category-filter"
+          label="Tipo de perfume"
+          value={filters.category}
+          onChange={(value) => onFilterChange('category', value)}
+          options={[ALL_VALUE, ...CATALOG_TYPE_OPTIONS]}
+          helper="Organização por curadoria: importados, árabes, nicho e designers."
         />
-        Apenas pronta entrega
-      </label>
+        <SelectField
+          id="gender-filter"
+          label="Gênero"
+          value={filters.gender}
+          onChange={(value) => onFilterChange('gender', value)}
+          options={[ALL_VALUE, ...GENDER_OPTIONS.filter((gender) => options.genders.includes(gender))]}
+        />
+        <SelectField
+          id="brand-filter"
+          label="Marca"
+          value={filters.brand}
+          onChange={(value) => onFilterChange('brand', value)}
+          options={[ALL_VALUE, ...options.brands]}
+        />
+        <SelectField
+          id="availability-filter"
+          label="Disponibilidade"
+          value={filters.availabilityStatus}
+          onChange={(value) => onFilterChange('availabilityStatus', value)}
+          options={AVAILABILITY_FILTER_OPTIONS}
+        />
+        <SelectField
+          id="price-filter"
+          label="Faixa de preço"
+          value={filters.priceRange}
+          onChange={(value) => onFilterChange('priceRange', value)}
+          options={PRICE_RANGES}
+        />
+        <SelectField
+          id="sort-filter"
+          label="Ordenar por"
+          value={filters.sortBy}
+          onChange={(value) => onFilterChange('sortBy', value)}
+          options={SORT_OPTIONS}
+        />
+        <SelectField
+          id="image-filter"
+          label="Imagem"
+          value={filters.imageMode}
+          onChange={(value) => onFilterChange('imageMode', value)}
+          options={IMAGE_OPTIONS}
+        />
+      </div>
 
       <button
-        className="rounded-full border border-lazule-gold/40 px-5 py-3 text-sm font-semibold text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
+        className="rounded-full border border-lazule-gold/40 bg-lazule-gold/5 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
         type="button"
         onClick={onReset}
       >
@@ -113,14 +107,17 @@ export { ALL_VALUE, PRICE_RANGES };
 
 export function AdvancedFilters({ filters, options, onFilterChange, onReset }) {
   return (
-    <aside className="rounded-[2rem] border border-white/10 bg-white/[0.055] p-5 shadow-mineral backdrop-blur lg:sticky lg:top-28 lg:p-6">
+    <aside className="rounded-[2rem] border border-lazule-gold/15 bg-gradient-to-br from-white/[0.075] via-white/[0.045] to-lazule-blue/10 p-5 shadow-mineral backdrop-blur lg:sticky lg:top-28 lg:p-6">
       <div className="mb-5 hidden lg:block">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-lazule-gold">Filtros</p>
         <h3 className="mt-3 font-display text-3xl text-lazule-mist">Curadoria inteligente</h3>
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Refine por perfil, disponibilidade e investimento sem perder a experiência limpa da boutique.
+        </p>
       </div>
 
       <details className="group lg:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-white/10 bg-lazule-night/60 px-4 py-3 text-sm font-semibold text-lazule-mist">
+        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-lazule-gold/20 bg-lazule-night/70 px-4 py-3 text-sm font-semibold text-lazule-mist shadow-inner shadow-lazule-blue/10">
           Filtros avançados
           <span className="text-lazule-gold transition group-open:rotate-45">+</span>
         </summary>
