@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { products } from '../data/products';
+import { useEffect, useMemo, useState } from 'react';
 import { formatBRL } from '../utils/currency';
-import { createProductSlug, findProductBySlug } from '../utils/productRouting';
+import { getCatalogProducts, getProductRecommendations } from '../utils/catalog';
+import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
+import { createBrandPath, createProductPath, createProductSlug, findProductBySlug } from '../utils/productRouting';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 import { ProductImageFallback } from './ProductCard';
 
@@ -24,6 +25,18 @@ function shouldShowGender(category, gender) {
   }
 
   return normalizeProductClassifier(category) !== normalizedGender;
+}
+
+function upsertMetaDescription(content) {
+  let metaDescription = document.querySelector('meta[name="description"]');
+
+  if (!metaDescription) {
+    metaDescription = document.createElement('meta');
+    metaDescription.setAttribute('name', 'description');
+    document.head.appendChild(metaDescription);
+  }
+
+  metaDescription.setAttribute('content', content);
 }
 
 function DetailImage({ product }) {
@@ -81,9 +94,84 @@ function ProductNotFound() {
   );
 }
 
+function RecommendationCard({ product }) {
+  return (
+    <a
+      className="lazule-product-card group flex min-h-36 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition"
+      href={createProductPath(product)}
+      onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: 'recommendations', action: 'recommendation' })}
+    >
+      <div className="relative w-28 shrink-0 overflow-hidden bg-lazule-depth sm:w-36">
+        {product.image ? (
+          <img
+            className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105"
+            src={product.image}
+            alt={`Perfume ${product.name}`}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <ProductImageFallback />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-lazule-night/20" />
+      </div>
+      <div className="flex flex-1 flex-col justify-between p-4">
+        <div>
+          <p className="text-[0.65rem] uppercase tracking-[0.24em] text-lazule-gold">{product.brand}</p>
+          <h3 className="mt-2 line-clamp-2 font-display text-xl leading-tight text-lazule-mist group-hover:text-lazule-gold">
+            {product.name}
+          </h3>
+          {product.olfactoryReference && <p className="mt-2 line-clamp-1 text-xs text-slate-400">Ref.: {product.olfactoryReference}</p>}
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <span className={`rounded-full border px-2.5 py-1 text-[0.68rem] ${product.availability.className}`}>{product.availability.label}</span>
+          <strong className="text-sm text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+function Recommendations({ products }) {
+  if (!products.length) {
+    return null;
+  }
+
+  return (
+    <section className="mt-14 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.045] p-5 shadow-mineral backdrop-blur sm:p-7 lg:p-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Curadoria conectada</p>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Você também pode gostar</h2>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-slate-300">
+          Recomendações calculadas por marca, categoria, referência olfativa e gênero para continuar sua descoberta sem recarregar a boutique.
+        </p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        {products.map((product) => (
+          <RecommendationCard key={product.id} product={product} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ProductDetails({ slug }) {
+  const catalogProducts = useMemo(() => getCatalogProducts(), []);
   const normalizedSlug = createProductSlug(slug);
-  const product = findProductBySlug(products, normalizedSlug);
+  const product = findProductBySlug(catalogProducts, normalizedSlug);
+  const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    document.title = `${product.name} | LAZULE FRAGRANCES`;
+    upsertMetaDescription(`Conheça ${product.name} da marca ${product.brand} na curadoria premium LAZULE FRAGRANCES.`);
+    trackEvent('product_view', { productId: product.id, productName: product.name, brandName: product.brand });
+  }, [product]);
 
   if (!product) {
     return <ProductNotFound />;
@@ -106,7 +194,9 @@ export function ProductDetails({ slug }) {
 
         <article className="rounded-[2.5rem] border border-white/10 bg-white/[0.055] p-6 shadow-mineral backdrop-blur sm:p-8 lg:p-10">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Página individual</p>
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-300">{product.brand}</p>
+          <a className="text-sm uppercase tracking-[0.3em] text-slate-300 transition hover:text-lazule-gold" href={createBrandPath(product.brand)}>
+            {product.brand}
+          </a>
           <h1 className="mt-4 font-display text-4xl leading-tight text-lazule-mist sm:text-5xl lg:text-6xl">{product.name}</h1>
 
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -122,15 +212,14 @@ export function ProductDetails({ slug }) {
             )}
           </div>
 
-          {badges.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {badges.map((badge) => (
-                <span key={badge} className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold">
-                  {badge}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="mt-6 flex flex-wrap gap-2">
+            <span className={`rounded-full border px-3 py-1 text-xs ${product.availability.className}`}>{product.availability.label}</span>
+            {badges.filter((badge) => badge !== product.availability.label).map((badge) => (
+              <span key={badge} className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold">
+                {badge}
+              </span>
+            ))}
+          </div>
 
           <div className="mt-8 space-y-6 text-base leading-8 text-slate-300">
             {description && <p>{description}</p>}
@@ -152,6 +241,7 @@ export function ProductDetails({ slug }) {
                 href={createWhatsAppLink(whatsAppMessage)}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'product_details' })}
               >
                 Consultar no WhatsApp
               </a>
@@ -165,6 +255,8 @@ export function ProductDetails({ slug }) {
           </div>
         </article>
       </div>
+
+      <Recommendations products={recommendations} />
     </section>
   );
 }

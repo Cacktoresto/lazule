@@ -3,21 +3,24 @@ import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { MineralBackground } from './components/MineralBackground';
 import { Hero } from './components/Hero';
+import { BrandPage } from './components/BrandPage';
 import { ProductCatalog } from './components/ProductCatalog';
 import { ProductDetails } from './components/ProductDetails';
 import { WhatsAppButton } from './components/WhatsAppButton';
-import { getProductSlugFromPath } from './utils/productRouting';
+import { getBrandSlugFromPath, getProductSlugFromPath } from './utils/productRouting';
 
 function getCurrentRoute() {
   return {
     pathname: window.location.pathname,
     productSlug: getProductSlugFromPath(window.location.pathname),
+    brandSlug: getBrandSlugFromPath(window.location.pathname),
   };
 }
 
 function App() {
   const [route, setRoute] = useState(getCurrentRoute);
   const isProductRoute = route.pathname.startsWith('/produto/');
+  const isBrandRoute = route.pathname.startsWith('/marca/');
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -48,14 +51,15 @@ function App() {
 
       const isCatalogAnchor = nextUrl.pathname === '/' && Boolean(nextUrl.hash);
       const isProductLink = nextUrl.pathname.startsWith('/produto/');
+      const isBrandLink = nextUrl.pathname.startsWith('/marca/');
 
-      if (!isCatalogAnchor && !isProductLink) {
+      if (!isCatalogAnchor && !isProductLink && !isBrandLink) {
         return;
       }
 
       event.preventDefault();
       window.history.pushState(null, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-      updateRoute({ scrollToTop: isProductLink });
+      updateRoute({ scrollToTop: isProductLink || isBrandLink });
 
       if (isCatalogAnchor) {
         requestAnimationFrame(() => {
@@ -81,6 +85,8 @@ function App() {
         <main>
           {isProductRoute ? (
             <ProductDetails slug={route.productSlug} />
+          ) : isBrandRoute ? (
+            <BrandPage slug={route.brandSlug} />
           ) : (
             <>
               <Hero />

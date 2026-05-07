@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react';
-import { products } from '../data/products';
+import { useEffect, useMemo, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
-import { createSearchIndex, inferBrandFromName, normalizeSearchText } from '../utils/search';
+import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
+import { isAvailableForImmediateFilter } from '../utils/availability';
+import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
+import { matchesSmartSearch, normalizeSearchText } from '../utils/search';
 import { AdvancedFilters, ALL_VALUE, PRICE_RANGES } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
+import { CatalogHighlights } from './CatalogHighlights';
 
 const DEFAULT_FILTERS = {
   category: ALL_VALUE,
@@ -17,37 +20,9 @@ const DEFAULT_FILTERS = {
 };
 
 const PRODUCTS_PER_PAGE = 24;
-const PROMOTIONAL_NAME_PATTERN = /^-?\s*\d+\s*%\s*off$/i;
-
-function isPromotionalName(value) {
-  return PROMOTIONAL_NAME_PATTERN.test(String(value ?? '').trim());
-}
-
-function getSafeProductName(product) {
-  if (!isPromotionalName(product.name)) {
-    return product.name;
-  }
-
-  const description = String(product.description ?? '').trim();
-
-  if (description && !isPromotionalName(description)) {
-    return description;
-  }
-
-  return 'Fragrância LAZULE';
-}
 
 function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-}
-
-function matchesSearch(product, normalizedSearch) {
-  if (!normalizedSearch) {
-    return true;
-  }
-
-  const terms = normalizedSearch.split(' ').filter(Boolean);
-  return terms.every((term) => product.searchIndex.includes(term));
 }
 
 function getPriceRange(value) {
@@ -81,22 +56,8 @@ export function ProductCatalog() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
 
-  const catalogProducts = useMemo(() => {
-    return products.map((product) => {
-      const safeName = getSafeProductName(product);
-      const inferredBrand = product.brand && !isPromotionalName(product.brand) ? product.brand : inferBrandFromName(safeName);
-      const brand = inferredBrand || inferBrandFromName(safeName);
-      const enrichedProduct = { ...product, name: safeName, originalName: product.name, brand };
-
-      return {
-        ...enrichedProduct,
-        normalizedBrand: normalizeSearchText(brand),
-        normalizedCategory: normalizeSearchText(product.category),
-        normalizedGender: normalizeSearchText(product.gender),
-        searchIndex: createSearchIndex(enrichedProduct),
-      };
-    });
-  }, []);
+  const catalogProducts = useMemo(() => getCatalogProducts(), []);
+  const featuredCollections = useMemo(() => getFeaturedCollections(catalogProducts), [catalogProducts]);
 
   const filterOptions = useMemo(() => {
     return {
@@ -119,10 +80,10 @@ export function ProductCatalog() {
         filters.imageMode === 'all' ||
         (filters.imageMode === 'with' && Boolean(product.image)) ||
         (filters.imageMode === 'without' && !product.image);
-      const matchesAvailability = !filters.availableOnly || product.available || product.badges?.includes('Pronta entrega');
+      const matchesAvailability = !filters.availableOnly || isAvailableForImmediateFilter(product);
 
       return (
-        matchesSearch(product, normalizedSearch) &&
+        matchesSmartSearch(product, normalizedSearch) &&
         matchesCategory &&
         matchesGender &&
         matchesBrand &&
@@ -147,6 +108,20 @@ export function ProductCatalog() {
     setSearchTerm(value);
     resetPagination();
   }
+
+  useEffect(() => {
+    const normalizedQuery = searchTerm.trim();
+
+    if (!normalizedQuery) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      trackEvent('search', { query: normalizedQuery, resultCount: filteredProducts.length });
+    }, 450);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [filteredProducts.length, searchTerm]);
 
   function handleFilterChange(filterName, value) {
     setFilters((currentFilters) => ({ ...currentFilters, [filterName]: value }));
@@ -175,6 +150,8 @@ export function ProductCatalog() {
         </p>
       </div>
 
+      <CatalogHighlights collections={featuredCollections} />
+
       <div className="grid gap-8 lg:grid-cols-[320px_1fr] lg:items-start">
         <AdvancedFilters
           filters={filters}
@@ -200,7 +177,7 @@ export function ProductCatalog() {
             <>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {visibleProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} analyticsSection="catalog_grid" />
                 ))}
               </div>
 
@@ -233,6 +210,7 @@ export function ProductCatalog() {
                 href={createWhatsAppLink('Olá! Quero uma curadoria personalizada da LAZULE FRAGRANCES.')}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => trackWhatsAppClick({ section: 'empty_results', query: searchTerm })}
               >
                 Pedir curadoria no WhatsApp
               </a>

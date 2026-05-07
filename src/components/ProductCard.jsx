@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
-import { createProductPath } from '../utils/productRouting';
+import { getAvailabilityStatus } from '../utils/availability';
+import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
+import { createBrandPath, createProductPath } from '../utils/productRouting';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 
 function normalizeComparisonText(value) {
@@ -61,10 +63,13 @@ function ProductImageSkeleton() {
   );
 }
 
-export function ProductCard({ product }) {
+export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
   const message = createProductWhatsAppMessage(product.name);
   const productPath = createProductPath(product);
+  const brandPath = createBrandPath(product.brand);
+  const badges = Array.isArray(product.badges) ? product.badges : [];
+  const availability = product.availability ?? getAvailabilityStatus(product);
   const description = String(product.description || '').trim();
   const olfactoryReference = String(product.olfactoryReference || '').trim();
   const showDescription = shouldRenderDescription(description, olfactoryReference);
@@ -97,9 +102,15 @@ export function ProductCard({ product }) {
           </span>
         )}
         <div className="relative z-10 mt-28">
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-200">{product.brand}</p>
+          <a className="relative z-20 text-sm uppercase tracking-[0.3em] text-slate-200 transition hover:text-lazule-gold" href={brandPath}>
+            {product.brand}
+          </a>
           <h3 className="mt-3 font-display text-3xl leading-tight text-lazule-mist">
-            <a className="relative z-20 transition hover:text-lazule-gold" href={productPath}>
+            <a
+              className="relative z-20 transition hover:text-lazule-gold"
+              href={productPath}
+              onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: analyticsSection, action: 'title' })}
+            >
               {product.name}
             </a>
           </h3>
@@ -108,7 +119,8 @@ export function ProductCard({ product }) {
 
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-4 flex flex-wrap gap-2">
-          {product.badges.map((badge) => (
+          <span className={`rounded-full border px-3 py-1 text-xs ${availability.className}`}>{availability.label}</span>
+          {badges.filter((badge) => badge !== availability.label).map((badge) => (
             <span key={badge} className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold">
               {badge}
             </span>
@@ -131,6 +143,7 @@ export function ProductCard({ product }) {
             <a
               className="lazule-premium-button inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/40 bg-white/5 px-5 py-3 font-semibold text-lazule-gold backdrop-blur hover:border-lazule-gold/70 hover:text-[#dfbd68]"
               href={productPath}
+              onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: analyticsSection, action: 'details' })}
             >
               Ver detalhes
             </a>
@@ -139,6 +152,7 @@ export function ProductCard({ product }) {
               href={createWhatsAppLink(message)}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: analyticsSection })}
             >
               Consultar no WhatsApp
             </a>
