@@ -5,6 +5,27 @@ import { createProductSlug, findProductBySlug } from '../utils/productRouting';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 import { ProductImageFallback } from './ProductCard';
 
+function normalizeProductClassifier(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/\bfemininos\b/g, 'feminino')
+    .replace(/\bmasculinos\b/g, 'masculino');
+}
+
+function shouldShowGender(category, gender) {
+  const normalizedGender = normalizeProductClassifier(gender);
+
+  if (!normalizedGender) {
+    return false;
+  }
+
+  return normalizeProductClassifier(category) !== normalizedGender;
+}
+
 function DetailImage({ product }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product?.image));
 
@@ -72,6 +93,7 @@ export function ProductDetails({ slug }) {
   const description = String(product.description || '').trim();
   const olfactoryReference = String(product.olfactoryReference || '').trim();
   const whatsAppMessage = createProductWhatsAppMessage(product.name);
+  const showGender = shouldShowGender(product.category, product.gender);
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:py-20">
@@ -92,7 +114,7 @@ export function ProductDetails({ slug }) {
               <span className="text-xs uppercase tracking-[0.22em] text-slate-400">Categoria</span>
               <p className="mt-2 font-semibold text-lazule-mist">{product.category}</p>
             </div>
-            {product.gender && (
+            {showGender && (
               <div className="rounded-2xl border border-white/10 bg-lazule-night/35 p-4">
                 <span className="text-xs uppercase tracking-[0.22em] text-slate-400">Gênero</span>
                 <p className="mt-2 font-semibold text-lazule-mist">{product.gender}</p>
