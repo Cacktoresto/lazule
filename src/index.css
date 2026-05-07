@@ -17,6 +17,7 @@ html {
 
 body {
   min-width: 320px;
+  overflow-x: hidden;
   min-height: 100vh;
   margin: 0;
   background:
@@ -117,6 +118,28 @@ body {
 
 .lazule-premium-button:active {
   transform: translateY(0.03rem) scale(0.99);
+}
+
+.lazule-premium-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #c8a24d,
+    0 0 0 5px rgba(15, 23, 42, 0.92),
+    0 18px 48px rgba(200, 162, 77, 0.18);
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: none;
+}
+
+button,
+a,
+select,
+input {
+  -webkit-tap-highlight-color: rgba(200, 162, 77, 0.22);
 }
 
 .lazule-cta-shimmer::before {
