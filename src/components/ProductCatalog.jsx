@@ -21,13 +21,26 @@ const DEFAULT_FILTERS = {
 
 const PRODUCTS_PER_PAGE = 24;
 
+const CATALOG_QUERY_PARAMS = ['tipo', 'categoria', 'category'];
+
+function getInitialCatalogState() {
+  const params = new URLSearchParams(window.location.search);
+  const category = CATALOG_QUERY_PARAMS.map((param) => params.get(param)).find(Boolean) ?? DEFAULT_FILTERS.category;
+
+  return {
+    filters: { ...DEFAULT_FILTERS, category },
+    searchTerm: params.get('busca') ?? params.get('q') ?? '',
+  };
+}
+
 function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
 export function ProductCatalog() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const initialCatalogState = useMemo(() => getInitialCatalogState(), []);
+  const [searchTerm, setSearchTerm] = useState(initialCatalogState.searchTerm);
+  const [filters, setFilters] = useState(initialCatalogState.filters);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
 
   const catalogProducts = useMemo(() => getCatalogProducts(), []);
