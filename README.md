@@ -235,6 +235,23 @@ Regras aplicadas no importador:
 - deduplicação por nome normalizado após essa correção;
 - campos internos continuam fora do front-end público.
 
+
+## Busca inteligente e filtros avançados
+
+O catálogo público combina busca normalizada e filtros para ajudar o cliente a encontrar perfumes por intenção. A busca remove acentos, usa lowercase, ignora caracteres especiais e permite termos parciais em campos como `name`, `brand`, `category`, `gender`, `badges`, `olfactoryReference`, `description` e `rawText`.
+
+Filtros disponíveis na interface:
+
+- categoria;
+- gênero;
+- marca;
+- faixa de preço público (`salePrice`);
+- com imagem ou sem imagem;
+- pronta entrega;
+- ordenação por menor preço, maior preço, A-Z e marca.
+
+A interface exibe a contagem de produtos encontrados e o total geral do catálogo, mantendo campos internos como `costPrice`, `supplierRetailPrice`, margem e `sourceUrl` fora do front-end público.
+
 ## WhatsApp
 
 Os links de WhatsApp são centralizados em `src/utils/whatsapp.js`.
