@@ -29,3 +29,13 @@ body {
   color: #0f172a;
   background: #c8a24d;
 }
+
+@keyframes lazule-shimmer {
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-lazule-shimmer {
+  animation: lazule-shimmer 1.35s ease-in-out infinite;
+}

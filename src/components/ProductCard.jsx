@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 
@@ -21,19 +22,40 @@ function ProductImageFallback() {
   );
 }
 
+function ProductImageSkeleton() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-lazule-night/75" aria-hidden="true">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(200,162,77,0.24),transparent_26%),radial-gradient(circle_at_75%_26%,rgba(37,99,235,0.22),transparent_32%)]" />
+      <div className="absolute inset-x-6 top-8 h-48 rounded-[1.5rem] border border-white/10 bg-white/[0.06]" />
+      <div className="absolute bottom-20 left-6 h-3 w-28 rounded-full bg-white/10" />
+      <div className="absolute bottom-12 left-6 h-7 w-48 rounded-full bg-white/10" />
+      <div className="absolute inset-y-0 -left-2/3 w-2/3 animate-lazule-shimmer bg-gradient-to-r from-transparent via-white/18 to-transparent" />
+    </div>
+  );
+}
+
 export function ProductCard({ product }) {
+  const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
   const message = createProductWhatsAppMessage(product.name);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition hover:-translate-y-1 hover:border-lazule-gold/40">
       <div className="relative min-h-64 overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue p-6">
         {product.image ? (
-          <img
-            className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105"
-            src={product.image}
-            alt={`Perfume ${product.name}`}
-            loading="lazy"
-          />
+          <>
+            {isImageLoading && <ProductImageSkeleton />}
+            <img
+              className={`absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 ${
+                isImageLoading ? 'opacity-0' : 'opacity-80'
+              }`}
+              src={product.image}
+              alt={`Perfume ${product.name}`}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setIsImageLoading(false)}
+              onError={() => setIsImageLoading(false)}
+            />
+          </>
         ) : (
           <ProductImageFallback />
         )}
