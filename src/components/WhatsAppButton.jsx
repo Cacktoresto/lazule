@@ -1,3 +1,4 @@
+import { trackWhatsAppClick } from '../utils/analytics';
 import { createWhatsAppLink } from '../utils/whatsapp';
 
 export function WhatsAppButton() {
@@ -8,6 +9,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noreferrer"
       aria-label="Falar com a LAZULE pelo WhatsApp"
+      onClick={() => trackWhatsAppClick({ section: 'floating_button' })}
     >
       <span className="sm:hidden">W</span>
       <span className="hidden sm:inline">WhatsApp</span>

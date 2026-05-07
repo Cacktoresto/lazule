@@ -19,6 +19,19 @@ export function getProductSlugFromPath(pathname) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+export function createBrandSlug(brandName) {
+  return createProductSlug(brandName || 'lazule');
+}
+
+export function createBrandPath(brandName) {
+  return `/marca/${createBrandSlug(brandName)}`;
+}
+
+export function getBrandSlugFromPath(pathname) {
+  const match = String(pathname || '').match(/^\/marca\/([^/]+)\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export function findProductBySlug(products, slug) {
   return products.find((product) => createProductSlug(product.name) === slug) ?? null;
 }
