@@ -211,11 +211,31 @@ https://rjperfumaria.catalog.kyte.site/
 supplier-products.json
 ```
 
-9. Salve ou mova esse arquivo para:
+9. Para importar uma única extração, salve ou mova esse arquivo para:
 
 ```txt
 data/supplier-products.json
 ```
+
+Para consolidar várias categorias, rode o extractor em cada categoria e salve os arquivos em:
+
+```txt
+data/imports/
+```
+
+Exemplos:
+
+```txt
+data/imports/supplier-tudo.json
+data/imports/supplier-masculinos.json
+data/imports/supplier-femininos.json
+data/imports/supplier-kit.json
+data/imports/supplier-arabes.json
+data/imports/supplier-nicho.json
+data/imports/supplier-pastas-isabelle.json
+```
+
+Se `product.category` vier vazio ou genérico, o importador tenta inferir a categoria pelo nome do arquivo, por exemplo `supplier-arabes.json` vira `Árabe`.
 
 10. Importe o JSON para o catálogo local:
 
@@ -223,7 +243,7 @@ data/supplier-products.json
 npm run import:supplier-json
 ```
 
-O importador lê `data/supplier-products.json`, converte os produtos para `src/data/products.js`, deduplica por `name` normalizado e mantém imagens como URL externa inicialmente.
+O importador lê todos os arquivos `.json` em `data/imports/`. Se essa pasta não tiver JSON, mantém compatibilidade com o fallback `data/supplier-products.json`. Ele junta todos os produtos, converte para `src/data/products.js`, deduplica por `name` normalizado e mantém imagens como URL externa inicialmente.
 
 Regras aplicadas no importador:
 
@@ -232,7 +252,8 @@ Regras aplicadas no importador:
 - `salePrice` = `supplierRetailPrice`;
 - preços como `number`;
 - se `name` vier como `14% OFF`, `7% OFF`, `3% OFF` etc., o importador usa `description` como nome real e limpa `description`;
-- deduplicação por nome normalizado após essa correção;
+- deduplicação por nome normalizado após juntar todos os arquivos;
+- relatório no terminal com arquivos lidos, produtos brutos por arquivo, total consolidado, total deduplicado, quantidade por categoria e produtos com/sem imagem;
 - campos internos continuam fora do front-end público.
 
 

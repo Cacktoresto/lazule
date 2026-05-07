@@ -1,11 +1,13 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const INPUT_FILE = path.join(ROOT_DIR, 'data/supplier-products.json');
+const IMPORTS_DIR = path.join(ROOT_DIR, 'data/imports');
+const FALLBACK_INPUT_FILE = path.join(ROOT_DIR, 'data/supplier-products.json');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'src/data/products.js');
 const LOG_PREFIX = '[LAZULE import]';
+const GENERIC_CATEGORIES = new Set(['', 'catalogo', 'catálogo', 'todos', 'tudo', 'all', 'catalog']);
 
 function log(message) {
   console.log(`${LOG_PREFIX} ${message}`);
@@ -34,6 +36,61 @@ function normalizeName(value) {
     .replace(/\s+/g, ' ')
     .replace(/[^a-z0-9 |.-]/g, '')
     .trim();
+}
+
+function normalizeCategoryKey(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function titleCaseCategory(value) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toLocaleUpperCase('pt-BR') + word.slice(1).toLocaleLowerCase('pt-BR'))
+    .join(' ');
+}
+
+function inferCategoryFromFileName(filePath) {
+  const baseName = path.basename(filePath, '.json');
+  const normalized = normalizeCategoryKey(baseName)
+    .replace(/^(supplier|produtos|products|catalogo|catalog|categoria|category)\s+/, '')
+    .replace(/\s+(supplier|produtos|products|catalogo|catalog|categoria|category)$/, '')
+    .trim();
+
+  if (!normalized || GENERIC_CATEGORIES.has(normalized)) {
+    return '';
+  }
+
+  const aliases = new Map([
+    ['arabes', 'Árabe'],
+    ['arabe', 'Árabe'],
+    ['masculino', 'Masculinos'],
+    ['masculinos', 'Masculinos'],
+    ['feminino', 'Femininos'],
+    ['femininos', 'Femininos'],
+    ['kits', 'Kit'],
+    ['kit', 'Kit'],
+    ['nicho', 'Nicho'],
+    ['pastas isabelle', 'Pastas Isabelle'],
+  ]);
+
+  return aliases.get(normalized) || titleCaseCategory(normalized);
+}
+
+function getEffectiveCategory(rawCategory, fallbackCategory) {
+  const category = String(rawCategory || '').trim();
+  const normalizedCategory = normalizeCategoryKey(category);
+
+  if (GENERIC_CATEGORIES.has(normalizedCategory)) {
+    return fallbackCategory || 'Catálogo';
+  }
+
+  return category || fallbackCategory || 'Catálogo';
 }
 
 function parseMoneyToNumber(value) {
@@ -151,13 +208,13 @@ function getSupplierRetailPrice(rawProduct) {
   return parseMoneyToNumber(rawProduct.supplierRetailPrice);
 }
 
-function normalizeProduct(rawProduct) {
+function normalizeProduct(rawProduct, fallbackCategory = '') {
   const originalName = String(rawProduct.name || '').trim();
   const originalDescription = String(rawProduct.description || '').trim();
   const isDiscountName = /^\d+% OFF$/i.test(originalName);
   const name = isDiscountName ? originalDescription : originalName;
   const description = isDiscountName ? '' : originalDescription;
-  const category = String(rawProduct.category || 'Catálogo').trim();
+  const category = getEffectiveCategory(rawProduct.category, fallbackCategory);
   const costPrice = getCostPrice(rawProduct);
   const supplierRetailPrice = getSupplierRetailPrice(rawProduct);
 
@@ -221,6 +278,13 @@ function deduplicateByName(products) {
   return [...productsByName.values()].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 }
 
+function countByCategory(products) {
+  return products.reduce((totals, product) => {
+    totals.set(product.category, (totals.get(product.category) ?? 0) + 1);
+    return totals;
+  }, new Map());
+}
+
 function serializeValue(value, indentLevel = 2) {
   const indent = ' '.repeat(indentLevel);
   const nextIndent = ' '.repeat(indentLevel + 2);
@@ -243,23 +307,93 @@ function serializeValue(value, indentLevel = 2) {
   return String(value);
 }
 
-async function main() {
-  log(`Lendo ${path.relative(ROOT_DIR, INPUT_FILE)}`);
-  const payload = JSON.parse(await readFile(INPUT_FILE, 'utf8'));
+async function pathExists(filePath) {
+  try {
+    await readFile(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getImportFiles() {
+  try {
+    const entries = await readdir(IMPORTS_DIR, { withFileTypes: true });
+    const importFiles = entries
+      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.json'))
+      .map((entry) => path.join(IMPORTS_DIR, entry.name))
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    if (importFiles.length > 0) {
+      return importFiles;
+    }
+  } catch {
+    // Fallback below keeps compatibility with the original single-file import flow.
+  }
+
+  if (await pathExists(FALLBACK_INPUT_FILE)) {
+    return [FALLBACK_INPUT_FILE];
+  }
+
+  throw new Error('Nenhum JSON encontrado. Salve arquivos em data/imports/*.json ou use data/supplier-products.json como fallback.');
+}
+
+async function readImportFile(filePath) {
+  const payload = JSON.parse(await readFile(filePath, 'utf8'));
   const rawProducts = Array.isArray(payload) ? payload : payload.products;
 
   if (!Array.isArray(rawProducts)) {
-    throw new Error('Formato inválido: esperado array de produtos ou objeto com propriedade products.');
+    throw new Error(`Formato inválido em ${path.relative(ROOT_DIR, filePath)}: esperado array de produtos ou objeto com propriedade products.`);
   }
 
-  const normalizedProducts = rawProducts.map(normalizeProduct).filter(Boolean);
+  return {
+    filePath,
+    fallbackCategory: inferCategoryFromFileName(filePath),
+    rawProducts,
+  };
+}
+
+function logReport(fileReports, rawProducts, normalizedProducts, products) {
+  log('Relatório de importação consolidada:');
+  log(`Arquivos lidos: ${fileReports.length}`);
+
+  for (const report of fileReports) {
+    const categoryInfo = report.fallbackCategory ? ` | categoria fallback: ${report.fallbackCategory}` : '';
+    log(`- ${path.relative(ROOT_DIR, report.filePath)}: ${report.rawCount} produtos brutos${categoryInfo}`);
+  }
+
+  log(`Total bruto consolidado: ${rawProducts.length}`);
+  log(`Produtos válidos antes da deduplicação: ${normalizedProducts.length}`);
+  log(`Total após deduplicação: ${products.length}`);
+  log('Quantidade por categoria:');
+
+  for (const [category, count] of [...countByCategory(products).entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))) {
+    log(`- ${category}: ${count}`);
+  }
+
+  log(`Produtos com imagem: ${products.filter((product) => Boolean(product.image)).length}`);
+  log(`Produtos sem imagem: ${products.filter((product) => !product.image).length}`);
+}
+
+async function main() {
+  const importFiles = await getImportFiles();
+  const filePayloads = await Promise.all(importFiles.map(readImportFile));
+  const rawProducts = filePayloads.flatMap((payload) =>
+    payload.rawProducts.map((rawProduct) => ({ rawProduct, fallbackCategory: payload.fallbackCategory })),
+  );
+  const normalizedProducts = rawProducts
+    .map(({ rawProduct, fallbackCategory }) => normalizeProduct(rawProduct, fallbackCategory))
+    .filter(Boolean);
   const products = deduplicateByName(normalizedProducts);
   const serializedProducts = products.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
 
   await writeFile(OUTPUT_FILE, `export const products = [\n${serializedProducts},\n];\n`);
-  log(`Produtos brutos: ${rawProducts.length}`);
-  log(`Produtos válidos: ${normalizedProducts.length}`);
-  log(`Produtos após deduplicação por nome: ${products.length}`);
+  logReport(
+    filePayloads.map((payload) => ({ filePath: payload.filePath, rawCount: payload.rawProducts.length, fallbackCategory: payload.fallbackCategory })),
+    rawProducts,
+    normalizedProducts,
+    products,
+  );
   log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
 }
 
