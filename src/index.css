@@ -39,3 +39,150 @@ body {
 .animate-lazule-shimmer {
   animation: lazule-shimmer 1.35s ease-in-out infinite;
 }
+
+@keyframes lazule-mineral-float {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    opacity: 0.48;
+    transform: translate3d(0.75rem, -1.1rem, 0) scale(1.08);
+  }
+}
+
+@keyframes lazule-mineral-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(1.25rem, -0.75rem, 0) scale(1.04);
+  }
+}
+
+@keyframes lazule-cta-glint {
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+.lazule-mineral-particle {
+  animation: lazule-mineral-float 22s ease-in-out infinite;
+}
+
+.lazule-mineral-drift {
+  animation: lazule-mineral-drift 30s ease-in-out infinite;
+}
+
+.lazule-premium-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateY(0);
+  transition:
+    transform 260ms ease,
+    border-color 260ms ease,
+    background-color 260ms ease,
+    box-shadow 260ms ease,
+    color 260ms ease;
+}
+
+.lazule-premium-button::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(110deg, transparent 10%, rgba(255, 255, 255, 0.18) 45%, transparent 62%);
+  opacity: 0;
+  transform: translateX(-120%);
+  transition: opacity 260ms ease;
+}
+
+.lazule-premium-button:hover {
+  transform: translateY(-0.18rem);
+  box-shadow:
+    0 20px 60px rgba(15, 23, 42, 0.34),
+    0 14px 38px rgba(200, 162, 77, 0.16);
+}
+
+.lazule-premium-button:hover::after {
+  opacity: 1;
+  animation: lazule-cta-glint 1.35s ease forwards;
+}
+
+.lazule-premium-button:active {
+  transform: translateY(0.03rem) scale(0.99);
+}
+
+.lazule-cta-shimmer::before {
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  pointer-events: none;
+  content: '';
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 42%, rgba(200, 162, 77, 0.24));
+  opacity: 0.28;
+}
+
+.lazule-product-card {
+  position: relative;
+  transform: translateY(0);
+  transition:
+    transform 320ms ease,
+    border-color 320ms ease,
+    box-shadow 320ms ease,
+    background-color 320ms ease;
+}
+
+.lazule-product-card::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(200, 162, 77, 0.13), transparent 28%),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.10), transparent 44%);
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+.lazule-product-card:hover {
+  transform: translateY(-0.32rem);
+  border-color: rgba(200, 162, 77, 0.42);
+  box-shadow:
+    0 26px 80px rgba(15, 23, 42, 0.52),
+    0 0 42px rgba(37, 99, 235, 0.12),
+    0 0 0 1px rgba(200, 162, 77, 0.12);
+}
+
+.lazule-product-card:hover::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .lazule-premium-button:hover,
+  .lazule-premium-button:active,
+  .lazule-product-card:hover {
+    transform: none;
+  }
+}

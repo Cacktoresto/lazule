@@ -39,7 +39,7 @@ export function ProductCard({ product }) {
   const message = createProductWhatsAppMessage(product.name);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition hover:-translate-y-1 hover:border-lazule-gold/40">
+    <article className="lazule-product-card group flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur">
       <div className="relative min-h-64 overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue p-6">
         {product.image ? (
           <>
@@ -93,7 +93,7 @@ export function ProductCard({ product }) {
             <strong className="text-2xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>
           </div>
           <a
-            className="inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-5 py-3 font-semibold text-lazule-night transition hover:bg-[#dfbd68]"
+            className="lazule-premium-button lazule-cta-shimmer inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-5 py-3 font-semibold text-lazule-night"
             href={createWhatsAppLink(message)}
             target="_blank"
             rel="noreferrer"

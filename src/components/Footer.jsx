@@ -12,7 +12,7 @@ export function Footer() {
           </p>
         </div>
         <a
-          className="inline-flex w-fit rounded-full border border-lazule-gold/40 px-6 py-3 text-sm font-semibold text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
+          className="lazule-premium-button inline-flex w-fit rounded-full border border-lazule-gold/40 px-6 py-3 text-sm font-semibold text-lazule-gold hover:bg-lazule-gold hover:text-lazule-night"
           href={createWhatsAppLink('Olá! Preciso de atendimento da LAZULE FRAGRANCES.')}
           target="_blank"
           rel="noreferrer"

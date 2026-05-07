@@ -208,10 +208,9 @@ export function ProductCatalog() {
                 <div className="mt-10 flex flex-col items-center gap-3 text-center">
                   <button
                     type="button"
-                    className="group relative inline-flex overflow-hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night shadow-aureate transition hover:-translate-y-0.5 hover:bg-[#dfbd68] focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
+                    className="lazule-premium-button lazule-cta-shimmer group relative inline-flex overflow-hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night shadow-aureate focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
                     onClick={loadMoreProducts}
                   >
-                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition duration-700 group-hover:translate-x-full" />
                     <span className="relative">Carregar mais fragrâncias</span>
                   </button>
                   <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
