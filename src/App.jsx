@@ -14,19 +14,24 @@ import { getBrandSlugFromPath, getProductSlugFromPath } from './utils/productRou
 function normalizeLegacyCatalogRoute() {
   const { pathname, hash } = window.location;
 
-  if (pathname !== '/') {
+  if (pathname === '/' && hash === '#catalogo') {
+    window.history.replaceState(null, '', '/catalogo');
+  }
+}
+
+function scrollToHashOrTop({ smooth = true } = {}) {
+  const hash = window.location.hash;
+  const behavior = smooth ? 'smooth' : 'auto';
+
+  if (!hash || hash === '#top') {
+    window.scrollTo({ top: 0, behavior });
     return;
   }
 
-  const legacyRouteMap = {
-    '#catalogo': '/catalogo',
-    '#atendimento': '/faq',
-    '#top': '/',
-  };
-  const normalizedPath = legacyRouteMap[hash];
+  const target = document.getElementById(hash.slice(1));
 
-  if (normalizedPath) {
-    window.history.replaceState(null, '', normalizedPath);
+  if (target) {
+    target.scrollIntoView({ behavior, block: 'start' });
   }
 }
 
@@ -35,6 +40,8 @@ function getCurrentRoute() {
 
   return {
     pathname: window.location.pathname,
+    search: window.location.search,
+    hash: window.location.hash,
     productSlug: getProductSlugFromPath(window.location.pathname),
     brandSlug: getBrandSlugFromPath(window.location.pathname),
   };
@@ -52,7 +59,7 @@ function App() {
       setRoute(getCurrentRoute());
 
       if (scrollToTop) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.requestAnimationFrame(() => scrollToHashOrTop());
       }
     }
 
@@ -76,11 +83,12 @@ function App() {
 
       const legacyRouteMap = {
         '#catalogo': '/catalogo',
-        '#atendimento': '/faq',
         '#top': '/',
+        '#atendimento': '/',
       };
       const legacyPath = nextUrl.pathname === '/' ? legacyRouteMap[nextUrl.hash] : null;
       const routePath = legacyPath || nextUrl.pathname;
+      const routeHash = legacyPath && nextUrl.hash !== '#catalogo' ? nextUrl.hash : '';
       const isSpaRoute =
         routePath === '/' ||
         routePath === '/catalogo' ||
@@ -93,10 +101,11 @@ function App() {
       }
 
       event.preventDefault();
-      window.history.pushState(null, '', `${routePath}${nextUrl.search}`);
+      window.history.pushState(null, '', `${routePath}${nextUrl.search}${routeHash}`);
       updateRoute();
     }
 
+    window.requestAnimationFrame(() => scrollToHashOrTop({ smooth: false }));
     window.addEventListener('popstate', handlePopState);
     document.addEventListener('click', handleDocumentClick);
 
@@ -119,7 +128,7 @@ function App() {
           ) : isCatalogRoute ? (
             <>
               <Hero />
-              <ProductCatalog />
+              <ProductCatalog key={route.search} />
             </>
           ) : isFaqRoute ? (
             <FAQ />
