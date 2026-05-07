@@ -1,10 +1,28 @@
 (() => {
+  const CONFIG = {
+    maxProductTextLength: 1800,
+    scrollStepRatio: 0.45,
+    minScrollStep: 320,
+    scrollDelayMs: 1200,
+    stableRoundsToStop: 4,
+    maxScrollAttempts: 70,
+    imageTimeoutMs: 1800,
+    imagePollMs: 120,
+    cardFocusDelayMs: 450,
+    finalSettleDelayMs: 1200,
+    minImageWidth: 80,
+    minImageHeight: 80,
+  };
   const LOG_PREFIX = '[LAZULE browser extractor]';
-  const MAX_PRODUCT_TEXT_LENGTH = 1800;
   const CATEGORY_NAMES = new Set(['All', 'Masculinos', 'Femininos', 'Kit', 'Árabe', 'Nicho', 'Pastas Isabelle']);
+  const IGNORED_IMAGE_PATTERN = /logo|icon|favicon|banner|placeholder|sprite|brand|avatar|whatsapp|facebook|instagram/i;
 
   function log(message) {
     console.log(`${LOG_PREFIX} ${message}`);
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   function normalizeText(value) {
@@ -19,21 +37,107 @@
     return normalizeText(element?.innerText || element?.textContent || '');
   }
 
-  function getImageUrl(element) {
-    const image = element?.querySelector?.('img');
+  function getFirstSrcsetUrl(srcset) {
+    return srcset
+      ?.split(',')
+      ?.map((item) => item.trim().split(/\s+/)[0])
+      ?.find(Boolean) || '';
+  }
 
-    if (!image) {
-      return '';
+  function getBackgroundImageUrl(element) {
+    const backgroundImage = window.getComputedStyle(element).backgroundImage;
+    const match = backgroundImage?.match(/url\(["']?(.+?)["']?\)/i);
+    return match?.[1] || '';
+  }
+
+  function isUsableImageUrl(url) {
+    if (!url || url.startsWith('data:') || url.startsWith('blob:')) {
+      return false;
     }
 
+    return !IGNORED_IMAGE_PATTERN.test(url);
+  }
+
+  function isUsableImageElement(image) {
+    if (!image) {
+      return false;
+    }
+
+    const altAndClass = `${image.alt || ''} ${image.className || ''} ${image.id || ''}`;
+    const rect = image.getBoundingClientRect();
+    const naturalWidth = image.naturalWidth || rect.width;
+    const naturalHeight = image.naturalHeight || rect.height;
+
     return (
-      image.currentSrc ||
-      image.src ||
-      image.getAttribute('data-src') ||
-      image.getAttribute('data-lazy-src') ||
-      image.getAttribute('srcset')?.split(',')?.[0]?.trim()?.split(' ')?.[0] ||
-      ''
+      !IGNORED_IMAGE_PATTERN.test(altAndClass) &&
+      naturalWidth >= CONFIG.minImageWidth &&
+      naturalHeight >= CONFIG.minImageHeight
     );
+  }
+
+  function getImageCandidateUrl(image) {
+    const candidates = [
+      image.currentSrc,
+      image.src,
+      image.getAttribute('src'),
+      image.getAttribute('data-src'),
+      image.getAttribute('data-lazy-src'),
+      image.getAttribute('data-original'),
+      getFirstSrcsetUrl(image.getAttribute('srcset')),
+      getFirstSrcsetUrl(image.getAttribute('data-srcset')),
+    ];
+
+    return candidates.find(isUsableImageUrl) || '';
+  }
+
+  async function waitForImage(image) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < CONFIG.imageTimeoutMs) {
+      const hasSource = Boolean(getImageCandidateUrl(image));
+      const isComplete = image.complete || image.naturalWidth > 0;
+
+      if (hasSource && isComplete) {
+        return true;
+      }
+
+      await sleep(CONFIG.imagePollMs);
+    }
+
+    return Boolean(getImageCandidateUrl(image));
+  }
+
+  async function waitForVisibleImages(root = document) {
+    const visibleImages = [...root.querySelectorAll('img')].filter((image) => {
+      const rect = image.getBoundingClientRect();
+      return rect.bottom >= 0 && rect.top <= window.innerHeight && rect.right >= 0 && rect.left <= window.innerWidth;
+    });
+
+    await Promise.allSettled(visibleImages.map(waitForImage));
+  }
+
+  function getImageUrl(element) {
+    const imageElements = [...element.querySelectorAll('img')].filter(isUsableImageElement);
+
+    for (const image of imageElements) {
+      const url = getImageCandidateUrl(image);
+
+      if (url) {
+        return url;
+      }
+    }
+
+    const elementsWithBackground = [element, ...element.querySelectorAll('*')];
+
+    for (const backgroundElement of elementsWithBackground) {
+      const url = getBackgroundImageUrl(backgroundElement);
+
+      if (isUsableImageUrl(url)) {
+        return url;
+      }
+    }
+
+    return '';
   }
 
   function countRetailMarkers(text) {
@@ -53,7 +157,7 @@
       const parentText = visibleText(parent);
       const parentRetailCount = countRetailMarkers(parentText);
 
-      if (parentRetailCount > 1 || parentText.length > MAX_PRODUCT_TEXT_LENGTH) {
+      if (parentRetailCount > 1 || parentText.length > CONFIG.maxProductTextLength) {
         break;
       }
 
@@ -146,10 +250,11 @@
     let previousHeight = 0;
     let previousY = -1;
 
-    for (let attempt = 1; attempt <= 40; attempt += 1) {
-      const step = Math.max(650, Math.floor(window.innerHeight * 0.75));
+    for (let attempt = 1; attempt <= CONFIG.maxScrollAttempts; attempt += 1) {
+      const step = Math.max(CONFIG.minScrollStep, Math.floor(window.innerHeight * CONFIG.scrollStepRatio));
       window.scrollBy(0, step);
-      await new Promise((resolve) => setTimeout(resolve, 750));
+      await sleep(CONFIG.scrollDelayMs);
+      await waitForVisibleImages(document);
 
       const height = document.body.scrollHeight;
       const y = window.scrollY;
@@ -162,22 +267,22 @@
       previousHeight = height;
       previousY = y;
 
-      if (stableRounds >= 3) {
+      if (stableRounds >= CONFIG.stableRoundsToStop) {
         break;
       }
     }
 
     window.scrollTo(0, 0);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await sleep(CONFIG.finalSettleDelayMs);
   }
 
-  function extractRawProducts() {
+  function findProductElements() {
     const retailElements = [...document.querySelectorAll('body *')]
       .filter((element) => {
         const text = visibleText(element);
-        return hasProductPriceShape(text) && countRetailMarkers(text) === 1 && text.length <= MAX_PRODUCT_TEXT_LENGTH;
+        return hasProductPriceShape(text) && countRetailMarkers(text) === 1 && text.length <= CONFIG.maxProductTextLength;
       });
-    const roots = new Set(retailElements.map((element) => findProductRoot(element)));
+    const roots = [...new Set(retailElements.map((element) => findProductRoot(element)))];
     const selectorCandidates = [...document.querySelectorAll([
       'article',
       'li',
@@ -190,11 +295,21 @@
     ].join(','))]
       .filter((element) => {
         const text = visibleText(element);
-        return hasProductPriceShape(text) && countRetailMarkers(text) === 1 && text.length <= MAX_PRODUCT_TEXT_LENGTH;
+        return hasProductPriceShape(text) && countRetailMarkers(text) === 1 && text.length <= CONFIG.maxProductTextLength;
       });
-    const byText = new Map();
 
-    for (const element of [...roots, ...selectorCandidates]) {
+    return [...new Set([...roots, ...selectorCandidates])];
+  }
+
+  async function extractRawProducts() {
+    const byText = new Map();
+    const productElements = findProductElements();
+
+    for (const element of productElements) {
+      element.scrollIntoView({ block: 'center' });
+      await sleep(CONFIG.cardFocusDelayMs);
+      await waitForVisibleImages(element);
+
       const text = visibleText(element);
       const key = text.replace(/\s+/g, ' ').trim();
 
@@ -208,6 +323,7 @@
       });
     }
 
+    window.scrollTo(0, 0);
     return [...byText.values()];
   }
 
@@ -229,18 +345,35 @@
     URL.revokeObjectURL(url);
   }
 
+  function logImageReport(products) {
+    const withImage = products.filter((product) => product.image).length;
+    const withoutImage = products.length - withImage;
+    const coverage = products.length > 0 ? Math.round((withImage / products.length) * 100) : 0;
+    const missingImages = products.filter((product) => !product.image).slice(0, 20).map((product) => product.name);
+
+    log(`Total de produtos extraídos: ${products.length}`);
+    log(`Produtos com imagem: ${withImage}`);
+    log(`Produtos sem imagem: ${withoutImage}`);
+    log(`Cobertura de imagem: ${coverage}%`);
+
+    if (missingImages.length > 0) {
+      console.warn(`${LOG_PREFIX} Até 20 produtos sem imagem para debug:`, missingImages);
+    }
+  }
+
   (async function run() {
-    log('Iniciando scroll automático. Aguarde até o download do JSON.');
+    log('Iniciando scroll automático lento. Aguarde até o download do JSON.');
     await autoScroll();
 
     const fallbackCategory = document.querySelector('[aria-current="page"]')?.textContent?.trim() || document.title || '';
-    const rawProducts = extractRawProducts();
+    const rawProducts = await extractRawProducts();
     const products = rawProducts
       .map((rawProduct) => parseProductBlock(rawProduct, fallbackCategory))
       .filter((product) => product.name && Number.isFinite(product.costPrice) && Number.isFinite(product.supplierRetailPrice));
 
     log(`Blocos encontrados: ${rawProducts.length}`);
     log(`Produtos válidos: ${products.length}`);
+    logImageReport(products);
     console.table(products.map(({ name, category, costPrice, supplierRetailPrice, image }) => ({ name, category, costPrice, supplierRetailPrice, image })));
 
     if (products.length === 0) {

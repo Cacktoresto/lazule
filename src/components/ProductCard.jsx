@@ -1,6 +1,26 @@
 import { formatBRL } from '../utils/currency';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 
+function ProductImageFallback() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_28%_18%,rgba(200,162,77,0.22),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(37,99,235,0.34),transparent_28%),linear-gradient(135deg,#0F172A_0%,#1E3A8A_52%,#0F172A_100%)]">
+      <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(115deg,transparent_0%,rgba(248,250,252,0.12)_46%,transparent_48%),radial-gradient(circle_at_50%_120%,rgba(200,162,77,0.2),transparent_34%)]" />
+      <div className="absolute -left-14 top-8 h-44 w-44 rounded-full border border-lazule-gold/20 bg-lazule-blue/20 blur-2xl" />
+      <div className="absolute bottom-5 right-5 h-28 w-28 rounded-full border border-lazule-gold/30" />
+      <div className="absolute inset-6 rounded-[1.5rem] border border-lazule-gold/20" />
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-night/45 text-4xl font-semibold text-lazule-gold shadow-aureate backdrop-blur">
+          L
+        </div>
+        <p className="text-xs font-semibold uppercase tracking-[0.45em] text-lazule-gold">LAZULE</p>
+        <p className="mt-3 max-w-[13rem] text-xs uppercase leading-5 tracking-[0.22em] text-slate-200">
+          Curadoria visual em atualização
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function ProductCard({ product }) {
   const message = createProductWhatsAppMessage(product.name);
 
@@ -15,7 +35,7 @@ export function ProductCard({ product }) {
             loading="lazy"
           />
         ) : (
-          <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(circle_at_30%_20%,rgba(200,162,77,0.28),transparent_28%),linear-gradient(130deg,transparent_0%,rgba(248,250,252,0.13)_48%,transparent_50%)]" />
+          <ProductImageFallback />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/35 to-transparent" />
         {product.featured && (

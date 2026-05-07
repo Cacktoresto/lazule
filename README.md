@@ -257,6 +257,15 @@ Regras aplicadas no importador:
 - campos internos continuam fora do front-end público.
 
 
+
+### Captura de imagens no extractor
+
+O `tools/browserExtractor.js` usa scroll mais lento e progressivo para dar tempo ao lazy loading do catálogo do fornecedor. Durante a extração, ele aguarda imagens visíveis carregarem, foca cada card com `scrollIntoView({ block: "center" })`, tenta `currentSrc`, `src`, atributos lazy (`data-src`, `data-lazy-src`, `data-original`), `srcset` e `background-image`, ignorando logos, banners, ícones e imagens muito pequenas.
+
+Ao final, o extractor mostra relatório com total de produtos, produtos com imagem, produtos sem imagem, percentual de cobertura e até 20 produtos sem imagem para debug. O formato final do JSON permanece igual.
+
+Produtos sem imagem devem permanecer com `image: ""`. O front-end exibe um fallback visual premium da LAZULE nesses cards, sem buscar imagens externas automaticamente.
+
 ## Busca inteligente e filtros avançados
 
 O catálogo público combina busca normalizada e filtros para ajudar o cliente a encontrar perfumes por intenção. A busca remove acentos, usa lowercase, ignora caracteres especiais e permite termos parciais em campos como `name`, `brand`, `category`, `gender`, `badges`, `olfactoryReference`, `description` e `rawText`.
