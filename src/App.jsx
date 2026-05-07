@@ -2,14 +2,37 @@ import { useEffect, useState } from 'react';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { MineralBackground } from './components/MineralBackground';
+import { FAQ } from './components/FAQ';
 import { Hero } from './components/Hero';
+import { Home } from './components/Home';
 import { BrandPage } from './components/BrandPage';
 import { ProductCatalog } from './components/ProductCatalog';
 import { ProductDetails } from './components/ProductDetails';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { getBrandSlugFromPath, getProductSlugFromPath } from './utils/productRouting';
 
+function normalizeLegacyCatalogRoute() {
+  const { pathname, hash } = window.location;
+
+  if (pathname !== '/') {
+    return;
+  }
+
+  const legacyRouteMap = {
+    '#catalogo': '/catalogo',
+    '#atendimento': '/faq',
+    '#top': '/',
+  };
+  const normalizedPath = legacyRouteMap[hash];
+
+  if (normalizedPath) {
+    window.history.replaceState(null, '', normalizedPath);
+  }
+}
+
 function getCurrentRoute() {
+  normalizeLegacyCatalogRoute();
+
   return {
     pathname: window.location.pathname,
     productSlug: getProductSlugFromPath(window.location.pathname),
@@ -21,6 +44,8 @@ function App() {
   const [route, setRoute] = useState(getCurrentRoute);
   const isProductRoute = route.pathname.startsWith('/produto/');
   const isBrandRoute = route.pathname.startsWith('/marca/');
+  const isCatalogRoute = route.pathname === '/catalogo';
+  const isFaqRoute = route.pathname === '/faq';
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -49,23 +74,27 @@ function App() {
         return;
       }
 
-      const isCatalogAnchor = nextUrl.pathname === '/' && Boolean(nextUrl.hash);
-      const isProductLink = nextUrl.pathname.startsWith('/produto/');
-      const isBrandLink = nextUrl.pathname.startsWith('/marca/');
+      const legacyRouteMap = {
+        '#catalogo': '/catalogo',
+        '#atendimento': '/faq',
+        '#top': '/',
+      };
+      const legacyPath = nextUrl.pathname === '/' ? legacyRouteMap[nextUrl.hash] : null;
+      const routePath = legacyPath || nextUrl.pathname;
+      const isSpaRoute =
+        routePath === '/' ||
+        routePath === '/catalogo' ||
+        routePath === '/faq' ||
+        routePath.startsWith('/produto/') ||
+        routePath.startsWith('/marca/');
 
-      if (!isCatalogAnchor && !isProductLink && !isBrandLink) {
+      if (!isSpaRoute) {
         return;
       }
 
       event.preventDefault();
-      window.history.pushState(null, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-      updateRoute({ scrollToTop: isProductLink || isBrandLink });
-
-      if (isCatalogAnchor) {
-        requestAnimationFrame(() => {
-          document.querySelector(nextUrl.hash)?.scrollIntoView({ behavior: 'smooth' });
-        });
-      }
+      window.history.pushState(null, '', `${routePath}${nextUrl.search}`);
+      updateRoute();
     }
 
     window.addEventListener('popstate', handlePopState);
@@ -87,11 +116,15 @@ function App() {
             <ProductDetails slug={route.productSlug} />
           ) : isBrandRoute ? (
             <BrandPage slug={route.brandSlug} />
-          ) : (
+          ) : isCatalogRoute ? (
             <>
               <Hero />
               <ProductCatalog />
             </>
+          ) : isFaqRoute ? (
+            <FAQ />
+          ) : (
+            <Home />
           )}
         </main>
         <Footer />

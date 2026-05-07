@@ -85,7 +85,7 @@ function ProductNotFound() {
         </p>
         <a
           className="lazule-premium-button lazule-cta-shimmer mt-8 inline-flex rounded-full bg-lazule-gold px-7 py-3.5 font-semibold text-lazule-night shadow-aureate"
-          href="/#catalogo"
+          href="/catalogo"
         >
           Voltar ao catálogo
         </a>
@@ -185,7 +185,7 @@ export function ProductDetails({ slug }) {
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:py-20">
-      <a className="mb-8 inline-flex text-sm font-semibold text-lazule-gold transition hover:text-[#dfbd68]" href="/#catalogo">
+      <a className="mb-8 inline-flex text-sm font-semibold text-lazule-gold transition hover:text-[#dfbd68]" href="/catalogo">
         ← Voltar ao catálogo
       </a>
 
@@ -247,7 +247,7 @@ export function ProductDetails({ slug }) {
               </a>
               <a
                 className="lazule-premium-button inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-3.5 font-semibold text-lazule-mist backdrop-blur hover:border-lazule-gold/60 hover:text-lazule-gold"
-                href="/#catalogo"
+                href="/catalogo"
               >
                 Voltar ao catálogo
               </a>

@@ -18,9 +18,9 @@ export function Hero() {
           <div className="mt-9 flex flex-col gap-4 sm:flex-row">
             <a
               className="lazule-premium-button lazule-cta-shimmer inline-flex items-center justify-center rounded-full bg-lazule-gold px-7 py-3.5 font-semibold text-lazule-night shadow-aureate"
-              href="#catalogo"
+              href="/catalogo"
             >
-              Ver catálogo
+              Explorar catálogo
             </a>
             <a
               className="lazule-premium-button inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 py-3.5 font-semibold text-lazule-mist backdrop-blur hover:border-lazule-gold/60 hover:text-lazule-gold"
