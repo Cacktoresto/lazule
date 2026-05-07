@@ -231,7 +231,8 @@ Regras aplicadas no importador:
 - `supplierRetailPrice` = valor após `Varejo`;
 - `salePrice` = `supplierRetailPrice`;
 - preços como `number`;
-- deduplicação por nome normalizado;
+- se `name` vier como `14% OFF`, `7% OFF`, `3% OFF` etc., o importador usa `description` como nome real e limpa `description`;
+- deduplicação por nome normalizado após essa correção;
 - campos internos continuam fora do front-end público.
 
 ## WhatsApp

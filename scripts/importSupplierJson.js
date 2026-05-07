@@ -152,14 +152,22 @@ function getSupplierRetailPrice(rawProduct) {
 }
 
 function normalizeProduct(rawProduct) {
-  const name = String(rawProduct.name || '').trim();
+  const originalName = String(rawProduct.name || '').trim();
+  const originalDescription = String(rawProduct.description || '').trim();
+  const isDiscountName = /^\d+% OFF$/i.test(originalName);
+  const name = isDiscountName ? originalDescription : originalName;
+  const description = isDiscountName ? '' : originalDescription;
   const category = String(rawProduct.category || 'Catálogo').trim();
   const costPrice = getCostPrice(rawProduct);
   const supplierRetailPrice = getSupplierRetailPrice(rawProduct);
 
   if (!name) {
-    warn('Produto ignorado sem nome.');
+    warn(isDiscountName ? `Produto ignorado porque "${originalName}" não tinha descrição para usar como nome.` : 'Produto ignorado sem nome.');
     return null;
+  }
+
+  if (isDiscountName) {
+    log(`Nome promocional "${originalName}" substituído por descrição: "${name}".`);
   }
 
   if (!Number.isFinite(costPrice)) {
@@ -172,7 +180,6 @@ function normalizeProduct(rawProduct) {
     return null;
   }
 
-  const description = String(rawProduct.description || '').trim();
   const gender = inferGender(category);
   const available = rawProduct.available ?? true;
 
