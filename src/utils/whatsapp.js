@@ -1,7 +1,8 @@
-const WHATSAPP_NUMBER = '5599999999999';
+const WHATSAPP_NUMBER = '5521975110562';
+const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 export function createWhatsAppLink(message) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  return `${WHATSAPP_BASE_URL}?text=${encodeURIComponent(message)}`;
 }
 
 export function createProductWhatsAppMessage(productName) {

@@ -245,7 +245,7 @@ A mensagem dos botões de produto segue o padrão:
 Olá! Tenho interesse no perfume [NOME DO PRODUTO] da LAZULE. Está disponível?
 ```
 
-Antes de publicar, substitua o número placeholder em `WHATSAPP_NUMBER` pelo número oficial da marca.
+O número oficial configurado em `WHATSAPP_NUMBER` é `5521975110562`, gerando links no formato `https://wa.me/5521975110562` com mensagens pré-preenchidas via `encodeURIComponent`.
 
 ## Como rodar localmente
 
