@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
+import { createProductPath } from '../utils/productRouting';
 import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
 
 function normalizeComparisonText(value) {
@@ -28,7 +29,7 @@ function shouldRenderDescription(description, olfactoryReference) {
   return normalizedDescription !== normalizedReference;
 }
 
-function ProductImageFallback() {
+export function ProductImageFallback() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_28%_18%,rgba(200,162,77,0.22),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(37,99,235,0.34),transparent_28%),linear-gradient(135deg,#0F172A_0%,#1E3A8A_52%,#0F172A_100%)]">
       <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(115deg,transparent_0%,rgba(248,250,252,0.12)_46%,transparent_48%),radial-gradient(circle_at_50%_120%,rgba(200,162,77,0.2),transparent_34%)]" />
@@ -63,6 +64,7 @@ function ProductImageSkeleton() {
 export function ProductCard({ product }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
   const message = createProductWhatsAppMessage(product.name);
+  const productPath = createProductPath(product);
   const description = String(product.description || '').trim();
   const olfactoryReference = String(product.olfactoryReference || '').trim();
   const showDescription = shouldRenderDescription(description, olfactoryReference);
@@ -96,7 +98,11 @@ export function ProductCard({ product }) {
         )}
         <div className="relative z-10 mt-28">
           <p className="text-sm uppercase tracking-[0.3em] text-slate-200">{product.brand}</p>
-          <h3 className="mt-3 font-display text-3xl leading-tight text-lazule-mist">{product.name}</h3>
+          <h3 className="mt-3 font-display text-3xl leading-tight text-lazule-mist">
+            <a className="relative z-20 transition hover:text-lazule-gold" href={productPath}>
+              {product.name}
+            </a>
+          </h3>
         </div>
       </div>
 
@@ -121,14 +127,22 @@ export function ProductCard({ product }) {
             <span className="text-xs uppercase tracking-[0.25em] text-slate-400">Preço LAZULE</span>
             <strong className="text-2xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>
           </div>
-          <a
-            className="lazule-premium-button lazule-cta-shimmer inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-5 py-3 font-semibold text-lazule-night"
-            href={createWhatsAppLink(message)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Consultar no WhatsApp
-          </a>
+          <div className="grid gap-3">
+            <a
+              className="lazule-premium-button inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/40 bg-white/5 px-5 py-3 font-semibold text-lazule-gold backdrop-blur hover:border-lazule-gold/70 hover:text-[#dfbd68]"
+              href={productPath}
+            >
+              Ver detalhes
+            </a>
+            <a
+              className="lazule-premium-button lazule-cta-shimmer inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-5 py-3 font-semibold text-lazule-night"
+              href={createWhatsAppLink(message)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Consultar no WhatsApp
+            </a>
+          </div>
         </div>
       </div>
     </article>
