@@ -128,12 +128,6 @@ export function ProductCatalog() {
   }, [filters, searchTerm]);
 
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.debug('[LAZULE catalogType counts]', countCatalogProductsByType(catalogProducts));
-    }
-  }, [catalogProducts]);
-
-  useEffect(() => {
     const normalizedQuery = searchTerm.trim();
 
     if (!normalizedQuery) {
