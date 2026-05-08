@@ -3,7 +3,7 @@ import { matchesSmartSearch, normalizeSearchText } from './search';
 
 export const ALL_FILTER_VALUE = 'Todos';
 
-export const CATALOG_TYPE_OPTIONS = ['Importado', 'Árabe', 'Nicho', 'Designer', 'Contratipo', 'Outros'];
+export const CATALOG_TYPE_OPTIONS = ['Importado', 'Árabe', 'Nicho', 'Contratipo', 'Outros'];
 
 export const GENDER_OPTIONS = ['Masculino', 'Feminino', 'Unissex'];
 
@@ -32,18 +32,26 @@ export const SORT_OPTIONS = [
 
 const ARABIC_BRANDS = new Set([
   'afnan',
+  'ajmal',
   'al haramain',
   'al wataniah',
+  'ard al zaafaran',
   'armaf',
+  'asdaaf',
   'aurora scents',
+  'emper',
   'fragrance world',
   'french avenue',
+  'khadlaj',
   'lattafa',
   'maison alhambra',
   'orientica',
   'paris corner',
   'rasasi',
   'rayhaan',
+  'riiffs',
+  'swiss arabian',
+  'zimaya',
 ]);
 
 const NICHE_BRANDS = new Set([
@@ -56,7 +64,8 @@ const NICHE_BRANDS = new Set([
   'xerjoff',
 ]);
 
-const DESIGNER_BRANDS = new Set([
+const IMPORTED_DESIGNER_BRANDS = new Set([
+  'acqua',
   'armani',
   'azzaro',
   'bvlgari',
@@ -65,6 +74,7 @@ const DESIGNER_BRANDS = new Set([
   'ck',
   'd g',
   'dior',
+  'flower',
   'givenchy',
   'gucci',
   'hugo',
@@ -73,13 +83,26 @@ const DESIGNER_BRANDS = new Set([
   'mugler',
   'pr',
   'prada',
+  'sisterland',
   'tom ford',
   'valentino donna',
   'versace',
 ]);
 
+const CONTRATYPE_TERMS = ['contratipo', 'contra tipo'];
+const ARABIC_TERMS = ['arabe', 'arabes', 'oriental arabe'];
+const NICHE_TERMS = ['nicho'];
+const OTHER_TERMS = ['kit', 'outro', 'outros', 'presente'];
+
 function containsAnyTerm(text, terms) {
   return terms.some((term) => text.includes(term));
+}
+
+function normalizeCatalogType(value) {
+  const normalizedValue = normalizeSearchText(value);
+  const catalogType = CATALOG_TYPE_OPTIONS.find((option) => normalizeSearchText(option) === normalizedValue);
+
+  return catalogType ?? value;
 }
 
 function getPriceRange(value) {
@@ -102,30 +125,50 @@ export function inferCatalogType(product) {
     product?.brand,
     product?.category,
     ...(product?.badges ?? []),
+    product?.catalogType,
     product?.description,
   ].filter(Boolean).join(' '));
 
-  if (containsAnyTerm(searchableText, ['contratipo', 'contra tipo', 'inspirado'])) {
-    return 'Contratipo';
-  }
-
-  if (normalizedCategory.includes('arabe') || ARABIC_BRANDS.has(normalizedBrand)) {
+  if (ARABIC_BRANDS.has(normalizedBrand)) {
     return 'Árabe';
   }
 
-  if (normalizedCategory.includes('nicho') || NICHE_BRANDS.has(normalizedBrand)) {
+  if (NICHE_BRANDS.has(normalizedBrand)) {
     return 'Nicho';
   }
 
-  if (DESIGNER_BRANDS.has(normalizedBrand)) {
-    return 'Designer';
+  if (IMPORTED_DESIGNER_BRANDS.has(normalizedBrand)) {
+    return 'Importado';
   }
 
-  if (containsAnyTerm(normalizedCategory, ['kit', 'outro'])) {
+  if (containsAnyTerm(searchableText, CONTRATYPE_TERMS)) {
+    return 'Contratipo';
+  }
+
+  if (containsAnyTerm(searchableText, ARABIC_TERMS)) {
+    return 'Árabe';
+  }
+
+  if (containsAnyTerm(searchableText, NICHE_TERMS)) {
+    return 'Nicho';
+  }
+
+  if (containsAnyTerm(normalizedCategory, OTHER_TERMS) || containsAnyTerm(searchableText, OTHER_TERMS)) {
     return 'Outros';
   }
 
-  return 'Importado';
+  return 'Outros';
+}
+
+export function countCatalogProductsByType(products) {
+  return products.reduce((counts, product) => {
+    const catalogType = product.catalogType ?? inferCatalogType(product);
+
+    return {
+      ...counts,
+      [catalogType]: (counts[catalogType] ?? 0) + 1,
+    };
+  }, {});
 }
 
 export function matchesCatalogFilters(product, filters, searchTerm = '') {
@@ -134,8 +177,9 @@ export function matchesCatalogFilters(product, filters, searchTerm = '') {
   const availabilityKey = product.availability?.key;
   const productPrice = Number(product.salePrice ?? product.price ?? 0);
   const productType = product.catalogType ?? inferCatalogType(product);
+  const selectedCategory = normalizeCatalogType(filters.category);
 
-  const matchesCategory = filters.category === ALL_FILTER_VALUE || productType === filters.category;
+  const matchesCategory = selectedCategory === ALL_FILTER_VALUE || productType === selectedCategory;
   const matchesGender = filters.gender === ALL_FILTER_VALUE || product.gender === filters.gender;
   const matchesBrand = filters.brand === ALL_FILTER_VALUE || product.brand === filters.brand;
   const matchesPrice = productPrice >= priceRange.min && productPrice <= priceRange.max;

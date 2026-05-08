@@ -3,7 +3,6 @@ import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { MineralBackground } from './components/MineralBackground';
 import { FAQ } from './components/FAQ';
-import { Hero } from './components/Hero';
 import { Home } from './components/Home';
 import { BrandPage } from './components/BrandPage';
 import { ProductCatalog } from './components/ProductCatalog';
@@ -116,7 +115,7 @@ function App() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-lazule-night text-lazule-mist">
+    <div className="relative min-h-screen overflow-x-clip bg-lazule-night text-lazule-mist">
       <MineralBackground />
       <div className="relative z-10">
         <Header />
@@ -126,10 +125,7 @@ function App() {
           ) : isBrandRoute ? (
             <BrandPage slug={route.brandSlug} />
           ) : isCatalogRoute ? (
-            <>
-              <Hero />
-              <ProductCatalog key={route.search} />
-            </>
+            <ProductCatalog key={route.search} />
           ) : isFaqRoute ? (
             <FAQ />
           ) : (
