@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { getCatalogProducts, getProductRecommendations } from '../src/utils/catalog.js';
+import { getCatalogProducts, getFeaturedCollections, getHomeShowcaseLineKey, getProductRecommendations } from '../src/utils/catalog.js';
 import { createProductSlug } from '../src/utils/productRouting.js';
 import { normalizeSearchText } from '../src/utils/search.js';
 
@@ -116,6 +116,43 @@ function assertNoDuplicateRecommendations(recommendations) {
   });
 }
 
+function assertHomeShowcasesAreGloballyDiverse(collections) {
+  const seenProducts = new Map();
+  const seenLines = new Map();
+  const allProducts = [];
+
+  Object.entries(collections).forEach(([collectionName, products]) => {
+    assert(products.length >= 6, `vitrine ${collectionName} deveria ter curadoria suficiente`);
+
+    const localBrands = new Map();
+
+    products.forEach((product) => {
+      const productKey = product.productSlug ?? createProductSlug(product.name);
+      const lineKey = getHomeShowcaseLineKey(product);
+      const brandKey = product.normalizedBrand ?? normalizeSearchText(product.brand);
+
+      assert(!seenProducts.has(productKey), `produto ${product.name} aparece em ${seenProducts.get(productKey)} e ${collectionName}`);
+      assert(!seenLines.has(lineKey), `linha/franquia ${lineKey} aparece em ${seenLines.get(lineKey)} e ${collectionName}`);
+
+      seenProducts.set(productKey, collectionName);
+      seenLines.set(lineKey, collectionName);
+      localBrands.set(brandKey, (localBrands.get(brandKey) ?? 0) + 1);
+      allProducts.push(product);
+    });
+
+    localBrands.forEach((count, brandKey) => {
+      assert(count <= 2, `marca ${brandKey} aparece ${count} vezes na vitrine ${collectionName}`);
+    });
+  });
+
+  const uniqueBrands = new Set(allProducts.map((product) => product.normalizedBrand ?? normalizeSearchText(product.brand)));
+  const uniqueImages = new Set(allProducts.map((product) => String(product.image ?? '').trim()).filter(Boolean));
+
+  assert(uniqueBrands.size >= 12, `Home deveria misturar mais marcas; encontrou ${uniqueBrands.size}`);
+  assert(uniqueImages.size >= Math.min(12, allProducts.length), `Home deveria misturar imagens; encontrou ${uniqueImages.size}`);
+  assert(seenProducts.size === allProducts.length, 'Home não deve repetir produtos entre vitrines');
+}
+
 function assertNoSameExactLine(recommendations) {
   const lineKeys = new Set();
 
@@ -164,5 +201,8 @@ assertNoDuplicateRecommendations(diversityRecommendations);
 assertNoSameExactLine(diversityRecommendations);
 assert(diversityIds.filter((id) => ['spread-1', 'spread-2', 'spread-3'].includes(id)).length <= 1, 'não deve recomendar várias variações Club de Nuit ao mesmo tempo');
 assert(diversityIds.some((id) => ['spread-4', 'spread-5', 'spread-6'].includes(id)), 'recomendações finais devem buscar itens além do primeiro bloco do ranking elegível');
+
+const homeCollections = getFeaturedCollections(getCatalogProducts());
+assertHomeShowcasesAreGloballyDiverse(homeCollections);
 
 console.log('Recommendation validation passed');

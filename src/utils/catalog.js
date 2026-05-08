@@ -55,6 +55,8 @@ const MAX_PREMIUM_UPGRADES = 1;
 const MIN_GOOD_RECOMMENDATION_SCORE = 140;
 const DIVERSITY_MIN_ADJUSTED_SCORE = 120;
 const DIVERSITY_RELAXED_MIN_ADJUSTED_SCORE = 80;
+const HOME_SHOWCASE_SIZE = 8;
+const HOME_SHOWCASE_BRAND_LIMIT = 2;
 const PRIORITY_CATEGORIES = new Set(['arabe', 'nicho']);
 const STRICT_GENDERS = new Set(['masculino', 'feminino']);
 const GENERIC_NAME_TOKENS = new Set([
@@ -279,6 +281,20 @@ function getProductLineKey(product) {
   const brandKey = product.normalizedBrand ?? normalizeSearchText(product.brand);
 
   return baseKey ? `${brandKey}::${baseKey}` : '';
+}
+
+export function getHomeShowcaseLineKey(product) {
+  const tokens = getPrimaryNameTokens(product);
+
+  if (tokens.length === 0) {
+    return getNormalizedName(product);
+  }
+
+  if (tokens.length === 1) {
+    return tokens[0];
+  }
+
+  return tokens[0];
 }
 
 function getTokenOverlapRatio(firstProduct, secondProduct) {
@@ -592,22 +608,227 @@ export function getProductRecommendations(currentProduct, allProducts = getCatal
   return recommendations.slice(0, max);
 }
 
+const MAINSTREAM_WANTED_BRANDS = new Set([
+  'armani',
+  'azzaro',
+  'carolina herrera',
+  'chanel',
+  'ch',
+  'creed',
+  'dior',
+  'giorgio armani',
+  'givenchy',
+  'jean paul gaultier',
+  'jpg',
+  'maison francis kurkdjian',
+  'paco rabanne',
+  'parfums de marly',
+  'prada',
+  'versace',
+  'yves saint laurent',
+]);
+
+const STRONG_ARABIC_BRANDS = new Set([
+  'afnan',
+  'al haramain',
+  'armaf',
+  'fragrance world',
+  'lattafa',
+  'maison alhambra',
+  'rasasi',
+]);
+
+function createHomeShowcaseReservation() {
+  return {
+    keys: createIdentityKeySet(),
+    lineKeys: new Set(),
+    brandCounts: new Map(),
+  };
+}
+
+function getHomeShowcaseBrandCount(reservation, product) {
+  const brandKey = product.normalizedBrand ?? normalizeSearchText(product.brand);
+
+  return reservation.brandCounts.get(brandKey) ?? 0;
+}
+
+function registerHomeShowcaseProduct(reservation, product) {
+  addIdentityKeys(product, reservation.keys);
+
+  const lineKey = getHomeShowcaseLineKey(product);
+  const brandKey = product.normalizedBrand ?? normalizeSearchText(product.brand);
+
+  if (lineKey) {
+    reservation.lineKeys.add(lineKey);
+  }
+
+  if (brandKey) {
+    reservation.brandCounts.set(brandKey, getHomeShowcaseBrandCount(reservation, product) + 1);
+  }
+}
+
+function canUseInHomeShowcase(product, reservation, showcaseProducts, { enforceBrandLimit = true } = {}) {
+  const lineKey = getHomeShowcaseLineKey(product);
+
+  if (identityKeysOverlap(product, reservation.keys) || (lineKey && reservation.lineKeys.has(lineKey))) {
+    return false;
+  }
+
+  if (showcaseProducts.some((selectedProduct) => identityKeysOverlap(product, createIdentityKeySet([selectedProduct])))) {
+    return false;
+  }
+
+  if (lineKey && showcaseProducts.some((selectedProduct) => getHomeShowcaseLineKey(selectedProduct) === lineKey)) {
+    return false;
+  }
+
+  if (enforceBrandLimit) {
+    const brandKey = product.normalizedBrand ?? normalizeSearchText(product.brand);
+    const showcaseBrandCount = showcaseProducts.filter(
+      (selectedProduct) => (selectedProduct.normalizedBrand ?? normalizeSearchText(selectedProduct.brand)) === brandKey,
+    ).length;
+
+    if (brandKey && showcaseBrandCount >= HOME_SHOWCASE_BRAND_LIMIT) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getHomeShowcaseDiversityPenalty(product, selectedProducts, reservation) {
+  const brandCount = getHomeShowcaseBrandCount(reservation, product);
+  const image = String(product.image ?? '').trim();
+  const productCatalogType = product.normalizedCatalogType ?? normalizeSearchText(product.catalogType);
+  const productGender = product.normalizedGender ?? normalizeSearchText(product.gender);
+
+  return selectedProducts.reduce((penalty, selectedProduct) => {
+    let itemPenalty = 0;
+    const selectedCatalogType = selectedProduct.normalizedCatalogType ?? normalizeSearchText(selectedProduct.catalogType);
+    const selectedGender = selectedProduct.normalizedGender ?? normalizeSearchText(selectedProduct.gender);
+
+    if (product.normalizedBrand && product.normalizedBrand === selectedProduct.normalizedBrand) {
+      itemPenalty += 90;
+    }
+
+    if (image && image === String(selectedProduct.image ?? '').trim()) {
+      itemPenalty += 220;
+    }
+
+    if (product.normalizedOlfactoryReference && product.normalizedOlfactoryReference === selectedProduct.normalizedOlfactoryReference) {
+      itemPenalty += 120;
+    }
+
+    if (productCatalogType && productCatalogType === selectedCatalogType) {
+      itemPenalty += 18;
+    }
+
+    if (productGender && productGender === selectedGender) {
+      itemPenalty += 12;
+    }
+
+    return penalty + itemPenalty;
+  }, brandCount * 70);
+}
+
+function sortHomeShowcaseCandidates(candidates, selectedProducts, reservation, scoreProduct) {
+  return [...candidates].sort((a, b) => {
+    const scoreA = scoreProduct(a) - getHomeShowcaseDiversityPenalty(a, selectedProducts, reservation);
+    const scoreB = scoreProduct(b) - getHomeShowcaseDiversityPenalty(b, selectedProducts, reservation);
+
+    return (
+      scoreB - scoreA ||
+      Number(b.featured) - Number(a.featured) ||
+      Number(b.available) - Number(a.available) ||
+      a.name.localeCompare(b.name, 'pt-BR')
+    );
+  });
+}
+
+function selectHomeShowcase(candidates, reservation, scoreProduct, targetCount = HOME_SHOWCASE_SIZE) {
+  const selectedProducts = [];
+
+  while (selectedProducts.length < targetCount) {
+    const nextProduct = sortHomeShowcaseCandidates(candidates, selectedProducts, reservation, scoreProduct).find((candidate) =>
+      canUseInHomeShowcase(candidate, reservation, selectedProducts),
+    );
+
+    if (!nextProduct) {
+      break;
+    }
+
+    selectedProducts.push(nextProduct);
+  }
+
+  while (selectedProducts.length < targetCount) {
+    const nextProduct = sortHomeShowcaseCandidates(candidates, selectedProducts, reservation, scoreProduct).find((candidate) =>
+      canUseInHomeShowcase(candidate, reservation, selectedProducts, { enforceBrandLimit: false }),
+    );
+
+    if (!nextProduct) {
+      break;
+    }
+
+    selectedProducts.push(nextProduct);
+  }
+
+  selectedProducts.forEach((product) => registerHomeShowcaseProduct(reservation, product));
+
+  return selectedProducts;
+}
+
+function getArabicHighlightScore(product) {
+  const brandScore = STRONG_ARABIC_BRANDS.has(product.normalizedBrand) ? 180 : 70;
+  const referenceScore = product.olfactoryReference ? 45 : 0;
+  const priceScore = Math.min(Math.round(getProductPrice(product) / 12), 50);
+
+  return brandScore + referenceScore + priceScore + Number(product.featured) * 60 + Number(product.available) * 30;
+}
+
+function getMostWantedScore(product) {
+  const brandScore = MAINSTREAM_WANTED_BRANDS.has(product.normalizedBrand) ? 210 : 0;
+  const referenceScore = product.olfactoryReference ? 125 : 0;
+  const importedScore = product.catalogType === 'Importado' ? 45 : 0;
+
+  return brandScore + referenceScore + importedScore + Number(product.featured) * 70 + Number(product.available) * 25;
+}
+
+function getWeeklySelectionScore(product, indexById) {
+  const catalogType = product.normalizedCatalogType ?? normalizeSearchText(product.catalogType);
+  const gender = product.normalizedGender ?? normalizeSearchText(product.gender);
+  const categoryMixScore = catalogType === 'nicho' ? 95 : catalogType === 'importado' ? 75 : catalogType === 'arabe' ? 55 : 35;
+  const genderMixScore = gender === 'feminino' ? 35 : gender === 'masculino' ? 30 : gender === 'unissex' ? 25 : 0;
+  const editorialRotationScore = 80 - (indexById.get(product.id) % 17) * 3;
+
+  return categoryMixScore + genderMixScore + editorialRotationScore + Number(product.featured) * 55 + Number(product.available) * 20;
+}
+
 export function getFeaturedCollections(allProducts = getCatalogProducts()) {
-  const sortedByFeatured = [...allProducts].sort(
-    (a, b) => Number(b.featured) - Number(a.featured) || Number(b.available) - Number(a.available) || a.name.localeCompare(b.name, 'pt-BR'),
+  const reservation = createHomeShowcaseReservation();
+  const indexById = new Map(allProducts.map((product, index) => [product.id, index]));
+
+  const arabicHighlights = selectHomeShowcase(
+    allProducts.filter((product) => product.catalogType === 'Árabe'),
+    reservation,
+    getArabicHighlightScore,
   );
-  const mostWantedBrands = new Set(['creed', 'dior', 'chanel', 'parfums de marly', 'maison francis kurkdjian']);
-  const arabicHighlights = allProducts
-    .filter((product) => product.catalogType === 'Árabe')
-    .sort((a, b) => Number(b.featured) - Number(a.featured) || a.brand.localeCompare(b.brand, 'pt-BR'));
-  const mostWanted = allProducts
-    .filter((product) => mostWantedBrands.has(product.normalizedBrand) || product.featured || product.olfactoryReference)
-    .sort((a, b) => Number(b.featured) - Number(a.featured) || a.name.localeCompare(b.name, 'pt-BR'));
+  const mostWanted = selectHomeShowcase(
+    allProducts.filter(
+      (product) => MAINSTREAM_WANTED_BRANDS.has(product.normalizedBrand) || product.featured || product.olfactoryReference,
+    ),
+    reservation,
+    getMostWantedScore,
+  );
+  const weeklySelection = selectHomeShowcase(
+    allProducts,
+    reservation,
+    (product) => getWeeklySelectionScore(product, indexById),
+  );
 
   return {
-    weeklySelection: sortedByFeatured.slice(0, 8),
-    mostWanted: mostWanted.slice(0, 8),
-    arabicHighlights: arabicHighlights.slice(0, 8),
+    weeklySelection,
+    mostWanted,
+    arabicHighlights,
   };
 }
 
