@@ -224,7 +224,7 @@ export function getFeaturedCollections(allProducts = getCatalogProducts()) {
   );
   const mostWantedBrands = new Set(['creed', 'dior', 'chanel', 'parfums de marly', 'maison francis kurkdjian']);
   const arabicHighlights = allProducts
-    .filter((product) => normalizeSearchText(`${product.category} ${product.badges?.join(' ')}`).includes('arabe'))
+    .filter((product) => product.catalogType === 'Árabe')
     .sort((a, b) => Number(b.featured) - Number(a.featured) || a.brand.localeCompare(b.brand, 'pt-BR'));
   const mostWanted = allProducts
     .filter((product) => mostWantedBrands.has(product.normalizedBrand) || product.featured || product.olfactoryReference)

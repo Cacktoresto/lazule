@@ -55,6 +55,7 @@ export function createSearchIndex(product) {
     product.name,
     product.brand,
     product.category,
+    product.catalogType,
     product.gender,
     ...(product.badges ?? []),
     product.olfactoryReference,

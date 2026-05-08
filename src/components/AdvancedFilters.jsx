@@ -9,6 +9,13 @@ import {
 
 const ALL_VALUE = ALL_FILTER_VALUE;
 
+function getOrderedCatalogTypeOptions(availableCategories) {
+  const preferredOptions = CATALOG_TYPE_OPTIONS.filter((category) => availableCategories.includes(category));
+  const extraOptions = availableCategories.filter((category) => !CATALOG_TYPE_OPTIONS.includes(category));
+
+  return [ALL_VALUE, ...preferredOptions, ...extraOptions];
+}
+
 const IMAGE_OPTIONS = [
   { label: 'Todas', value: 'all' },
   { label: 'Com imagem', value: 'with' },
@@ -21,7 +28,7 @@ function SelectField({ id, label, value, onChange, options, helper }) {
       <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold">{label}</span>
       <select
         id={id}
-        className="w-full rounded-2xl border border-lazule-gold/15 bg-lazule-night/85 px-4 py-3 text-sm text-lazule-mist outline-none shadow-inner shadow-lazule-blue/10 transition hover:border-lazule-gold/35 focus:border-lazule-gold/75 focus:bg-lazule-night"
+        className="min-h-12 w-full rounded-2xl border border-lazule-gold/15 bg-lazule-night/85 px-4 py-3 text-sm text-lazule-mist outline-none shadow-inner shadow-lazule-blue/10 transition duration-200 hover:border-lazule-gold/35 focus-visible:border-lazule-gold/75 focus-visible:bg-lazule-night focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
@@ -45,7 +52,7 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
           label="Tipo de perfume"
           value={filters.category}
           onChange={(value) => onFilterChange('category', value)}
-          options={[ALL_VALUE, ...CATALOG_TYPE_OPTIONS]}
+          options={getOrderedCatalogTypeOptions(options.categories)}
           helper="Organização por curadoria: importados, árabes, nicho e designers."
         />
         <SelectField
@@ -93,7 +100,7 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
       </div>
 
       <button
-        className="rounded-full border border-lazule-gold/40 bg-lazule-gold/5 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
+        className="lazule-premium-button min-h-12 rounded-full border border-lazule-gold/40 bg-lazule-gold/5 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:tracking-[0.18em]"
         type="button"
         onClick={onReset}
       >
@@ -117,7 +124,7 @@ export function AdvancedFilters({ filters, options, onFilterChange, onReset }) {
       </div>
 
       <details className="group lg:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-lazule-gold/20 bg-lazule-night/70 px-4 py-3 text-sm font-semibold text-lazule-mist shadow-inner shadow-lazule-blue/10">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-2xl border border-lazule-gold/20 bg-lazule-night/70 px-4 py-3 text-sm font-semibold text-lazule-mist shadow-inner shadow-lazule-blue/10 transition duration-200 hover:border-lazule-gold/45 hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night">
           Filtros avançados
           <span className="text-lazule-gold transition group-open:rotate-45">+</span>
         </summary>
