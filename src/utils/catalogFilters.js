@@ -1,5 +1,5 @@
-import { isAvailableForImmediateFilter } from './availability';
-import { matchesSmartSearch, normalizeSearchText } from './search';
+import { isAvailableForImmediateFilter } from './availability.js';
+import { matchesSmartSearch, normalizeSearchText } from './search.js';
 
 export const ALL_FILTER_VALUE = 'Todos';
 

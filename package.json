@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "scrape:supplier": "node scripts/scrapeSupplier.js",
     "import:supplier-json": "node scripts/importSupplierJson.js",
-    "validate:products": "node scripts/validateProducts.js"
+    "validate:products": "node scripts/validateProducts.js",
+    "validate:recommendations": "node scripts/validateRecommendations.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
