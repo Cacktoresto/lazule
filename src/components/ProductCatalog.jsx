@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
 import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
-import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
+import { countCatalogProductsByType, filterAndSortCatalogProducts } from '../utils/catalogFilters';
 import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
@@ -122,6 +122,10 @@ export function ProductCatalog() {
     setVisibleCount(PRODUCTS_PER_PAGE);
     syncCatalogUrl(filters, '');
   }
+
+  useEffect(() => {
+    syncCatalogUrl(filters, searchTerm);
+  }, [filters, searchTerm]);
 
   useEffect(() => {
     syncCatalogUrl(filters, searchTerm);
