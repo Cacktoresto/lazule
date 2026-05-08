@@ -4,6 +4,48 @@ import { getCatalogProducts, getProductRecommendations } from '../src/utils/cata
 import { createProductSlug } from '../src/utils/productRouting.js';
 import { normalizeSearchText } from '../src/utils/search.js';
 
+const LINE_GENERIC_NAME_TOKENS = new Set([
+  'amostra',
+  'deo',
+  'edc',
+  'edp',
+  'edt',
+  'elixir',
+  'extrait',
+  'for',
+  'intense',
+  'limited',
+  'kit',
+  'edition',
+  'extreme',
+  'man',
+  'men',
+  'ml',
+  'of',
+  'parfum',
+  'perfume',
+  'pour',
+  'spray',
+  'woman',
+  'women',
+  'the',
+]);
+
+function getLineTokens(text) {
+  return normalizeSearchText(text)
+    .split(' ')
+    .filter((token) => token.length > 2 && !/^\d+$/.test(token) && !LINE_GENERIC_NAME_TOKENS.has(token));
+}
+
+function getRecommendationLineKey(product) {
+  const brandTokens = new Set(getLineTokens(product.brand ?? product.normalizedBrand ?? ''));
+  const displayName = String(product.name ?? '').split('|').pop() ?? '';
+  const nameTokens = getLineTokens(displayName).filter((token) => !brandTokens.has(token));
+  const baseKey = nameTokens.length > 0 ? nameTokens.slice(0, Math.min(3, nameTokens.length)).join(' ') : normalizeSearchText(product.name);
+
+  return `${product.normalizedBrand ?? normalizeSearchText(product.brand)}::${baseKey}`;
+}
+
 function product(overrides) {
   return {
     id: overrides.id,
@@ -74,6 +116,17 @@ function assertNoDuplicateRecommendations(recommendations) {
   });
 }
 
+function assertNoSameExactLine(recommendations) {
+  const lineKeys = new Set();
+
+  recommendations.forEach((recommendation) => {
+    const lineKey = getRecommendationLineKey(recommendation);
+
+    assert(!lineKeys.has(lineKey), `linha exata duplicada: ${recommendation.name}`);
+    lineKeys.add(lineKey);
+  });
+}
+
 const masculineRecommendations = recommend('masc-current', { min: 4, max: 8 });
 assert(masculineRecommendations.length >= 4, 'produto masculino deveria ter recomendações masculinas suficientes');
 assert(!masculineRecommendations.some((item) => item.normalizedGender === 'feminino'), 'produto masculino não deve recomendar feminino quando há masculino suficiente');
@@ -93,5 +146,23 @@ assert(nicheCount > nicheRecommendations.length / 2, 'produto Nicho deve recomen
 [masculineRecommendations, feminineRecommendations, arabicRecommendations, nicheRecommendations].forEach(assertNoDuplicateRecommendations);
 assert(!masculineRecommendations.some((item) => item.id === 'dupe-id'), 'não deve recomendar cópia do próprio produto por nome/slug normalizado');
 assert(masculineRecommendations.filter((item) => item.productSlug === createProductSlug('Dior | Homme Intense EDP 100ml')).length <= 1, 'não deve retornar duplicados por slug');
+
+[masculineRecommendations, feminineRecommendations, arabicRecommendations, nicheRecommendations].forEach(assertNoSameExactLine);
+
+const diversityFixture = getCatalogProducts([
+  product({ id: 'spread-current', name: 'Dior | Sauvage EDP 100ml', brand: 'Dior', category: 'Masculinos', gender: 'Masculino', salePrice: 600, olfactoryReference: 'Sauvage' }),
+  product({ id: 'spread-1', name: 'Armaf | Club de Nuit EDT 105ml', brand: 'Armaf', category: 'Masculinos', gender: 'Masculino', salePrice: 590, olfactoryReference: 'Sauvage' }),
+  product({ id: 'spread-2', name: 'Armaf | Club de Nuit Intense Man EDT 105ml', brand: 'Armaf', category: 'Masculinos', gender: 'Masculino', salePrice: 595, olfactoryReference: 'Sauvage' }),
+  product({ id: 'spread-3', name: 'Armaf | Club de Nuit Limited Edition EDP 105ml', brand: 'Armaf', category: 'Masculinos', gender: 'Masculino', salePrice: 605, olfactoryReference: 'Sauvage' }),
+  product({ id: 'spread-4', name: 'Chanel | Bleu de Chanel EDP 100ml', brand: 'Chanel', category: 'Masculinos', gender: 'Masculino', salePrice: 610, olfactoryReference: 'Bleu de Chanel' }),
+  product({ id: 'spread-5', name: 'Prada | Luna Rossa Carbon EDT 100ml', brand: 'Prada', category: 'Masculinos', gender: 'Masculino', salePrice: 580, olfactoryReference: 'Luna Rossa Carbon' }),
+  product({ id: 'spread-6', name: 'YSL | Y EDP 100ml', brand: 'YSL', category: 'Masculinos', gender: 'Masculino', salePrice: 620, olfactoryReference: 'Yves Saint Laurent Y' }),
+]);
+const diversityRecommendations = getProductRecommendations(diversityFixture[0], diversityFixture, { min: 4, max: 4 });
+const diversityIds = diversityRecommendations.map((item) => item.id);
+assertNoDuplicateRecommendations(diversityRecommendations);
+assertNoSameExactLine(diversityRecommendations);
+assert(diversityIds.filter((id) => ['spread-1', 'spread-2', 'spread-3'].includes(id)).length <= 1, 'não deve recomendar várias variações Club de Nuit ao mesmo tempo');
+assert(diversityIds.some((id) => ['spread-4', 'spread-5', 'spread-6'].includes(id)), 'recomendações finais devem buscar itens além do primeiro bloco do ranking elegível');
 
 console.log('Recommendation validation passed');
