@@ -9,6 +9,13 @@ import {
 
 const ALL_VALUE = ALL_FILTER_VALUE;
 
+function getOrderedCatalogTypeOptions(availableCategories) {
+  const preferredOptions = CATALOG_TYPE_OPTIONS.filter((category) => availableCategories.includes(category));
+  const extraOptions = availableCategories.filter((category) => !CATALOG_TYPE_OPTIONS.includes(category));
+
+  return [ALL_VALUE, ...preferredOptions, ...extraOptions];
+}
+
 const IMAGE_OPTIONS = [
   { label: 'Todas', value: 'all' },
   { label: 'Com imagem', value: 'with' },
@@ -45,7 +52,7 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
           label="Tipo de perfume"
           value={filters.category}
           onChange={(value) => onFilterChange('category', value)}
-          options={[ALL_VALUE, ...CATALOG_TYPE_OPTIONS]}
+          options={getOrderedCatalogTypeOptions(options.categories)}
           helper="Organização por curadoria: importados, árabes, nicho e designers."
         />
         <SelectField

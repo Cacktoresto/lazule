@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
 import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
-import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
+import { countCatalogProductsByType, filterAndSortCatalogProducts } from '../utils/catalogFilters';
 import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
@@ -73,6 +73,7 @@ function syncCatalogUrl(filters, searchTerm) {
 
 export function ProductCatalog() {
   const initialCatalogState = useMemo(() => getInitialCatalogState(), []);
+  const [draftSearchTerm, setDraftSearchTerm] = useState(initialCatalogState.searchTerm);
   const [searchTerm, setSearchTerm] = useState(initialCatalogState.searchTerm);
   const [filters, setFilters] = useState(initialCatalogState.filters);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
@@ -102,14 +103,35 @@ export function ProductCatalog() {
     setVisibleCount(PRODUCTS_PER_PAGE);
   }
 
+  function applySearch(nextSearchTerm = draftSearchTerm) {
+    setSearchTerm(nextSearchTerm.trim());
+    resetPagination();
+  }
+
   function handleSearchChange(value) {
-    setSearchTerm(value);
+    setDraftSearchTerm(value);
+  }
+
+  function handleSearchSubmit(event) {
+    event.preventDefault();
+    applySearch();
+  }
+
+  function clearSearch() {
+    setDraftSearchTerm('');
+    setSearchTerm('');
     resetPagination();
   }
 
   useEffect(() => {
     syncCatalogUrl(filters, searchTerm);
   }, [filters, searchTerm]);
+
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.debug('[LAZULE catalogType counts]', countCatalogProductsByType(catalogProducts));
+    }
+  }, [catalogProducts]);
 
   useEffect(() => {
     const normalizedQuery = searchTerm.trim();
@@ -132,6 +154,7 @@ export function ProductCatalog() {
 
   function resetFilters() {
     setFilters(DEFAULT_FILTERS);
+    setDraftSearchTerm('');
     setSearchTerm('');
     resetPagination();
   }
@@ -154,10 +177,13 @@ export function ProductCatalog() {
         </div>
 
         <div className="rounded-[2rem] border border-lazule-gold/20 bg-lazule-depth/80 p-4 shadow-mineral backdrop-blur sm:p-5">
-          <SearchBar value={searchTerm} onChange={handleSearchChange} />
-          <p className="mt-3 text-xs leading-5 text-slate-400">
-            Busque por nome, marca, categoria ou referência olfativa. Links como <span className="text-lazule-gold">/catalogo?busca=Invictus</span> continuam abrindo direto na pesquisa.
-          </p>
+          <SearchBar
+            value={draftSearchTerm}
+            onChange={handleSearchChange}
+            onSubmit={handleSearchSubmit}
+            onClear={clearSearch}
+            hasSearch={Boolean(draftSearchTerm.trim() || searchTerm.trim())}
+          />
         </div>
       </div>
 
@@ -223,9 +249,9 @@ export function ProductCatalog() {
           ) : (
             <div className="rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-6 text-center shadow-mineral sm:p-10">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-lazule-gold sm:tracking-[0.35em]">Curadoria LAZULE</p>
-              <h3 className="font-display text-3xl leading-tight text-lazule-mist">Não encontramos esse perfume no momento, mas nossa curadoria pode te ajudar pelo WhatsApp.</h3>
+              <h3 className="font-display text-3xl leading-tight text-lazule-mist">Não encontramos esse perfume no momento.</h3>
               <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-                Conte para nossa equipe a referência olfativa, ocasião ou faixa de investimento desejada e buscamos uma alternativa à altura.
+                Fale com a curadoria LAZULE pelo WhatsApp que ajudamos você a encontrar uma alternativa.
               </p>
               <a
                 className="lazule-premium-button lazule-cta-shimmer mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-center text-sm font-semibold text-lazule-night shadow-aureate sm:w-auto"
