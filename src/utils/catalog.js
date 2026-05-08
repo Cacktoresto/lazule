@@ -53,6 +53,8 @@ const PRICE_RANGE_MIN_RATIO = 0.7;
 const PRICE_RANGE_MAX_RATIO = 1.4;
 const MAX_PREMIUM_UPGRADES = 1;
 const MIN_GOOD_RECOMMENDATION_SCORE = 140;
+const DIVERSITY_MIN_ADJUSTED_SCORE = 120;
+const DIVERSITY_RELAXED_MIN_ADJUSTED_SCORE = 80;
 const PRIORITY_CATEGORIES = new Set(['arabe', 'nicho']);
 const STRICT_GENDERS = new Set(['masculino', 'feminino']);
 const GENERIC_NAME_TOKENS = new Set([
@@ -65,13 +67,20 @@ const GENERIC_NAME_TOKENS = new Set([
   'extrait',
   'for',
   'intense',
+  'limited',
   'kit',
+  'edition',
+  'extreme',
+  'man',
+  'men',
   'ml',
   'of',
   'parfum',
   'perfume',
   'pour',
   'spray',
+  'woman',
+  'women',
   'the',
 ]);
 
@@ -90,6 +99,14 @@ const SCORE_WEIGHTS = {
   incompatibleCategoryPenalty: 210,
   distantPricePenalty: 150,
   weakRelationshipPenalty: 220,
+};
+
+const DIVERSITY_PENALTIES = {
+  sameBrand: 85,
+  sameStrongPrefix: 140,
+  sameOlfactoryReference: 145,
+  similarOlfactoryReference: 90,
+  highNameTokenOverlap: 115,
 };
 
 function getProductPrice(product) {
@@ -223,6 +240,111 @@ function getMeaningfulTokens(text) {
     .filter((token) => token.length > 2 && !/^\d+$/.test(token) && !GENERIC_NAME_TOKENS.has(token));
 }
 
+function getProductDisplayName(product) {
+  return String(product.name ?? '').split('|').pop() ?? '';
+}
+
+function getBrandTokens(product) {
+  return new Set(getMeaningfulTokens(product.brand ?? product.normalizedBrand ?? ''));
+}
+
+function getPrimaryNameTokens(product) {
+  const brandTokens = getBrandTokens(product);
+
+  return getMeaningfulTokens(getProductDisplayName(product)).filter((token) => !brandTokens.has(token));
+}
+
+function getNameBaseKey(product) {
+  const tokens = getPrimaryNameTokens(product);
+
+  if (tokens.length === 0) {
+    return getNormalizedName(product);
+  }
+
+  return tokens.slice(0, Math.min(3, tokens.length)).join(' ');
+}
+
+function getStrongNamePrefix(product) {
+  const tokens = getPrimaryNameTokens(product);
+
+  if (tokens.length < 2) {
+    return tokens[0] ?? '';
+  }
+
+  return tokens.slice(0, 2).join(' ');
+}
+
+function getProductLineKey(product) {
+  const baseKey = getNameBaseKey(product);
+  const brandKey = product.normalizedBrand ?? normalizeSearchText(product.brand);
+
+  return baseKey ? `${brandKey}::${baseKey}` : '';
+}
+
+function getTokenOverlapRatio(firstProduct, secondProduct) {
+  const firstTokens = new Set(getPrimaryNameTokens(firstProduct));
+  const secondTokens = new Set(getPrimaryNameTokens(secondProduct));
+
+  if (firstTokens.size === 0 || secondTokens.size === 0) {
+    return 0;
+  }
+
+  const commonTokenCount = [...firstTokens].filter((token) => secondTokens.has(token)).length;
+
+  return commonTokenCount / Math.min(firstTokens.size, secondTokens.size);
+}
+
+function getOlfactoryReferenceDiversityPenalty(firstProduct, secondProduct) {
+  const firstReference = firstProduct.normalizedOlfactoryReference;
+  const secondReference = secondProduct.normalizedOlfactoryReference;
+
+  if (!firstReference || !secondReference) {
+    return 0;
+  }
+
+  if (firstReference === secondReference) {
+    return DIVERSITY_PENALTIES.sameOlfactoryReference;
+  }
+
+  const firstTokens = new Set(getMeaningfulTokens(firstReference));
+  const secondTokens = new Set(getMeaningfulTokens(secondReference));
+  const commonTokenCount = [...firstTokens].filter((token) => secondTokens.has(token)).length;
+
+  return commonTokenCount > 0 || firstReference.includes(secondReference) || secondReference.includes(firstReference)
+    ? DIVERSITY_PENALTIES.similarOlfactoryReference
+    : 0;
+}
+
+function getDiversityPenalty(candidate, selectedProducts) {
+  return selectedProducts.reduce((penalty, selectedProduct) => {
+    let itemPenalty = 0;
+    const candidatePrefix = getStrongNamePrefix(candidate);
+    const selectedPrefix = getStrongNamePrefix(selectedProduct);
+
+    if (candidate.normalizedBrand && candidate.normalizedBrand === selectedProduct.normalizedBrand) {
+      itemPenalty += DIVERSITY_PENALTIES.sameBrand;
+    }
+
+    if (candidatePrefix && candidatePrefix === selectedPrefix) {
+      itemPenalty += DIVERSITY_PENALTIES.sameStrongPrefix;
+    }
+
+    if (getTokenOverlapRatio(candidate, selectedProduct) >= 0.75) {
+      itemPenalty += DIVERSITY_PENALTIES.highNameTokenOverlap;
+    }
+
+    itemPenalty += getOlfactoryReferenceDiversityPenalty(candidate, selectedProduct);
+
+    return penalty + itemPenalty;
+  }, 0);
+}
+
+function isSameExactLine(candidate, selectedLineKeys) {
+  const lineKey = getProductLineKey(candidate);
+
+  return Boolean(lineKey && selectedLineKeys.has(lineKey));
+}
+
 function countCommonNameTokens(currentProduct, candidate) {
   const currentTokens = new Set(getMeaningfulTokens(currentProduct.name));
   const candidateTokens = new Set(getMeaningfulTokens(candidate.name));
@@ -329,7 +451,10 @@ function getRecommendationScore(currentProduct, candidate) {
 }
 
 function sortRecommendationItems(a, b) {
-  return b.score - a.score || Number(b.product.featured) - Number(a.product.featured) || a.product.name.localeCompare(b.product.name, 'pt-BR');
+  const scoreA = a.adjustedScore ?? a.score;
+  const scoreB = b.adjustedScore ?? b.score;
+
+  return scoreB - scoreA || b.score - a.score || Number(b.product.featured) - Number(a.product.featured) || a.product.name.localeCompare(b.product.name, 'pt-BR');
 }
 
 function createFallbackItems(scoredItems, currentProduct, shouldAvoidOppositeGender) {
@@ -350,34 +475,76 @@ function createFallbackItems(scoredItems, currentProduct, shouldAvoidOppositeGen
   });
 }
 
-function addRecommendationProducts(recommendations, candidates, currentProduct, targetCount) {
-  const selectedKeys = createIdentityKeySet([currentProduct, ...recommendations]);
-  let premiumUpgradeCount = recommendations.filter((product) => isPremiumUpgrade(currentProduct, product)).length;
+function createRecommendationSelectionState(currentProduct, recommendations = []) {
+  return {
+    selectedKeys: createIdentityKeySet([currentProduct, ...recommendations]),
+    selectedLineKeys: new Set(recommendations.map(getProductLineKey).filter(Boolean)),
+    premiumUpgradeCount: recommendations.filter((product) => isPremiumUpgrade(currentProduct, product)).length,
+  };
+}
 
-  candidates.some((item) => {
+function canSelectRecommendation(product, currentProduct, state) {
+  if (identityKeysOverlap(product, state.selectedKeys) || isSameExactLine(product, state.selectedLineKeys)) {
+    return false;
+  }
+
+  return !(isPremiumUpgrade(currentProduct, product) && state.premiumUpgradeCount >= MAX_PREMIUM_UPGRADES);
+}
+
+function selectMostDiverseRecommendation(candidates, recommendations, currentProduct, state, minimumAdjustedScore) {
+  let bestItem = null;
+
+  candidates.forEach((item) => {
     const product = item.product ?? item;
 
-    if (recommendations.length >= targetCount) {
-      return true;
+    if (!canSelectRecommendation(product, currentProduct, state)) {
+      return;
     }
 
-    if (identityKeysOverlap(product, selectedKeys)) {
-      return false;
+    const diversityPenalty = getDiversityPenalty(product, recommendations);
+    const adjustedScore = item.score - diversityPenalty;
+
+    if (adjustedScore < minimumAdjustedScore) {
+      return;
     }
 
-    if (isPremiumUpgrade(currentProduct, product)) {
-      if (premiumUpgradeCount >= MAX_PREMIUM_UPGRADES) {
-        return false;
-      }
+    const selectableItem = { ...item, diversityPenalty, adjustedScore };
 
-      premiumUpgradeCount += 1;
+    if (!bestItem || sortRecommendationItems(selectableItem, bestItem) < 0) {
+      bestItem = selectableItem;
     }
-
-    recommendations.push(product);
-    addIdentityKeys(product, selectedKeys);
-
-    return false;
   });
+
+  return bestItem;
+}
+
+function registerSelectedRecommendation(product, recommendations, currentProduct, state) {
+  recommendations.push(product);
+  addIdentityKeys(product, state.selectedKeys);
+
+  const lineKey = getProductLineKey(product);
+
+  if (lineKey) {
+    state.selectedLineKeys.add(lineKey);
+  }
+
+  if (isPremiumUpgrade(currentProduct, product)) {
+    state.premiumUpgradeCount += 1;
+  }
+}
+
+function addRecommendationProducts(recommendations, candidates, currentProduct, targetCount, minimumAdjustedScore = Number.NEGATIVE_INFINITY) {
+  const state = createRecommendationSelectionState(currentProduct, recommendations);
+
+  while (recommendations.length < targetCount) {
+    const nextItem = selectMostDiverseRecommendation(candidates, recommendations, currentProduct, state, minimumAdjustedScore);
+
+    if (!nextItem) {
+      break;
+    }
+
+    registerSelectedRecommendation(nextItem.product ?? nextItem, recommendations, currentProduct, state);
+  }
 }
 
 export function getProductRecommendations(currentProduct, allProducts = getCatalogProducts(), { min = 4, max = 8 } = {}) {
@@ -412,10 +579,14 @@ export function getProductRecommendations(currentProduct, allProducts = getCatal
   const fallbackItems = createFallbackItems(scoredItems, currentProduct, shouldAvoidOppositeGender);
   const recommendations = [];
 
-  addRecommendationProducts(recommendations, goodItems, currentProduct, targetCount);
+  addRecommendationProducts(recommendations, goodItems, currentProduct, targetCount, DIVERSITY_MIN_ADJUSTED_SCORE);
 
   if (recommendations.length < min) {
-    addRecommendationProducts(recommendations, fallbackItems, currentProduct, targetCount);
+    addRecommendationProducts(recommendations, goodItems, currentProduct, targetCount, DIVERSITY_RELAXED_MIN_ADJUSTED_SCORE);
+  }
+
+  if (recommendations.length < min) {
+    addRecommendationProducts(recommendations, fallbackItems, currentProduct, targetCount, DIVERSITY_RELAXED_MIN_ADJUSTED_SCORE);
   }
 
   return recommendations.slice(0, max);
