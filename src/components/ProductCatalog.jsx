@@ -103,25 +103,29 @@ export function ProductCatalog() {
     setVisibleCount(PRODUCTS_PER_PAGE);
   }
 
-  function applySearch(nextSearchTerm = draftSearchTerm) {
-    setSearchTerm(nextSearchTerm.trim());
-    resetPagination();
+  function handleApplySearch(term) {
+    const normalizedTerm = term.trim();
+
+    setDraftSearchTerm(normalizedTerm);
+    setSearchTerm(normalizedTerm);
+    setVisibleCount(PRODUCTS_PER_PAGE);
+    syncCatalogUrl(filters, normalizedTerm);
   }
 
   function handleSearchChange(value) {
     setDraftSearchTerm(value);
   }
 
-  function handleSearchSubmit(event) {
-    event.preventDefault();
-    applySearch();
-  }
-
   function clearSearch() {
     setDraftSearchTerm('');
     setSearchTerm('');
-    resetPagination();
+    setVisibleCount(PRODUCTS_PER_PAGE);
+    syncCatalogUrl(filters, '');
   }
+
+  useEffect(() => {
+    syncCatalogUrl(filters, searchTerm);
+  }, [filters, searchTerm]);
 
   useEffect(() => {
     syncCatalogUrl(filters, searchTerm);
@@ -174,7 +178,7 @@ export function ProductCatalog() {
           <SearchBar
             value={draftSearchTerm}
             onChange={handleSearchChange}
-            onSubmit={handleSearchSubmit}
+            onSubmit={handleApplySearch}
             onClear={clearSearch}
             hasSearch={Boolean(draftSearchTerm.trim() || searchTerm.trim())}
           />

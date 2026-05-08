@@ -1,6 +1,11 @@
 export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = false }) {
+  function handleSubmit(event) {
+    event.preventDefault();
+    onSubmit(value.trim());
+  }
+
   return (
-    <form className="w-full" role="search" aria-label="Pesquisar fragrâncias no catálogo" onSubmit={onSubmit}>
+    <form className="w-full" role="search" aria-label="Pesquisar fragrâncias no catálogo" onSubmit={handleSubmit}>
       <label className="block w-full" htmlFor="catalog-search">
         <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold sm:tracking-[0.24em]">
           Busca
