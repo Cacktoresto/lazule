@@ -7,6 +7,7 @@ import { Home } from './components/Home';
 import { BrandPage } from './components/BrandPage';
 import { ProductCatalog } from './components/ProductCatalog';
 import { ProductDetails } from './components/ProductDetails';
+import { ProductNotFound } from './components/ProductNotFound';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { getBrandSlugFromPath, getProductSlugFromPath } from './utils/productRouting';
 
@@ -52,6 +53,7 @@ function App() {
   const isBrandRoute = route.pathname.startsWith('/marca/');
   const isCatalogRoute = route.pathname === '/catalogo';
   const isFaqRoute = route.pathname === '/faq';
+  const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -92,6 +94,7 @@ function App() {
         routePath === '/' ||
         routePath === '/catalogo' ||
         routePath === '/faq' ||
+        routePath === '/produto-nao-encontrado' ||
         routePath.startsWith('/produto/') ||
         routePath.startsWith('/marca/');
 
@@ -128,6 +131,8 @@ function App() {
             <ProductCatalog key={route.search} />
           ) : isFaqRoute ? (
             <FAQ />
+          ) : isProductNotFoundRoute ? (
+            <ProductNotFound key={route.search} />
           ) : (
             <Home />
           )}

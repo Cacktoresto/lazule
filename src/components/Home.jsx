@@ -1,3 +1,4 @@
+import { ProductNavigationSearch } from './ProductNavigationSearch';
 import { createWhatsAppLink } from '../utils/whatsapp';
 
 const catalogWhatsAppLink = createWhatsAppLink('Olá! Quero uma recomendação premium da LAZULE FRAGRANCES.');
@@ -52,12 +53,15 @@ export function Home() {
             <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-200">
               Explore perfumes importados, árabes e nicho em uma experiência clara, sofisticada e acompanhada por atendimento humano antes da compra.
             </p>
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-9 max-w-2xl">
+              <ProductNavigationSearch />
+            </div>
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row">
               <a
-                className="lazule-premium-button lazule-cta-shimmer inline-flex items-center justify-center rounded-full bg-lazule-gold px-8 py-4 font-semibold text-lazule-night shadow-aureate focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
+                className="lazule-premium-button inline-flex items-center justify-center rounded-full border border-lazule-gold/35 bg-white/5 px-8 py-4 font-semibold text-lazule-mist backdrop-blur hover:border-lazule-gold/70 hover:text-lazule-gold focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
                 href="/catalogo"
               >
-                Ver catálogo
+                Ver catálogo completo
               </a>
               <a
                 className="lazule-premium-button inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-8 py-4 font-semibold text-lazule-mist backdrop-blur hover:border-lazule-gold/60 hover:text-lazule-gold focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night"
