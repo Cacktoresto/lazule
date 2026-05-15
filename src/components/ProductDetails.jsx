@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getCatalogProducts, getProductRecommendations } from '../utils/catalog';
 import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
@@ -94,10 +94,19 @@ function preloadProductImage(image) {
     return undefined;
   }
 
+  const existingPreload = Array.from(document.querySelectorAll('link[data-lazule-product-preload]')).some(
+    (preloadLink) => preloadLink.getAttribute('data-lazule-product-preload') === image,
+  );
+
+  if (existingPreload) {
+    return undefined;
+  }
+
   const link = document.createElement('link');
   link.rel = 'preload';
   link.as = 'image';
   link.href = image;
+  link.fetchPriority = 'high';
   link.setAttribute('data-lazule-product-preload', image);
   document.head.appendChild(link);
 
@@ -108,57 +117,81 @@ function preloadProductImage(image) {
 
 function DetailImage({ product }) {
   const gallery = useMemo(() => createEditorialGallery(product), [product]);
+  const galleryRef = useRef(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const [loadedImages, setLoadedImages] = useState(() => new Set());
 
+  function updateActiveSlide(nextSlide) {
+    setActiveSlide((currentSlide) => (currentSlide === nextSlide ? currentSlide : nextSlide));
+  }
+
   function handleScroll(event) {
     const nextSlide = Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth);
-    setActiveSlide(Math.min(Math.max(nextSlide, 0), gallery.length - 1));
+    updateActiveSlide(Math.min(Math.max(nextSlide, 0), gallery.length - 1));
+  }
+
+  function handleIndicatorClick(index) {
+    const galleryNode = galleryRef.current;
+
+    if (!galleryNode) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    galleryNode.scrollTo({ left: galleryNode.clientWidth * index, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    updateActiveSlide(index);
+  }
+
+  function handleImageLoad(slideId) {
+    setLoadedImages((currentImages) => {
+      if (currentImages.has(slideId)) {
+        return currentImages;
+      }
+
+      return new Set(currentImages).add(slideId);
+    });
   }
 
   return (
     <div className="lazule-product-hero relative overflow-hidden rounded-b-[2.35rem] border-b border-lazule-gold/20 bg-lazule-night shadow-mineral lg:rounded-[3rem] lg:border">
       <div
+        ref={galleryRef}
         className="lazule-product-gallery flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
         onScroll={handleScroll}
-        aria-label="Galeria do produto"
+        aria-label={`Galeria editorial do produto ${product.name}`}
+        tabIndex={0}
       >
         {gallery.map((slide, index) => {
           const isLoaded = loadedImages.has(slide.id);
+          const scale = index === 1 ? 1.055 : index === 2 ? 1.095 : 1;
 
           return (
             <figure
               className={`lazule-product-hero-frame relative w-full shrink-0 snap-center overflow-hidden bg-gradient-to-br ${slide.tone}`}
               key={slide.id}
+              aria-label={`${index + 1} de ${gallery.length}: ${slide.label}`}
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgba(248,250,252,0.13),transparent_24%),radial-gradient(circle_at_18%_68%,rgba(37,99,235,0.22),transparent_32%),radial-gradient(circle_at_82%_16%,rgba(200,162,77,0.16),transparent_28%)]" />
-              <div className="absolute inset-x-6 top-20 h-[58%] rounded-full bg-white/[0.045] blur-3xl" aria-hidden="true" />
+              <div className="lazule-product-atmosphere absolute inset-0" aria-hidden="true" />
+              <div className="lazule-product-stage absolute left-1/2 top-[52%]" aria-hidden="true" />
               {product?.image ? (
                 <>
-                  {!isLoaded && (
-                    <div className="lazule-product-skeleton absolute inset-8 top-24 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045]" aria-hidden="true">
-                      <div className="absolute inset-x-10 top-12 h-3/5 rounded-[1.5rem] bg-white/[0.07]" />
-                      <div className="absolute inset-y-0 -left-2/3 w-2/3 animate-lazule-shimmer bg-gradient-to-r from-transparent via-white/16 to-transparent" />
-                    </div>
-                  )}
+                  {!isLoaded && <div className="lazule-product-skeleton absolute" aria-hidden="true" />}
                   <img
-                    className={`lazule-product-bottle absolute left-1/2 top-[52%] h-[72%] w-[86%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_34px_70px_rgba(2,6,23,0.46)] transition duration-700 ${
-                      isLoaded ? 'opacity-95' : 'opacity-0'
-                    } `}
+                    className={`lazule-product-bottle lazule-product-bottle--${slide.id} absolute left-1/2 object-contain transition duration-700 ${isLoaded ? 'opacity-95 blur-0' : 'opacity-0 blur-sm'}`}
                     src={product.image}
                     alt={slide.alt}
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                     fetchPriority={index === 0 ? 'high' : 'auto'}
-                    style={{ '--bottle-scale': index === 1 ? 1.08 : index === 2 ? 1.15 : 1 }}
-                    onLoad={() => setLoadedImages((currentImages) => new Set(currentImages).add(slide.id))}
-                    onError={() => setLoadedImages((currentImages) => new Set(currentImages).add(slide.id))}
+                    style={{ '--bottle-scale': scale }}
+                    onLoad={() => handleImageLoad(slide.id)}
+                    onError={() => handleImageLoad(slide.id)}
                   />
                 </>
               ) : (
-                <ProductImageFallback />
+                <ProductImageFallback label="Imagem em atualização" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/10 to-transparent" aria-hidden="true" />
               <figcaption className="absolute bottom-7 left-6 text-[0.62rem] uppercase tracking-[0.34em] text-lazule-gold/80 sm:left-8">
                 {slide.label}
               </figcaption>
@@ -166,14 +199,20 @@ function DetailImage({ product }) {
           );
         })}
       </div>
-      <div className="absolute bottom-7 right-6 flex items-center gap-1.5 sm:right-8" aria-hidden="true">
-        {gallery.map((slide, index) => (
-          <span
-            className={`h-1 rounded-full transition-all duration-300 ${activeSlide === index ? 'w-6 bg-lazule-gold' : 'w-1.5 bg-white/35'}`}
-            key={slide.id}
-          />
-        ))}
-      </div>
+      {gallery.length > 1 && (
+        <div className="absolute bottom-7 right-6 flex items-center gap-1.5 sm:right-8" role="group" aria-label="Selecionar imagem da galeria">
+          {gallery.map((slide, index) => (
+            <button
+              className={`lazule-product-dot h-1 rounded-full transition-all duration-300 ${activeSlide === index ? 'w-6 bg-lazule-gold' : 'w-1.5 bg-white/35'}`}
+              key={slide.id}
+              type="button"
+              aria-label={`Ver ${slide.label}`}
+              aria-current={activeSlide === index ? 'true' : undefined}
+              onClick={() => handleIndicatorClick(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
