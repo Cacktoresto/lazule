@@ -5,6 +5,15 @@ import { formatBRL } from '../src/utils/currency.js';
 import { createProductPath, createProductSlug, getProductSlugFromPath, normalizeSpaPath } from '../src/utils/productRouting.js';
 import { createProductWhatsAppLink, createProductWhatsAppMessage, createWhatsAppLink } from '../src/utils/whatsapp.js';
 
+import {
+  createProductAnalyticsPayload,
+  createSearchAnalyticsPayload,
+  normalizeAnalyticsPayload,
+  resetAnalyticsForTests,
+  shouldTrackEvent,
+  trackProductView,
+} from '../src/utils/analytics.js';
+
 test('formatBRL formats valid prices and falls back safely', () => {
   assert.equal(formatBRL(320), 'R$ 320,00');
   assert.equal(formatBRL(undefined), 'Consulte');
@@ -41,4 +50,42 @@ test('WhatsApp links encode messages exactly once and never break on missing pro
   const decodedMessage = decodeURIComponent(new URL(productLink).searchParams.get('text'));
   assert.match(decodedMessage, /fragrância da curadoria LAZULE/);
   assert.match(decodedMessage, /Preço: sob consulta/);
+});
+
+
+test('analytics normalizes product payloads and handles incomplete products safely', () => {
+  const payload = createProductAnalyticsPayload({ id: 'abc-123', name: 'Âmbar Oud', brand: 'LAZULE', salePrice: '420', catalogType: 'Árabe' });
+
+  assert.equal(payload.product_id, 'abc-123');
+  assert.equal(payload.product_name, 'Âmbar Oud');
+  assert.equal(payload.brand, 'LAZULE');
+  assert.equal(payload.price, 420);
+  assert.equal(payload.category, 'Árabe');
+  assert.equal(payload.page_path, '/');
+
+  const incompletePayload = createProductAnalyticsPayload({});
+  assert.equal(incompletePayload.page_path, '/');
+  assert.ok(!Object.hasOwn(incompletePayload, 'product_name'));
+});
+
+test('analytics creates search payloads with consistent fields', () => {
+  const payload = createSearchAnalyticsPayload({ searchTerm: 'sauvage', resultCount: 3, sourcePage: 'catalog' });
+
+  assert.equal(payload.search_term, 'sauvage');
+  assert.equal(payload.result_count, 3);
+  assert.equal(payload.source_page, 'catalog');
+});
+
+test('analytics deduplicates events and falls back safely without configured pixels', () => {
+  resetAnalyticsForTests();
+  const payload = normalizeAnalyticsPayload('search', { searchTerm: 'asad', resultCount: 1 });
+
+  assert.equal(shouldTrackEvent('search', payload, { dedupeKey: 'test-search', dedupeMs: 5000 }), true);
+  assert.equal(shouldTrackEvent('search', payload, { dedupeKey: 'test-search', dedupeMs: 5000 }), false);
+
+  resetAnalyticsForTests();
+  const event = trackProductView({ name: 'Produto incompleto' });
+  assert.equal(event.name, 'product_view');
+  assert.equal(event.gaEventName, 'view_item');
+  assert.equal(event.metaStandardName, 'ViewContent');
 });

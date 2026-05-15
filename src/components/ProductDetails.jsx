@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getCatalogProducts, getProductRecommendations } from '../utils/catalog';
-import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
+import { trackBrandClick, trackEvent, trackProductView, trackRecommendationClick, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug, findProductBySlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
@@ -127,7 +127,9 @@ function DetailImage({ product }) {
 
   function handleScroll(event) {
     const nextSlide = Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth);
-    updateActiveSlide(Math.min(Math.max(nextSlide, 0), gallery.length - 1));
+    const boundedSlide = Math.min(Math.max(nextSlide, 0), gallery.length - 1);
+    updateActiveSlide(boundedSlide);
+    trackEvent('image_gallery_interaction', { product_id: product.id, product_name: product.name, slide_index: boundedSlide, interaction_type: 'scroll' }, { dedupeKey: `gallery|${product.id}|${boundedSlide}`, dedupeMs: 2000 });
   }
 
   function handleIndicatorClick(index) {
@@ -140,6 +142,7 @@ function DetailImage({ product }) {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     galleryNode.scrollTo({ left: galleryNode.clientWidth * index, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
     updateActiveSlide(index);
+    trackEvent('image_gallery_interaction', { product_id: product.id, product_name: product.name, slide_index: index, interaction_type: 'indicator_click' });
   }
 
   function handleImageLoad(slideId) {
@@ -237,9 +240,15 @@ function ProductNotFound() {
   );
 }
 
-function ProductAccordion({ title, children, defaultOpen = false }) {
+function ProductAccordion({ title, children, defaultOpen = false, product }) {
+  function handleToggle(event) {
+    if (event.currentTarget.open) {
+      trackEvent('accordion_open', { product_id: product?.id, product_name: product?.name, accordion_title: title, source_page: 'product' });
+    }
+  }
+
   return (
-    <details className="lazule-product-accordion group border-t border-lazule-night/10 py-5 first:border-t-0 lg:border-white/10" open={defaultOpen}>
+    <details className="lazule-product-accordion group border-t border-lazule-night/10 py-5 first:border-t-0 lg:border-white/10" open={defaultOpen} onToggle={handleToggle}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night transition hover:text-lazule-gold lg:text-lazule-mist">
         {title}
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-lazule-night/10 bg-lazule-night/[0.04] text-lazule-gold transition group-open:rotate-45 lg:border-white/10 lg:bg-white/[0.04]">
@@ -338,7 +347,7 @@ function RecommendationCard({ product }) {
     <a
       className="lazule-product-card group flex min-h-[19rem] w-[78vw] max-w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition md:w-[20rem]"
       href={createProductPath(product)}
-      onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: 'recommendations', action: 'recommendation' })}
+      onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: 'recommendations' })}
     >
       <div className="relative min-h-44 overflow-hidden bg-lazule-depth">
         {product.image ? (
@@ -410,7 +419,10 @@ function StickyWhatsAppBar({ product, whatsAppLink }) {
           aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
           target="_blank"
           rel="noreferrer"
-          onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'sticky_product_whatsapp' })}
+          onClick={() => {
+            trackEvent('sticky_cta_click', { product_id: product.id, product_name: product.name, source_page: 'product', cta_location: 'sticky_cta' });
+            trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'sticky_cta' });
+          }}
         >
           Comprar via WhatsApp
         </a>
@@ -431,7 +443,7 @@ export function ProductDetails({ slug }) {
     }
 
     applyProductSeo(product);
-    trackEvent('product_view', { productId: product.id, productName: product.name, brandName: product.brand });
+    trackProductView(product, { source_page: 'product' });
 
     return preloadProductImage(product.image);
   }, [product]);
@@ -491,7 +503,7 @@ export function ProductDetails({ slug }) {
         <DetailImage product={product} />
 
         <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
-          <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)}>
+          <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
             {product.brand}
           </a>
           <h1 className="mt-4 font-display text-4xl leading-[0.98] text-lazule-night sm:text-5xl lg:text-6xl lg:text-lazule-mist">
@@ -518,14 +530,14 @@ export function ProductDetails({ slug }) {
             aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'product_details' })}
+            onClick={() => trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'product_details' })}
           >
             Comprar via WhatsApp
           </a>
 
           <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
             {accordionItems.map((item) => (
-              <ProductAccordion key={item.title} title={item.title} defaultOpen={item.defaultOpen}>
+              <ProductAccordion key={item.title} title={item.title} defaultOpen={item.defaultOpen} product={product}>
                 <p>{item.content}</p>
               </ProductAccordion>
             ))}

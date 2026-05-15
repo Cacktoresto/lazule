@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
+import { trackEvent, trackWhatsappClick } from '../utils/analytics';
 import { applyFaqSeo } from '../utils/seo';
 
 const steps = [
@@ -32,6 +33,7 @@ const steps = [
 export function FAQ() {
   useEffect(() => {
     applyFaqSeo();
+    trackEvent('faq_view', { source_page: 'faq' }, { dedupeKey: 'faq_view', dedupeMs: 1500 });
   }, []);
 
   return (
@@ -57,6 +59,7 @@ export function FAQ() {
               href={createWhatsAppLink('Olá! Quero entender como comprar na LAZULE FRAGRANCES.')}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackWhatsappClick({ source_page: 'faq', cta_location: 'faq_hero' })}
             >
               Falar no WhatsApp
             </a>
@@ -66,7 +69,7 @@ export function FAQ() {
 
       <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {steps.map((step, index) => (
-          <article key={step.title} className="lazule-product-card rounded-[2rem] border border-white/10 bg-white/[0.055] p-6 shadow-mineral backdrop-blur">
+          <article key={step.title} className="lazule-product-card rounded-[2rem] border border-white/10 bg-white/[0.055] p-6 shadow-mineral backdrop-blur" onClick={() => trackEvent('faq_item_open', { faq_item: step.title, source_page: 'faq' })}>
             <span className="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 text-sm font-semibold text-lazule-gold">
               {String(index + 1).padStart(2, '0')}
             </span>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAvailabilityStatus } from '../utils/availability';
-import { trackEvent } from '../utils/analytics';
+import { trackProductSelect } from '../utils/analytics';
 import { createProductPath } from '../utils/productRouting';
 
 export function ProductImageFallback({ label = 'Imagem em atualização' } = {}) {
@@ -46,7 +46,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
-        onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: analyticsSection, action: 'card' })}
+        onClick={() => trackProductSelect(product, { source_page: analyticsSection, section: analyticsSection, interaction_type: 'card' })}
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue">
           {product.image ? (

@@ -4,6 +4,7 @@ import { ProductCard } from './ProductCard';
 import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
 import { createBrandPath } from '../utils/productRouting';
 import { applyHomeSeo } from '../utils/seo';
+import { trackBrandClick, trackCategoryClick, trackEvent, trackProductSelect } from '../utils/analytics';
 
 const categoryTiles = [
   {
@@ -152,6 +153,7 @@ export function Home() {
             <a
               className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-lazule-gold px-7 text-sm font-semibold uppercase tracking-[0.18em] text-lazule-night shadow-aureate"
               href="/catalogo"
+              onClick={() => trackEvent('hero_cta_click', { source_page: 'home', cta_location: 'hero_primary' })}
             >
               <span className="relative z-10">Explorar agora</span>
             </a>
@@ -161,6 +163,7 @@ export function Home() {
             className="lazule-hero-product group relative mx-auto block aspect-[4/5] w-full max-w-[24rem] overflow-hidden rounded-[2.4rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur md:mr-0"
             href={heroProduct ? `/catalogo?busca=${encodeURIComponent(heroProduct.name)}` : '/catalogo'}
             aria-label="Abrir destaque LAZULE"
+            onClick={() => heroProduct && trackProductSelect(heroProduct, { source_page: 'home_hero_product', section: 'home_hero_product', interaction_type: 'hero_product' })}
           >
             {heroProduct?.image ? (
               <img
@@ -195,6 +198,7 @@ export function Home() {
               className={`lazule-touch-card lazule-reveal-item relative flex h-40 min-w-[9.8rem] snap-start scroll-ml-4 flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br ${category.gradient} p-5 shadow-mineral transition hover:border-lazule-gold/45 focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night`}
               href={category.href}
               style={{ '--item-delay': `${index * 55}ms` }}
+              onClick={() => trackCategoryClick(category.title, { source_page: 'home_category_tiles', category_label: category.label })}
             >
               <span className="h-1 w-10 rounded-full bg-lazule-gold/90" />
               <span>
@@ -215,6 +219,7 @@ export function Home() {
               className="lazule-brand-pill lazule-reveal-item shrink-0 snap-start rounded-full border border-white/10 bg-white/[0.055] px-5 py-3 text-sm font-semibold text-slate-200 backdrop-blur transition hover:border-lazule-gold/55 hover:text-lazule-gold focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
               href={createBrandPath(brand)}
               style={{ '--item-delay': `${Math.min(index, 7) * 42}ms` }}
+              onClick={() => trackBrandClick(brand, { source_page: 'home_brand_rail' })}
             >
               {brand}
             </a>

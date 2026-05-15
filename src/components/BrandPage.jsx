@@ -34,7 +34,7 @@ export function BrandPage({ slug }) {
     }
 
     applyBrandSeo(brand);
-    trackEvent('brand_view', { brandSlug: brand.slug, brandName: brand.name, productCount: brand.products.length });
+    trackEvent('brand_view', { brand_slug: brand.slug, brand_name: brand.name, product_count: brand.products.length, source_page: 'brand' }, { dedupeKey: `brand_view|${brand.slug}`, dedupeMs: 1800 });
   }, [brand]);
 
   if (!brand) {

@@ -3,7 +3,7 @@ import { getCatalogProducts } from '../utils/catalog';
 import { navigateSpa } from '../utils/navigation';
 import { createProductPath, createProductSlug } from '../utils/productRouting';
 import { findBestProductMatch } from '../utils/search';
-import { trackEvent } from '../utils/analytics';
+import { trackEvent, trackSearch } from '../utils/analytics';
 
 function createNotFoundPath(term) {
   return `/produto-nao-encontrado?q=${encodeURIComponent(term)}`;
@@ -32,11 +32,14 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
     const matchedProduct = match?.product ?? null;
     const destination = match?.destination ?? 'product_not_found';
 
-    trackEvent('search_navigation', {
-      query: normalizedTerm,
+    trackEvent('search_submit', { searchTerm: normalizedTerm, sourcePage: compact ? 'home_sticky_search' : 'product_navigation_search' });
+    trackSearch({
+      searchTerm: normalizedTerm,
+      resultCount: matchedProduct ? 1 : 0,
+      sourcePage: compact ? 'home_sticky_search' : 'product_navigation_search',
       destination,
       score: match?.score,
-      productId: matchedProduct?.id,
+      product_id: matchedProduct?.id,
     });
 
     if (!matchedProduct) {
@@ -77,6 +80,7 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
+              onFocus={() => trackEvent('search_focus', { source_page: compact ? 'home_sticky_search' : 'product_navigation_search' })}
               placeholder={compact ? 'Buscar perfume' : 'Digite Asad, Sauvage, Hacivat...'}
               autoComplete="off"
               inputMode="search"

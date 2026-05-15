@@ -1,5 +1,5 @@
 import { formatBRL } from '../utils/currency';
-import { trackEvent } from '../utils/analytics';
+import { trackBrandClick, trackProductSelect } from '../utils/analytics';
 import { createBrandPath, createProductPath } from '../utils/productRouting';
 
 function FeaturedProductCard({ product, section }) {
@@ -8,7 +8,7 @@ function FeaturedProductCard({ product, section }) {
       <a
         className="group block"
         href={createProductPath(product)}
-        onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section, action: 'highlight' })}
+        onClick={() => trackProductSelect(product, { source_page: section, section, interaction_type: 'highlight' })}
       >
         <div className="relative h-60 overflow-hidden bg-lazule-depth p-5">
           {product.image ? (
@@ -32,7 +32,7 @@ function FeaturedProductCard({ product, section }) {
       </a>
       <div className="p-5">
         <div className="flex items-end justify-between gap-4">
-          <a className="text-xs uppercase tracking-[0.24em] text-lazule-gold transition hover:text-[#dfbd68]" href={createBrandPath(product.brand)}>
+          <a className="text-xs uppercase tracking-[0.24em] text-lazule-gold transition hover:text-[#dfbd68]" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: section })}>
             {product.brand}
           </a>
           <strong className="text-xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>

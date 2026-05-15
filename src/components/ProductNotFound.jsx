@@ -40,7 +40,7 @@ export function ProductNotFound() {
             href={createWhatsAppLink(whatsappMessage)}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackWhatsAppClick({ section: 'product_not_found', query: requestedTerm })}
+            onClick={() => trackWhatsAppClick({ source_page: 'product_not_found', cta_location: 'not_found_whatsapp', search_term: requestedTerm })}
           >
             <span className="relative z-10">Consultar disponibilidade no WhatsApp</span>
           </a>
