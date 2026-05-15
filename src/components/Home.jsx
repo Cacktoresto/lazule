@@ -3,6 +3,7 @@ import { ProductNavigationSearch } from './ProductNavigationSearch';
 import { ProductCard } from './ProductCard';
 import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
 import { createBrandPath } from '../utils/productRouting';
+import { applyHomeSeo } from '../utils/seo';
 
 const categoryTiles = [
   {
@@ -119,6 +120,10 @@ function ProductRail({ eyebrow, title, products, actionHref }) {
 }
 
 export function Home() {
+  useEffect(() => {
+    applyHomeSeo();
+  }, []);
+
   const { collections, heroProduct, brands } = useMemo(() => {
     const products = getCatalogProducts();
     const featuredCollections = getFeaturedCollections(products);

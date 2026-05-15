@@ -1,5 +1,6 @@
 import { formatBRL } from './currency.js';
 import { createProductPath } from './productRouting.js';
+import { createCanonicalUrl } from './seo.js';
 
 const WHATSAPP_NUMBER = '5521975110562';
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -22,11 +23,7 @@ function getProductUrl(product, productUrl) {
     return cleanText(productUrl, DEFAULT_PRODUCT_URL);
   }
 
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    return new URL(createProductPath(product), window.location.origin).href;
-  }
-
-  return createProductPath(product);
+  return createCanonicalUrl(createProductPath(product));
 }
 
 export function createWhatsAppLink(message = DEFAULT_WHATSAPP_MESSAGE) {

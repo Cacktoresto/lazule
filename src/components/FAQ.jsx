@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
+import { applyFaqSeo } from '../utils/seo';
 
 const steps = [
   {
@@ -28,6 +30,10 @@ const steps = [
 ];
 
 export function FAQ() {
+  useEffect(() => {
+    applyFaqSeo();
+  }, []);
+
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-24">
       <div className="relative overflow-hidden rounded-[3rem] border border-lazule-gold/20 bg-lazule-depth p-7 shadow-mineral sm:p-10 lg:p-12">

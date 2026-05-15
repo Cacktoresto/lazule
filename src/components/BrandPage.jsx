@@ -2,18 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { getBrandBySlug, getCatalogProducts } from '../utils/catalog';
 import { trackEvent } from '../utils/analytics';
 import { ProductCard } from './ProductCard';
-
-function upsertMetaDescription(content) {
-  let metaDescription = document.querySelector('meta[name="description"]');
-
-  if (!metaDescription) {
-    metaDescription = document.createElement('meta');
-    metaDescription.setAttribute('name', 'description');
-    document.head.appendChild(metaDescription);
-  }
-
-  metaDescription.setAttribute('content', content);
-}
+import { applyBrandSeo } from '../utils/seo';
 
 function BrandNotFound() {
   return (
@@ -44,8 +33,7 @@ export function BrandPage({ slug }) {
       return;
     }
 
-    document.title = `${brand.name} | Marcas LAZULE FRAGRANCES`;
-    upsertMetaDescription(`Explore ${brand.products.length} fragrâncias da marca ${brand.name} disponíveis na curadoria LAZULE FRAGRANCES.`);
+    applyBrandSeo(brand);
     trackEvent('brand_view', { brandSlug: brand.slug, brandName: brand.name, productCount: brand.products.length });
   }, [brand]);
 
