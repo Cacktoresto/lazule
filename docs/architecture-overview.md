@@ -21,6 +21,8 @@
 - Produto normalizado: saída de `normalizeProduct`.
 - Analytics dashboard: agregadores puros em `analyticsDashboard.js`, com provider local substituível.
 
-## Próximo adapter esperado
+## Adapter Supabase experimental
 
-Um futuro `supabaseCatalogAdapter` deve retornar objetos compatíveis com `normalizeProduct` ou já normalizados com o mesmo shape público. A UI não deve importar cliente Supabase diretamente.
+O projeto agora possui um adapter experimental em `src/data/supabaseCatalogAdapter.js`, habilitado somente quando `VITE_LAZULE_CATALOG_SOURCE=supabase` ou `LAZULE_CATALOG_SOURCE=supabase`. A configuração aceita `SUPABASE_URL`/`SUPABASE_ANON_KEY` no Node (scripts e Vercel) e `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` no bundle do navegador.
+
+A UI continua usando `getAllProducts()` de forma síncrona: se o Supabase ainda não respondeu ou não estiver configurado, o repositório devolve o catálogo local seguro. Scripts de build/prebuild devem usar `getAllProductsAsync()` ou `getCatalogProductsAsync()` para aguardar a fonte selecionada antes de gerar artefatos. O repository mantém exports nomeados e default para evitar incompatibilidades entre consumidores antigos e novos.
