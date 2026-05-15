@@ -1,51 +1,19 @@
 import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAvailabilityStatus } from '../utils/availability';
-import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
-import { createBrandPath, createProductPath } from '../utils/productRouting';
-import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
-
-function normalizeComparisonText(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/\b(?:ref\.?\s*olfativa|referencia\s*olfativa|ref\.?|referencia)\b/g, ' ')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function shouldRenderDescription(description, olfactoryReference) {
-  const normalizedDescription = normalizeComparisonText(description);
-  const normalizedReference = normalizeComparisonText(olfactoryReference);
-
-  if (!normalizedDescription) {
-    return false;
-  }
-
-  if (!normalizedReference) {
-    return true;
-  }
-
-  return normalizedDescription !== normalizedReference;
-}
+import { trackEvent } from '../utils/analytics';
+import { createProductPath } from '../utils/productRouting';
 
 export function ProductImageFallback() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_28%_18%,rgba(200,162,77,0.22),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(37,99,235,0.34),transparent_28%),linear-gradient(135deg,#0F172A_0%,#1E3A8A_52%,#0F172A_100%)]">
       <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(115deg,transparent_0%,rgba(248,250,252,0.12)_46%,transparent_48%),radial-gradient(circle_at_50%_120%,rgba(200,162,77,0.2),transparent_34%)]" />
-      <div className="absolute -left-14 top-8 h-44 w-44 rounded-full border border-lazule-gold/20 bg-lazule-blue/20 blur-2xl" />
-      <div className="absolute bottom-5 right-5 h-28 w-28 rounded-full border border-lazule-gold/30" />
       <div className="absolute inset-6 rounded-[1.5rem] border border-lazule-gold/20" />
       <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-night/45 text-4xl font-semibold text-lazule-gold shadow-aureate backdrop-blur">
           L
         </div>
         <p className="text-xs font-semibold uppercase tracking-[0.45em] text-lazule-gold">LAZULE</p>
-        <p className="mt-3 max-w-[13rem] text-xs uppercase leading-5 tracking-[0.22em] text-slate-200">
-          Curadoria visual em atualização
-        </p>
       </div>
     </div>
   );
@@ -56,8 +24,6 @@ function ProductImageSkeleton() {
     <div className="absolute inset-0 overflow-hidden bg-lazule-night/75" aria-hidden="true">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(200,162,77,0.24),transparent_26%),radial-gradient(circle_at_75%_26%,rgba(37,99,235,0.22),transparent_32%)]" />
       <div className="absolute inset-x-6 top-8 h-48 rounded-[1.5rem] border border-white/10 bg-white/[0.06]" />
-      <div className="absolute bottom-20 left-6 h-3 w-28 rounded-full bg-white/10" />
-      <div className="absolute bottom-12 left-6 h-7 w-48 rounded-full bg-white/10" />
       <div className="absolute inset-y-0 -left-2/3 w-2/3 animate-lazule-shimmer bg-gradient-to-r from-transparent via-white/18 to-transparent" />
     </div>
   );
@@ -65,100 +31,50 @@ function ProductImageSkeleton() {
 
 export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
-  const message = createProductWhatsAppMessage(product.name);
   const productPath = createProductPath(product);
-  const brandPath = createBrandPath(product.brand);
-  const badges = Array.isArray(product.badges) ? product.badges : [];
   const availability = product.availability ?? getAvailabilityStatus(product);
-  const description = String(product.description || '').trim();
-  const olfactoryReference = String(product.olfactoryReference || '').trim();
-  const showDescription = shouldRenderDescription(description, olfactoryReference);
+  const heroBadge = product.featured ? 'Destaque' : availability.label;
 
   return (
-    <article className="lazule-product-card group flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur">
-      <div className="relative min-h-64 overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue p-6">
-        {product.image ? (
-          <>
-            {isImageLoading && <ProductImageSkeleton />}
-            <img
-              className={`absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 ${
-                isImageLoading ? 'opacity-0' : 'opacity-80'
-              }`}
-              src={product.image}
-              alt={`Perfume ${product.name}`}
-              loading="lazy"
-              decoding="async"
-              onLoad={() => setIsImageLoading(false)}
-              onError={() => setIsImageLoading(false)}
-            />
-          </>
-        ) : (
-          <ProductImageFallback />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/35 to-transparent" />
-        {product.featured && (
-          <span className="relative z-10 inline-flex rounded-full border border-lazule-gold/40 bg-lazule-night/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-lazule-gold backdrop-blur">
-            Destaque
+    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur">
+      <a
+        className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
+        href={productPath}
+        onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: analyticsSection, action: 'card' })}
+      >
+        <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue">
+          {product.image ? (
+            <>
+              {isImageLoading && <ProductImageSkeleton />}
+              <img
+                className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 ${
+                  isImageLoading ? 'opacity-0' : 'opacity-90'
+                }`}
+                src={product.image}
+                alt={`Perfume ${product.name}`}
+                loading="lazy"
+                decoding="async"
+                onLoad={() => setIsImageLoading(false)}
+                onError={() => setIsImageLoading(false)}
+              />
+            </>
+          ) : (
+            <ProductImageFallback />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/80 via-transparent to-transparent" />
+          <span className="absolute left-4 top-4 rounded-full border border-lazule-gold/35 bg-lazule-night/58 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold backdrop-blur">
+            {heroBadge}
           </span>
-        )}
-        <div className="relative z-10 mt-28">
-          <a className="relative z-20 text-sm uppercase tracking-[0.3em] text-slate-200 transition hover:text-lazule-gold" href={brandPath}>
-            {product.brand}
-          </a>
-          <h3 className="mt-3 font-display text-3xl leading-tight text-lazule-mist">
-            <a
-              className="relative z-20 transition hover:text-lazule-gold"
-              href={productPath}
-              onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: analyticsSection, action: 'title' })}
-            >
-              {product.name}
-            </a>
+        </div>
+
+        <div className="flex flex-1 flex-col px-4 py-4">
+          <p className="line-clamp-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{product.brand}</p>
+          <h3 className="mt-2 line-clamp-2 font-display text-[1.65rem] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold">
+            {product.name}
           </h3>
+          <strong className="mt-4 text-xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>
         </div>
-      </div>
-
-      <div className="flex flex-1 flex-col p-6">
-        <div className="mb-4 flex flex-wrap gap-2">
-          <span className={`rounded-full border px-3 py-1 text-xs ${availability.className}`}>{availability.label}</span>
-          {badges.filter((badge) => badge !== availability.label).map((badge) => (
-            <span key={badge} className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold">
-              {badge}
-            </span>
-          ))}
-        </div>
-
-        {showDescription && <p className="text-sm leading-6 text-slate-300">{description}</p>}
-        {olfactoryReference && (
-          <p className="mt-4 text-sm text-slate-400">
-            <span className="text-lazule-gold">Referência olfativa:</span> {olfactoryReference}
-          </p>
-        )}
-
-        <div className="mt-auto pt-6">
-          <div className="mb-5 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
-            <span className="text-xs uppercase tracking-[0.25em] text-slate-400">Preço LAZULE</span>
-            <strong className="text-2xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>
-          </div>
-          <div className="grid gap-3">
-            <a
-              className="lazule-premium-button inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/40 bg-white/5 px-5 py-3 font-semibold text-lazule-gold backdrop-blur hover:border-lazule-gold/70 hover:text-[#dfbd68]"
-              href={productPath}
-              onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: analyticsSection, action: 'details' })}
-            >
-              Ver detalhes
-            </a>
-            <a
-              className="lazule-premium-button lazule-cta-shimmer inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-5 py-3 font-semibold text-lazule-night"
-              href={createWhatsAppLink(message)}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: analyticsSection })}
-            >
-              Consultar no WhatsApp
-            </a>
-          </div>
-        </div>
-      </div>
+      </a>
     </article>
   );
 }
