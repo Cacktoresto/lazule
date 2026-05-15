@@ -10,7 +10,8 @@
     "scrape:supplier": "node scripts/scrapeSupplier.js",
     "import:supplier-json": "node scripts/importSupplierJson.js",
     "validate:products": "node scripts/validateProducts.js",
-    "validate:recommendations": "node scripts/validateRecommendations.js"
+    "validate:recommendations": "node scripts/validateRecommendations.js",
+    "test:utils": "node --test tests/*.test.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
