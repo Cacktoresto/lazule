@@ -386,3 +386,55 @@ Os helpers ficam em `src/utils/analytics.js`:
 ### Privacidade
 
 A arquitetura coleta apenas comportamento agregado e intenção comercial. Não colete nem envie nome de cliente, telefone, endereço, dados sensíveis ou conteúdo da conversa do WhatsApp nos payloads de analytics.
+
+## Catálogo experimental com Supabase
+
+A fonte padrão do catálogo continua sendo local (`src/data/products.js`). A integração Supabase é experimental e foi adicionada atrás de feature flag para validar uma fonte futura sem reescrever a UI ou mudar o contrato público dos produtos.
+
+### Como ativar experimentalmente
+
+Crie/atualize um arquivo `.env.local` com:
+
+```bash
+VITE_CATALOG_SOURCE=supabase
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=SUA_CHAVE_ANON
+```
+
+Se `VITE_CATALOG_SOURCE` estiver vazio, diferente de `supabase`, ou se `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` não estiverem configuradas, o repository mantém fallback automático para o catálogo local.
+
+### Arquivos da integração
+
+- `src/data/supabaseClient.js`: cliente REST mínimo para ler tabelas públicas do Supabase usando `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`, sem quebrar build quando as variáveis estão vazias.
+- `src/data/supabaseCatalogAdapter.js`: adapter que converte linhas planejadas do Supabase para o mesmo shape público normalizado retornado pelo catálogo local.
+- `src/data/catalogRepository.js`: seleciona a fonte por `VITE_CATALOG_SOURCE=supabase|local` e mantém fallback local em erro, ausência de configuração ou retorno vazio.
+- `src/data/localCatalogAdapter.js`: adapter local explícito para manter a arquitetura baseada em repository.
+
+### Contrato preservado
+
+O adapter Supabase retorna produtos com os campos consumidos hoje pela experiência pública, incluindo `id`, `name`, `brand`, `category`, `gender`, `salePrice`, `originalPrice`, `image`, `badges`, `description`, `olfactoryReference`, `available`, `featured`, `catalogType`, `productSlug`, `brandSlug`, campos normalizados e índices de busca.
+
+### Tabelas planejadas
+
+A primeira versão espera uma tabela `products` e aceita tanto colunas diretas quanto joins opcionais:
+
+- `products`: `id`, `slug`, `name`, `description`, `brand`, `brand_name`, `category`, `category_name`, `catalog_type`, `gender`, `price`, `sale_price`, `original_price`, `image`, `image_url`, `badges`, `olfactory_reference`, `available`, `featured`, `size`, `volume_ml`.
+- `brands`: `name`, `slug`.
+- `categories`: `name`, `slug`, `catalog_type`.
+- `product_images`: `url`, `alt`, `sort_order`.
+- `product_prices`: `price`, `sale_price`, `original_price`, `currency`.
+- `product_inventory`: `available`, `quantity`.
+
+### Limitações atuais
+
+- A integração é apenas leitura e experimental.
+- Não há admin real, autenticação, RLS específica, upload de imagens ou migração de dados.
+- A UI permanece visualmente igual; o objetivo é validar a fonte de dados por trás do repository.
+- O fallback local é intencional para não derrubar o catálogo público durante testes.
+
+### Próximos passos sugeridos
+
+1. Definir schema final no Supabase com RLS de leitura pública apenas para tabelas publicáveis.
+2. Criar seed/migração a partir de `src/data/products.js`.
+3. Validar joins e ordenação com dados reais.
+4. Só depois conectar telas públicas ao repository assíncrono se a fonte Supabase for promovida de experimental para padrão.
