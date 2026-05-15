@@ -190,7 +190,7 @@ function App() {
         </main>
         <Footer />
       </div>
-      <WhatsAppButton />
+      <WhatsAppButton hidden={isProductRoute} />
     </div>
   );
 }
