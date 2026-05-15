@@ -7,6 +7,7 @@ import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
 import { CatalogHighlights } from './CatalogHighlights';
+import { applyCatalogSeo } from '../utils/seo';
 
 const DEFAULT_FILTERS = {
   category: ALL_VALUE,
@@ -125,7 +126,8 @@ export function ProductCatalog() {
 
   useEffect(() => {
     syncCatalogUrl(filters, searchTerm);
-  }, [filters, searchTerm]);
+    applyCatalogSeo({ filters, searchTerm, resultCount: filteredProducts.length });
+  }, [filteredProducts.length, filters, searchTerm]);
 
   useEffect(() => {
     const normalizedQuery = searchTerm.trim();

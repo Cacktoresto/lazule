@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lazule.store/sitemap.xml
+Sitemap: https://lazulefragrances.com.br/sitemap.xml

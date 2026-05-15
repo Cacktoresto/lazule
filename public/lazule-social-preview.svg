@@ -1,0 +1,25 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#050816"/>
+  <radialGradient id="a" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(312 132) rotate(47) scale(487 708)">
+    <stop stop-color="#284C9B" stop-opacity="0.92"/>
+    <stop offset="0.48" stop-color="#0F172A" stop-opacity="0.72"/>
+    <stop offset="1" stop-color="#050816" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="b" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(890 438) rotate(153) scale(430 360)">
+    <stop stop-color="#D7B56D" stop-opacity="0.42"/>
+    <stop offset="1" stop-color="#D7B56D" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1200" height="630" fill="url(#a)"/>
+  <rect width="1200" height="630" fill="url(#b)"/>
+  <path d="M0 520C160 456 278 472 420 512C594 562 744 605 1200 452V630H0V520Z" fill="#0F172A" fill-opacity="0.72"/>
+  <circle cx="942" cy="146" r="168" stroke="#D7B56D" stroke-opacity="0.24" stroke-width="1"/>
+  <circle cx="942" cy="146" r="104" stroke="#D7B56D" stroke-opacity="0.18" stroke-width="1"/>
+  <path d="M855 116H1029" stroke="#D7B56D" stroke-opacity="0.5"/>
+  <path d="M855 176H1029" stroke="#D7B56D" stroke-opacity="0.35"/>
+  <rect x="72" y="72" width="1056" height="486" rx="46" stroke="#D7B56D" stroke-opacity="0.28"/>
+  <text x="104" y="158" fill="#D7B56D" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" letter-spacing="10">CURADORIA PREMIUM</text>
+  <text x="104" y="292" fill="#F8FAFC" font-family="Georgia, 'Times New Roman', serif" font-size="88" font-weight="500" letter-spacing="-2">LAZULE</text>
+  <text x="104" y="374" fill="#F8FAFC" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="500" letter-spacing="-1">FRAGRANCES</text>
+  <text x="108" y="444" fill="#CBD5E1" font-family="Arial, Helvetica, sans-serif" font-size="30">Perfumes importados, árabes e nicho</text>
+  <text x="108" y="491" fill="#D7B56D" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="4">ATENDIMENTO PELO WHATSAPP</text>
+</svg>
