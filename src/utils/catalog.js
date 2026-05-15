@@ -1,10 +1,14 @@
-import { getAllProducts } from '../data/catalogRepository.js';
+import { getAllProducts, getAllProductsAsync } from '../data/catalogRepository.js';
 import { getLocalCatalogProducts } from '../data/localCatalogAdapter.js';
 import { normalizeSearchText } from './search.js';
 import { createBrandSlug, createProductSlug } from './productRouting.js';
 
 export function getCatalogProducts(sourceProducts) {
   return sourceProducts ? getLocalCatalogProducts(sourceProducts) : getAllProducts();
+}
+
+export async function getCatalogProductsAsync(sourceProducts, options = {}) {
+  return sourceProducts ? getLocalCatalogProducts(sourceProducts) : getAllProductsAsync(options);
 }
 
 const PRICE_RANGE_MIN_RATIO = 0.7;

@@ -90,9 +90,19 @@ test('analytics deduplicates events and falls back safely without configured pix
   assert.equal(event.metaStandardName, 'ViewContent');
 });
 
-import { getAllProducts, getProductBySlug, getProductsByBrand, searchProducts } from '../src/data/catalogRepository.js';
+import catalogRepository, { getAllProducts, getAllProductsAsync, getProductBySlug, getProductsByBrand, searchProducts } from '../src/data/catalogRepository.js';
 import { normalizeProduct } from '../src/domain/product.js';
 import { createProductJsonLd, createProductSeoData } from '../src/utils/seo.js';
+
+test('catalog repository keeps named and default exports compatible', async () => {
+  const sourceProducts = [
+    { id: 'compat', name: 'Compat EDP 100ml', brand: 'LAZULE', category: 'Nicho', gender: 'Unissex', salePrice: 320, image: '', badges: [], description: '', olfactoryReference: '', available: true, featured: false },
+  ];
+
+  assert.equal(catalogRepository.getAllProducts, getAllProducts);
+  assert.equal(catalogRepository.getAllProductsAsync, getAllProductsAsync);
+  assert.equal((await getAllProductsAsync({ sourceProducts }))[0].id, 'compat');
+});
 
 test('catalog repository normalizes local products and resolves by canonical slug', () => {
   const sourceProducts = [

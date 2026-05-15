@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { getBrandBySlug, getCatalogProducts } from '../src/utils/catalog.js';
+import { getBrandBySlug, getCatalogProductsAsync } from '../src/utils/catalog.js';
 import { createBrandPath, createBrandSlug, createProductPath } from '../src/utils/productRouting.js';
 import {
   DEFAULT_ORIGIN,
@@ -21,8 +21,8 @@ import {
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const targetDir = path.resolve(ROOT_DIR, process.argv[2] || 'public');
-const products = getCatalogProducts();
-const uniqueBrands = [...new Map(products.map((product) => [product.brandSlug, product.brand])).values()].filter(Boolean);
+let products = [];
+let uniqueBrands = [];
 
 function escapeHtml(value = '') {
   return String(value)
@@ -145,8 +145,15 @@ function writeRouteHtmlFiles(baseDir) {
   });
 }
 
-fs.mkdirSync(targetDir, { recursive: true });
-writeSitemap(targetDir);
-writeRobots(targetDir);
-writeRouteHtmlFiles(targetDir);
-console.log(`SEO assets generated in ${path.relative(ROOT_DIR, targetDir) || '.'}`);
+async function main() {
+  products = await getCatalogProductsAsync();
+  uniqueBrands = [...new Map(products.map((product) => [product.brandSlug, product.brand])).values()].filter(Boolean);
+
+  fs.mkdirSync(targetDir, { recursive: true });
+  writeSitemap(targetDir);
+  writeRobots(targetDir);
+  writeRouteHtmlFiles(targetDir);
+  console.log(`SEO assets generated in ${path.relative(ROOT_DIR, targetDir) || '.'}`);
+}
+
+await main();

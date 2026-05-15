@@ -1,6 +1,6 @@
 # Plano conceitual de migração para Supabase
 
-Status: planejamento arquitetural. Este projeto **não** instala Supabase, não cria backend e não altera a fonte de dados em produção nesta etapa.
+Status: planejamento arquitetural com adapter experimental. Este projeto **não** instala o SDK do Supabase, não cria backend e não altera a fonte de dados em produção sem opt-in por variável de ambiente.
 
 ## Objetivo
 
@@ -114,4 +114,4 @@ Continuar derivado:
 - Auditoria de estoque e disponibilidade.
 - Vitrines editoriais manuais + automáticas.
 - Analytics com origem remota e filtro de visitas administrativas.
-- Migração incremental: implementar um `supabaseCatalogAdapter` mantendo a API do repository.
+- Migração incremental: o `supabaseCatalogAdapter` experimental mantém a API do repository, com fallback para o catálogo local quando a fonte remota não estiver configurada ou falhar.
