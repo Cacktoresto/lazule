@@ -189,6 +189,200 @@ input {
   opacity: 1;
 }
 
+
+@keyframes lazule-hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.15rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes lazule-product-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.35deg);
+  }
+
+  50% {
+    transform: translate3d(0, -0.45rem, 0) rotate(0.25deg);
+  }
+}
+
+.lazule-hero-copy > * {
+  opacity: 0;
+  animation: lazule-hero-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.lazule-hero-copy > *:nth-child(1) {
+  animation-delay: 80ms;
+}
+
+.lazule-hero-copy > *:nth-child(2) {
+  animation-delay: 170ms;
+}
+
+.lazule-hero-copy > *:nth-child(3) {
+  animation-delay: 260ms;
+}
+
+.lazule-hero-copy > *:nth-child(4) {
+  animation-delay: 360ms;
+}
+
+.lazule-hero-product {
+  opacity: 0;
+  transform: translate3d(0, 1.1rem, 0) scale(0.985);
+  animation:
+    lazule-hero-rise 820ms cubic-bezier(0.22, 1, 0.36, 1) 250ms forwards,
+    lazule-product-float 7.5s ease-in-out 1.25s infinite;
+  transition:
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 320ms ease,
+    box-shadow 320ms ease;
+}
+
+.lazule-hero-product:hover,
+.lazule-hero-product:focus-visible {
+  border-color: rgba(200, 162, 77, 0.34);
+  box-shadow:
+    0 30px 90px rgba(2, 6, 23, 0.46),
+    0 0 0 1px rgba(200, 162, 77, 0.10);
+}
+
+.lazule-hero-product:active {
+  transform: translate3d(0, -0.2rem, 0) scale(0.992);
+}
+
+.lazule-hero-cta {
+  touch-action: manipulation;
+}
+
+.lazule-reveal {
+  opacity: 0;
+  transform: translate3d(0, 1.15rem, 0);
+  transition:
+    opacity 640ms ease var(--reveal-delay, 0ms),
+    transform 640ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.lazule-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.lazule-reveal-item {
+  opacity: 0;
+  transform: translate3d(0, 0.9rem, 0);
+  transition:
+    opacity 560ms ease var(--item-delay, 0ms),
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1) var(--item-delay, 0ms);
+}
+
+.lazule-reveal.is-visible .lazule-reveal-item {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.lazule-horizontal-rail {
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+  scroll-padding-inline: 1rem;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.lazule-horizontal-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.lazule-rail-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 1rem, #000 calc(100% - 2.4rem), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 1rem, #000 calc(100% - 2.4rem), transparent 100%);
+}
+
+.lazule-touch-card,
+.lazule-brand-pill {
+  transform: translateZ(0);
+  transition:
+    transform 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease,
+    color 260ms ease,
+    background-color 260ms ease;
+}
+
+.lazule-touch-card:hover,
+.lazule-brand-pill:hover {
+  transform: translateY(-0.18rem);
+  box-shadow:
+    0 22px 58px rgba(2, 6, 23, 0.34),
+    0 0 0 1px rgba(200, 162, 77, 0.10);
+}
+
+.lazule-touch-card:active,
+.lazule-brand-pill:active,
+.lazule-product-card:active {
+  transform: scale(0.985);
+}
+
+.lazule-inline-link {
+  transition:
+    color 220ms ease,
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+
+.lazule-inline-link:hover,
+.lazule-inline-link:focus-visible {
+  color: #f8fafc;
+  background: rgba(200, 162, 77, 0.10);
+  transform: translateX(0.12rem);
+}
+
+.lazule-inline-link:focus-visible,
+.lazule-hero-product:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #c8a24d,
+    0 0 0 5px rgba(15, 23, 42, 0.86);
+}
+
+.lazule-sticky-search::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgba(200, 162, 77, 0.08), transparent);
+  opacity: 0.72;
+}
+
+.lazule-search-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.lazule-search-shell::after {
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  pointer-events: none;
+  content: '';
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(200, 162, 77, 0.24), transparent 32%, rgba(37, 99, 235, 0.16));
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.lazule-search-shell:focus-within::after {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -203,9 +397,24 @@ input {
     transition-duration: 0.001ms !important;
   }
 
+  .lazule-hero-copy > *,
+  .lazule-hero-product,
+  .lazule-reveal,
+  .lazule-reveal-item {
+    opacity: 1;
+    transform: none;
+  }
+
   .lazule-premium-button:hover,
   .lazule-premium-button:active,
-  .lazule-product-card:hover {
+  .lazule-product-card:hover,
+  .lazule-product-card:active,
+  .lazule-touch-card:hover,
+  .lazule-touch-card:active,
+  .lazule-brand-pill:hover,
+  .lazule-brand-pill:active,
+  .lazule-hero-product:hover,
+  .lazule-hero-product:active {
     transform: none;
   }
 }
