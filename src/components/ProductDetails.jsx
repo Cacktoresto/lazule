@@ -39,37 +39,152 @@ function upsertMetaDescription(content) {
   metaDescription.setAttribute('content', content);
 }
 
+function getProductDisplayName(product) {
+  return String(product?.name || '').split('|').pop().trim() || product?.name;
+}
+
+function getProductEssence(product) {
+  const normalizedCategory = normalizeProductClassifier(product.category);
+  const normalizedGender = normalizeProductClassifier(product.gender);
+  const normalizedName = normalizeProductClassifier(product.name);
+  const normalizedReference = normalizeProductClassifier(product.olfactoryReference);
+
+  if (normalizedReference.includes('bleu') || normalizedName.includes('blue') || normalizedName.includes('bleu')) {
+    return 'Sofisticado, magnético e limpo para presença imediata.';
+  }
+
+  if (normalizedReference.includes('erba') || normalizedName.includes('gold')) {
+    return 'Solar, marcante e envolvente para deixar rastro.';
+  }
+
+  if (normalizedReference.includes('delina') || normalizedGender === 'feminino') {
+    return 'Elegante, luminoso e viciante para momentos memoráveis.';
+  }
+
+  if (normalizedCategory.includes('arabe')) {
+    return 'Intenso, opulento e moderno para noites de impacto.';
+  }
+
+  if (normalizedGender === 'masculino') {
+    return 'Confiante, refinado e presente sem esforço.';
+  }
+
+  return 'Elegante, intenso e viciante para noites especiais.';
+}
+
+function createEditorialGallery(product) {
+  const slides = [
+    {
+      id: 'hero',
+      src: product.image,
+      alt: `Perfume ${product.name}`,
+      label: 'Frasco em destaque',
+      tone: 'from-lazule-royal via-lazule-night to-lazule-blue',
+    },
+    {
+      id: 'mood',
+      src: product.image,
+      alt: `Atmosfera editorial do perfume ${product.name}`,
+      label: 'Mood editorial',
+      tone: 'from-[#07111f] via-lazule-royal to-lazule-night',
+    },
+    {
+      id: 'detail',
+      src: product.image,
+      alt: `Detalhe premium do perfume ${product.name}`,
+      label: 'Detalhe LAZULE',
+      tone: 'from-lazule-night via-[#122b62] to-[#050816]',
+    },
+  ];
+
+  return product.image ? slides : slides.slice(0, 1);
+}
+
+function preloadProductImage(image) {
+  if (!image) {
+    return undefined;
+  }
+
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = image;
+  link.setAttribute('data-lazule-product-preload', image);
+  document.head.appendChild(link);
+
+  return () => {
+    link.remove();
+  };
+}
+
 function DetailImage({ product }) {
-  const [isImageLoading, setIsImageLoading] = useState(Boolean(product?.image));
+  const gallery = useMemo(() => createEditorialGallery(product), [product]);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [loadedImages, setLoadedImages] = useState(() => new Set());
+
+  function handleScroll(event) {
+    const nextSlide = Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth);
+    setActiveSlide(Math.min(Math.max(nextSlide, 0), gallery.length - 1));
+  }
 
   return (
-    <div className="relative min-h-[22rem] overflow-hidden rounded-[2rem] border border-lazule-gold/20 bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue shadow-mineral sm:min-h-[30rem] lg:min-h-[40rem]">
-      {product?.image ? (
-        <>
-          {isImageLoading && (
-            <div className="absolute inset-0 overflow-hidden bg-lazule-night/75" aria-hidden="true">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(200,162,77,0.24),transparent_26%),radial-gradient(circle_at_75%_26%,rgba(37,99,235,0.22),transparent_32%)]" />
-              <div className="absolute inset-x-8 top-10 h-2/3 rounded-[1.5rem] border border-white/10 bg-white/[0.06]" />
-              <div className="absolute inset-y-0 -left-2/3 w-2/3 animate-lazule-shimmer bg-gradient-to-r from-transparent via-white/18 to-transparent" />
-            </div>
-          )}
-          <img
-            className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${
-              isImageLoading ? 'opacity-0' : 'opacity-90'
-            }`}
-            src={product.image}
-            alt={`Perfume ${product.name}`}
-            loading="eager"
-            decoding="async"
-            onLoad={() => setIsImageLoading(false)}
-            onError={() => setIsImageLoading(false)}
+    <div className="lazule-product-hero relative overflow-hidden rounded-b-[2.35rem] border-b border-lazule-gold/20 bg-lazule-night shadow-mineral lg:rounded-[3rem] lg:border">
+      <div
+        className="lazule-product-gallery flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
+        onScroll={handleScroll}
+        aria-label="Galeria do produto"
+      >
+        {gallery.map((slide, index) => {
+          const isLoaded = loadedImages.has(slide.id);
+
+          return (
+            <figure
+              className={`relative min-h-[78vh] w-full shrink-0 snap-center overflow-hidden bg-gradient-to-br ${slide.tone} sm:min-h-[34rem] lg:min-h-[42rem]`}
+              key={slide.id}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgba(248,250,252,0.13),transparent_24%),radial-gradient(circle_at_18%_68%,rgba(37,99,235,0.22),transparent_32%),radial-gradient(circle_at_82%_16%,rgba(200,162,77,0.16),transparent_28%)]" />
+              <div className="absolute inset-x-6 top-20 h-[58%] rounded-full bg-white/[0.045] blur-3xl" aria-hidden="true" />
+              {product?.image ? (
+                <>
+                  {!isLoaded && (
+                    <div className="lazule-product-skeleton absolute inset-8 top-24 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045]" aria-hidden="true">
+                      <div className="absolute inset-x-10 top-12 h-3/5 rounded-[1.5rem] bg-white/[0.07]" />
+                      <div className="absolute inset-y-0 -left-2/3 w-2/3 animate-lazule-shimmer bg-gradient-to-r from-transparent via-white/16 to-transparent" />
+                    </div>
+                  )}
+                  <img
+                    className={`lazule-product-bottle absolute left-1/2 top-[52%] h-[72%] w-[86%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_34px_70px_rgba(2,6,23,0.46)] transition duration-700 ${
+                      isLoaded ? 'opacity-95' : 'opacity-0'
+                    } `}
+                    src={product.image}
+                    alt={slide.alt}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
+                    style={{ '--bottle-scale': index === 1 ? 1.08 : index === 2 ? 1.15 : 1 }}
+                    onLoad={() => setLoadedImages((currentImages) => new Set(currentImages).add(slide.id))}
+                    onError={() => setLoadedImages((currentImages) => new Set(currentImages).add(slide.id))}
+                  />
+                </>
+              ) : (
+                <ProductImageFallback />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/10 to-transparent" />
+              <figcaption className="absolute bottom-7 left-6 text-[0.62rem] uppercase tracking-[0.34em] text-lazule-gold/80 sm:left-8">
+                {slide.label}
+              </figcaption>
+            </figure>
+          );
+        })}
+      </div>
+      <div className="absolute bottom-7 right-6 flex items-center gap-1.5 sm:right-8" aria-hidden="true">
+        {gallery.map((slide, index) => (
+          <span
+            className={`h-1 rounded-full transition-all duration-300 ${activeSlide === index ? 'w-6 bg-lazule-gold' : 'w-1.5 bg-white/35'}`}
+            key={slide.id}
           />
-        </>
-      ) : (
-        <ProductImageFallback />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/20 to-transparent" />
-      <div className="absolute inset-6 rounded-[1.5rem] border border-white/10" />
+        ))}
+      </div>
     </div>
   );
 }
@@ -94,17 +209,113 @@ function ProductNotFound() {
   );
 }
 
+function ProductAccordion({ title, children, defaultOpen = false }) {
+  return (
+    <details className="lazule-product-accordion group border-t border-lazule-night/10 py-5 first:border-t-0 lg:border-white/10" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night transition hover:text-lazule-gold lg:text-lazule-mist">
+        {title}
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-lazule-night/10 bg-lazule-night/[0.04] text-lazule-gold transition group-open:rotate-45 lg:border-white/10 lg:bg-white/[0.04]">
+          +
+        </span>
+      </summary>
+      <div className="lazule-product-accordion-panel pt-4 text-sm leading-7 text-slate-700 lg:text-slate-300">{children}</div>
+    </details>
+  );
+}
+
+function getVibeItems(product) {
+  const normalizedCategory = normalizeProductClassifier(product.category);
+  const normalizedGender = normalizeProductClassifier(product.gender);
+  const normalizedReference = normalizeProductClassifier(product.olfactoryReference);
+  const base = ['presença forte', 'elegante sem esforço'];
+
+  if (normalizedCategory.includes('arabe')) {
+    base.unshift('noite intensa', 'rastro opulento');
+  } else {
+    base.unshift('assinatura sofisticada', 'rotina premium');
+  }
+
+  if (normalizedReference || normalizedGender === 'unissex') {
+    base.push('descoberta sensorial');
+  }
+
+  if (normalizedGender === 'feminino') {
+    base.push('encontro luminoso');
+  } else if (normalizedGender === 'masculino') {
+    base.push('executivo noturno');
+  } else {
+    base.push('clima frio');
+  }
+
+  return [...new Set(base)].slice(0, 6);
+}
+
+function getAccordionItems(product, description, olfactoryReference) {
+  const notes = olfactoryReference
+    ? `DNA olfativo inspirado em ${olfactoryReference}, com leitura moderna e acabamento marcante.`
+    : `Curadoria LAZULE com perfil ${String(product.category || '').toLowerCase()} e assinatura pensada para presença.`;
+
+  return [
+    {
+      title: 'Notas olfativas',
+      content: notes,
+      defaultOpen: true,
+    },
+    {
+      title: 'Performance',
+      content: 'Selecionado para quem busca projeção elegante, sem perder a sensação refinada na pele.',
+    },
+    {
+      title: 'Ocasião',
+      content: `${getProductEssence(product)} Ideal para transformar um momento simples em assinatura pessoal.`,
+    },
+    {
+      title: 'Similaridades',
+      content: olfactoryReference ? `Para quem gosta da direção olfativa de ${olfactoryReference}.` : 'A curadoria aproxima este perfume de famílias olfativas desejadas, mantendo descoberta e personalidade.',
+    },
+    {
+      title: 'Fixação',
+      content: 'Fixação percebida como confortável para uso social. A duração pode variar conforme pele, clima e quantidade aplicada.',
+    },
+    {
+      title: 'Sobre a fragrância',
+      content: description || 'Uma escolha premium da LAZULE FRAGRANCES para quem prefere perfumes com identidade, presença e acabamento elegante.',
+    },
+  ];
+}
+
+function VibeSection({ product }) {
+  const vibeItems = getVibeItems(product);
+
+  return (
+    <section className="lazule-reveal mt-10 rounded-[2.4rem] border border-lazule-gold/15 bg-white/[0.045] p-6 shadow-mineral backdrop-blur sm:p-8 lg:mt-14">
+      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Vibe</p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {vibeItems.map((item, index) => (
+          <div
+            className="lazule-touch-card lazule-reveal-item rounded-full border border-white/10 bg-lazule-night/35 px-4 py-3 text-sm text-lazule-mist"
+            key={item}
+            style={{ '--item-delay': `${index * 55}ms` }}
+          >
+            {item}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function RecommendationCard({ product }) {
   return (
     <a
-      className="lazule-product-card group flex min-h-36 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition"
+      className="lazule-product-card group flex min-h-[19rem] w-[78vw] max-w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition md:w-[20rem]"
       href={createProductPath(product)}
       onClick={() => trackEvent('card_click', { productId: product.id, productName: product.name, section: 'recommendations', action: 'recommendation' })}
     >
-      <div className="relative w-28 shrink-0 overflow-hidden bg-lazule-depth sm:w-36">
+      <div className="relative min-h-44 overflow-hidden bg-lazule-depth">
         {product.image ? (
           <img
-            className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-contain p-5 opacity-90 transition duration-500 group-hover:scale-105"
             src={product.image}
             alt={`Perfume ${product.name}`}
             loading="lazy"
@@ -113,20 +324,17 @@ function RecommendationCard({ product }) {
         ) : (
           <ProductImageFallback />
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-lazule-night/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/60 to-transparent" />
       </div>
-      <div className="flex flex-1 flex-col justify-between p-4">
+      <div className="flex flex-1 flex-col justify-between p-5">
         <div>
-          <p className="text-[0.65rem] uppercase tracking-[0.24em] text-lazule-gold">{product.brand}</p>
-          <h3 className="mt-2 line-clamp-2 font-display text-xl leading-tight text-lazule-mist group-hover:text-lazule-gold">
-            {product.name}
+          <p className="text-[0.65rem] uppercase tracking-[0.26em] text-lazule-gold">{product.brand}</p>
+          <h3 className="mt-2 line-clamp-2 font-display text-2xl leading-tight text-lazule-mist group-hover:text-lazule-gold">
+            {getProductDisplayName(product)}
           </h3>
-          {product.olfactoryReference && <p className="mt-2 line-clamp-1 text-xs text-slate-400">Ref.: {product.olfactoryReference}</p>}
+          {product.olfactoryReference && <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {product.olfactoryReference}</p>}
         </div>
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <span className={`rounded-full border px-2.5 py-1 text-[0.68rem] ${product.availability.className}`}>{product.availability.label}</span>
-          <strong className="text-sm text-lazule-mist">{formatBRL(product.salePrice)}</strong>
-        </div>
+        <strong className="mt-5 text-base text-lazule-mist">{formatBRL(product.salePrice)}</strong>
       </div>
     </a>
   );
@@ -138,22 +346,44 @@ function Recommendations({ products }) {
   }
 
   return (
-    <section className="mt-14 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.045] p-5 shadow-mineral backdrop-blur sm:p-7 lg:p-8">
+    <section className="lazule-reveal mt-10 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Curadoria conectada</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Descoberta emocional</p>
           <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Você também pode gostar</h2>
         </div>
         <p className="max-w-xl text-sm leading-6 text-slate-300">
-          Recomendações calculadas por marca, categoria, referência olfativa e gênero para continuar sua descoberta sem recarregar a boutique.
+          Seleção guiada por vibe, DNA olfativo, performance e ocasião — como uma conversa de boutique.
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
         {products.map((product) => (
           <RecommendationCard key={product.id} product={product} />
         ))}
       </div>
     </section>
+  );
+}
+
+function StickyWhatsAppBar({ product, whatsAppLink }) {
+  return (
+    <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-50 border-t border-lazule-gold/20 bg-lazule-night/88 px-4 pb-[calc(env(safe-area-inset-bottom)+0.8rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden">
+      <div className="mx-auto flex max-w-md items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
+          <strong className="block truncate text-lg text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+        </div>
+        <a
+          className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate"
+          href={whatsAppLink}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'sticky_product_whatsapp' })}
+        >
+          Comprar via WhatsApp
+        </a>
+      </div>
+    </div>
   );
 }
 
@@ -165,98 +395,118 @@ export function ProductDetails({ slug }) {
 
   useEffect(() => {
     if (!product) {
-      return;
+      return undefined;
     }
 
     document.title = `${product.name} | LAZULE FRAGRANCES`;
     upsertMetaDescription(`Conheça ${product.name} da marca ${product.brand} na curadoria premium LAZULE FRAGRANCES.`);
     trackEvent('product_view', { productId: product.id, productName: product.name, brandName: product.brand });
+
+    return preloadProductImage(product.image);
+  }, [product]);
+
+  useEffect(() => {
+    const revealItems = Array.from(document.querySelectorAll('.lazule-reveal'));
+
+    if (!revealItems.length) {
+      return undefined;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      revealItems.forEach((item) => item.classList.add('is-visible'));
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.14 },
+    );
+
+    revealItems.forEach((item) => observer.observe(item));
+
+    return () => observer.disconnect();
   }, [product]);
 
   if (!product) {
     return <ProductNotFound />;
   }
 
-  const badges = Array.isArray(product.badges) ? product.badges : [];
   const description = String(product.description || '').trim();
   const olfactoryReference = String(product.olfactoryReference || '').trim();
-  const whatsAppMessage = createProductWhatsAppMessage(product.name);
+  const productUrl = typeof window === 'undefined' ? createProductPath(product) : window.location.href;
+  const whatsAppMessage = createProductWhatsAppMessage(product.name, product.salePrice, productUrl);
+  const whatsAppLink = createWhatsAppLink(whatsAppMessage);
   const showGender = shouldShowGender(product.category, product.gender);
+  const accordionItems = getAccordionItems(product, description, olfactoryReference);
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:py-20">
-      <a className="mb-8 inline-flex text-sm font-semibold text-lazule-gold transition hover:text-[#dfbd68]" href="/catalogo">
+    <section className="mx-auto max-w-7xl pb-32 lg:px-8 lg:py-20">
+      <div className="lg:hidden">
+        <a className="absolute left-5 top-5 z-20 rounded-full border border-white/10 bg-lazule-night/45 px-4 py-2 text-xs font-semibold text-lazule-gold backdrop-blur transition hover:text-[#dfbd68]" href="/catalogo">
+          ← catálogo
+        </a>
+      </div>
+      <a className="mb-8 hidden text-sm font-semibold text-lazule-gold transition hover:text-[#dfbd68] lg:inline-flex" href="/catalogo">
         ← Voltar ao catálogo
       </a>
 
-      <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+      <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
         <DetailImage product={product} />
 
-        <article className="rounded-[2.5rem] border border-white/10 bg-white/[0.055] p-6 shadow-mineral backdrop-blur sm:p-8 lg:p-10">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Página individual</p>
-          <a className="text-sm uppercase tracking-[0.3em] text-slate-300 transition hover:text-lazule-gold" href={createBrandPath(product.brand)}>
+        <article className="lazule-hero-copy relative z-10 -mt-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] p-6 text-lazule-night shadow-mineral backdrop-blur sm:p-8 lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
+          <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)}>
             {product.brand}
           </a>
-          <h1 className="mt-4 font-display text-4xl leading-tight text-lazule-mist sm:text-5xl lg:text-6xl">{product.name}</h1>
-
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-lazule-night/35 p-4">
-              <span className="text-xs uppercase tracking-[0.22em] text-slate-400">Categoria</span>
-              <p className="mt-2 font-semibold text-lazule-mist">{product.category}</p>
+          <h1 className="mt-4 font-display text-4xl leading-[0.98] text-lazule-night sm:text-5xl lg:text-6xl lg:text-lazule-mist">
+            {getProductDisplayName(product)}
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-7 text-slate-700 lg:text-slate-300">{getProductEssence(product)}</p>
+          <div className="mt-7 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-5 lg:border-white/10">
+            <div>
+              <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
+              <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{formatBRL(product.salePrice)}</strong>
             </div>
-            {showGender && (
-              <div className="rounded-2xl border border-white/10 bg-lazule-night/35 p-4">
-                <span className="text-xs uppercase tracking-[0.22em] text-slate-400">Gênero</span>
-                <p className="mt-2 font-semibold text-lazule-mist">{product.gender}</p>
-              </div>
-            )}
+            <span className={`rounded-full border px-3 py-1 text-[0.68rem] ${product.availability.className}`}>{product.availability.label}</span>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            <span className={`rounded-full border px-3 py-1 text-xs ${product.availability.className}`}>{product.availability.label}</span>
-            {badges.filter((badge) => badge !== product.availability.label).map((badge) => (
-              <span key={badge} className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold">
-                {badge}
-              </span>
+          <div className="mt-6 flex flex-wrap gap-2 text-xs text-slate-600 lg:text-slate-300">
+            <span>{product.category}</span>
+            {showGender && <span>• {product.gender}</span>}
+            {olfactoryReference && <span>• DNA {olfactoryReference}</span>}
+          </div>
+
+          <a
+            className="lazule-premium-button lazule-cta-shimmer mt-8 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate lg:inline-flex"
+            href={whatsAppLink}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'product_details' })}
+          >
+            Comprar via WhatsApp
+          </a>
+
+          <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
+            {accordionItems.map((item) => (
+              <ProductAccordion key={item.title} title={item.title} defaultOpen={item.defaultOpen}>
+                <p>{item.content}</p>
+              </ProductAccordion>
             ))}
-          </div>
-
-          <div className="mt-8 space-y-6 text-base leading-8 text-slate-300">
-            {description && <p>{description}</p>}
-            {olfactoryReference && (
-              <p>
-                <span className="font-semibold text-lazule-gold">Referência olfativa:</span> {olfactoryReference}
-              </p>
-            )}
-          </div>
-
-          <div className="mt-10 rounded-[2rem] border border-lazule-gold/20 bg-lazule-night/45 p-5 sm:p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <span className="text-xs uppercase tracking-[0.25em] text-slate-400">Preço LAZULE</span>
-              <strong className="text-3xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>
-            </div>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a
-                className="lazule-premium-button lazule-cta-shimmer inline-flex flex-1 items-center justify-center rounded-full bg-lazule-gold px-6 py-3.5 font-semibold text-lazule-night shadow-aureate"
-                href={createWhatsAppLink(whatsAppMessage)}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'product_details' })}
-              >
-                Consultar no WhatsApp
-              </a>
-              <a
-                className="lazule-premium-button inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-3.5 font-semibold text-lazule-mist backdrop-blur hover:border-lazule-gold/60 hover:text-lazule-gold"
-                href="/catalogo"
-              >
-                Voltar ao catálogo
-              </a>
-            </div>
           </div>
         </article>
       </div>
 
-      <Recommendations products={recommendations} />
+      <div className="px-4 lg:px-0">
+        <VibeSection product={product} />
+        <Recommendations products={recommendations} />
+      </div>
+      <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} />
     </section>
   );
 }

@@ -170,7 +170,7 @@ function App() {
     <div className="relative min-h-screen overflow-x-clip bg-lazule-night text-lazule-mist">
       <MineralBackground />
       <div className="relative z-10">
-        <Header />
+        <Header immersiveProduct={isProductRoute} />
         <main>
           {isProductRoute ? (
             <ProductDetails slug={route.productSlug} />
