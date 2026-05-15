@@ -128,10 +128,6 @@ export function ProductCatalog() {
   }, [filters, searchTerm]);
 
   useEffect(() => {
-    syncCatalogUrl(filters, searchTerm);
-  }, [filters, searchTerm]);
-
-  useEffect(() => {
     const normalizedQuery = searchTerm.trim();
 
     if (!normalizedQuery) {
