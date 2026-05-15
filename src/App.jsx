@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { MineralBackground } from './components/MineralBackground';
@@ -14,7 +14,9 @@ import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from '
 import { navigateSpa } from './utils/navigation';
 import { trackPageView } from './utils/analytics';
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
+
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/analytics\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -107,12 +109,15 @@ function App() {
   const isFaqRoute = route.pathname === '/faq';
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
+  const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
 
   useEffect(() => {
     const routeName = isProductRoute
       ? 'product'
-      : isBrandRoute
-        ? 'brand'
+      : isAnalyticsDashboardRoute
+        ? 'admin_analytics'
+        : isBrandRoute
+          ? 'brand'
         : isCatalogRoute
           ? 'catalog'
           : isFaqRoute
@@ -124,7 +129,7 @@ function App() {
                 : 'home';
 
     trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
-  }, [isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, route.hash, route.pathname, route.search]);
+  }, [isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -191,7 +196,11 @@ function App() {
       <div className="relative z-10">
         <Header immersiveProduct={isProductRoute} />
         <main>
-          {isProductRoute ? (
+          {isAnalyticsDashboardRoute ? (
+            <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70">Carregando dashboard LAZULE...</div>}>
+              <AnalyticsDashboard />
+            </Suspense>
+          ) : isProductRoute ? (
             <ProductDetails slug={route.productSlug} />
           ) : isBrandRoute ? (
             <BrandPage slug={route.brandSlug} />
@@ -209,7 +218,7 @@ function App() {
         </main>
         <Footer />
       </div>
-      <WhatsAppButton hidden={isProductRoute} />
+      <WhatsAppButton hidden={isProductRoute || isAnalyticsDashboardRoute} />
     </div>
   );
 }
