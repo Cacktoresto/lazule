@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ProductNavigationSearch } from './ProductNavigationSearch';
 import { ProductCard } from './ProductCard';
-import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
+import { getAllProducts } from '../data/catalogRepository';
+import { getFeaturedCollections } from '../utils/catalog';
 import { createBrandPath } from '../utils/productRouting';
 import { applyHomeSeo } from '../utils/seo';
 import { trackBrandClick, trackCategoryClick, trackEvent, trackProductSelect } from '../utils/analytics';
@@ -126,7 +127,7 @@ export function Home() {
   }, []);
 
   const { collections, heroProduct, brands } = useMemo(() => {
-    const products = getCatalogProducts();
+    const products = getAllProducts();
     const featuredCollections = getFeaturedCollections(products);
     const [firstHeroProduct] = featuredCollections.weeklySelection.length ? featuredCollections.weeklySelection : products;
     const availableBrandSet = new Set(products.map((product) => product.brand));

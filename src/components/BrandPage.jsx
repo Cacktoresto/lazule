@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { getBrandBySlug, getCatalogProducts } from '../utils/catalog';
+import { getAllProducts, getBrandBySlug } from '../data/catalogRepository';
 import { trackEvent } from '../utils/analytics';
 import { ProductCard } from './ProductCard';
 import { applyBrandSeo } from '../utils/seo';
@@ -25,7 +25,7 @@ function BrandNotFound() {
 }
 
 export function BrandPage({ slug }) {
-  const catalogProducts = useMemo(() => getCatalogProducts(), []);
+  const catalogProducts = useMemo(() => getAllProducts(), []);
   const brand = useMemo(() => getBrandBySlug(slug, catalogProducts), [catalogProducts, slug]);
 
   useEffect(() => {

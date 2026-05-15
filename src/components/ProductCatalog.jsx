@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
-import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
+import { getAllProducts } from '../data/catalogRepository';
+import { getFeaturedCollections } from '../utils/catalog';
 import { trackEvent, trackSearch, trackWhatsAppClick } from '../utils/analytics';
 import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
 import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
@@ -79,7 +80,7 @@ export function ProductCatalog() {
   const [filters, setFilters] = useState(initialCatalogState.filters);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
 
-  const catalogProducts = useMemo(() => getCatalogProducts(), []);
+  const catalogProducts = useMemo(() => getAllProducts(), []);
   const featuredCollections = useMemo(() => getFeaturedCollections(catalogProducts), [catalogProducts]);
 
   const filterOptions = useMemo(() => {
