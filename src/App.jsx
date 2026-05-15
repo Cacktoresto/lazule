@@ -11,8 +11,58 @@ import { ProductNotFound } from './components/ProductNotFound';
 import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { getBrandSlugFromPath, getProductSlugFromPath } from './utils/productRouting';
+import { navigateSpa } from './utils/navigation';
+
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+
+function isSafeSpaPath(path) {
+  const normalizedPath = String(path || '/');
+
+  return SPA_ROUTE_PATTERN.test(normalizedPath);
+}
+
+function restoreRouteFromFallbackRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const redirectPath = params.get('lazule_redirect');
+
+  if (window.location.pathname !== '/' || !redirectPath) {
+    return;
+  }
+
+  let nextUrl;
+
+  try {
+    nextUrl = new URL(redirectPath, window.location.origin);
+  } catch {
+    params.delete('lazule_redirect');
+    const query = params.toString();
+    window.history.replaceState(null, '', query ? `/?${query}${window.location.hash}` : `/${window.location.hash}`);
+    return;
+  }
+
+  if (nextUrl.origin !== window.location.origin || !isSafeSpaPath(nextUrl.pathname)) {
+    params.delete('lazule_redirect');
+    const query = params.toString();
+    window.history.replaceState(null, '', query ? `/?${query}${window.location.hash}` : `/${window.location.hash}`);
+    return;
+  }
+
+  const nextPath = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+  window.history.replaceState(null, '', nextPath);
+}
+
+function normalizeTrailingSlashRoute() {
+  const { pathname, search, hash } = window.location;
+
+  if (pathname !== '/' && pathname.endsWith('/') && isSafeSpaPath(pathname)) {
+    window.history.replaceState(null, '', `${pathname.replace(/\/+$/, '') || '/'}${search}${hash}`);
+  }
+}
 
 function normalizeLegacyCatalogRoute() {
+  restoreRouteFromFallbackRedirect();
+  normalizeTrailingSlashRoute();
+
   const { pathname, hash } = window.location;
 
   if (pathname === '/' && hash === '#catalogo') {
@@ -78,7 +128,13 @@ function App() {
         return;
       }
 
-      const nextUrl = new URL(anchor.href);
+      let nextUrl;
+
+      try {
+        nextUrl = new URL(anchor.href);
+      } catch {
+        return;
+      }
 
       if (nextUrl.origin !== window.location.origin) {
         return;
@@ -92,22 +148,12 @@ function App() {
       const legacyPath = nextUrl.pathname === '/' ? legacyRouteMap[nextUrl.hash] : null;
       const routePath = legacyPath || nextUrl.pathname;
       const routeHash = legacyPath && nextUrl.hash !== '#catalogo' ? nextUrl.hash : '';
-      const isSpaRoute =
-        routePath === '/' ||
-        routePath === '/catalogo' ||
-        routePath === '/faq' ||
-        routePath === '/produto-nao-encontrado' ||
-        routePath === '/produto-sugerido' ||
-        routePath.startsWith('/produto/') ||
-        routePath.startsWith('/marca/');
-
-      if (!isSpaRoute) {
+      if (!isSafeSpaPath(routePath)) {
         return;
       }
 
       event.preventDefault();
-      window.history.pushState(null, '', `${routePath}${nextUrl.search}${routeHash}`);
-      updateRoute();
+      navigateSpa(`${routePath}${nextUrl.search}${routeHash}`);
     }
 
     window.requestAnimationFrame(() => scrollToHashOrTop({ smooth: false }));
