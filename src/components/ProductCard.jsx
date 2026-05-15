@@ -47,7 +47,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
             <>
               {isImageLoading && <ProductImageSkeleton />}
               <img
-                className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 ${
+                className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 group-active:scale-[1.025] ${
                   isImageLoading ? 'opacity-0' : 'opacity-90'
                 }`}
                 src={product.image}

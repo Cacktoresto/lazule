@@ -59,22 +59,33 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
             Encontre seu perfume
           </span>
         )}
-        <div className={`grid gap-3 border border-lazule-gold/25 bg-lazule-night/75 shadow-aureate backdrop-blur sm:grid-cols-[1fr_auto] ${
+        <div className={`lazule-search-shell group grid gap-3 border border-lazule-gold/20 bg-lazule-night/70 shadow-aureate backdrop-blur-xl transition duration-300 focus-within:border-lazule-gold/65 focus-within:bg-lazule-night/86 focus-within:shadow-[0_18px_54px_rgba(200,162,77,0.14)] sm:grid-cols-[1fr_auto] ${
           compact ? 'grid-cols-[1fr_auto] rounded-full p-1.5' : 'rounded-[1.8rem] p-2 sm:rounded-full sm:p-2.5'
         }`}>
-          <input
-            id="product-navigation-search"
-            className={`min-h-12 rounded-full border border-white/10 bg-white/[0.08] px-4 text-base text-lazule-mist outline-none placeholder:text-slate-400 transition duration-200 hover:border-lazule-gold/40 focus-visible:border-lazule-gold/75 focus-visible:bg-white/[0.12] focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night ${compact ? 'py-2' : 'py-3'}`}
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder={compact ? 'Buscar perfume' : 'Digite Asad, Sauvage, Hacivat...'}
-            autoComplete="off"
-            inputMode="search"
-          />
+          <div className="relative min-w-0">
+            <svg
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-lazule-gold/68 transition duration-300 group-focus-within:scale-110 group-focus-within:text-lazule-gold"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+            >
+              <path d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+            </svg>
+            <input
+              id="product-navigation-search"
+              className={`min-h-12 w-full rounded-full border border-white/10 bg-white/[0.075] px-4 pl-11 text-base text-lazule-mist outline-none placeholder:text-slate-400 transition duration-300 hover:border-lazule-gold/40 focus-visible:border-lazule-gold/75 focus-visible:bg-white/[0.12] focus-visible:ring-2 focus-visible:ring-lazule-gold/80 focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night ${compact ? 'py-2' : 'py-3'}`}
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder={compact ? 'Buscar perfume' : 'Digite Asad, Sauvage, Hacivat...'}
+              autoComplete="off"
+              inputMode="search"
+            />
+          </div>
           <button
             className={`lazule-premium-button lazule-cta-shimmer min-h-12 rounded-full bg-lazule-gold text-sm font-semibold text-lazule-night shadow-aureate ${compact ? 'px-5' : 'px-6'}`}
             type="submit"
+            aria-label={compact ? 'Pesquisar perfume' : undefined}
           >
             <span className="relative z-10">{compact ? 'Ir' : 'Pesquisar'}</span>
           </button>
