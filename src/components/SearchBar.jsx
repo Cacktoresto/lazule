@@ -1,3 +1,5 @@
+import { trackEvent } from '../utils/analytics';
+
 export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = false }) {
   function handleSubmit(event) {
     event.preventDefault();
@@ -16,6 +18,7 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
           type="search"
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onFocus={() => trackEvent('search_focus', { source_page: 'catalog_search' })}
           placeholder="Busque por perfume, marca ou referência olfativa"
           autoComplete="off"
           inputMode="search"

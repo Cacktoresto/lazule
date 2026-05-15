@@ -331,3 +331,58 @@ Pré-visualize o build:
 ```bash
 npm run preview
 ```
+
+## Analytics, Tracking e Pixel Architecture
+
+A LAZULE possui uma camada centralizada em `src/utils/analytics.js` para medir comportamento, intenção de compra e conversão assistida pelo WhatsApp sem espalhar integrações pelo código da interface.
+
+### Como ativar GA4
+
+1. Crie ou abra uma propriedade Google Analytics 4.
+2. Copie o Measurement ID no formato `G-XXXXXXXXXX`.
+3. Configure no ambiente de deploy:
+
+```bash
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+O script do GA4 é carregado de forma assíncrona e condicional. O `send_page_view` automático fica desativado para evitar duplicidade em rotas SPA; as visualizações são enviadas pela função `trackPageView()`.
+
+### Como ativar Meta Pixel
+
+1. Crie ou abra um Pixel no Meta Events Manager.
+2. Copie o Pixel ID.
+3. Configure no ambiente de deploy:
+
+```bash
+VITE_META_PIXEL_ID=000000000000000
+```
+
+O Pixel é inicializado uma única vez, também de forma assíncrona. Se o ID não existir ou `fbq` não estiver disponível, os helpers retornam com segurança e o site continua funcionando.
+
+### Helpers principais
+
+Os helpers ficam em `src/utils/analytics.js`:
+
+- `initializeAnalytics()` — inicializa GA4 e Meta Pixel de forma condicional.
+- `trackEvent()` — base genérica para eventos customizados.
+- `trackPageView()` — page views compatíveis com SPA routing.
+- `trackProductView()` — visualização de produto, mapeada para GA4 `view_item` e Meta `ViewContent`.
+- `trackProductSelect()` — clique em card/vitrine, mapeado para GA4 `select_item` quando aplicável.
+- `trackWhatsappClick()` / `trackWhatsAppClick()` — intenção de compra pelo WhatsApp, mapeada para GA4 `generate_lead` e Meta `Contact`.
+- `trackSearch()` — buscas com termo, contagem de resultado e origem.
+- `trackBrandClick()`, `trackCategoryClick()` e `trackRecommendationClick()` — intenção por marca, categoria e recomendação.
+
+### Eventos principais instrumentados
+
+- Rotas SPA: `page_view` em home, catálogo, marca, produto, FAQ e deep links.
+- Home: `hero_cta_click`, `search_focus`, `search_submit`, `category_click`, `brand_click`, `product_card_click`.
+- Catálogo: `catalog_view`, `search`, `filter_apply`, `product_card_click`, `empty_search_result`, `catalog_load_more`.
+- Marca: `brand_view`, `product_card_click`.
+- Produto: `product_view`, `image_gallery_interaction`, `accordion_open`, `recommendation_click`, `whatsapp_click`.
+- FAQ: `faq_view`, `faq_item_open`, `whatsapp_click`.
+- WhatsApp global: `floating_whatsapp_click` via payload `cta_location=floating_whatsapp` no evento `whatsapp_click`.
+
+### Privacidade
+
+A arquitetura coleta apenas comportamento agregado e intenção comercial. Não colete nem envie nome de cliente, telefone, endereço, dados sensíveis ou conteúdo da conversa do WhatsApp nos payloads de analytics.

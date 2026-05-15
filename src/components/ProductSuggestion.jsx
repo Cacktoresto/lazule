@@ -71,7 +71,7 @@ export function ProductSuggestion() {
             href={createWhatsAppLink(whatsappMessage)}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackWhatsAppClick({ section: 'product_suggestion', query: requestedTerm, product: productName })}
+            onClick={() => trackWhatsAppClick({ source_page: 'product_suggestion', cta_location: 'suggestion_whatsapp', search_term: requestedTerm, product_name: productName })}
           >
             Consultar disponibilidade no WhatsApp
           </a>

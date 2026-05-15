@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getCatalogProducts, getFeaturedCollections } from '../utils/catalog';
-import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
-import { countCatalogProductsByType, filterAndSortCatalogProducts } from '../utils/catalogFilters';
+import { trackEvent, trackSearch, trackWhatsAppClick } from '../utils/analytics';
+import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
 import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
@@ -111,6 +111,7 @@ export function ProductCatalog() {
     setSearchTerm(normalizedTerm);
     setVisibleCount(PRODUCTS_PER_PAGE);
     syncCatalogUrl(filters, normalizedTerm);
+    trackEvent('search_submit', { searchTerm: normalizedTerm, sourcePage: 'catalog' });
   }
 
   function handleSearchChange(value) {
@@ -130,6 +131,10 @@ export function ProductCatalog() {
   }, [filteredProducts.length, filters, searchTerm]);
 
   useEffect(() => {
+    trackEvent('catalog_view', { result_count: filteredProducts.length, source_page: 'catalog' }, { dedupeKey: `catalog_view|${window.location.search}|${filteredProducts.length}`, dedupeMs: 1500 });
+  }, [filteredProducts.length]);
+
+  useEffect(() => {
     const normalizedQuery = searchTerm.trim();
 
     if (!normalizedQuery) {
@@ -137,7 +142,10 @@ export function ProductCatalog() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      trackEvent('search', { query: normalizedQuery, resultCount: filteredProducts.length });
+      trackSearch({ searchTerm: normalizedQuery, resultCount: filteredProducts.length, sourcePage: 'catalog' });
+      if (filteredProducts.length === 0) {
+        trackEvent('empty_search_result', { searchTerm: normalizedQuery, resultCount: 0, sourcePage: 'catalog' });
+      }
     }, 450);
 
     return () => window.clearTimeout(timeoutId);
@@ -145,6 +153,7 @@ export function ProductCatalog() {
 
   function handleFilterChange(filterName, value) {
     setFilters((currentFilters) => ({ ...currentFilters, [filterName]: value }));
+    trackEvent('filter_apply', { filter_name: filterName, filter_value: value, source_page: 'catalog' });
     resetPagination();
   }
 
@@ -156,6 +165,7 @@ export function ProductCatalog() {
   }
 
   function loadMoreProducts() {
+    trackEvent('catalog_load_more', { visible_count: visibleProducts.length, result_count: filteredProducts.length, source_page: 'catalog' });
     setVisibleCount((currentCount) => currentCount + PRODUCTS_PER_PAGE);
   }
 
@@ -254,7 +264,7 @@ export function ProductCatalog() {
                 href={createWhatsAppLink('Olá! Quero uma curadoria personalizada da LAZULE FRAGRANCES.')}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => trackWhatsAppClick({ section: 'empty_results', query: searchTerm })}
+                onClick={() => trackWhatsAppClick({ cta_location: 'empty_results', source_page: 'catalog', search_term: searchTerm })}
               >
                 Pedir curadoria no WhatsApp
               </a>

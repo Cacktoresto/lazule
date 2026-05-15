@@ -1,4 +1,4 @@
-import { trackWhatsAppClick } from '../utils/analytics';
+import { trackEvent, trackWhatsappClick } from '../utils/analytics';
 import { createWhatsAppLink } from '../utils/whatsapp';
 
 export function WhatsAppButton({ hidden = false } = {}) {
@@ -13,7 +13,10 @@ export function WhatsAppButton({ hidden = false } = {}) {
       target="_blank"
       rel="noreferrer"
       aria-label="Falar com a curadoria LAZULE FRAGRANCES pelo WhatsApp"
-      onClick={() => trackWhatsAppClick({ section: 'floating_button' })}
+      onClick={() => {
+        trackEvent('floating_whatsapp_click', { source_page: 'global', cta_location: 'floating_whatsapp' });
+        trackWhatsappClick({ source_page: 'global', cta_location: 'floating_whatsapp' });
+      }}
     >
       <span className="relative z-10 flex h-full w-full items-center justify-center sm:hidden" aria-hidden="true">W</span>
       <span className="relative z-10 hidden sm:inline">WhatsApp</span>

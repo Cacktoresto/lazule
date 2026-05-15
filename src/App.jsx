@@ -12,6 +12,7 @@ import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
+import { trackPageView } from './utils/analytics';
 
 const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
@@ -106,6 +107,24 @@ function App() {
   const isFaqRoute = route.pathname === '/faq';
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
+
+  useEffect(() => {
+    const routeName = isProductRoute
+      ? 'product'
+      : isBrandRoute
+        ? 'brand'
+        : isCatalogRoute
+          ? 'catalog'
+          : isFaqRoute
+            ? 'faq'
+            : isProductNotFoundRoute
+              ? 'product_not_found'
+              : isProductSuggestionRoute
+                ? 'product_suggestion'
+                : 'home';
+
+    trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
+  }, [isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
