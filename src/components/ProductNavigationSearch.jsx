@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { getCatalogProducts } from '../utils/catalog';
+import { getAllProducts } from '../data/catalogRepository';
 import { navigateSpa } from '../utils/navigation';
 import { createProductPath, createProductSlug } from '../utils/productRouting';
 import { findBestProductMatch } from '../utils/search';
@@ -17,7 +17,7 @@ function createSuggestionPath(term, product) {
 
 export function ProductNavigationSearch({ className = '', compact = false }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const catalogProducts = useMemo(() => getCatalogProducts(), []);
+  const catalogProducts = useMemo(() => getAllProducts(), []);
 
   function handleSubmit(event) {
     event.preventDefault();

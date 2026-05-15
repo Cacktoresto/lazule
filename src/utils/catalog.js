@@ -1,52 +1,10 @@
-import { products } from '../data/products.js';
-import { getAvailabilityStatus } from './availability.js';
-import { inferCatalogType } from './catalogFilters.js';
-import { createSearchIndex, createSearchTokens, inferBrandFromName, normalizeSearchText } from './search.js';
+import { getAllProducts } from '../data/catalogRepository.js';
+import { getLocalCatalogProducts } from '../data/localCatalogAdapter.js';
+import { normalizeSearchText } from './search.js';
 import { createBrandSlug, createProductSlug } from './productRouting.js';
 
-const PROMOTIONAL_NAME_PATTERN = /^-?\s*\d+\s*%\s*off$/i;
-
-export function isPromotionalName(value) {
-  return PROMOTIONAL_NAME_PATTERN.test(String(value ?? '').trim());
-}
-
-export function getSafeProductName(product) {
-  if (!isPromotionalName(product.name)) {
-    return product.name;
-  }
-
-  const description = String(product.description ?? '').trim();
-
-  if (description && !isPromotionalName(description)) {
-    return description;
-  }
-
-  return 'Fragrância LAZULE';
-}
-
-export function getCatalogProducts(sourceProducts = products) {
-  return sourceProducts.map((product) => {
-    const safeName = getSafeProductName(product);
-    const inferredBrand = product.brand && !isPromotionalName(product.brand) ? product.brand : inferBrandFromName(safeName);
-    const brand = inferredBrand || inferBrandFromName(safeName);
-    const availability = getAvailabilityStatus(product);
-    const catalogType = inferCatalogType({ ...product, name: safeName, brand });
-    const enrichedProduct = { ...product, name: safeName, originalName: product.name, brand, availability, catalogType };
-
-    return {
-      ...enrichedProduct,
-      brandSlug: createBrandSlug(brand),
-      normalizedBrand: normalizeSearchText(brand),
-      productSlug: createProductSlug(safeName),
-      normalizedName: normalizeSearchText(safeName),
-      normalizedCategory: normalizeSearchText(product.category),
-      normalizedCatalogType: normalizeSearchText(catalogType),
-      normalizedGender: normalizeSearchText(product.gender),
-      normalizedOlfactoryReference: normalizeSearchText(product.olfactoryReference),
-      searchIndex: createSearchIndex(enrichedProduct),
-      searchTokens: createSearchTokens(enrichedProduct),
-    };
-  });
+export function getCatalogProducts(sourceProducts) {
+  return sourceProducts ? getLocalCatalogProducts(sourceProducts) : getAllProducts();
 }
 
 const PRICE_RANGE_MIN_RATIO = 0.7;

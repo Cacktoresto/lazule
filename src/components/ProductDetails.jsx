@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
-import { getCatalogProducts, getProductRecommendations } from '../utils/catalog';
+import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
+import { getProductRecommendations } from '../utils/catalog';
 import { trackBrandClick, trackEvent, trackProductView, trackRecommendationClick, trackWhatsappClick } from '../utils/analytics';
-import { createBrandPath, createProductPath, createProductSlug, findProductBySlug } from '../utils/productRouting';
+import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
@@ -432,9 +433,9 @@ function StickyWhatsAppBar({ product, whatsAppLink }) {
 }
 
 export function ProductDetails({ slug }) {
-  const catalogProducts = useMemo(() => getCatalogProducts(), []);
+  const catalogProducts = useMemo(() => getAllProducts(), []);
   const normalizedSlug = createProductSlug(slug);
-  const product = findProductBySlug(catalogProducts, normalizedSlug);
+  const product = getProductBySlug(normalizedSlug, catalogProducts);
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
 
   useEffect(() => {
