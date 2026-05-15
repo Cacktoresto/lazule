@@ -128,7 +128,7 @@ function DetailImage({ product }) {
 
           return (
             <figure
-              className={`relative min-h-[78vh] w-full shrink-0 snap-center overflow-hidden bg-gradient-to-br ${slide.tone} sm:min-h-[34rem] lg:min-h-[42rem]`}
+              className={`lazule-product-hero-frame relative w-full shrink-0 snap-center overflow-hidden bg-gradient-to-br ${slide.tone}`}
               key={slide.id}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgba(248,250,252,0.13),transparent_24%),radial-gradient(circle_at_18%_68%,rgba(37,99,235,0.22),transparent_32%),radial-gradient(circle_at_82%_16%,rgba(200,162,77,0.16),transparent_28%)]" />
@@ -451,7 +451,7 @@ export function ProductDetails({ slug }) {
       <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
         <DetailImage product={product} />
 
-        <article className="lazule-hero-copy relative z-10 -mt-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] p-6 text-lazule-night shadow-mineral backdrop-blur sm:p-8 lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
+        <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
           <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)}>
             {product.brand}
           </a>
