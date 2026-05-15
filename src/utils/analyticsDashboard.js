@@ -1,4 +1,4 @@
-import { getAnalyticsSnapshot } from './analytics.js';
+import { getLocalAnalyticsEventsSnapshot } from '../data/localAnalyticsProvider.js';
 
 const EMPTY_METRICS = {
   pageViews: 0,
@@ -99,14 +99,13 @@ export function normalizeAnalyticsEvents(events = [], { dedupe = true } = {}) {
   });
 }
 
-export function getLocalAnalyticsEvents() {
-  const snapshot = getAnalyticsSnapshot();
-  return normalizeAnalyticsEvents(snapshot?.events);
+export function getLocalAnalyticsEvents(provider = getLocalAnalyticsEventsSnapshot) {
+  return normalizeAnalyticsEvents(provider());
 }
 
-export function getAnalyticsEvents() {
-  // Provider seam: swap this for Supabase, GA4 Data API, BigQuery or an API endpoint later.
-  return getLocalAnalyticsEvents();
+export function getAnalyticsEvents(provider = getLocalAnalyticsEventsSnapshot) {
+  // Provider seam: swap provider for Supabase, GA4 Data API, BigQuery or an API endpoint later.
+  return getLocalAnalyticsEvents(provider);
 }
 
 export function calculateConversionRate(productViews, whatsappClicks) {
