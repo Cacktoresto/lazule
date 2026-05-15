@@ -1,3 +1,5 @@
+import { normalizeSpaPath } from './productRouting.js';
+
 export function dispatchSpaNavigationEvent() {
   if (typeof PopStateEvent === 'function') {
     window.dispatchEvent(new PopStateEvent('popstate'));
@@ -8,8 +10,8 @@ export function dispatchSpaNavigationEvent() {
 }
 
 export function navigateSpa(path) {
-  const nextPath = String(path || '/');
-  const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const nextPath = normalizeSpaPath(path || '/');
+  const currentPath = normalizeSpaPath(`${window.location.pathname}${window.location.search}${window.location.hash}`);
 
   if (currentPath !== nextPath) {
     window.history.pushState(null, '', nextPath);

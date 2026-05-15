@@ -501,3 +501,17 @@ input {
     transform: translate3d(-50%, -50%, 0) scale(var(--bottle-scale, 1));
   }
 }
+
+.lazule-floating-whatsapp {
+  transform: translate3d(0, 0, 0);
+}
+
+.lazule-floating-whatsapp:active {
+  transform: translate3d(0, 0.08rem, 0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lazule-floating-whatsapp {
+    transition: none !important;
+  }
+}

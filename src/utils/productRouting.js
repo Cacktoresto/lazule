@@ -11,12 +11,21 @@ export function createProductSlug(productName) {
 }
 
 export function createProductPath(product) {
-  return `/produto/${createProductSlug(product.name)}`;
+  const name = typeof product === 'string' ? product : product?.name;
+  return `/produto/${encodeURIComponent(createProductSlug(name))}`;
+}
+
+function safelyDecodePathSegment(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 export function getProductSlugFromPath(pathname) {
   const match = String(pathname || '').match(/^\/produto\/([^/]+)\/?$/);
-  return match ? decodeURIComponent(match[1]) : null;
+  return match ? createProductSlug(safelyDecodePathSegment(match[1])) : null;
 }
 
 export function createBrandSlug(brandName) {
@@ -24,14 +33,25 @@ export function createBrandSlug(brandName) {
 }
 
 export function createBrandPath(brandName) {
-  return `/marca/${createBrandSlug(brandName)}`;
+  return `/marca/${encodeURIComponent(createBrandSlug(brandName))}`;
 }
 
 export function getBrandSlugFromPath(pathname) {
   const match = String(pathname || '').match(/^\/marca\/([^/]+)\/?$/);
-  return match ? decodeURIComponent(match[1]) : null;
+  return match ? createBrandSlug(safelyDecodePathSegment(match[1])) : null;
 }
 
-export function findProductBySlug(products, slug) {
-  return products.find((product) => createProductSlug(product.name) === slug) ?? null;
+export function normalizeSpaPath(path = '/') {
+  try {
+    const url = new URL(String(path || '/'), 'https://lazule.local');
+    const pathname = url.pathname !== '/' ? url.pathname.replace(/\/+$/, '') : '/';
+    return `${pathname || '/'}${url.search}${url.hash}`;
+  } catch {
+    return '/';
+  }
+}
+
+export function findProductBySlug(products = [], slug) {
+  const normalizedSlug = createProductSlug(slug);
+  return products.find((product) => createProductSlug(product.name) === normalizedSlug) ?? null;
 }

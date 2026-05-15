@@ -3,7 +3,8 @@ import { formatBRL } from '../utils/currency';
 import { getCatalogProducts, getProductRecommendations } from '../utils/catalog';
 import { trackEvent, trackWhatsAppClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug, findProductBySlug } from '../utils/productRouting';
-import { createProductWhatsAppMessage, createWhatsAppLink } from '../utils/whatsapp';
+import { createProductWhatsAppLink } from '../utils/whatsapp';
+import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 
 function normalizeProductClassifier(value) {
@@ -25,18 +26,6 @@ function shouldShowGender(category, gender) {
   }
 
   return normalizeProductClassifier(category) !== normalizedGender;
-}
-
-function upsertMetaDescription(content) {
-  let metaDescription = document.querySelector('meta[name="description"]');
-
-  if (!metaDescription) {
-    metaDescription = document.createElement('meta');
-    metaDescription.setAttribute('name', 'description');
-    document.head.appendChild(metaDescription);
-  }
-
-  metaDescription.setAttribute('content', content);
 }
 
 function getProductDisplayName(product) {
@@ -366,16 +355,20 @@ function Recommendations({ products }) {
 }
 
 function StickyWhatsAppBar({ product, whatsAppLink }) {
+  const disabled = !whatsAppLink;
+
   return (
-    <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-50 border-t border-lazule-gold/20 bg-lazule-night/88 px-4 pb-[calc(env(safe-area-inset-bottom)+0.8rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden">
+    <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-lazule-night/90 px-4 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden">
       <div className="mx-auto flex max-w-md items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
           <strong className="block truncate text-lg text-lazule-mist">{formatBRL(product.salePrice)}</strong>
         </div>
         <a
-          className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate"
-          href={whatsAppLink}
+          className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+          href={whatsAppLink || '#'}
+          aria-disabled={disabled}
+          aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
           target="_blank"
           rel="noreferrer"
           onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'sticky_product_whatsapp' })}
@@ -398,8 +391,7 @@ export function ProductDetails({ slug }) {
       return undefined;
     }
 
-    document.title = `${product.name} | LAZULE FRAGRANCES`;
-    upsertMetaDescription(`Conheça ${product.name} da marca ${product.brand} na curadoria premium LAZULE FRAGRANCES.`);
+    applyProductSeo(product);
     trackEvent('product_view', { productId: product.id, productName: product.name, brandName: product.brand });
 
     return preloadProductImage(product.image);
@@ -440,9 +432,8 @@ export function ProductDetails({ slug }) {
 
   const description = String(product.description || '').trim();
   const olfactoryReference = String(product.olfactoryReference || '').trim();
-  const productUrl = typeof window === 'undefined' ? createProductPath(product) : window.location.href;
-  const whatsAppMessage = createProductWhatsAppMessage(product.name, product.salePrice, productUrl);
-  const whatsAppLink = createWhatsAppLink(whatsAppMessage);
+  const productUrl = createCanonicalUrl(createProductPath(product));
+  const whatsAppLink = createProductWhatsAppLink(product, { productUrl });
   const showGender = shouldShowGender(product.category, product.gender);
   const accordionItems = getAccordionItems(product, description, olfactoryReference);
 
@@ -483,8 +474,9 @@ export function ProductDetails({ slug }) {
           </div>
 
           <a
-            className="lazule-premium-button lazule-cta-shimmer mt-8 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate lg:inline-flex"
+            className="lazule-premium-button lazule-cta-shimmer mt-8 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] lg:inline-flex"
             href={whatsAppLink}
+            aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
             target="_blank"
             rel="noreferrer"
             onClick={() => trackWhatsAppClick({ productId: product.id, productName: product.name, section: 'product_details' })}
