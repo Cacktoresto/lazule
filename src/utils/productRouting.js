@@ -12,7 +12,9 @@ export function createProductSlug(productName) {
 
 export function createProductPath(product) {
   const name = typeof product === 'string' ? product : product?.name;
-  return `/produto/${encodeURIComponent(createProductSlug(name))}`;
+  const slug = typeof product === 'object' && product?.productSlug ? product.productSlug : createProductSlug(name);
+
+  return `/produto/${encodeURIComponent(slug)}`;
 }
 
 function safelyDecodePathSegment(value) {
@@ -53,5 +55,5 @@ export function normalizeSpaPath(path = '/') {
 
 export function findProductBySlug(products = [], slug) {
   const normalizedSlug = createProductSlug(slug);
-  return products.find((product) => createProductSlug(product.name) === normalizedSlug) ?? null;
+  return products.find((product) => (product.productSlug ?? createProductSlug(product.name)) === normalizedSlug) ?? null;
 }

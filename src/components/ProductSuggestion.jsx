@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { getCatalogProducts } from '../utils/catalog';
-import { createProductPath, findProductBySlug } from '../utils/productRouting';
+import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
+import { createProductPath } from '../utils/productRouting';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { trackWhatsAppClick } from '../utils/analytics';
 
@@ -15,8 +15,8 @@ function getSuggestionParams() {
 
 export function ProductSuggestion() {
   const { requestedTerm, suggestionSlug } = getSuggestionParams();
-  const catalogProducts = useMemo(() => getCatalogProducts(), []);
-  const suggestedProduct = suggestionSlug ? findProductBySlug(catalogProducts, suggestionSlug) : null;
+  const catalogProducts = useMemo(() => getAllProducts(), []);
+  const suggestedProduct = suggestionSlug ? getProductBySlug(suggestionSlug, catalogProducts) : null;
   const productName = suggestedProduct?.name ?? 'fragrância sugerida';
   const whatsappMessage = requestedTerm
     ? `Olá! Busquei por "${requestedTerm}" e gostaria de consultar disponibilidade da sugestão: ${productName}`
