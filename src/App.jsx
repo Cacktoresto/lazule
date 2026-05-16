@@ -12,7 +12,8 @@ import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
-import { trackPageView } from './utils/analytics';
+import { trackCouponDetected, trackPageView, trackReferralVisit } from './utils/analytics';
+import { captureReferralParams } from './utils/referral';
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
@@ -110,6 +111,18 @@ function App() {
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
+
+  useEffect(() => {
+    const referralContext = captureReferralParams({ search: route.search });
+
+    if (referralContext.ref || referralContext.coupon || referralContext.utm_source || referralContext.utm_campaign) {
+      trackReferralVisit({ ...referralContext, source_page: 'referral_capture', page_path: `${route.pathname}${route.search}${route.hash}` });
+    }
+
+    if (referralContext.coupon) {
+      trackCouponDetected({ coupon: referralContext.coupon, source_page: 'referral_capture', page_path: `${route.pathname}${route.search}${route.hash}` });
+    }
+  }, [route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     const routeName = isProductRoute

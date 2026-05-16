@@ -4,6 +4,14 @@ import test from 'node:test';
 import { formatBRL } from '../src/utils/currency.js';
 import { createProductPath, createProductSlug, getProductSlugFromPath, normalizeSpaPath } from '../src/utils/productRouting.js';
 import { createProductWhatsAppLink, createProductWhatsAppMessage, createWhatsAppLink } from '../src/utils/whatsapp.js';
+import {
+  captureReferralParams,
+  clearReferralContext,
+  enrichPayloadWithReferral,
+  formatReferralForWhatsapp,
+  getReferralContext,
+  referralConfig,
+} from '../src/utils/referral.js';
 
 import {
   createProductAnalyticsPayload,
@@ -12,6 +20,7 @@ import {
   resetAnalyticsForTests,
   shouldTrackEvent,
   trackProductView,
+  trackWhatsappClick,
 } from '../src/utils/analytics.js';
 
 test('formatBRL formats valid prices and falls back safely', () => {
@@ -145,4 +154,145 @@ test('SEO and WhatsApp helpers consume normalized product fallbacks safely', () 
   assert.equal(jsonLd.offers.availability, 'https://schema.org/InStock');
   assert.match(whatsapp, /Preço: R\$\s*0,00/);
   assert.match(whatsapp, /Link: https:\/\/lazulefragrances\.com\.br\/produto\/teste-seguro/);
+});
+
+
+function createMemoryLocalStorage() {
+  const store = new Map();
+
+  return {
+    getItem: (key) => (store.has(key) ? store.get(key) : null),
+    setItem: (key, value) => store.set(key, String(value)),
+    removeItem: (key) => store.delete(key),
+    clear: () => store.clear(),
+  };
+}
+
+function installBrowserGlobals(search = '') {
+  const localStorage = createMemoryLocalStorage();
+  const listeners = new Map();
+
+  global.window = {
+    localStorage,
+    location: {
+      pathname: '/',
+      search,
+      hash: '',
+      origin: 'https://lazulefragrances.com.br',
+      href: `https://lazulefragrances.com.br/${search}`,
+    },
+    dispatchEvent(event) {
+      for (const listener of listeners.get(event.type) || []) {
+        listener(event);
+      }
+      return true;
+    },
+    addEventListener(type, listener) {
+      const entries = listeners.get(type) || [];
+      listeners.set(type, [...entries, listener]);
+    },
+    removeEventListener(type, listener) {
+      listeners.set(type, (listeners.get(type) || []).filter((entry) => entry !== listener));
+    },
+    CustomEvent: class CustomEvent extends Event {
+      constructor(type, options = {}) {
+        super(type);
+        this.detail = options.detail;
+      }
+    },
+  };
+  global.document = { title: 'LAZULE', head: { appendChild() {} }, getElementById: () => null };
+
+  return localStorage;
+}
+
+function uninstallBrowserGlobals() {
+  clearReferralContext();
+  delete global.window;
+  delete global.document;
+}
+
+test('referral captures ref/coupon/utm with first-touch persistence', () => {
+  installBrowserGlobals('?ref=@criadora&coupon=cria10&utm_source=instagram&utm_campaign=maio');
+
+  const context = captureReferralParams({ now: 1_000 });
+
+  assert.equal(context.ref, 'criadora');
+  assert.equal(context.coupon, 'CRIA10');
+  assert.equal(context.utm_source, 'instagram');
+  assert.equal(context.utm_campaign, 'maio');
+  assert.equal(context.attributionRule, referralConfig.attributionRule);
+
+  const preservedContext = captureReferralParams({ search: '?ref=outra&coupon=novo20', now: 2_000 });
+  assert.equal(preservedContext.ref, 'criadora');
+  assert.equal(preservedContext.coupon, 'CRIA10');
+
+  uninstallBrowserGlobals();
+});
+
+test('referral context expires after configurable window', () => {
+  installBrowserGlobals('?ref=influencer&coupon=VIP10');
+
+  captureReferralParams({ expirationDays: 1, now: 10_000 });
+  assert.equal(getReferralContext({ now: 10_000 + 23 * 60 * 60 * 1000 }).coupon, 'VIP10');
+  assert.deepEqual(getReferralContext({ now: 10_000 + 25 * 60 * 60 * 1000 }), {});
+
+  uninstallBrowserGlobals();
+});
+
+test('referral sanitizes values and limits dangerous characters', () => {
+  installBrowserGlobals('?ref=@ana<script>alert(1)</script>&coupon=cria 10!!&utm_source=insta/gr.am&utm_campaign='.concat('x'.repeat(120)));
+
+  const context = captureReferralParams({ now: 1_000 });
+
+  assert.equal(context.ref, 'anascriptalert1script');
+  assert.equal(context.coupon, 'CRIA10');
+  assert.equal(context.utm_source, 'instagr.am');
+  assert.equal(context.utm_campaign.length, 80);
+
+  uninstallBrowserGlobals();
+});
+
+test('referral enriches analytics payloads without collecting personal data', () => {
+  installBrowserGlobals('?ref=criadora&coupon=cria10&utm_source=instagram&utm_campaign=drop');
+  captureReferralParams({ now: Date.now() });
+  resetAnalyticsForTests();
+
+  const payload = enrichPayloadWithReferral({ event: 'manual_check' });
+  assert.deepEqual(payload, {
+    event: 'manual_check',
+    ref: 'criadora',
+    coupon: 'CRIA10',
+    utm_source: 'instagram',
+    utm_campaign: 'drop',
+  });
+
+  const event = trackWhatsappClick({ source_page: 'product', cta_location: 'test' });
+  assert.equal(event.payload.ref, 'criadora');
+  assert.equal(event.payload.coupon, 'CRIA10');
+  assert.equal(event.payload.utm_source, 'instagram');
+  assert.ok(!Object.hasOwn(event.payload, 'phone'));
+  assert.ok(!Object.hasOwn(event.payload, 'customer_name'));
+
+  uninstallBrowserGlobals();
+});
+
+test('WhatsApp product message includes active coupon and referral', () => {
+  installBrowserGlobals('?ref=criadora&coupon=cria10');
+  const referralContext = captureReferralParams({ now: 1_000 });
+  const message = createProductWhatsAppMessage(
+    { name: 'Perfume X', brand: 'LAZULE', salePrice: 199 },
+    undefined,
+    'https://lazulefragrances.com.br/produto/perfume-x',
+    { referralContext },
+  );
+
+  assert.match(message, /Produto: Perfume X/);
+  assert.match(message, /Preço: R\$\s*199,00/);
+  assert.match(message, /Link: https:\/\/lazulefragrances\.com\.br\/produto\/perfume-x/);
+  assert.match(message, /Cupom: CRIA10/);
+  assert.match(message, /Indicação: @criadora/);
+  assert.equal(formatReferralForWhatsapp(referralContext), 'Cupom: CRIA10\nIndicação: @criadora');
+
+  uninstallBrowserGlobals();
 });

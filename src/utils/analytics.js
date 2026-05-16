@@ -1,3 +1,4 @@
+import { enrichPayloadWithReferral } from './referral.js';
 const STORAGE_KEY = 'lazule.analytics.v2';
 const MAX_STORED_EVENTS = 250;
 const MAX_STORED_SEARCHES = 100;
@@ -381,6 +382,10 @@ function forwardToMetaPixel(event) {
   }
 }
 
+function shouldEnrichWithReferral(eventName) {
+  return eventName === 'whatsapp_click' || eventName === 'product_view' || eventName === 'product_card_click';
+}
+
 function mapEventForDestinations(eventName, payload) {
   const mapped = { gaEventName: eventName, metaEventName: eventName, metaPayload: payload };
 
@@ -424,7 +429,9 @@ export function trackEvent(eventName, payload = {}, options = {}) {
     return null;
   }
 
-  const normalizedPayload = normalizeAnalyticsPayload(eventName, payload);
+  const normalizedPayload = shouldEnrichWithReferral(eventName)
+    ? enrichPayloadWithReferral(normalizeAnalyticsPayload(eventName, payload))
+    : normalizeAnalyticsPayload(eventName, payload);
 
   if (!shouldTrackEvent(eventName, normalizedPayload, options)) {
     return null;
@@ -483,6 +490,19 @@ export function trackProductSelect(product, extraPayload = {}) {
 export function trackWhatsappClick(payload = {}) {
   // Privacidade: não coletamos nome, telefone, endereço ou conteúdo da conversa no WhatsApp.
   return trackEvent('whatsapp_click', createIntentPayload(payload));
+}
+
+export function trackReferralVisit(payload = {}) {
+  // Privacidade: apenas origem/cupom/campanha, sem dados pessoais.
+  return trackEvent('referral_visit', createIntentPayload(payload), { dedupeKey: `referral_visit|${payload.ref || ''}|${payload.coupon || ''}|${payload.utm_source || ''}|${payload.utm_campaign || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackCouponDetected(payload = {}) {
+  if (!payload.coupon) {
+    return null;
+  }
+
+  return trackEvent('coupon_detected', createIntentPayload(payload), { dedupeKey: `coupon_detected|${payload.coupon}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
 }
 
 export function trackSearch(payload = {}) {

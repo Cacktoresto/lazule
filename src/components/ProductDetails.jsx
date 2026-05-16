@@ -5,6 +5,7 @@ import { getProductRecommendations } from '../utils/catalog';
 import { trackBrandClick, trackEvent, trackProductView, trackRecommendationClick, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
+import { getReferralChangeEventName, getReferralContext } from '../utils/referral';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 
@@ -114,6 +115,19 @@ function preloadProductImage(image) {
   return () => {
     link.remove();
   };
+}
+
+
+function ReferralCouponBadge({ coupon, className = '' }) {
+  if (!coupon) {
+    return null;
+  }
+
+  return (
+    <div className={`inline-flex items-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold shadow-aureate/20 backdrop-blur ${className}`}>
+      Cupom aplicado: {coupon}
+    </div>
+  );
 }
 
 function DetailImage({ product }) {
@@ -403,7 +417,7 @@ function Recommendations({ products }) {
   );
 }
 
-function StickyWhatsAppBar({ product, whatsAppLink }) {
+function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   const disabled = !whatsAppLink;
 
   return (
@@ -412,6 +426,7 @@ function StickyWhatsAppBar({ product, whatsAppLink }) {
         <div className="min-w-0 flex-1">
           <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
           <strong className="block truncate text-lg text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+          <ReferralCouponBadge coupon={referralContext?.coupon} className="mt-1 border-lazule-gold/25 bg-lazule-gold/8 px-2 py-0.5 text-[0.55rem] tracking-[0.12em]" />
         </div>
         <a
           className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
@@ -437,6 +452,17 @@ export function ProductDetails({ slug }) {
   const normalizedSlug = createProductSlug(slug);
   const product = getProductBySlug(normalizedSlug, catalogProducts);
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
+  const [referralContext, setReferralContext] = useState(() => getReferralContext());
+
+  useEffect(() => {
+    const eventName = getReferralChangeEventName();
+    const refreshReferralContext = () => setReferralContext(getReferralContext());
+
+    refreshReferralContext();
+    window.addEventListener(eventName, refreshReferralContext);
+
+    return () => window.removeEventListener(eventName, refreshReferralContext);
+  }, []);
 
   useEffect(() => {
     if (!product) {
@@ -485,7 +511,7 @@ export function ProductDetails({ slug }) {
   const description = String(product.description || '').trim();
   const olfactoryReference = String(product.olfactoryReference || '').trim();
   const productUrl = createCanonicalUrl(createProductPath(product));
-  const whatsAppLink = createProductWhatsAppLink(product, { productUrl });
+  const whatsAppLink = createProductWhatsAppLink(product, { productUrl, referralContext });
   const showGender = shouldShowGender(product.category, product.gender);
   const accordionItems = getAccordionItems(product, description, olfactoryReference);
 
@@ -519,6 +545,8 @@ export function ProductDetails({ slug }) {
             <span className={`rounded-full border px-3 py-1 text-[0.68rem] ${product.availability.className}`}>{product.availability.label}</span>
           </div>
 
+          <ReferralCouponBadge coupon={referralContext.coupon} className="mt-5" />
+
           <div className="mt-6 flex flex-wrap gap-2 text-xs text-slate-600 lg:text-slate-300">
             <span>{product.category}</span>
             {showGender && <span>• {product.gender}</span>}
@@ -550,7 +578,7 @@ export function ProductDetails({ slug }) {
         <VibeSection product={product} />
         <Recommendations products={recommendations} />
       </div>
-      <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} />
+      <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
     </section>
   );
 }
