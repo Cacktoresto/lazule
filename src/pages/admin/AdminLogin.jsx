@@ -11,17 +11,23 @@ function getFriendlyError(error) {
 }
 
 export function AdminLogin() {
-  const { authError, authUnavailableReason, isAdmin, isAuthAvailable, isAuthenticated, isLoading, signInWithEmailPassword } = useAuth();
+  const { authError, authUnavailableReason, isAdmin, isAuthAvailable, isAuthenticated, isInfluencer, isLoading, signInWithEmailPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated && isAdmin) {
-      navigateSpa('/admin/analytics');
+    if (isLoading || !isAuthenticated) {
+      return;
     }
-  }, [isAdmin, isAuthenticated, isLoading]);
+
+    if (isAdmin) {
+      navigateSpa('/admin/analytics');
+    } else if (isInfluencer) {
+      navigateSpa('/influencer');
+    }
+  }, [isAdmin, isAuthenticated, isInfluencer, isLoading]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -70,9 +76,9 @@ export function AdminLogin() {
             </div>
           ) : null}
 
-          {isAuthenticated && !isAdmin && !isLoading ? (
+          {isAuthenticated && !isAdmin && !isInfluencer && !isLoading ? (
             <div className="mt-8 rounded-2xl border border-red-300/25 bg-red-400/10 p-4 text-sm leading-6 text-red-100">
-              Conta autenticada, mas sem permissão admin ativa.
+              Conta autenticada, mas sem permissão admin ou influencer ativa.
             </div>
           ) : null}
 

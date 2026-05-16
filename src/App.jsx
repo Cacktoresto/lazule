@@ -12,8 +12,10 @@ import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { AuthProvider } from './auth/AuthProvider';
 import { RequireAdmin } from './auth/RequireAdmin';
+import { RequireInfluencerOrAdmin } from './auth/RequireInfluencerOrAdmin';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { InfluencerLoginRedirect } from './pages/influencer/InfluencerLoginRedirect';
+import { InfluencerDashboard } from './pages/influencer/InfluencerDashboard';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
@@ -22,7 +24,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer\/login\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -145,11 +147,13 @@ function App() {
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
   const isAdminLoginRoute = route.pathname === '/admin/login';
   const isInfluencerLoginRoute = route.pathname === '/influencer/login';
+  const isInfluencerDashboardRoute = route.pathname === '/influencer';
   const isAdminRoute = route.pathname.startsWith('/admin/');
+  const isProtectedDashboardRoute = isAdminRoute || isInfluencerDashboardRoute;
   const isPromoReferralRouteActive = isPromoReferralRoute(route.pathname);
 
   useEffect(() => {
-    if (isPromoReferralRouteActive || isAdminRoute) {
+    if (isPromoReferralRouteActive || isProtectedDashboardRoute) {
       return;
     }
 
@@ -162,7 +166,7 @@ function App() {
     if (referralContext.coupon) {
       trackCouponDetected({ coupon: referralContext.coupon, source_page: 'referral_capture', page_path: `${route.pathname}${route.search}${route.hash}` });
     }
-  }, [isAdminRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+  }, [isPromoReferralRouteActive, isProtectedDashboardRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     if (!isPromoReferralRouteActive) {
@@ -225,6 +229,8 @@ function App() {
       routeName = 'promo_referral';
     } else if (isAnalyticsDashboardRoute) {
       routeName = 'admin_analytics';
+    } else if (isInfluencerDashboardRoute) {
+      routeName = 'influencer_dashboard';
     } else if (isBrandRoute) {
       routeName = 'brand';
     } else if (isCatalogRoute) {
@@ -237,10 +243,10 @@ function App() {
       routeName = 'product_suggestion';
     }
 
-    if (!isAdminRoute) {
+    if (!isProtectedDashboardRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isAdminRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -314,6 +320,10 @@ function App() {
             <AdminLogin />
           ) : isInfluencerLoginRoute ? (
             <InfluencerLoginRedirect />
+          ) : isInfluencerDashboardRoute ? (
+            <RequireInfluencerOrAdmin>
+              <InfluencerDashboard />
+            </RequireInfluencerOrAdmin>
           ) : isAnalyticsDashboardRoute ? (
             <RequireAdmin>
               <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70">Carregando dashboard LAZULE...</div>}>
@@ -338,7 +348,7 @@ function App() {
         </main>
         <Footer />
       </div>
-        <WhatsAppButton hidden={isProductRoute || isAdminRoute || isPromoReferralRouteActive} />
+        <WhatsAppButton hidden={isProductRoute || isProtectedDashboardRoute || isPromoReferralRouteActive} />
       </div>
     </AuthProvider>
   );

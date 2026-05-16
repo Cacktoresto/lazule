@@ -306,3 +306,58 @@ export function aggregateFunnel(events = []) {
     };
   });
 }
+
+const REFERRAL_EVENT_NAMES = new Set(['referral_visit', 'promo_route_visit', 'influencer_route_visit', 'referral_applied', 'coupon_detected']);
+
+function normalizeReferralRef(value) {
+  return normalizeText(value).replace(/^@+/, '').toLowerCase();
+}
+
+function normalizeCouponCode(value) {
+  return normalizeText(value).toUpperCase();
+}
+
+export function normalizeInfluencerProfile(profile = {}) {
+  return {
+    ...profile,
+    influencer_ref: normalizeReferralRef(profile.influencer_ref ?? profile.influencerRef ?? profile.ref),
+    coupon_code: normalizeCouponCode(profile.coupon_code ?? profile.couponCode ?? profile.coupon),
+  };
+}
+
+function getEventRef(payload = {}) {
+  return normalizeReferralRef(payload.ref ?? payload.influencer_ref ?? payload.influencerRef);
+}
+
+function getEventCoupon(payload = {}) {
+  return normalizeCouponCode(payload.coupon ?? payload.coupon_code ?? payload.couponCode);
+}
+
+export function eventMatchesInfluencer(event, influencer = {}) {
+  const profile = normalizeInfluencerProfile(influencer);
+  const payload = getPayload(event);
+  const influencerRef = profile.influencer_ref;
+  const couponCode = profile.coupon_code;
+
+  if (!influencerRef && !couponCode) {
+    return false;
+  }
+
+  return Boolean((influencerRef && getEventRef(payload) === influencerRef) || (couponCode && getEventCoupon(payload) === couponCode));
+}
+
+export function filterAnalyticsEventsByInfluencer(events = [], influencer = {}) {
+  return normalizeAnalyticsEvents(events).filter((event) => eventMatchesInfluencer(event, influencer));
+}
+
+export function aggregateInfluencerMetrics(events = [], influencer = {}) {
+  const attributedEvents = filterAnalyticsEventsByInfluencer(events, influencer);
+  const baseMetrics = aggregateMetrics(attributedEvents);
+  const referralVisits = attributedEvents.filter((event) => REFERRAL_EVENT_NAMES.has(getEventName(event))).length;
+
+  return {
+    ...baseMetrics,
+    attributedEvents: attributedEvents.length,
+    referralVisits,
+  };
+}

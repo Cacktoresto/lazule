@@ -262,6 +262,31 @@ class LazuleSupabaseAuthClient {
     return { error: null };
   }
 
+  async selectInfluencerProfiles(session) {
+    if (!session?.access_token) {
+      return { profiles: [], error: null };
+    }
+
+    try {
+      const response = await fetch(`${this.url}/rest/v1/profiles?role=eq.influencer&select=id,email,full_name,name,display_name,role,is_active,influencer_ref,coupon_code,created_at&order=created_at.desc`, {
+        headers: {
+          apikey: this.anonKey,
+          Authorization: `Bearer ${session.access_token}`,
+          Accept: 'application/json',
+        },
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw mapAuthError(payload, 'Não foi possível carregar os perfis influencers.');
+      }
+
+      return { profiles: Array.isArray(payload) ? payload : [], error: null };
+    } catch (error) {
+      return { profiles: [], error };
+    }
+  }
+
   async selectProfile(session) {
     if (!session?.access_token || !session.user?.id) {
       return { profile: null, error: null };

@@ -6,7 +6,10 @@ import {
   aggregateMetrics,
   aggregateTopProducts,
   aggregateTopSearches,
+  aggregateInfluencerMetrics,
   calculateConversionRate,
+  eventMatchesInfluencer,
+  filterAnalyticsEventsByInfluencer,
   normalizeAnalyticsEvents,
 } from '../src/utils/analyticsDashboard.js';
 
@@ -78,4 +81,31 @@ test('analytics dashboard ignores malformed events and deduplicates identical sn
 
   assert.equal(normalized.length, 1);
   assert.equal(aggregateMetrics([null, {}, duplicateEvent, { ...duplicateEvent }]).pageViews, 1);
+});
+
+test('analytics dashboard filters attribution by influencer ref or coupon only', () => {
+  const events = [
+    { name: 'influencer_route_visit', timestamp: '2026-05-15T10:00:00.000Z', payload: { ref: 'lucas', page_path: '/i/lucas' } },
+    { name: 'product_view', timestamp: '2026-05-15T10:01:00.000Z', payload: { ref: 'lucas', coupon: 'LUCAS10', product_name: 'Asad' } },
+    { name: 'whatsapp_click', timestamp: '2026-05-15T10:02:00.000Z', payload: { coupon: 'LUCAS10', product_name: 'Asad' } },
+    { name: 'product_view', timestamp: '2026-05-15T10:03:00.000Z', payload: { ref: 'maria', coupon: 'MARIA10', product_name: 'Turathi' } },
+  ];
+
+  const influencer = { influencer_ref: '@Lucas', coupon_code: 'lucas10' };
+  const filtered = filterAnalyticsEventsByInfluencer(events, influencer);
+  const metrics = aggregateInfluencerMetrics(events, influencer);
+
+  assert.equal(filtered.length, 3);
+  assert.equal(metrics.attributedEvents, 3);
+  assert.equal(metrics.referralVisits, 1);
+  assert.equal(metrics.productViews, 1);
+  assert.equal(metrics.whatsappClicks, 1);
+  assert.equal(metrics.productToWhatsappRate, 1);
+});
+
+test('analytics dashboard does not attribute events when profile has no ref or coupon', () => {
+  const event = { name: 'product_view', timestamp: '2026-05-15T10:00:00.000Z', payload: { ref: 'lucas', coupon: 'LUCAS10' } };
+
+  assert.equal(eventMatchesInfluencer(event, {}), false);
+  assert.equal(aggregateInfluencerMetrics([event], {}).attributedEvents, 0);
 });
