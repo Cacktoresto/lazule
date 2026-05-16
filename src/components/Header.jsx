@@ -4,13 +4,15 @@ const navigationItems = [
   { href: '/', label: 'Início' },
   { href: '/catalogo', label: 'Catálogo' },
   { href: '/faq', label: 'Como funciona' },
+  { href: '/influencer/login', label: 'Área do parceiro', ariaLabel: 'Acessar Área do parceiro', variant: 'partner' },
 ];
 
-function NavigationLink({ href, children, className = '' }) {
+function NavigationLink({ href, children, className = '', ariaLabel }) {
   return (
     <a
       className={`rounded-full px-3 py-2 transition duration-200 hover:bg-white/5 hover:text-lazule-gold active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night ${className}`}
       href={href}
+      aria-label={ariaLabel}
     >
       {children}
     </a>
@@ -41,7 +43,12 @@ export function Header({ immersiveProduct = false }) {
 
         <nav className="hidden items-center gap-2 text-sm text-slate-300 md:flex" aria-label="Navegação principal">
           {navigationItems.map((item) => (
-            <NavigationLink key={item.href} href={item.href}>
+            <NavigationLink
+              key={item.href}
+              href={item.href}
+              ariaLabel={item.ariaLabel}
+              className={item.variant === 'partner' ? 'text-slate-400 hover:text-lazule-gold' : ''}
+            >
               {item.label}
             </NavigationLink>
           ))}
@@ -57,9 +64,16 @@ export function Header({ immersiveProduct = false }) {
         </a>
       </div>
 
-      <nav className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-3 text-sm text-slate-300 [scrollbar-width:none] md:hidden" aria-label="Navegação mobile">
+      <nav className="mx-auto grid max-w-7xl grid-cols-2 gap-2 px-4 pb-3 text-sm text-slate-300 sm:flex sm:flex-wrap md:hidden" aria-label="Navegação mobile">
         {navigationItems.map((item) => (
-          <NavigationLink key={item.href} href={item.href} className="shrink-0 border border-white/10 bg-white/[0.04]">
+          <NavigationLink
+            key={item.href}
+            href={item.href}
+            ariaLabel={item.ariaLabel}
+            className={`shrink-0 border border-white/10 bg-white/[0.04] text-center ${
+              item.variant === 'partner' ? 'border-lazule-gold/20 bg-lazule-gold/[0.035] text-slate-400' : ''
+            }`}
+          >
             {item.label}
           </NavigationLink>
         ))}
