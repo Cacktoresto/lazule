@@ -2,6 +2,16 @@ import { useEffect } from 'react';
 import { navigateSpa } from '../utils/navigation.js';
 import { useAuth } from './useAuth.js';
 
+const isDevEnvironment = import.meta.env.DEV;
+
+function getAuthUnavailableDescription(authUnavailableReason, fallback) {
+  if (isDevEnvironment) {
+    return authUnavailableReason || fallback;
+  }
+
+  return 'Portal temporariamente indisponível.';
+}
+
 function PremiumGateState({ eyebrow, title, description, action }) {
   return (
     <section className="mx-auto flex min-h-[62vh] max-w-4xl items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
@@ -30,7 +40,10 @@ export function RequireAdmin({ children }) {
       <PremiumGateState
         eyebrow="Configuração segura"
         title="Autenticação indisponível"
-        description={authUnavailableReason || 'Configure as variáveis públicas do Supabase para habilitar o acesso administrativo.'}
+        description={getAuthUnavailableDescription(
+          authUnavailableReason,
+          'Configure as variáveis públicas do Supabase para habilitar o acesso administrativo.',
+        )}
       />
     );
   }
