@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /promo/
+Disallow: /i/
+Disallow: /indica/
 
 Sitemap: https://lazulefragrances.com.br/sitemap.xml

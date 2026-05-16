@@ -104,7 +104,10 @@ function writeSitemap(baseDir) {
 }
 
 function writeRobots(baseDir) {
-  writeText(path.join(baseDir, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${absoluteUrl('/sitemap.xml')}\n`);
+  writeText(
+    path.join(baseDir, 'robots.txt'),
+    `User-agent: *\nAllow: /\nDisallow: /promo/\nDisallow: /i/\nDisallow: /indica/\n\nSitemap: ${absoluteUrl('/sitemap.xml')}\n`,
+  );
 }
 
 function writeRouteHtmlFiles(baseDir) {
