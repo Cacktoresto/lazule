@@ -10,6 +10,8 @@ export const REMOTE_ANALYTICS_ALLOWED_EVENTS = new Set([
   'coupon_manual_apply',
   'referral_manual_apply',
   'coupon_removed',
+  'influencer_invite_opened',
+  'influencer_signup_completed',
 ]);
 
 const METADATA_ALLOWLIST = new Set([
@@ -26,6 +28,9 @@ const METADATA_ALLOWLIST = new Set([
   'route_name',
   'cta_location',
   'interaction_type',
+  'invite_id',
+  'has_ref',
+  'has_coupon',
   'product_id',
   'product_slug',
   'product_name',

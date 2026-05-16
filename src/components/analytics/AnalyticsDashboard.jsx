@@ -14,6 +14,7 @@ import { AnalyticsTable } from './AnalyticsTable';
 import { EmptyAnalyticsState } from './EmptyAnalyticsState';
 import { FunnelSummary } from './FunnelSummary';
 import { MetricCard } from './MetricCard';
+import { PartnerInvitesAdmin } from './PartnerInvitesAdmin.jsx';
 import { RankingList } from './RankingList';
 
 function formatNumber(value) {
@@ -86,6 +87,8 @@ export function AnalyticsDashboard() {
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {summaryCards.map((card) => <MetricCard key={card.label} {...card} />)}
       </section>
+
+      <PartnerInvitesAdmin />
 
       {!hasEvents ? <div className="mt-8"><EmptyAnalyticsState /></div> : null}
 

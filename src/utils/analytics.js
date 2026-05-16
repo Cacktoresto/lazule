@@ -569,6 +569,39 @@ export function trackCouponDetected(payload = {}) {
   return trackEvent('coupon_detected', createIntentPayload(payload), { dedupeKey: `coupon_detected|${payload.coupon}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
 }
 
+export function trackInfluencerInviteCreated(payload = {}) {
+  return trackEvent('influencer_invite_created', createIntentPayload({
+    invite_id: normalizeText(payload.invite_id ?? payload.inviteId),
+    has_ref: Boolean(payload.has_ref ?? payload.hasRef),
+    has_coupon: Boolean(payload.has_coupon ?? payload.hasCoupon),
+    source_page: payload.source_page || 'admin_invites',
+    page_path: '/admin/analytics#partner-invites',
+    canonical_url: '/admin/analytics#partner-invites',
+  }));
+}
+
+export function trackInfluencerInviteOpened(payload = {}) {
+  return trackEvent('influencer_invite_opened', createIntentPayload({
+    invite_id: normalizeText(payload.invite_id ?? payload.inviteId),
+    has_ref: Boolean(payload.has_ref ?? payload.hasRef),
+    has_coupon: Boolean(payload.has_coupon ?? payload.hasCoupon),
+    source_page: payload.source_page || 'partner_invite',
+    page_path: '/influencer/invite',
+    canonical_url: '/influencer/invite',
+  }), { dedupeKey: `influencer_invite_opened|${payload.invite_id || payload.inviteId || ''}|${getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackInfluencerSignupCompleted(payload = {}) {
+  return trackEvent('influencer_signup_completed', createIntentPayload({
+    invite_id: normalizeText(payload.invite_id ?? payload.inviteId),
+    has_ref: Boolean(payload.has_ref ?? payload.hasRef),
+    has_coupon: Boolean(payload.has_coupon ?? payload.hasCoupon),
+    source_page: payload.source_page || 'partner_invite',
+    page_path: '/influencer/invite',
+    canonical_url: '/influencer/invite',
+  }));
+}
+
 export function trackSearch(payload = {}) {
   return trackEvent('search', createSearchAnalyticsPayload(payload), { dedupeMs: 1200 });
 }

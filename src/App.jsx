@@ -15,6 +15,7 @@ import { RequireAdmin } from './auth/RequireAdmin';
 import { RequireInfluencerOrAdmin } from './auth/RequireInfluencerOrAdmin';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { InfluencerDashboard } from './pages/influencer/InfluencerDashboard';
+import { InfluencerInvite } from './pages/influencer/InfluencerInvite';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
@@ -23,7 +24,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -147,12 +148,14 @@ function App() {
   const isAdminLoginRoute = route.pathname === '/admin/login';
   const isInfluencerLoginRoute = route.pathname === '/influencer/login';
   const isInfluencerDashboardRoute = route.pathname === '/influencer';
+  const isInfluencerInviteRoute = route.pathname.startsWith('/influencer/invite/');
+  const influencerInviteToken = isInfluencerInviteRoute ? route.pathname.split('/').filter(Boolean).at(-1) : '';
   const isAdminRoute = route.pathname.startsWith('/admin/');
   const isProtectedDashboardRoute = isAdminRoute || isInfluencerDashboardRoute;
   const isPromoReferralRouteActive = isPromoReferralRoute(route.pathname);
 
   useEffect(() => {
-    if (isPromoReferralRouteActive || isProtectedDashboardRoute) {
+    if (isPromoReferralRouteActive || isProtectedDashboardRoute || isInfluencerInviteRoute) {
       return;
     }
 
@@ -165,10 +168,10 @@ function App() {
     if (referralContext.coupon) {
       trackCouponDetected({ coupon: referralContext.coupon, source_page: 'referral_capture', page_path: `${route.pathname}${route.search}${route.hash}` });
     }
-  }, [isPromoReferralRouteActive, isProtectedDashboardRoute, route.hash, route.pathname, route.search]);
+  }, [isPromoReferralRouteActive, isProtectedDashboardRoute, isInfluencerInviteRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
-    if (!isPromoReferralRouteActive) {
+    if (!isPromoReferralRouteActive && !isInfluencerInviteRoute) {
       return undefined;
     }
 
@@ -191,7 +194,7 @@ function App() {
         robotsMeta.removeAttribute('content');
       }
     };
-  }, [isPromoReferralRouteActive]);
+  }, [isPromoReferralRouteActive, isInfluencerInviteRoute]);
 
   useEffect(() => {
     if (!isPromoReferralRouteActive) {
@@ -230,6 +233,8 @@ function App() {
       routeName = 'admin_analytics';
     } else if (isInfluencerDashboardRoute) {
       routeName = 'influencer_dashboard';
+    } else if (isInfluencerInviteRoute) {
+      routeName = 'influencer_invite';
     } else if (isBrandRoute) {
       routeName = 'brand';
     } else if (isCatalogRoute) {
@@ -242,10 +247,10 @@ function App() {
       routeName = 'product_suggestion';
     }
 
-    if (!isProtectedDashboardRoute) {
+    if (!isProtectedDashboardRoute && !isInfluencerInviteRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -319,6 +324,8 @@ function App() {
             <AdminLogin />
           ) : isInfluencerLoginRoute ? (
             <AdminLogin experience="partner" />
+          ) : isInfluencerInviteRoute ? (
+            <InfluencerInvite token={influencerInviteToken} />
           ) : isInfluencerDashboardRoute ? (
             <RequireInfluencerOrAdmin>
               <InfluencerDashboard />
@@ -347,7 +354,7 @@ function App() {
         </main>
         <Footer />
       </div>
-        <WhatsAppButton hidden={isProductRoute || isProtectedDashboardRoute || isPromoReferralRouteActive} />
+        <WhatsAppButton hidden={isProductRoute || isProtectedDashboardRoute || isPromoReferralRouteActive || isInfluencerInviteRoute} />
       </div>
     </AuthProvider>
   );

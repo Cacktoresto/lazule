@@ -74,6 +74,9 @@ function createUnavailableAuthClient(reason) {
       async signInWithPassword() {
         return { data: { session: null, user: null }, error: unavailableError };
       },
+      async signUp() {
+        return { data: { session: null, user: null }, error: unavailableError };
+      },
       async signOut() {
         return { error: unavailableError };
       },
@@ -95,6 +98,7 @@ class LazuleSupabaseAuthClient {
       getSession: this.getSession.bind(this),
       onAuthStateChange: this.onAuthStateChange.bind(this),
       signInWithPassword: this.signInWithPassword.bind(this),
+      signUp: this.signUp.bind(this),
       signOut: this.signOut.bind(this),
       refreshSession: this.refreshSession.bind(this),
     };
@@ -221,6 +225,36 @@ class LazuleSupabaseAuthClient {
     }
   }
 
+  async signUp({ email, password, options = {} }) {
+    try {
+      const payload = await this.request('/auth/v1/signup', {
+        method: 'POST',
+        body: {
+          email,
+          password,
+          data: options.data || {},
+        },
+      });
+      const session = payload.session || (payload.access_token ? {
+        access_token: payload.access_token,
+        refresh_token: payload.refresh_token,
+        expires_in: payload.expires_in,
+        expires_at: payload.expires_at || Math.floor(Date.now() / 1000) + Number(payload.expires_in || 0),
+        token_type: payload.token_type || 'bearer',
+        user: payload.user || null,
+      } : null);
+
+      if (session?.access_token) {
+        this.writeStoredSession(session);
+        this.notify('SIGNED_IN', session);
+      }
+
+      return { data: { session, user: payload.user || session?.user || null }, error: null };
+    } catch (error) {
+      return { data: { session: null, user: null }, error };
+    }
+  }
+
   async refreshSession(session = this.readStoredSession()) {
     try {
       if (!session?.refresh_token) {
@@ -260,6 +294,67 @@ class LazuleSupabaseAuthClient {
 
     this.notify('SIGNED_OUT', null);
     return { error: null };
+  }
+
+  async rpc(functionName, { session, body } = {}) {
+    try {
+      const response = await fetch(`${this.url}/rest/v1/rpc/${encodeURIComponent(functionName)}`, {
+        method: 'POST',
+        headers: {
+          apikey: this.anonKey,
+          Authorization: `Bearer ${session?.access_token || this.anonKey}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(body || {}),
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw mapAuthError(payload, 'Não foi possível concluir a operação segura.');
+      }
+
+      return { data: payload, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async createPartnerInvite(session, invite) {
+    return this.rpc('admin_create_partner_invite', { session, body: invite });
+  }
+
+  async getPartnerInvite(token) {
+    return this.rpc('get_partner_invite_public', { body: { invite_token: token } });
+  }
+
+  async acceptPartnerInvite(session, token) {
+    return this.rpc('accept_partner_invite', { session, body: { invite_token: token } });
+  }
+
+  async selectPartnerInvites(session) {
+    if (!session?.access_token) {
+      return { invites: [], error: null };
+    }
+
+    try {
+      const response = await fetch(`${this.url}/rest/v1/partner_invites?select=id,email,role,influencer_ref,coupon_code,token,invited_by,expires_at,accepted_at,is_active,created_at&order=created_at.desc&limit=50`, {
+        headers: {
+          apikey: this.anonKey,
+          Authorization: `Bearer ${session.access_token}`,
+          Accept: 'application/json',
+        },
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw mapAuthError(payload, 'Não foi possível carregar os convites de parceiros.');
+      }
+
+      return { invites: Array.isArray(payload) ? payload : [], error: null };
+    } catch (error) {
+      return { invites: [], error };
+    }
   }
 
   async selectInfluencerProfiles(session) {
