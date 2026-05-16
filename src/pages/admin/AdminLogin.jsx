@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { navigateSpa } from '../../utils/navigation.js';
 import { useAuth } from '../../auth/useAuth.js';
 
+const isDevEnvironment = import.meta.env.DEV;
+
 function getFriendlyError(error) {
   if (!error) {
     return '';
@@ -10,12 +12,21 @@ function getFriendlyError(error) {
   return error.message || 'Não foi possível entrar. Confira suas credenciais e tente novamente.';
 }
 
-export function AdminLogin() {
+function getUnavailableMessage(authUnavailableReason) {
+  if (isDevEnvironment) {
+    return authUnavailableReason || 'Supabase Auth não está configurado para este ambiente.';
+  }
+
+  return 'Portal temporariamente indisponível. Nossa equipe já está preparando o acesso seguro para parceiros LAZULE.';
+}
+
+export function AdminLogin({ experience = 'admin' }) {
   const { authError, authUnavailableReason, isAdmin, isAuthAvailable, isAuthenticated, isInfluencer, isLoading, signInWithEmailPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isPartnerExperience = experience === 'partner';
 
   useEffect(() => {
     if (isLoading || !isAuthenticated) {
@@ -34,7 +45,7 @@ export function AdminLogin() {
     setFormError('');
 
     if (!email.trim() || !password) {
-      setFormError('Informe e-mail e senha para acessar a área administrativa.');
+      setFormError(isPartnerExperience ? 'Informe e-mail e senha para acessar o Portal do parceiro.' : 'Informe e-mail e senha para acessar a área administrativa.');
       return;
     }
 
@@ -48,37 +59,57 @@ export function AdminLogin() {
   }
 
   const disabled = isSubmitting || isLoading || !isAuthAvailable;
+  const eyebrow = isPartnerExperience ? 'Parceiros LAZULE' : 'LAZULE Admin';
+  const title = isPartnerExperience ? 'Portal do parceiro' : 'Área administrativa';
+  const subtitle = isPartnerExperience ? 'Acesse seu painel exclusivo LAZULE para acompanhar links, cupons e performance.' : 'Use seu e-mail e senha cadastrados no Supabase Auth para acessar o dashboard interno.';
+  const sideTitle = isPartnerExperience ? 'Seu espaço exclusivo para crescer com a LAZULE.' : 'Acesso seguro à inteligência da boutique.';
+  const sideDescription = isPartnerExperience
+    ? 'Entre para consultar seus materiais de divulgação, acompanhar resultados e preparar novas ativações com uma experiência premium.'
+    : 'Entre com uma conta criada no Supabase Auth. As permissões são definidas pela tabela profiles e separadas entre admin e influencer.';
+  const sideNotice = isPartnerExperience
+    ? 'Dashboard de métricas, links e cupons em evolução contínua para parceiros e influencers convidados.'
+    : 'Não há cadastro público nesta etapa. Usuários são convidados ou criados manualmente pela administração LAZULE.';
 
   return (
-    <section className="mx-auto flex min-h-[72vh] max-w-6xl items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+    <section className="mx-auto flex min-h-[72vh] max-w-6xl items-center justify-center px-4 pb-16 pt-24 sm:px-6 sm:py-20 lg:px-8 lg:py-16">
       <div className="grid w-full overflow-hidden rounded-[2rem] border border-lazule-gold/20 bg-slate-950/78 shadow-2xl shadow-lazule-blue/20 backdrop-blur lg:grid-cols-[0.95fr_1.05fr]">
         <div className="relative hidden border-r border-white/10 bg-gradient-to-br from-lazule-blue/35 via-slate-950 to-lazule-night p-10 lg:block">
           <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-lazule-gold/80 to-transparent" />
-          <p className="text-xs font-semibold uppercase tracking-[0.38em] text-lazule-gold/80">LAZULE Admin</p>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight text-white">Acesso seguro à inteligência da boutique.</h1>
-          <p className="mt-5 text-sm leading-7 text-lazule-mist/72">Entre com uma conta criada no Supabase Auth. As permissões são definidas pela tabela profiles e separadas entre admin e influencer.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.38em] text-lazule-gold/80">{eyebrow}</p>
+          <h1 className="mt-6 text-4xl font-semibold leading-tight text-white">{sideTitle}</h1>
+          <p className="mt-5 text-sm leading-7 text-lazule-mist/72">{sideDescription}</p>
+          {isPartnerExperience ? (
+            <div className="mt-10 grid gap-3 text-sm text-lazule-mist/76">
+              {['Performance de campanhas', 'Links e cupons exclusivos', 'Visão preparada para métricas'].map((item) => (
+                <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                  <span className="h-2 w-2 rounded-full bg-lazule-gold shadow-[0_0_18px_rgba(233,194,87,0.75)]" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm text-lazule-mist/70">
-            Não há cadastro público nesta etapa. Usuários são convidados ou criados manualmente pela administração LAZULE.
+            {sideNotice}
           </div>
         </div>
 
         <div className="p-8 sm:p-10 lg:p-12">
           <a className="text-xs font-semibold uppercase tracking-[0.28em] text-lazule-gold/80 transition hover:text-lazule-gold" href="/">← Voltar para loja</a>
           <div className="mt-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold/80">Login premium</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Área administrativa</h2>
-            <p className="mt-3 text-sm leading-6 text-lazule-mist/68">Use seu e-mail e senha cadastrados no Supabase Auth para acessar o dashboard interno.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold/80">{isPartnerExperience ? 'Login exclusivo' : 'Login premium'}</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{title}</h2>
+            <p className="mt-3 text-sm leading-6 text-lazule-mist/68">{subtitle}</p>
           </div>
 
           {!isAuthAvailable ? (
-            <div className="mt-8 rounded-2xl border border-amber-300/25 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">
-              {authUnavailableReason || 'Supabase Auth não está configurado para este ambiente.'}
+            <div className="mt-6 rounded-2xl border border-lazule-gold/15 bg-white/[0.035] p-4 text-sm leading-6 text-lazule-mist/70">
+              {getUnavailableMessage(authUnavailableReason)}
             </div>
           ) : null}
 
           {isAuthenticated && !isAdmin && !isInfluencer && !isLoading ? (
-            <div className="mt-8 rounded-2xl border border-red-300/25 bg-red-400/10 p-4 text-sm leading-6 text-red-100">
-              Conta autenticada, mas sem permissão admin ou influencer ativa.
+            <div className="mt-6 rounded-2xl border border-red-300/20 bg-red-400/10 p-4 text-sm leading-6 text-red-100/85">
+              Conta autenticada, mas sem permissão ativa para este portal.
             </div>
           ) : null}
 
@@ -91,7 +122,7 @@ export function AdminLogin() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@lazulefragrances.com.br"
+                placeholder={isPartnerExperience ? 'parceiro@exemplo.com' : 'admin@lazulefragrances.com.br'}
                 disabled={disabled}
               />
             </label>
@@ -109,7 +140,7 @@ export function AdminLogin() {
             </label>
 
             {formError || authError ? (
-              <div className="rounded-2xl border border-red-300/25 bg-red-400/10 p-4 text-sm leading-6 text-red-100">{formError || getFriendlyError(authError)}</div>
+              <div className="rounded-2xl border border-red-300/20 bg-red-400/10 p-4 text-sm leading-6 text-red-100/85">{formError || getFriendlyError(authError)}</div>
             ) : null}
 
             <button
@@ -120,6 +151,16 @@ export function AdminLogin() {
               {isSubmitting || isLoading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
+
+          {isPartnerExperience ? (
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {['Métricas', 'Links', 'Cupons'].map((item) => (
+                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-lazule-mist/55">
+                  {item}
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
