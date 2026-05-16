@@ -1,3 +1,4 @@
+import { sendSupabaseAnalyticsEvent } from '../data/supabaseAnalyticsProvider.js';
 import { enrichPayloadWithReferral } from './referral.js';
 const STORAGE_KEY = 'lazule.analytics.v2';
 const MAX_STORED_EVENTS = 250;
@@ -386,8 +387,25 @@ function forwardToMetaPixel(event) {
   }
 }
 
+
+function forwardToSupabaseAnalytics(event) {
+  // Envio experimental e assíncrono: o snapshot local já foi gravado acima, então
+  // falhas de Supabase/env/RLS não interrompem UX nem dashboards locais.
+  sendSupabaseAnalyticsEvent(event).then((result) => {
+    if (!result.ok && !result.skipped) {
+      devLog('Supabase analytics event skipped', result);
+    }
+  }).catch((error) => {
+    devLog('Supabase analytics event failed', error);
+  });
+}
+
 function shouldEnrichWithReferral(eventName) {
-  return eventName === 'whatsapp_click' || eventName === 'product_view' || eventName === 'product_card_click';
+  return eventName === 'whatsapp_click'
+    || eventName === 'product_view'
+    || eventName === 'product_card_click'
+    || eventName === 'influencer_route_visit'
+    || eventName === 'referral_applied';
 }
 
 function mapEventForDestinations(eventName, payload) {
@@ -461,6 +479,7 @@ export function trackEvent(eventName, payload = {}, options = {}) {
   updateLocalState(event);
   forwardToGA4(event);
   forwardToMetaPixel(event);
+  forwardToSupabaseAnalytics(event);
   devLog('event', event);
 
   return event;
