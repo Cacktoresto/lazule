@@ -5,12 +5,15 @@ import { formatBRL } from '../src/utils/currency.js';
 import { createProductPath, createProductSlug, getProductSlugFromPath, normalizeSpaPath } from '../src/utils/productRouting.js';
 import { createProductWhatsAppLink, createProductWhatsAppMessage, createWhatsAppLink } from '../src/utils/whatsapp.js';
 import {
+  applyManualReferralCode,
   captureReferralParams,
+  classifyManualReferralCode,
   clearReferralContext,
   enrichPayloadWithReferral,
   formatReferralForWhatsapp,
   getReferralContext,
   referralConfig,
+  removeReferralField,
 } from '../src/utils/referral.js';
 import { applyPromoReferralRoute, buildPromoReferralSearch, getPromoRouteMatch } from '../src/utils/promoRoutes.js';
 import { canAccessAdmin, canAccessInfluencerArea, getProfileRole, isAdminRole, isInfluencerRole } from '../src/auth/roles.js';
@@ -29,11 +32,14 @@ import {
   normalizeAnalyticsPayload,
   resetAnalyticsForTests,
   shouldTrackEvent,
+  trackCouponManualApply,
+  trackCouponRemoved,
   trackInfluencerRouteVisit,
   trackPageView,
   trackProductView,
   trackPromoRouteVisit,
   trackReferralApplied,
+  trackReferralManualApply,
   trackWhatsappClick,
 } from '../src/utils/analytics.js';
 
@@ -522,6 +528,76 @@ test('WhatsApp product message includes active coupon and referral', () => {
   uninstallBrowserGlobals();
 });
 
+
+test('manual referral application sanitizes, persists and removes coupon codes', () => {
+  installBrowserGlobals('', '/produto/perfume-x');
+  resetAnalyticsForTests();
+
+  const classified = classifyManualReferralCode(' cria 10<script> ');
+  const result = applyManualReferralCode(' cria 10<script> ', { now: Date.now() });
+  const analyticsEvent = trackCouponManualApply({ coupon: result.coupon, source_page: 'product', product_slug: 'perfume-x' });
+
+  assert.equal(classified.type, 'coupon');
+  assert.equal(classified.coupon, 'CRIA10SCRIPT');
+  assert.equal(result.ok, true);
+  assert.equal(result.type, 'coupon');
+  assert.equal(result.coupon, 'CRIA10SCRIPT');
+  assert.equal(getReferralContext().coupon, 'CRIA10SCRIPT');
+  assert.equal(analyticsEvent.name, 'coupon_manual_apply');
+  assert.equal(analyticsEvent.payload.source_page, 'product');
+  assert.equal(analyticsEvent.payload.product_slug, 'perfume-x');
+  assert.equal(analyticsEvent.payload.coupon, 'CRIA10SCRIPT');
+
+  const removed = removeReferralField('coupon');
+  const removedEvent = trackCouponRemoved({ coupon: 'CRIA10SCRIPT', source_page: 'product', product_slug: 'perfume-x' });
+
+  assert.equal(removed.removed, true);
+  assert.deepEqual(getReferralContext(), {});
+  assert.equal(removedEvent.name, 'coupon_removed');
+  assert.equal(removedEvent.payload.coupon, 'CRIA10SCRIPT');
+
+  uninstallBrowserGlobals();
+});
+
+test('manual referral application stores lowercase partner codes as ref and handles invalid input', () => {
+  installBrowserGlobals('', '/produto/perfume-x');
+  resetAnalyticsForTests();
+
+  const invalid = applyManualReferralCode(' !!! ', { now: 1_000 });
+  const result = applyManualReferralCode('@criadora', { now: Date.now() });
+  const analyticsEvent = trackReferralManualApply({ ref: result.ref, source_page: 'product', product_slug: 'perfume-x' });
+
+  assert.equal(invalid.ok, false);
+  assert.match(invalid.error, /válido/);
+  assert.equal(result.ok, true);
+  assert.equal(result.type, 'ref');
+  assert.equal(result.ref, 'criadora');
+  assert.equal(getReferralContext().ref, 'criadora');
+  assert.equal(analyticsEvent.name, 'referral_manual_apply');
+  assert.equal(analyticsEvent.payload.ref, 'criadora');
+
+  uninstallBrowserGlobals();
+});
+
+test('manual coupon is included in WhatsApp message and whatsapp_click payload without duplication', () => {
+  installBrowserGlobals('', '/produto/perfume-x');
+  resetAnalyticsForTests();
+
+  const applied = applyManualReferralCode('CRIA10', { now: Date.now() });
+  const message = createProductWhatsAppMessage(
+    { id: 'perfume-x', name: 'Perfume X', brand: 'LAZULE', salePrice: 199 },
+    undefined,
+    'https://lazulefragrances.com.br/produto/perfume-x',
+    { referralContext: applied.context },
+  );
+  const event = trackWhatsappClick({ product_id: 'perfume-x', product_slug: 'perfume-x', source_page: 'product', cta_location: 'product_details' });
+
+  assert.equal((message.match(/Cupom: CRIA10/g) || []).length, 1);
+  assert.equal(event.payload.coupon, 'CRIA10');
+  assert.equal(event.payload.product_slug, 'perfume-x');
+
+  uninstallBrowserGlobals();
+});
 
 test('auth role helpers normalize roles and require active admin profiles', () => {
   assert.equal(isAdminRole(' ADMIN '), true);

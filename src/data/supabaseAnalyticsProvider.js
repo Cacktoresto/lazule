@@ -7,6 +7,9 @@ export const REMOTE_ANALYTICS_ALLOWED_EVENTS = new Set([
   'referral_applied',
   'product_view',
   'whatsapp_click',
+  'coupon_manual_apply',
+  'referral_manual_apply',
+  'coupon_removed',
 ]);
 
 const METADATA_ALLOWLIST = new Set([
