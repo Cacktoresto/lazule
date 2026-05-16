@@ -180,6 +180,10 @@ function getCurrentPagePath() {
   return `${window.location.pathname}${window.location.search}${window.location.hash}` || '/';
 }
 
+function isAdminAnalyticsPath(pagePath = getCurrentPagePath()) {
+  return String(pagePath || '').startsWith('/admin/');
+}
+
 function getCanonicalUrl(pagePath = getCurrentPagePath()) {
   if (!canUseWindow()) {
     return pagePath;
@@ -426,6 +430,12 @@ function mapEventForDestinations(eventName, payload) {
 
 export function trackEvent(eventName, payload = {}, options = {}) {
   if (!eventName) {
+    return null;
+  }
+
+  const candidatePath = payload?.page_path || getCurrentPagePath();
+
+  if (isAdminAnalyticsPath(candidatePath)) {
     return null;
   }
 

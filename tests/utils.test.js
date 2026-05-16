@@ -13,6 +13,8 @@ import {
   referralConfig,
 } from '../src/utils/referral.js';
 import { applyPromoReferralRoute, buildPromoReferralSearch, getPromoRouteMatch } from '../src/utils/promoRoutes.js';
+import { canAccessAdmin, canAccessInfluencerArea, getProfileRole, isAdminRole, isInfluencerRole } from '../src/auth/roles.js';
+import { createSupabaseAuthClient, getSupabaseAuthConfig } from '../src/services/supabaseAuthClient.js';
 
 import {
   createProductAnalyticsPayload,
@@ -22,6 +24,7 @@ import {
   resetAnalyticsForTests,
   shouldTrackEvent,
   trackInfluencerRouteVisit,
+  trackPageView,
   trackProductView,
   trackPromoRouteVisit,
   trackReferralApplied,
@@ -102,6 +105,13 @@ test('analytics deduplicates events and falls back safely without configured pix
   assert.equal(event.name, 'product_view');
   assert.equal(event.gaEventName, 'view_item');
   assert.equal(event.metaStandardName, 'ViewContent');
+});
+
+test('analytics ignores admin routes in public tracking', () => {
+  resetAnalyticsForTests();
+
+  assert.equal(trackPageView({ path: '/admin/analytics', routeName: 'admin_analytics' }), null);
+  assert.equal(getAnalyticsSnapshot().events.length, 0);
 });
 
 import catalogRepository, { getAllProducts, getAllProductsAsync, getProductBySlug, getProductsByBrand, searchProducts } from '../src/data/catalogRepository.js';
@@ -395,4 +405,45 @@ test('WhatsApp product message includes active coupon and referral', () => {
   assert.equal(formatReferralForWhatsapp(referralContext), 'Cupom: CRIA10\nIndicação: @criadora');
 
   uninstallBrowserGlobals();
+});
+
+
+test('auth role helpers normalize roles and require active admin profiles', () => {
+  assert.equal(isAdminRole(' ADMIN '), true);
+  assert.equal(isInfluencerRole('influencer'), true);
+  assert.equal(getProfileRole({ role: 'Admin' }), 'admin');
+  assert.equal(canAccessAdmin({ role: 'admin', is_active: true }), true);
+  assert.equal(canAccessAdmin({ role: 'admin', is_active: false }), false);
+  assert.equal(canAccessInfluencerArea({ role: 'influencer', is_active: true }), true);
+  assert.equal(canAccessInfluencerArea({ role: 'admin', is_active: true }), true);
+});
+
+test('Supabase auth client falls back safely when env is missing', async () => {
+  const previousUrl = process.env.VITE_SUPABASE_URL;
+  const previousAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+  delete process.env.VITE_SUPABASE_URL;
+  delete process.env.VITE_SUPABASE_ANON_KEY;
+
+  try {
+    const config = getSupabaseAuthConfig();
+    const client = createSupabaseAuthClient(config);
+    const { data, error } = await client.auth.getSession();
+
+    assert.equal(config.enabled, false);
+    assert.equal(client.isConfigured, false);
+    assert.equal(data.session, null);
+    assert.match(error.message, /Supabase Auth não está configurado/);
+  } finally {
+    if (previousUrl === undefined) {
+      delete process.env.VITE_SUPABASE_URL;
+    } else {
+      process.env.VITE_SUPABASE_URL = previousUrl;
+    }
+
+    if (previousAnonKey === undefined) {
+      delete process.env.VITE_SUPABASE_ANON_KEY;
+    } else {
+      process.env.VITE_SUPABASE_ANON_KEY = previousAnonKey;
+    }
+  }
 });
