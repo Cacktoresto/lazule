@@ -10,6 +10,10 @@ import { ProductDetails } from './components/ProductDetails';
 import { ProductNotFound } from './components/ProductNotFound';
 import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
+import { AuthProvider } from './auth/AuthProvider';
+import { RequireAdmin } from './auth/RequireAdmin';
+import { AdminLogin } from './pages/admin/AdminLogin';
+import { InfluencerLoginRedirect } from './pages/influencer/InfluencerLoginRedirect';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
@@ -18,7 +22,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/analytics\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer\/login\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -139,10 +143,13 @@ function App() {
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
+  const isAdminLoginRoute = route.pathname === '/admin/login';
+  const isInfluencerLoginRoute = route.pathname === '/influencer/login';
+  const isAdminRoute = route.pathname.startsWith('/admin/');
   const isPromoReferralRouteActive = isPromoReferralRoute(route.pathname);
 
   useEffect(() => {
-    if (isPromoReferralRouteActive) {
+    if (isPromoReferralRouteActive || isAdminRoute) {
       return;
     }
 
@@ -155,7 +162,7 @@ function App() {
     if (referralContext.coupon) {
       trackCouponDetected({ coupon: referralContext.coupon, source_page: 'referral_capture', page_path: `${route.pathname}${route.search}${route.hash}` });
     }
-  }, [isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+  }, [isAdminRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     if (!isPromoReferralRouteActive) {
@@ -230,8 +237,10 @@ function App() {
       routeName = 'product_suggestion';
     }
 
-    trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
-  }, [isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+    if (!isAdminRoute) {
+      trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
+    }
+  }, [isAdminRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -293,17 +302,24 @@ function App() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-lazule-night text-lazule-mist">
+    <AuthProvider>
+      <div className="relative min-h-screen overflow-x-clip bg-lazule-night text-lazule-mist">
       <MineralBackground />
       <div className="relative z-10">
         <Header immersiveProduct={isProductRoute} />
         <main>
           {isPromoReferralRouteActive ? (
             <PromoReferralLanding route={route} />
+          ) : isAdminLoginRoute ? (
+            <AdminLogin />
+          ) : isInfluencerLoginRoute ? (
+            <InfluencerLoginRedirect />
           ) : isAnalyticsDashboardRoute ? (
-            <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70">Carregando dashboard LAZULE...</div>}>
-              <AnalyticsDashboard />
-            </Suspense>
+            <RequireAdmin>
+              <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70">Carregando dashboard LAZULE...</div>}>
+                <AnalyticsDashboard />
+              </Suspense>
+            </RequireAdmin>
           ) : isProductRoute ? (
             <ProductDetails slug={route.productSlug} />
           ) : isBrandRoute ? (
@@ -322,8 +338,9 @@ function App() {
         </main>
         <Footer />
       </div>
-      <WhatsAppButton hidden={isProductRoute || isAnalyticsDashboardRoute || isPromoReferralRouteActive} />
-    </div>
+        <WhatsAppButton hidden={isProductRoute || isAdminRoute || isPromoReferralRouteActive} />
+      </div>
+    </AuthProvider>
   );
 }
 
