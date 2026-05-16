@@ -14,7 +14,6 @@ import { AuthProvider } from './auth/AuthProvider';
 import { RequireAdmin } from './auth/RequireAdmin';
 import { RequireInfluencerOrAdmin } from './auth/RequireInfluencerOrAdmin';
 import { AdminLogin } from './pages/admin/AdminLogin';
-import { InfluencerLoginRedirect } from './pages/influencer/InfluencerLoginRedirect';
 import { InfluencerDashboard } from './pages/influencer/InfluencerDashboard';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
@@ -319,7 +318,7 @@ function App() {
           ) : isAdminLoginRoute ? (
             <AdminLogin />
           ) : isInfluencerLoginRoute ? (
-            <InfluencerLoginRedirect />
+            <AdminLogin experience="partner" />
           ) : isInfluencerDashboardRoute ? (
             <RequireInfluencerOrAdmin>
               <InfluencerDashboard />
