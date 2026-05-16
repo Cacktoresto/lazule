@@ -22,7 +22,7 @@ function normalizeExpirationDays(value) {
   return Number.isFinite(days) && days > 0 ? days : DEFAULT_EXPIRATION_DAYS;
 }
 
-function sanitizeReferralValue(value) {
+export function sanitizeReferralValue(value) {
   return String(value ?? '')
     .normalize('NFKC')
     .trim()
@@ -31,7 +31,7 @@ function sanitizeReferralValue(value) {
     .slice(0, MAX_FIELD_LENGTH);
 }
 
-function sanitizeCouponValue(value) {
+export function sanitizeCouponValue(value) {
   return sanitizeReferralValue(value).toUpperCase();
 }
 
@@ -66,6 +66,94 @@ function compactContext(context = {}) {
   }
 
   return compacted;
+}
+
+function createContextFromValues(values, { expirationDays = DEFAULT_EXPIRATION_DAYS, now = getNow(), attributionRule = 'latest_manual_touch' } = {}) {
+  const compactedValues = compactContext(values);
+
+  if (!Object.keys(compactedValues).length) {
+    return null;
+  }
+
+  const capturedAt = values.capturedAt || now;
+
+  return {
+    ...compactedValues,
+    capturedAt,
+    expiresAt: values.expiresAt || capturedAt + normalizeExpirationDays(expirationDays) * MS_PER_DAY,
+    attributionRule,
+  };
+}
+
+export function classifyManualReferralCode(value, { preferredType = 'auto' } = {}) {
+  const rawValue = String(value ?? '').normalize('NFKC').trim();
+  const sanitizedRef = sanitizeReferralValue(rawValue);
+
+  if (!sanitizedRef) {
+    return { ok: false, error: 'Informe um cupom ou código válido.' };
+  }
+
+  const normalizedType = String(preferredType || 'auto').toLowerCase();
+  const shouldTreatAsCoupon = normalizedType === 'coupon'
+    || (normalizedType !== 'ref' && (/\d/.test(sanitizedRef) || /[A-Z]/.test(rawValue)));
+
+  if (shouldTreatAsCoupon) {
+    return { ok: true, type: 'coupon', coupon: sanitizeCouponValue(sanitizedRef) };
+  }
+
+  return { ok: true, type: 'ref', ref: sanitizedRef };
+}
+
+export function applyManualReferralCode(value, { preferredType = 'auto', expirationDays = DEFAULT_EXPIRATION_DAYS, now = getNow() } = {}) {
+  const classifiedCode = classifyManualReferralCode(value, { preferredType });
+
+  if (!classifiedCode.ok) {
+    return classifiedCode;
+  }
+
+  const existingContext = getReferralContext({ now });
+  const nextValues = { ...existingContext };
+
+  if (classifiedCode.type === 'coupon') {
+    nextValues.coupon = classifiedCode.coupon;
+  } else {
+    nextValues.ref = classifiedCode.ref;
+  }
+
+  const nextContext = createContextFromValues(nextValues, { expirationDays, now, attributionRule: existingContext.attributionRule || 'latest_manual_touch' });
+
+  writeStoredContext(nextContext);
+  emitReferralChange(nextContext);
+
+  return { ok: true, type: classifiedCode.type, context: nextContext, coupon: nextContext.coupon, ref: nextContext.ref };
+}
+
+export function removeReferralField(field, { now = getNow() } = {}) {
+  const normalizedField = field === 'coupon' ? 'coupon' : field === 'ref' ? 'ref' : '';
+
+  if (!normalizedField) {
+    return { ok: false, error: 'Tipo de código inválido.' };
+  }
+
+  const existingContext = getReferralContext({ now });
+
+  if (!existingContext[normalizedField]) {
+    return { ok: true, context: existingContext, removed: false };
+  }
+
+  const nextValues = { ...existingContext };
+  delete nextValues[normalizedField];
+  const nextContext = createContextFromValues(nextValues, { now, attributionRule: existingContext.attributionRule }) || {};
+
+  if (Object.keys(nextContext).length) {
+    writeStoredContext(nextContext);
+  } else {
+    removeStoredContext();
+  }
+
+  emitReferralChange(nextContext);
+
+  return { ok: true, context: nextContext, removed: true, type: normalizedField };
 }
 
 function readStoredContext() {

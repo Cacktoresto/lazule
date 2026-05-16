@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
 import { getProductRecommendations } from '../utils/catalog';
-import { trackBrandClick, trackEvent, trackProductView, trackRecommendationClick, trackWhatsappClick } from '../utils/analytics';
+import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
-import { getReferralChangeEventName, getReferralContext } from '../utils/referral';
+import { applyManualReferralCode, getReferralChangeEventName, getReferralContext, removeReferralField } from '../utils/referral';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 
@@ -126,6 +126,103 @@ function ReferralCouponBadge({ coupon, className = '' }) {
   return (
     <div className={`inline-flex items-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold shadow-aureate/20 backdrop-blur ${className}`}>
       Cupom aplicado: {coupon}
+    </div>
+  );
+}
+
+function getAppliedReferralLabel(referralContext = {}) {
+  if (referralContext.coupon) {
+    return { type: 'coupon', label: 'Cupom aplicado', value: referralContext.coupon };
+  }
+
+  if (referralContext.ref) {
+    return { type: 'ref', label: 'Código aplicado', value: referralContext.ref };
+  }
+
+  return null;
+}
+
+function ManualReferralForm({ product, referralContext }) {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const appliedCode = getAppliedReferralLabel(referralContext);
+  const productSlug = createProductSlug(product?.name);
+
+  function buildAnalyticsPayload(extraPayload = {}) {
+    return {
+      source_page: 'product',
+      product_id: product?.id,
+      product_slug: productSlug,
+      product_name: product?.name,
+      ...extraPayload,
+    };
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    const result = applyManualReferralCode(code);
+
+    if (!result.ok) {
+      setError(result.error || 'Não foi possível aplicar este código.');
+      return;
+    }
+
+    setError('');
+    setCode('');
+
+    if (result.type === 'coupon') {
+      trackCouponManualApply(buildAnalyticsPayload({ coupon: result.coupon }));
+    } else {
+      trackReferralManualApply(buildAnalyticsPayload({ ref: result.ref }));
+    }
+  }
+
+  function handleRemove() {
+    if (!appliedCode) {
+      return;
+    }
+
+    const result = removeReferralField(appliedCode.type);
+
+    if (result.ok) {
+      setError('');
+      trackCouponRemoved(buildAnalyticsPayload({ [appliedCode.type]: appliedCode.value }));
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-[1.6rem] border border-lazule-night/10 bg-white/45 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] lg:border-white/10 lg:bg-white/[0.045]">
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lazule-royal lg:text-lazule-gold">Tem cupom ou código de indicação?</p>
+      <form className="mt-3 flex gap-2" onSubmit={handleSubmit}>
+        <input
+          className="min-w-0 flex-1 rounded-full border border-lazule-night/10 bg-white/70 px-4 py-2.5 text-sm text-lazule-night outline-none transition placeholder:text-slate-400 focus:border-lazule-gold/70 focus:ring-2 focus:ring-lazule-gold/20 lg:border-white/10 lg:bg-lazule-night/45 lg:text-lazule-mist"
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          value={code}
+          maxLength={80}
+          onChange={(event) => {
+            setCode(event.target.value);
+            if (error) setError('');
+          }}
+          placeholder="Cupom ou código do parceiro"
+          aria-label="Cupom ou código do parceiro"
+        />
+        <button className="rounded-full border border-lazule-gold/45 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-lazule-royal transition hover:bg-lazule-gold hover:text-lazule-night lg:text-lazule-gold" type="submit">
+          Aplicar
+        </button>
+      </form>
+      <div className="mt-3 min-h-5 text-xs leading-5">
+        {error ? <p className="text-red-600 lg:text-red-200">{error}</p> : null}
+        {!error && appliedCode ? (
+          <p className="flex flex-wrap items-center gap-2 text-slate-600 lg:text-slate-300">
+            <span><strong className="text-lazule-royal lg:text-lazule-gold">{appliedCode.label}:</strong> {appliedCode.value}</span>
+            <button className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500 underline decoration-lazule-gold/40 underline-offset-4 transition hover:text-lazule-gold" type="button" onClick={handleRemove}>
+              Remover
+            </button>
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -419,6 +516,7 @@ function Recommendations({ products }) {
 
 function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   const disabled = !whatsAppLink;
+  const appliedCode = getAppliedReferralLabel(referralContext);
 
   return (
     <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-lazule-night/90 px-4 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden">
@@ -426,7 +524,11 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
         <div className="min-w-0 flex-1">
           <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
           <strong className="block truncate text-lg text-lazule-mist">{formatBRL(product.salePrice)}</strong>
-          <ReferralCouponBadge coupon={referralContext?.coupon} className="mt-1 border-lazule-gold/25 bg-lazule-gold/8 px-2 py-0.5 text-[0.55rem] tracking-[0.12em]" />
+          {appliedCode ? (
+            <p className="mt-1 truncate text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold/85">
+              {appliedCode.label}: {appliedCode.value}
+            </p>
+          ) : null}
         </div>
         <a
           className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
@@ -553,8 +655,10 @@ export function ProductDetails({ slug }) {
             {olfactoryReference && <span>• DNA {olfactoryReference}</span>}
           </div>
 
+          <ManualReferralForm product={product} referralContext={referralContext} />
+
           <a
-            className="lazule-premium-button lazule-cta-shimmer mt-8 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] lg:inline-flex"
+            className="lazule-premium-button lazule-cta-shimmer mt-6 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] lg:inline-flex"
             href={whatsAppLink}
             aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
             target="_blank"

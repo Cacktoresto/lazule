@@ -405,7 +405,10 @@ function shouldEnrichWithReferral(eventName) {
     || eventName === 'product_view'
     || eventName === 'product_card_click'
     || eventName === 'influencer_route_visit'
-    || eventName === 'referral_applied';
+    || eventName === 'referral_applied'
+    || eventName === 'coupon_manual_apply'
+    || eventName === 'referral_manual_apply'
+    || eventName === 'coupon_removed';
 }
 
 function mapEventForDestinations(eventName, payload) {
@@ -536,6 +539,26 @@ export function trackInfluencerRouteVisit(payload = {}) {
 
 export function trackReferralApplied(payload = {}) {
   return trackEvent('referral_applied', createIntentPayload(payload), { dedupeKey: `referral_applied|${payload.source_page || ''}|${payload.ref || ''}|${payload.coupon || ''}|${payload.utm_source || ''}|${payload.utm_campaign || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackCouponManualApply(payload = {}) {
+  if (!payload.coupon) {
+    return null;
+  }
+
+  return trackEvent('coupon_manual_apply', createIntentPayload(payload), { dedupeKey: `coupon_manual_apply|${payload.source_page || ''}|${payload.product_slug || ''}|${payload.coupon}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackReferralManualApply(payload = {}) {
+  if (!payload.ref) {
+    return null;
+  }
+
+  return trackEvent('referral_manual_apply', createIntentPayload(payload), { dedupeKey: `referral_manual_apply|${payload.source_page || ''}|${payload.product_slug || ''}|${payload.ref}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackCouponRemoved(payload = {}) {
+  return trackEvent('coupon_removed', createIntentPayload(payload), { dedupeKey: `coupon_removed|${payload.source_page || ''}|${payload.product_slug || ''}|${payload.coupon || payload.ref || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
 }
 
 export function trackCouponDetected(payload = {}) {
