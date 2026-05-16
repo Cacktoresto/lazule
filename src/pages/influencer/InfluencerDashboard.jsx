@@ -59,6 +59,19 @@ function CopyButton({ value, children }) {
   );
 }
 
+
+function CodeSummaryCard({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      <span className="block text-[0.65rem] uppercase tracking-[0.24em] text-lazule-gold/75">{label}</span>
+      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <strong className="break-all text-white">{value || '—'}</strong>
+        {value ? <CopyButton value={value}>Copiar código</CopyButton> : null}
+      </div>
+    </div>
+  );
+}
+
 function LinkCard({ label, value, href }) {
   return (
     <article className="rounded-[1.5rem] border border-white/10 bg-white/[0.055] p-5 shadow-mineral backdrop-blur">
@@ -119,14 +132,8 @@ function InfluencerPanel({ profile, user, events, isAdminView = false }) {
           <p className="mt-2 text-sm text-lazule-mist/62">{email}</p>
         </div>
         <div className="grid gap-3 text-sm text-lazule-mist/75 sm:grid-cols-2 lg:min-w-[24rem]">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-            <span className="block text-[0.65rem] uppercase tracking-[0.24em] text-lazule-gold/75">influencer_ref</span>
-            <strong className="mt-2 block text-white">{normalized.influencer_ref || '—'}</strong>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-            <span className="block text-[0.65rem] uppercase tracking-[0.24em] text-lazule-gold/75">coupon_code</span>
-            <strong className="mt-2 block text-white">{normalized.coupon_code || '—'}</strong>
-          </div>
+          <CodeSummaryCard label="influencer_ref" value={normalized.influencer_ref} />
+          <CodeSummaryCard label="coupon_code" value={normalized.coupon_code} />
         </div>
       </div>
 
@@ -222,8 +229,8 @@ export function InfluencerDashboard() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold/80">Influencers LAZULE</p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">Painel inicial de divulgação</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-lazule-mist/68">Acompanhe links, cupom e métricas locais agregadas por ref/coupon. Não coletamos nome, telefone, endereço ou dados pessoais de clientes.</p>
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">Dashboard do parceiro</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-lazule-mist/68">Acompanhe métricas, links de divulgação e cupom em um painel pós-login. Não coletamos nome, telefone, endereço ou dados pessoais de clientes.</p>
         </div>
         <button className="self-start rounded-full border border-white/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.22em] text-lazule-mist/80 transition hover:border-lazule-gold/40 hover:text-lazule-gold" type="button" onClick={signOut}>Sair</button>
       </div>

@@ -13,7 +13,7 @@ VITE_SUPABASE_ANON_KEY=sua-chave-anon-publica
 
 > Nunca exponha `SUPABASE_SERVICE_ROLE_KEY`, service role ou chaves secretas no frontend. A aplicação deve receber somente a anon/public key.
 
-Se essas variáveis não existirem, a autenticação fica indisponível e a build continua funcionando. A rota `/admin/analytics` exibe um estado seguro explicando a configuração ausente.
+Se essas variáveis não existirem, a autenticação fica indisponível e a build continua funcionando. Em produção, as rotas protegidas exibem apenas a mensagem pública “Portal temporariamente indisponível.”; em desenvolvimento, os detalhes técnicos ajudam a configurar o Supabase.
 
 ## Aplicar a migration
 
@@ -56,18 +56,19 @@ A conta precisa estar ativa (`is_active = true`) para passar pelas policies e pe
 ## Roles disponíveis
 
 - `admin`: acessa `/admin/analytics` e poderá gerenciar influencers/dados administrativos.
-- `influencer`: base preparada para login individual futuro, sem dashboard implementado agora.
+- `influencer`: acessa `/influencer` para consultar links de divulgação, cupom e métricas agregadas do próprio perfil.
 
 ## Rotas protegidas
 
 - `/admin/login`: tela premium de login com e-mail e senha.
 - `/admin/analytics`: protegida por `RequireAdmin`; redireciona não autenticados para `/admin/login`, bloqueia usuários sem role `admin` e mostra estado seguro se Supabase Auth não estiver configurado.
-- `/influencer/login`: estrutura temporária que redireciona para `/admin/login`; o painel de influencer ainda não foi implementado.
+- `/influencer/login`: tela focada apenas em autenticação do Portal do parceiro; após login, influencers seguem para `/influencer` e admins seguem para `/admin/analytics`.
+- `/influencer`: protegida por `RequireInfluencerOrAdmin`; redireciona não autenticados para `/influencer/login`, bloqueia usuários sem role válida e concentra links, cupom e métricas do parceiro.
 
-## Futuras rotas de influencer
+## Dashboard de influencer
 
-Para proteger uma futura área de influencer, reutilize `AuthProvider` e crie um guard similar ao `RequireAdmin`, mas validando `isInfluencer` ou uma regra mais específica. O modelo previsto é: admin vê dashboard geral; influencer vê somente dados do próprio `profile`, usando RLS e filtros por `auth.uid()`.
+A rota `/influencer` reutiliza `AuthProvider`, roles e `RequireInfluencerOrAdmin`. Admins podem visualizar um overview de perfis influencers; influencers veem apenas o painel do próprio `profile`, com estado vazio quando `influencer_ref` ou `coupon_code` ainda não estiverem configurados.
 
 ## Analytics público
 
-Rotas `/admin/*` não devem alimentar métricas públicas/referral. A aplicação ignora captura referral/page_view para admin e o utilitário de analytics descarta eventos cujo `page_path` comece com `/admin/`.
+Rotas `/admin/*` e o dashboard `/influencer` não devem alimentar métricas públicas/referral. A aplicação ignora captura referral/page_view para dashboards protegidos e o utilitário de analytics descarta eventos cujo `page_path` comece com `/admin/`.

@@ -17,7 +17,7 @@ function getUnavailableMessage(authUnavailableReason) {
     return authUnavailableReason || 'Supabase Auth não está configurado para este ambiente.';
   }
 
-  return 'Portal temporariamente indisponível. Nossa equipe já está preparando o acesso seguro para parceiros LAZULE.';
+  return 'Portal temporariamente indisponível.';
 }
 
 export function AdminLogin({ experience = 'admin' }) {
@@ -61,43 +61,31 @@ export function AdminLogin({ experience = 'admin' }) {
   const disabled = isSubmitting || isLoading || !isAuthAvailable;
   const eyebrow = isPartnerExperience ? 'Parceiros LAZULE' : 'LAZULE Admin';
   const title = isPartnerExperience ? 'Portal do parceiro' : 'Área administrativa';
-  const subtitle = isPartnerExperience ? 'Acesse seu painel exclusivo LAZULE para acompanhar links, cupons e performance.' : 'Use seu e-mail e senha cadastrados no Supabase Auth para acessar o dashboard interno.';
-  const sideTitle = isPartnerExperience ? 'Seu espaço exclusivo para crescer com a LAZULE.' : 'Acesso seguro à inteligência da boutique.';
-  const sideDescription = isPartnerExperience
-    ? 'Entre para consultar seus materiais de divulgação, acompanhar resultados e preparar novas ativações com uma experiência premium.'
-    : 'Entre com uma conta criada no Supabase Auth. As permissões são definidas pela tabela profiles e separadas entre admin e influencer.';
-  const sideNotice = isPartnerExperience
-    ? 'Dashboard de métricas, links e cupons em evolução contínua para parceiros e influencers convidados.'
-    : 'Não há cadastro público nesta etapa. Usuários são convidados ou criados manualmente pela administração LAZULE.';
+  const subtitle = isPartnerExperience ? 'Entre com seu e-mail e senha para acessar seu painel LAZULE.' : 'Use seu e-mail e senha cadastrados no Supabase Auth para acessar o dashboard interno.';
+  const sideTitle = 'Acesso seguro à inteligência da boutique.';
+  const sideDescription = 'Entre com uma conta criada no Supabase Auth. As permissões são definidas pela tabela profiles e separadas entre admin e influencer.';
+  const sideNotice = 'Não há cadastro público nesta etapa. Usuários são convidados ou criados manualmente pela administração LAZULE.';
 
   return (
-    <section className="mx-auto flex min-h-[72vh] max-w-6xl items-center justify-center px-4 pb-16 pt-24 sm:px-6 sm:py-20 lg:px-8 lg:py-16">
-      <div className="grid w-full overflow-hidden rounded-[2rem] border border-lazule-gold/20 bg-slate-950/78 shadow-2xl shadow-lazule-blue/20 backdrop-blur lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="relative hidden border-r border-white/10 bg-gradient-to-br from-lazule-blue/35 via-slate-950 to-lazule-night p-10 lg:block">
-          <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-lazule-gold/80 to-transparent" />
-          <p className="text-xs font-semibold uppercase tracking-[0.38em] text-lazule-gold/80">{eyebrow}</p>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight text-white">{sideTitle}</h1>
-          <p className="mt-5 text-sm leading-7 text-lazule-mist/72">{sideDescription}</p>
-          {isPartnerExperience ? (
-            <div className="mt-10 grid gap-3 text-sm text-lazule-mist/76">
-              {['Performance de campanhas', 'Links e cupons exclusivos', 'Visão preparada para métricas'].map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                  <span className="h-2 w-2 rounded-full bg-lazule-gold shadow-[0_0_18px_rgba(233,194,87,0.75)]" />
-                  <span>{item}</span>
-                </div>
-              ))}
+    <section className={`mx-auto flex min-h-[calc(100svh-9rem)] items-start justify-center px-4 pb-10 pt-6 sm:min-h-[72vh] sm:px-6 sm:py-12 lg:px-8 ${isPartnerExperience ? 'max-w-xl lg:py-14' : 'max-w-6xl lg:py-16'}`}>
+      <div className={`grid w-full overflow-hidden rounded-[2rem] border border-lazule-gold/20 bg-slate-950/78 shadow-2xl shadow-lazule-blue/20 backdrop-blur ${isPartnerExperience ? '' : 'lg:grid-cols-[0.95fr_1.05fr]'}`}>
+        {!isPartnerExperience ? (
+          <div className="relative hidden border-r border-white/10 bg-gradient-to-br from-lazule-blue/35 via-slate-950 to-lazule-night p-10 lg:block">
+            <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-lazule-gold/80 to-transparent" />
+            <p className="text-xs font-semibold uppercase tracking-[0.38em] text-lazule-gold/80">{eyebrow}</p>
+            <h1 className="mt-6 text-4xl font-semibold leading-tight text-white">{sideTitle}</h1>
+            <p className="mt-5 text-sm leading-7 text-lazule-mist/72">{sideDescription}</p>
+            <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm text-lazule-mist/70">
+              {sideNotice}
             </div>
-          ) : null}
-          <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm text-lazule-mist/70">
-            {sideNotice}
           </div>
-        </div>
+        ) : null}
 
-        <div className="p-8 sm:p-10 lg:p-12">
+        <div className={isPartnerExperience ? 'p-6 sm:p-8' : 'p-8 sm:p-10 lg:p-12'}>
           <a className="text-xs font-semibold uppercase tracking-[0.28em] text-lazule-gold/80 transition hover:text-lazule-gold" href="/">← Voltar para loja</a>
-          <div className="mt-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold/80">{isPartnerExperience ? 'Login exclusivo' : 'Login premium'}</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{title}</h2>
+          <div className="mt-6 sm:mt-8">
+            {!isPartnerExperience ? <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold/80">Login premium</p> : null}
+            <h2 className={`${isPartnerExperience ? '' : 'mt-3'} text-3xl font-semibold tracking-tight text-white sm:text-4xl`}>{title}</h2>
             <p className="mt-3 text-sm leading-6 text-lazule-mist/68">{subtitle}</p>
           </div>
 
@@ -113,7 +101,7 @@ export function AdminLogin({ experience = 'admin' }) {
             </div>
           ) : null}
 
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+          <form className="mt-6 space-y-4 sm:mt-8 sm:space-y-5" onSubmit={handleSubmit}>
             <label className="block text-sm font-medium text-lazule-mist/86">
               E-mail
               <input
@@ -139,7 +127,7 @@ export function AdminLogin({ experience = 'admin' }) {
               />
             </label>
 
-            {formError || authError ? (
+            {formError || (isAuthAvailable && authError) ? (
               <div className="rounded-2xl border border-red-300/20 bg-red-400/10 p-4 text-sm leading-6 text-red-100/85">{formError || getFriendlyError(authError)}</div>
             ) : null}
 
@@ -151,16 +139,6 @@ export function AdminLogin({ experience = 'admin' }) {
               {isSubmitting || isLoading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
-
-          {isPartnerExperience ? (
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {['Métricas', 'Links', 'Cupons'].map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-lazule-mist/55">
-                  {item}
-                </div>
-              ))}
-            </div>
-          ) : null}
         </div>
       </div>
     </section>
