@@ -12,14 +12,19 @@ import {
   getReferralContext,
   referralConfig,
 } from '../src/utils/referral.js';
+import { applyPromoReferralRoute, buildPromoReferralSearch, getPromoRouteMatch } from '../src/utils/promoRoutes.js';
 
 import {
   createProductAnalyticsPayload,
   createSearchAnalyticsPayload,
+  getAnalyticsSnapshot,
   normalizeAnalyticsPayload,
   resetAnalyticsForTests,
   shouldTrackEvent,
+  trackInfluencerRouteVisit,
   trackProductView,
+  trackPromoRouteVisit,
+  trackReferralApplied,
   trackWhatsappClick,
 } from '../src/utils/analytics.js';
 
@@ -168,18 +173,18 @@ function createMemoryLocalStorage() {
   };
 }
 
-function installBrowserGlobals(search = '') {
+function installBrowserGlobals(search = '', pathname = '/') {
   const localStorage = createMemoryLocalStorage();
   const listeners = new Map();
 
   global.window = {
     localStorage,
     location: {
-      pathname: '/',
+      pathname,
       search,
       hash: '',
       origin: 'https://lazulefragrances.com.br',
-      href: `https://lazulefragrances.com.br/${search}`,
+      href: `https://lazulefragrances.com.br${pathname}${search}`,
     },
     dispatchEvent(event) {
       for (const listener of listeners.get(event.type) || []) {
@@ -211,6 +216,101 @@ function uninstallBrowserGlobals() {
   delete global.window;
   delete global.document;
 }
+
+
+test('promo route applies coupon from the short URL', () => {
+  installBrowserGlobals('', '/promo/CRIA10');
+
+  const result = applyPromoReferralRoute({ pathname: '/promo/CRIA10', now: 1_000 });
+  const context = getReferralContext({ now: 1_000 });
+
+  assert.equal(result.routeType, 'promo');
+  assert.equal(result.redirectTo, '/catalogo');
+  assert.equal(result.payload.coupon, 'CRIA10');
+  assert.equal(context.coupon, 'CRIA10');
+
+  uninstallBrowserGlobals();
+});
+
+test('influencer route applies ref from /i/:ref and /indica/:ref', () => {
+  installBrowserGlobals('', '/i/lucas');
+
+  const result = applyPromoReferralRoute({ pathname: '/i/lucas', now: 1_000 });
+
+  assert.equal(result.routeType, 'influencer');
+  assert.equal(result.payload.ref, 'lucas');
+  assert.equal(getReferralContext({ now: 1_000 }).ref, 'lucas');
+  assert.deepEqual(getPromoRouteMatch('/indica/maria'), { routeType: 'influencer', ref: 'maria', source_page: 'influencer_route' });
+
+  uninstallBrowserGlobals();
+});
+
+test('promo referral routes combine URL segments and query params', () => {
+  installBrowserGlobals('?coupon=cria10&utm_source=instagram&utm_campaign=maio', '/i/lucas');
+
+  const result = applyPromoReferralRoute({ pathname: '/i/lucas', search: '?coupon=cria10&utm_source=instagram&utm_campaign=maio', now: 1_000 });
+
+  assert.equal(buildPromoReferralSearch({ pathname: '/i/lucas', search: '?coupon=cria10&utm_source=instagram&utm_campaign=maio' }), '?coupon=cria10&utm_source=instagram&utm_campaign=maio&ref=lucas');
+  assert.equal(result.payload.ref, 'lucas');
+  assert.equal(result.payload.coupon, 'CRIA10');
+  assert.equal(result.payload.utm_source, 'instagram');
+  assert.equal(result.payload.utm_campaign, 'maio');
+
+  uninstallBrowserGlobals();
+});
+
+test('promo referral routes sanitize values and fall back safely for invalid codes', () => {
+  installBrowserGlobals('', '/promo/%40cria%2010!!');
+
+  const sanitizedResult = applyPromoReferralRoute({ pathname: '/promo/%40cria%2010!!', now: 1_000 });
+  assert.equal(sanitizedResult.payload.coupon, 'CRIA10');
+  assert.equal(getReferralContext({ now: 1_000 }).coupon, 'CRIA10');
+
+  uninstallBrowserGlobals();
+  installBrowserGlobals('', '/promo/%21%21%21');
+
+  const invalidResult = applyPromoReferralRoute({ pathname: '/promo/%21%21%21', now: 1_000 });
+  assert.equal(invalidResult.redirectTo, '/catalogo');
+  assert.ok(!invalidResult.payload.coupon);
+  assert.deepEqual(getReferralContext({ now: 1_000 }), {});
+
+  uninstallBrowserGlobals();
+});
+
+test('promo and influencer routes emit analytics payloads with referral context', () => {
+  installBrowserGlobals('?utm_source=instagram&utm_campaign=maio', '/promo/CRIA10');
+  resetAnalyticsForTests();
+
+  const promoResult = applyPromoReferralRoute({ pathname: '/promo/CRIA10', search: '?utm_source=instagram&utm_campaign=maio', now: 1_000 });
+  const promoVisit = trackPromoRouteVisit(promoResult.payload);
+  const promoApplied = trackReferralApplied(promoResult.payload);
+
+  assert.equal(promoVisit.name, 'promo_route_visit');
+  assert.equal(promoApplied.name, 'referral_applied');
+  assert.equal(promoVisit.payload.coupon, 'CRIA10');
+  assert.equal(promoVisit.payload.utm_source, 'instagram');
+  assert.equal(promoVisit.payload.utm_campaign, 'maio');
+  assert.equal(promoVisit.payload.source_page, 'promo_route');
+
+  uninstallBrowserGlobals();
+  installBrowserGlobals('?coupon=cria10&utm_source=instagram&utm_campaign=maio', '/i/lucas');
+  resetAnalyticsForTests();
+
+  const influencerResult = applyPromoReferralRoute({ pathname: '/i/lucas', search: '?coupon=cria10&utm_source=instagram&utm_campaign=maio', now: 1_000 });
+  const influencerVisit = trackInfluencerRouteVisit(influencerResult.payload);
+  trackReferralApplied(influencerResult.payload);
+  const snapshot = getAnalyticsSnapshot();
+
+  assert.equal(influencerVisit.name, 'influencer_route_visit');
+  assert.equal(influencerVisit.payload.ref, 'lucas');
+  assert.equal(influencerVisit.payload.coupon, 'CRIA10');
+  assert.equal(influencerVisit.payload.utm_source, 'instagram');
+  assert.equal(influencerVisit.payload.utm_campaign, 'maio');
+  assert.equal(influencerVisit.payload.source_page, 'influencer_route');
+  assert.ok(snapshot.events.some((event) => event.name === 'referral_applied' && event.payload.ref === 'lucas'));
+
+  uninstallBrowserGlobals();
+});
 
 test('referral captures ref/coupon/utm with first-touch persistence', () => {
   installBrowserGlobals('?ref=@criadora&coupon=cria10&utm_source=instagram&utm_campaign=maio');

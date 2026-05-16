@@ -1,0 +1,8 @@
+/promo/*
+  X-Robots-Tag: noindex, nofollow
+
+/i/*
+  X-Robots-Tag: noindex, nofollow
+
+/indica/*
+  X-Robots-Tag: noindex, nofollow

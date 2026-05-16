@@ -12,12 +12,13 @@ import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
-import { trackCouponDetected, trackPageView, trackReferralVisit } from './utils/analytics';
+import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
 import { captureReferralParams } from './utils/referral';
+import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRoutes';
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/analytics\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/analytics\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -90,6 +91,33 @@ function scrollToHashOrTop({ smooth = true } = {}) {
   }
 }
 
+function PromoReferralLanding({ route }) {
+  const isPromoRoute = route.pathname.startsWith('/promo/');
+  const title = isPromoRoute ? 'Cupom aplicado' : 'Curadoria liberada';
+  const eyebrow = isPromoRoute ? 'Benefício LAZULE' : 'Indicação premium';
+  const description = isPromoRoute
+    ? 'Seu cupom foi salvo com segurança. Estamos levando você para conhecer a seleção da LAZULE FRAGRANCES.'
+    : 'Você está entrando na curadoria LAZULE por uma indicação especial. Preparando o catálogo para você.';
+
+  return (
+    <section className="mx-auto flex min-h-[62vh] max-w-4xl items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <div className="relative w-full overflow-hidden rounded-[2rem] border border-lazule-gold/25 bg-slate-950/72 p-8 text-center shadow-2xl shadow-lazule-blue/20 backdrop-blur sm:p-12">
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-lazule-gold/70 to-transparent" />
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-lazule-gold/30 bg-lazule-gold/10 text-2xl text-lazule-gold shadow-lg shadow-lazule-gold/10">
+          ✦
+        </div>
+        <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold/80">{eyebrow}</p>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-5xl">{title}</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-lazule-mist/74 sm:text-base">{description}</p>
+        <div className="mx-auto mt-8 h-1.5 max-w-xs overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-lazule-gold via-white to-lazule-blue animate-lazule-shimmer" />
+        </div>
+        <p className="mt-5 text-xs uppercase tracking-[0.28em] text-lazule-mist/48">Redirecionando para o catálogo</p>
+      </div>
+    </section>
+  );
+}
+
 function getCurrentRoute() {
   normalizeLegacyCatalogRoute();
 
@@ -111,8 +139,13 @@ function App() {
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
+  const isPromoReferralRouteActive = isPromoReferralRoute(route.pathname);
 
   useEffect(() => {
+    if (isPromoReferralRouteActive) {
+      return;
+    }
+
     const referralContext = captureReferralParams({ search: route.search });
 
     if (referralContext.ref || referralContext.coupon || referralContext.utm_source || referralContext.utm_campaign) {
@@ -122,27 +155,83 @@ function App() {
     if (referralContext.coupon) {
       trackCouponDetected({ coupon: referralContext.coupon, source_page: 'referral_capture', page_path: `${route.pathname}${route.search}${route.hash}` });
     }
-  }, [route.hash, route.pathname, route.search]);
+  }, [isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
-    const routeName = isProductRoute
-      ? 'product'
-      : isAnalyticsDashboardRoute
-        ? 'admin_analytics'
-        : isBrandRoute
-          ? 'brand'
-        : isCatalogRoute
-          ? 'catalog'
-          : isFaqRoute
-            ? 'faq'
-            : isProductNotFoundRoute
-              ? 'product_not_found'
-              : isProductSuggestionRoute
-                ? 'product_suggestion'
-                : 'home';
+    if (!isPromoReferralRouteActive) {
+      return undefined;
+    }
+
+    const robotsMeta = document.querySelector('meta[name="robots"]') || document.createElement('meta');
+    const previousContent = robotsMeta.getAttribute('content');
+    const wasConnected = robotsMeta.isConnected;
+    robotsMeta.setAttribute('name', 'robots');
+    robotsMeta.setAttribute('content', 'noindex, nofollow');
+
+    if (!wasConnected) {
+      document.head.appendChild(robotsMeta);
+    }
+
+    return () => {
+      if (previousContent) {
+        robotsMeta.setAttribute('content', previousContent);
+      } else if (!wasConnected) {
+        robotsMeta.remove();
+      } else {
+        robotsMeta.removeAttribute('content');
+      }
+    };
+  }, [isPromoReferralRouteActive]);
+
+  useEffect(() => {
+    if (!isPromoReferralRouteActive) {
+      return undefined;
+    }
+
+    const result = applyPromoReferralRoute({ pathname: route.pathname, search: route.search, hash: route.hash });
+
+    if (!result) {
+      return undefined;
+    }
+
+    if (result.routeType === 'promo') {
+      trackPromoRouteVisit(result.payload);
+    } else {
+      trackInfluencerRouteVisit(result.payload);
+    }
+
+    trackReferralApplied(result.payload);
+
+    const redirectTimer = window.setTimeout(() => {
+      navigateSpa(result.redirectTo);
+    }, 900);
+
+    return () => window.clearTimeout(redirectTimer);
+  }, [isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+
+  useEffect(() => {
+    let routeName = 'home';
+
+    if (isProductRoute) {
+      routeName = 'product';
+    } else if (isPromoReferralRouteActive) {
+      routeName = 'promo_referral';
+    } else if (isAnalyticsDashboardRoute) {
+      routeName = 'admin_analytics';
+    } else if (isBrandRoute) {
+      routeName = 'brand';
+    } else if (isCatalogRoute) {
+      routeName = 'catalog';
+    } else if (isFaqRoute) {
+      routeName = 'faq';
+    } else if (isProductNotFoundRoute) {
+      routeName = 'product_not_found';
+    } else if (isProductSuggestionRoute) {
+      routeName = 'product_suggestion';
+    }
 
     trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
-  }, [isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, route.hash, route.pathname, route.search]);
+  }, [isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -209,7 +298,9 @@ function App() {
       <div className="relative z-10">
         <Header immersiveProduct={isProductRoute} />
         <main>
-          {isAnalyticsDashboardRoute ? (
+          {isPromoReferralRouteActive ? (
+            <PromoReferralLanding route={route} />
+          ) : isAnalyticsDashboardRoute ? (
             <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70">Carregando dashboard LAZULE...</div>}>
               <AnalyticsDashboard />
             </Suspense>
@@ -231,7 +322,7 @@ function App() {
         </main>
         <Footer />
       </div>
-      <WhatsAppButton hidden={isProductRoute || isAnalyticsDashboardRoute} />
+      <WhatsAppButton hidden={isProductRoute || isAnalyticsDashboardRoute || isPromoReferralRouteActive} />
     </div>
   );
 }

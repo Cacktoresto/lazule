@@ -497,6 +497,18 @@ export function trackReferralVisit(payload = {}) {
   return trackEvent('referral_visit', createIntentPayload(payload), { dedupeKey: `referral_visit|${payload.ref || ''}|${payload.coupon || ''}|${payload.utm_source || ''}|${payload.utm_campaign || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
 }
 
+export function trackPromoRouteVisit(payload = {}) {
+  return trackEvent('promo_route_visit', createIntentPayload(payload), { dedupeKey: `promo_route_visit|${payload.coupon || ''}|${payload.utm_source || ''}|${payload.utm_campaign || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackInfluencerRouteVisit(payload = {}) {
+  return trackEvent('influencer_route_visit', createIntentPayload(payload), { dedupeKey: `influencer_route_visit|${payload.ref || ''}|${payload.coupon || ''}|${payload.utm_source || ''}|${payload.utm_campaign || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackReferralApplied(payload = {}) {
+  return trackEvent('referral_applied', createIntentPayload(payload), { dedupeKey: `referral_applied|${payload.source_page || ''}|${payload.ref || ''}|${payload.coupon || ''}|${payload.utm_source || ''}|${payload.utm_campaign || ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
 export function trackCouponDetected(payload = {}) {
   if (!payload.coupon) {
     return null;
