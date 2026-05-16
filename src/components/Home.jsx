@@ -184,7 +184,7 @@ export function Home() {
         </div>
       </section>
 
-      <div className="lazule-sticky-search sticky top-[7.35rem] z-30 border-y border-white/10 bg-lazule-night/78 px-4 py-3 shadow-[0_18px_52px_rgba(2,6,23,0.24)] backdrop-blur-2xl md:top-[4.75rem]">
+      <div className="lazule-sticky-search sticky top-[10.75rem] z-30 sm:top-[7.35rem] border-y border-white/10 bg-lazule-night/78 px-4 py-3 shadow-[0_18px_52px_rgba(2,6,23,0.24)] backdrop-blur-2xl md:top-[4.75rem]">
         <div className="mx-auto max-w-3xl">
           <ProductNavigationSearch className="lazule-home-search" compact />
         </div>

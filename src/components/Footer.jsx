@@ -22,7 +22,13 @@ export function Footer() {
       </div>
       <div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <span>© 2026 LAZULE FRAGRANCES. Todos os direitos reservados.</span>
-        <a className="w-fit text-slate-500 transition hover:text-lazule-gold" href="/influencer/login">Área do parceiro</a>
+        <a
+          className="w-fit rounded-full px-3 py-2 text-slate-500 transition hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
+          href="/influencer/login"
+          aria-label="Acessar Área do parceiro"
+        >
+          Área do parceiro
+        </a>
       </div>
     </footer>
   );
