@@ -15,6 +15,12 @@ import {
 import { applyPromoReferralRoute, buildPromoReferralSearch, getPromoRouteMatch } from '../src/utils/promoRoutes.js';
 import { canAccessAdmin, canAccessInfluencerArea, getProfileRole, isAdminRole, isInfluencerRole } from '../src/auth/roles.js';
 import { createSupabaseAuthClient, getSupabaseAuthConfig } from '../src/services/supabaseAuthClient.js';
+import {
+  createRemoteAnalyticsPayload,
+  fetchSupabaseAnalyticsEvents,
+  isRemoteAnalyticsAllowedEvent,
+  sendSupabaseAnalyticsEvent,
+} from '../src/data/supabaseAnalyticsProvider.js';
 
 import {
   createProductAnalyticsPayload,
@@ -112,6 +118,115 @@ test('analytics ignores admin routes in public tracking', () => {
 
   assert.equal(trackPageView({ path: '/admin/analytics', routeName: 'admin_analytics' }), null);
   assert.equal(getAnalyticsSnapshot().events.length, 0);
+});
+
+
+test('remote analytics builds a PII-safe Supabase payload for allowed events', () => {
+  const row = createRemoteAnalyticsPayload({
+    name: 'whatsapp_click',
+    timestamp: '2026-05-16T10:00:00.000Z',
+    payload: {
+      ref: 'criadora',
+      coupon: 'cria10',
+      utm_source: 'instagram',
+      utm_campaign: 'maio',
+      page_path: '/produto/asad',
+      canonical_url: 'https://lazulefragrances.com.br/produto/asad',
+      product_id: 'asad',
+      product_name: 'Asad',
+      brand: 'Lattafa',
+      price: '320',
+      customer_name: 'Cliente Teste',
+      phone: '+55 11 99999-9999',
+      email: 'cliente@example.com',
+    },
+  });
+
+  assert.equal(row.event_name, 'whatsapp_click');
+  assert.equal(row.influencer_ref, 'criadora');
+  assert.equal(row.coupon_code, 'CRIA10');
+  assert.equal(row.metadata.ref, 'criadora');
+  assert.equal(row.metadata.coupon, 'CRIA10');
+  assert.equal(row.metadata.utm_source, 'instagram');
+  assert.equal(row.metadata.product_id, 'asad');
+  assert.equal(row.metadata.price, 320);
+  assert.ok(!Object.hasOwn(row.metadata, 'customer_name'));
+  assert.ok(!Object.hasOwn(row.metadata, 'phone'));
+  assert.ok(!Object.hasOwn(row.metadata, 'email'));
+});
+
+test('remote analytics only allows approved event names and blocks admin paths', () => {
+  assert.equal(isRemoteAnalyticsAllowedEvent('influencer_route_visit'), true);
+  assert.equal(isRemoteAnalyticsAllowedEvent('referral_applied'), true);
+  assert.equal(isRemoteAnalyticsAllowedEvent('product_view'), true);
+  assert.equal(isRemoteAnalyticsAllowedEvent('whatsapp_click'), true);
+  assert.equal(isRemoteAnalyticsAllowedEvent('search'), false);
+  assert.equal(createRemoteAnalyticsPayload({ name: 'search', payload: { page_path: '/catalogo', search_term: 'oud' } }), null);
+  assert.equal(createRemoteAnalyticsPayload({ name: 'product_view', payload: { page_path: '/admin/analytics', product_id: 'asad' } }), null);
+});
+
+test('remote analytics falls back safely when Supabase insert fails', async () => {
+  const previousFetch = global.fetch;
+  const previousUrl = process.env.VITE_SUPABASE_URL;
+  const previousAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+  const previousFlag = process.env.VITE_LAZULE_REMOTE_ANALYTICS_ENABLED;
+
+  process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
+  process.env.VITE_SUPABASE_ANON_KEY = 'anon-key';
+  process.env.VITE_LAZULE_REMOTE_ANALYTICS_ENABLED = 'true';
+  global.fetch = async () => ({ ok: false, status: 403, text: async () => 'RLS denied' });
+  installBrowserGlobals('', '/catalogo');
+  resetAnalyticsForTests();
+
+  try {
+    const result = await sendSupabaseAnalyticsEvent({ name: 'referral_applied', timestamp: '2026-05-16T10:00:00.000Z', payload: { ref: 'ana', coupon: 'ana10', page_path: '/catalogo' } });
+    const localEvent = trackReferralApplied({ ref: 'ana', coupon: 'ana10', page_path: '/catalogo' });
+    await Promise.resolve();
+
+    assert.equal(result.ok, false);
+    assert.equal(result.skipped, false);
+    assert.equal(result.status, 403);
+    assert.equal(result.row.influencer_ref, 'ana');
+    assert.equal(result.row.coupon_code, 'ANA10');
+    assert.equal(localEvent.name, 'referral_applied');
+    assert.equal(getAnalyticsSnapshot().events.some((event) => event.name === 'referral_applied' && event.payload.ref === 'ana'), true);
+  } finally {
+    uninstallBrowserGlobals();
+    global.fetch = previousFetch;
+    if (previousUrl === undefined) delete process.env.VITE_SUPABASE_URL;
+    else process.env.VITE_SUPABASE_URL = previousUrl;
+    if (previousAnonKey === undefined) delete process.env.VITE_SUPABASE_ANON_KEY;
+    else process.env.VITE_SUPABASE_ANON_KEY = previousAnonKey;
+    if (previousFlag === undefined) delete process.env.VITE_LAZULE_REMOTE_ANALYTICS_ENABLED;
+    else process.env.VITE_LAZULE_REMOTE_ANALYTICS_ENABLED = previousFlag;
+  }
+});
+
+test('remote analytics prepares Supabase queries filtered by influencer ref and coupon', async () => {
+  const previousFetch = global.fetch;
+  const rows = [{ event_name: 'whatsapp_click', influencer_ref: 'ana', coupon_code: 'ANA10', metadata: { ref: 'ana', coupon: 'ANA10' } }];
+  let requestedUrl;
+
+  global.fetch = async (url) => {
+    requestedUrl = new URL(String(url));
+    return { ok: true, json: async () => rows };
+  };
+
+  try {
+    const result = await fetchSupabaseAnalyticsEvents(
+      { influencerRef: 'ana', couponCode: 'ana10', limit: 25 },
+      { config: { enabled: true, url: 'https://example.supabase.co', anonKey: 'anon-key', table: 'analytics_events', select: '*' } },
+    );
+
+    assert.deepEqual(result, rows);
+    assert.equal(requestedUrl.pathname, '/rest/v1/analytics_events');
+    assert.equal(requestedUrl.searchParams.get('influencer_ref'), 'eq.ana');
+    assert.equal(requestedUrl.searchParams.get('coupon_code'), 'eq.ANA10');
+    assert.equal(requestedUrl.searchParams.get('limit'), '25');
+    assert.equal(requestedUrl.searchParams.get('order'), 'occurred_at.desc');
+  } finally {
+    global.fetch = previousFetch;
+  }
 });
 
 import catalogRepository, { getAllProducts, getAllProductsAsync, getProductBySlug, getProductsByBrand, searchProducts } from '../src/data/catalogRepository.js';
