@@ -1,6 +1,7 @@
 import { formatBRL } from './currency.js';
 import { createProductPath } from './productRouting.js';
 import { createCanonicalUrl } from './seo.js';
+import { formatReferralForWhatsapp } from './referral.js';
 
 const WHATSAPP_NUMBER = '5521975110562';
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -39,6 +40,7 @@ export function createProductWhatsAppMessage(productOrName, price, productUrl, o
   const variation = cleanText(product?.variation ?? product?.size ?? options.variation ?? options.size);
   const quantity = cleanText(options.quantity ?? product?.quantity);
   const canonicalUrl = getProductUrl(product ?? { name: productName }, productUrl ?? options.productUrl);
+  const referralLines = formatReferralForWhatsapp(options.referralContext);
 
   const details = [
     `Produto: ${productName}`,
@@ -55,6 +57,10 @@ export function createProductWhatsAppMessage(productOrName, price, productUrl, o
   }
 
   details.push(`Link: ${canonicalUrl}`);
+
+  if (referralLines) {
+    details.push(referralLines);
+  }
 
   return [
     'Olá, LAZULE! Gostaria de comprar esta fragrância.',
