@@ -37,6 +37,7 @@ function ProductImageSkeleton() {
 
 export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
+  const [hasImageFailed, setHasImageFailed] = useState(false);
   const productPath = createProductPath(product);
   const availability = product.availability ?? getAvailabilityStatus(product);
   const heroBadge = product.featured ? 'Destaque' : availability.label;
@@ -49,7 +50,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
         onClick={() => trackProductSelect(product, { source_page: analyticsSection, section: analyticsSection, interaction_type: 'card' })}
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue">
-          {product.image ? (
+          {product.image && !hasImageFailed ? (
             <>
               {isImageLoading && <ProductImageSkeleton />}
               <img
@@ -61,11 +62,14 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
                 loading="lazy"
                 decoding="async"
                 onLoad={() => setIsImageLoading(false)}
-                onError={() => setIsImageLoading(false)}
+                onError={() => {
+                  setHasImageFailed(true);
+                  setIsImageLoading(false);
+                }}
               />
             </>
           ) : (
-            <ProductImageFallback />
+            <ProductImageFallback label={product.image ? 'Imagem temporariamente indisponível' : 'Imagem em atualização'} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/80 via-transparent to-transparent" />
           <span className="absolute left-4 top-4 rounded-full border border-lazule-gold/35 bg-lazule-night/58 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold backdrop-blur">

@@ -171,7 +171,9 @@ function App() {
   }, [isPromoReferralRouteActive, isProtectedDashboardRoute, isInfluencerInviteRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
-    if (!isPromoReferralRouteActive && !isInfluencerInviteRoute) {
+    const shouldNoIndexRoute = isPromoReferralRouteActive || isProtectedDashboardRoute || isAdminLoginRoute || isInfluencerLoginRoute || isInfluencerInviteRoute;
+
+    if (!shouldNoIndexRoute) {
       return undefined;
     }
 
@@ -194,7 +196,7 @@ function App() {
         robotsMeta.removeAttribute('content');
       }
     };
-  }, [isPromoReferralRouteActive, isInfluencerInviteRoute]);
+  }, [isAdminLoginRoute, isInfluencerLoginRoute, isPromoReferralRouteActive, isProtectedDashboardRoute, isInfluencerInviteRoute]);
 
   useEffect(() => {
     if (!isPromoReferralRouteActive) {
@@ -247,10 +249,10 @@ function App() {
       routeName = 'product_suggestion';
     }
 
-    if (!isProtectedDashboardRoute && !isInfluencerInviteRoute) {
+    if (!isProtectedDashboardRoute && !isInfluencerInviteRoute && !isPromoReferralRouteActive && !isAdminLoginRoute && !isInfluencerLoginRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
