@@ -171,19 +171,19 @@ export function ProductCatalog() {
   }
 
   return (
-    <section id="catalogo" className="relative mx-auto max-w-7xl px-4 py-14 sm:px-8 sm:py-20 lg:py-24">
-      <div className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
+    <section id="catalogo" className="relative mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-20 lg:py-24">
+      <div className="mb-7 grid gap-5 sm:mb-8 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
         <div className="max-w-3xl">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.32em] text-lazule-gold sm:tracking-[0.38em]">
+          <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold sm:mb-4 sm:text-xs sm:tracking-[0.38em]">
             Catálogo premium
           </p>
-          <h2 className="font-display text-4xl leading-tight text-lazule-mist sm:text-5xl">Descubra sua próxima assinatura olfativa.</h2>
-          <p className="mt-5 text-base leading-7 text-slate-300">
+          <h2 className="font-display text-[clamp(2.25rem,11vw,3rem)] leading-[1.02] text-lazule-mist sm:text-5xl">Descubra sua próxima assinatura olfativa.</h2>
+          <p className="mt-4 text-sm leading-6 text-slate-300 sm:mt-5 sm:text-base sm:leading-7">
             Uma seleção editorial de importados, árabes e nicho com apoio consultivo para escolher com segurança e desejo.
           </p>
         </div>
 
-        <div className="lazule-surface-premium rounded-[2rem] border border-lazule-gold/20 bg-lazule-depth/80 p-4 shadow-mineral backdrop-blur sm:p-5">
+        <div className="lazule-surface-premium rounded-[1.6rem] border border-lazule-gold/20 bg-lazule-depth/80 p-3.5 shadow-mineral backdrop-blur sm:rounded-[2rem] sm:p-5">
           <SearchBar
             value={draftSearchTerm}
             onChange={handleSearchChange}
@@ -194,7 +194,7 @@ export function ProductCatalog() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:items-start">
+      <div className="grid gap-5 lg:grid-cols-[320px_1fr] lg:items-start">
         <AdvancedFilters
           filters={filters}
           options={filterOptions}
@@ -228,7 +228,7 @@ export function ProductCatalog() {
 
           {filteredProducts.length > 0 ? (
             <>
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 min-[520px]:grid-cols-2 md:gap-5 xl:grid-cols-3">
                 {visibleProducts.map((product) => (
                   <ProductCard key={product.id} product={product} analyticsSection="catalog_grid" />
                 ))}
@@ -238,12 +238,12 @@ export function ProductCatalog() {
                 <div className="mt-10 flex flex-col items-center gap-3 text-center">
                   <button
                     type="button"
-                    className="lazule-premium-button lazule-cta-shimmer group relative inline-flex min-h-12 w-full items-center justify-center overflow-hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-6 py-4 text-center text-sm font-semibold uppercase tracking-[0.18em] text-lazule-night shadow-aureate focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night sm:w-auto sm:px-8 sm:tracking-[0.22em]"
+                    className="lazule-premium-button lazule-cta-shimmer group relative inline-flex min-h-12 w-full items-center justify-center overflow-hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-5 py-4 text-center text-sm font-semibold uppercase tracking-[0.14em] text-lazule-night shadow-aureate focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night sm:w-auto sm:px-8 sm:tracking-[0.22em]"
                     onClick={loadMoreProducts}
                   >
                     <span className="relative">Carregar mais fragrâncias</span>
                   </button>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400 sm:tracking-[0.24em]">
+                  <p className="max-w-sm text-xs uppercase leading-5 tracking-[0.14em] text-slate-400 sm:tracking-[0.24em]">
                     Exibindo <strong className="text-lazule-gold">{visibleProducts.length}</strong> de{' '}
                     <strong className="text-lazule-gold">{filteredProducts.length}</strong> fragrâncias — mais{' '}
                     <strong className="text-lazule-mist">{Math.min(PRODUCTS_PER_PAGE, remainingProducts)}</strong> no próximo toque

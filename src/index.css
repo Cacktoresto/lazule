@@ -1226,3 +1226,290 @@ body {
     top: 5.75rem;
   }
 }
+
+/* Mobile-first viewport stabilization pass */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+}
+
+html {
+  overflow-x: clip;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: clip;
+  overscroll-behavior-y: none;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary {
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .lazule-premium-button:hover,
+  .lazule-product-card:hover,
+  .lazule-touch-card:hover,
+  .lazule-brand-pill:hover,
+  .lazule-hero-product:hover,
+  .lazule-ai-card:hover,
+  .lazule-surface-premium:hover::after,
+  .lazule-discovery-card:hover::after,
+  .lazule-ai-card:hover::after {
+    transform: none;
+    box-shadow: inherit;
+  }
+
+  .lazule-product-card:hover::after,
+  .lazule-premium-button:hover::after {
+    opacity: 0;
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --lazule-mobile-gutter: clamp(1rem, 4.8vw, 1.25rem);
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 12% 12%, rgba(30, 58, 138, 0.18), transparent 18rem),
+      radial-gradient(circle at 92% 4%, rgba(200, 162, 77, 0.08), transparent 15rem),
+      linear-gradient(180deg, #050816 0%, #0b1227 52%, #050816 100%);
+  }
+
+  .lazule-atmosphere {
+    contain: strict;
+  }
+
+  .lazule-atmosphere__depth {
+    transform: none;
+    transition: none;
+    background:
+      radial-gradient(circle at 18% 16%, rgba(37, 99, 235, 0.14), transparent 18rem),
+      radial-gradient(circle at 84% 10%, rgba(200, 162, 77, 0.075), transparent 14rem),
+      linear-gradient(180deg, #050816 0%, #0f172a 56%, #050816 100%);
+  }
+
+  .lazule-atmosphere__nebula {
+    inset: -4%;
+    filter: blur(16px);
+    opacity: 0.46;
+    transform: none;
+    animation-duration: 54s;
+  }
+
+  .lazule-atmosphere__wave {
+    opacity: 0.18;
+    transform: none;
+    animation-duration: 60s;
+  }
+
+  .lazule-atmosphere__noise {
+    opacity: 0.028;
+    background-size: 5rem 5rem, 6.5rem 6.5rem;
+  }
+
+  .lazule-light-trail:nth-of-type(n + 2),
+  .lazule-mineral-particle:nth-of-type(n + 8) {
+    display: none;
+  }
+
+  .lazule-mineral-particle {
+    animation-duration: 42s !important;
+    box-shadow: 0 0 10px rgba(200, 162, 77, 0.22);
+  }
+
+  .lazule-hero::after {
+    height: 8rem;
+  }
+
+  .lazule-hero-copy > * {
+    animation-duration: 520ms;
+  }
+
+  .lazule-hero-product {
+    animation:
+      lazule-hero-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) 180ms forwards,
+      lazule-product-float 10s ease-in-out 1.2s infinite;
+    box-shadow:
+      inset 0 1px 0 rgba(248, 250, 252, 0.05),
+      0 18px 54px rgba(2, 6, 23, 0.32);
+  }
+
+  .lazule-surface-premium {
+    box-shadow:
+      inset 0 1px 0 rgba(248, 250, 252, 0.05),
+      inset 0 -1px 0 rgba(200, 162, 77, 0.035),
+      0 18px 58px rgba(2, 6, 23, 0.22);
+  }
+
+  .lazule-product-card {
+    box-shadow:
+      inset 0 1px 0 rgba(248, 250, 252, 0.045),
+      0 16px 44px rgba(2, 6, 23, 0.24);
+  }
+
+  .lazule-reveal {
+    transform: translate3d(0, 0.65rem, 0);
+    transition-duration: 480ms;
+  }
+
+  .lazule-reveal-item {
+    transform: translate3d(0, 0.5rem, 0);
+    transition-duration: 420ms;
+  }
+
+  .lazule-horizontal-rail {
+    margin-inline: calc(var(--lazule-mobile-gutter) * -1);
+    padding-inline: var(--lazule-mobile-gutter);
+    scroll-padding-inline: var(--lazule-mobile-gutter);
+    scroll-snap-stop: always;
+  }
+
+  .lazule-rail-fade {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 0.75rem, #000 calc(100% - 1.7rem), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 0.75rem, #000 calc(100% - 1.7rem), transparent 100%);
+  }
+
+  .lazule-sticky-search {
+    box-shadow: 0 12px 34px rgba(2, 6, 23, 0.28);
+  }
+
+  .lazule-home-search .lazule-search-shell {
+    max-width: 100%;
+  }
+
+  .lazule-ai-orb,
+  .lazule-ai-orb::before,
+  .lazule-ai-orb::after {
+    animation-duration: 5.8s;
+  }
+
+  .lazule-result-reveal > *,
+  .lazule-result-reveal .lazule-ai-card {
+    animation-duration: 460ms;
+  }
+
+  .lazule-product-hero {
+    border-bottom-left-radius: 1.75rem;
+    border-bottom-right-radius: 1.75rem;
+  }
+
+  .lazule-product-hero-frame {
+    min-height: clamp(25.5rem, 68svh, 34rem);
+  }
+
+  .lazule-product-stage {
+    width: min(15.5rem, 68vw);
+    height: min(15.5rem, 68vw);
+    filter: blur(1.8rem);
+  }
+
+  .lazule-product-bottle {
+    max-height: 68%;
+  }
+
+  .lazule-product-info-card {
+    margin-top: -2.15rem;
+    padding: 1.25rem;
+  }
+
+  .lazule-product-info-card h1 {
+    font-size: clamp(2.2rem, 11vw, 3.1rem);
+    line-height: 0.96;
+  }
+
+  .lazule-sticky-whatsapp {
+    padding-inline: 0.9rem;
+  }
+}
+
+@media (max-width: 374px) {
+  .lazule-mobile-container {
+    min-height: 74svh;
+    padding-top: 1.25rem;
+  }
+
+  .lazule-hero-product {
+    max-width: min(17.5rem, 86vw);
+  }
+
+  .lazule-sticky-search {
+    top: 8.15rem;
+  }
+
+  .lazule-home-search input::placeholder {
+    color: transparent;
+  }
+
+  .lazule-home-search button {
+    min-width: 2.75rem;
+    padding-inline: 0.85rem;
+  }
+
+  .lazule-ai-card {
+    width: min(84vw, 18.5rem);
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .lazule-mobile-container {
+    min-height: auto;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.75fr);
+    align-items: end;
+    padding-block: 1.25rem 1.5rem;
+  }
+
+  .lazule-mobile-container .lazule-hero-product {
+    max-width: min(15rem, 38vw);
+  }
+
+  .lazule-sticky-search {
+    position: relative;
+    top: auto;
+  }
+
+  .lazule-product-hero-frame {
+    min-height: 24rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .lazule-hero-product {
+    max-width: min(23rem, 42vw);
+  }
+
+  .lazule-product-hero-frame {
+    min-height: clamp(30rem, 70svh, 38rem);
+  }
+}

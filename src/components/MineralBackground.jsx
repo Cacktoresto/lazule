@@ -23,8 +23,9 @@ export function MineralBackground() {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || isCoarsePointer) {
       return undefined;
     }
 
@@ -67,7 +68,7 @@ export function MineralBackground() {
       <div className="absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-lazule-blue/10 blur-3xl lazule-mineral-drift" />
       <div className="absolute -right-24 top-20 h-80 w-80 rounded-full bg-lazule-gold/10 blur-3xl lazule-mineral-drift [animation-delay:-9s]" />
 
-      {LIGHT_TRAILS.map((trail) => (
+      {LIGHT_TRAILS.slice(0, 2).map((trail) => (
         <span
           key={`${trail.left}-${trail.top}`}
           className="lazule-light-trail absolute h-px rounded-full bg-gradient-to-r from-transparent via-lazule-gold/35 to-transparent"

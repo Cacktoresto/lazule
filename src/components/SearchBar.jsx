@@ -14,7 +14,7 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
         </span>
         <input
           id="catalog-search"
-          className="min-h-12 w-full rounded-2xl border border-lazule-gold/20 bg-white/[0.075] px-4 py-3.5 text-base text-lazule-mist outline-none ring-0 placeholder:text-slate-400 transition duration-200 hover:border-lazule-gold/40 focus-visible:border-lazule-gold/75 focus-visible:bg-white/[0.10] focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:rounded-full"
+          className="min-h-12 w-full rounded-2xl border border-lazule-gold/20 bg-white/[0.075] px-4 py-3 text-[16px] text-lazule-mist outline-none ring-0 placeholder:text-slate-400 transition duration-200 hover:border-lazule-gold/40 focus-visible:border-lazule-gold/75 focus-visible:bg-white/[0.10] focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:rounded-full sm:py-3.5 sm:text-base"
           type="search"
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -25,9 +25,9 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
         />
       </label>
 
-      <div className="mt-3 grid gap-2 sm:flex sm:items-center sm:justify-between">
+      <div className="mt-3 grid gap-3 sm:flex sm:items-center sm:justify-between">
         <p className="text-xs leading-5 text-slate-400">Ex.: Sauvage, Hacivat, presente elegante, noite intensa…</p>
-        <div className="grid gap-2 sm:flex sm:shrink-0">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
           {hasSearch && (
             <button
               className="min-h-11 rounded-full border border-white/15 bg-white/5 px-4 text-sm font-semibold text-slate-200 transition duration-200 hover:border-lazule-gold/50 hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
