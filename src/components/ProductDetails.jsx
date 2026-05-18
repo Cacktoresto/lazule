@@ -9,6 +9,7 @@ import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus
 import { applyManualReferralCode, getReferralChangeEventName, getReferralContext, removeReferralField } from '../utils/referral';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
+import { generateOlfactiveRelationships, getExplorableOlfactiveTerms } from '../ai/olfactiveRelationships';
 
 function normalizeProductClassifier(value) {
   return String(value || '')
@@ -461,12 +462,12 @@ function VibeSection({ product }) {
   );
 }
 
-function RecommendationCard({ product }) {
+function RecommendationCard({ product, context = 'recommendations', explanation }) {
   return (
     <a
       className="lazule-product-card group flex min-h-[19rem] w-[78vw] max-w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition md:w-[20rem]"
       href={createProductPath(product)}
-      onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: 'recommendations' })}
+      onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: context })}
     >
       <div className="relative min-h-44 overflow-hidden bg-lazule-depth">
         {product.image ? (
@@ -489,10 +490,102 @@ function RecommendationCard({ product }) {
             {getProductDisplayName(product)}
           </h3>
           {product.olfactoryReference && <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {product.olfactoryReference}</p>}
+          {explanation ? <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-300">{explanation}</p> : null}
         </div>
-        <strong className="mt-5 text-base text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+        <strong className="mt-5 text-base text-lazule-mist">{canDirectBuy(product) ? formatBRL(product.salePrice) : getCommercialStatusMeta(product).badge}</strong>
       </div>
     </a>
+  );
+}
+
+
+function OlfactiveDiscoveryTerms({ product }) {
+  const terms = getExplorableOlfactiveTerms(product, { limit: 9 });
+
+  if (!terms.length) {
+    return null;
+  }
+
+  return (
+    <section className="lazule-reveal mt-10 rounded-[2.4rem] border border-lazule-gold/15 bg-white/[0.045] p-6 shadow-mineral backdrop-blur sm:p-8 lg:mt-14">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Mapa olfativo</p>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist">Explore notas e acordes</h2>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-slate-300">Atalhos contextuais para descobrir perfumes por direção olfativa, sem criar uma taxonomia pública pesada.</p>
+      </div>
+      <div className="mt-6 flex flex-wrap gap-2">
+        {terms.map((item) => (
+          <a
+            key={`${item.type}-${item.term}`}
+            className="lazule-premium-button rounded-full border border-lazule-gold/25 bg-lazule-gold/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
+            href={`/catalogo?busca=${encodeURIComponent(item.term)}`}
+            onClick={() => trackEvent('olfactive_term_exploration', {
+              product_id: product.id,
+              product_slug: product.productSlug,
+              product_name: product.name,
+              term_type: item.type,
+              term: item.term,
+              source_page: 'product',
+              privacy: 'olfactive_taxonomy_only',
+            })}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RelationshipBlocks({ sections, currentProduct }) {
+  if (!sections.length) {
+    return null;
+  }
+
+  return (
+    <section className="lazule-reveal mt-10 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
+      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Relações olfativas</p>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Descoberta por assinatura</h2>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-slate-300">Conexões explicáveis por acordes, notas, DNA, vibe e disponibilidade — curadoria, não comparação de clones.</p>
+      </div>
+      <div className="space-y-8">
+        {sections.map((section) => (
+          <div key={section.id} onMouseEnter={() => trackEvent('relationship_block_engagement', {
+            product_id: currentProduct.id,
+            product_slug: currentProduct.productSlug,
+            relationship_block: section.id,
+            item_count: section.items.length,
+            source_page: 'product',
+          }, { dedupeKey: `relationship_block|${currentProduct.id}|${section.id}`, dedupeMs: 12000 })}>
+            <div className="mb-4">
+              <h3 className="font-display text-2xl text-lazule-mist">{section.title}</h3>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-300">{section.subtitle}</p>
+            </div>
+            <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
+              {section.items.map((item) => (
+                <div key={`${section.id}-${item.product.id ?? item.product.productSlug}`} onClick={() => trackEvent(section.id === 'available_alternatives' ? 'alternative_perfume_click' : 'relationship_click', {
+                  product_id: currentProduct.id,
+                  product_slug: currentProduct.productSlug,
+                  related_product_id: item.product.id,
+                  related_product_slug: item.product.productSlug,
+                  relationship_block: section.id,
+                  relationship_score: item.score,
+                  source_page: 'product',
+                  conversion_type: section.id === 'available_alternatives' ? 'unavailable_to_in_stock' : undefined,
+                })}>
+                  <RecommendationCard product={item.product} context={section.id} explanation={item.explanation} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -563,6 +656,7 @@ export function ProductDetails({ slug }) {
   const normalizedSlug = createProductSlug(slug);
   const product = getProductBySlug(normalizedSlug, catalogProducts);
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
+  const relationshipSections = useMemo(() => (product ? generateOlfactiveRelationships(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
 
   useEffect(() => {
@@ -691,6 +785,8 @@ export function ProductDetails({ slug }) {
 
       <div className="px-4 lg:px-0">
         <VibeSection product={product} />
+        <OlfactiveDiscoveryTerms product={product} />
+        <RelationshipBlocks sections={relationshipSections} currentProduct={product} />
         <Recommendations products={recommendations} />
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />

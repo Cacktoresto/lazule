@@ -253,7 +253,12 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   ) : null}
                 </div>
 
-                {result.fallbackUsed ? (
+                {result.discoveryConversion ? (
+                  <div className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
+                    <p className="font-semibold text-lazule-gold">{result.discoveryConversion.title}</p>
+                    <p className="mt-1">{result.discoveryConversion.message}</p>
+                  </div>
+                ) : result.fallbackUsed ? (
                   <p className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
                     A leitura não encontrou uma combinação absoluta; refinamos alternativas versáteis com melhor aderência ao seu briefing.
                   </p>
