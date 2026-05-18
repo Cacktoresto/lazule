@@ -117,18 +117,18 @@ export function AdvancedFilters({ filters, options, onFilterChange, onReset }) {
     <aside className="rounded-[2rem] border border-lazule-gold/15 bg-gradient-to-br from-white/[0.075] via-white/[0.045] to-lazule-blue/10 p-5 shadow-mineral backdrop-blur lg:sticky lg:top-28 lg:p-6">
       <div className="mb-5 hidden lg:block">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-lazule-gold">Filtros</p>
-        <h3 className="mt-3 font-display text-3xl text-lazule-mist">Curadoria inteligente</h3>
+        <h3 className="mt-3 font-display text-3xl text-lazule-mist">Curadoria assistida</h3>
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          Refine por perfil, disponibilidade e investimento sem perder a experiência limpa da boutique.
+          Ajuste perfil, disponibilidade e investimento com a calma de uma consultoria de boutique.
         </p>
       </div>
 
-      <details className="group lg:hidden">
+      <details className="lazule-product-accordion group lg:hidden">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-2xl border border-lazule-gold/20 bg-lazule-night/70 px-4 py-3 text-sm font-semibold text-lazule-mist shadow-inner shadow-lazule-blue/10 transition duration-200 hover:border-lazule-gold/45 hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night">
           Filtros avançados
           <span className="text-lazule-gold transition group-open:rotate-45">+</span>
         </summary>
-        <div className="mt-5">
+        <div className="lazule-product-accordion-panel mt-5">
           <FilterContent filters={filters} options={options} onFilterChange={onFilterChange} onReset={onReset} />
         </div>
       </details>

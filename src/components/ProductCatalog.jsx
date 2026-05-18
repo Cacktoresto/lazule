@@ -177,13 +177,13 @@ export function ProductCatalog() {
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.32em] text-lazule-gold sm:tracking-[0.38em]">
             Catálogo premium
           </p>
-          <h2 className="font-display text-4xl leading-tight text-lazule-mist sm:text-5xl">Escolha sua próxima assinatura olfativa.</h2>
+          <h2 className="font-display text-4xl leading-tight text-lazule-mist sm:text-5xl">Descubra sua próxima assinatura olfativa.</h2>
           <p className="mt-5 text-base leading-7 text-slate-300">
-            Produtos selecionados para atendimento personalizado. Consulte disponibilidade pelo WhatsApp antes de finalizar seu pedido.
+            Uma seleção editorial de importados, árabes e nicho com apoio consultivo para escolher com segurança e desejo.
           </p>
         </div>
 
-        <div className="rounded-[2rem] border border-lazule-gold/20 bg-lazule-depth/80 p-4 shadow-mineral backdrop-blur sm:p-5">
+        <div className="lazule-surface-premium rounded-[2rem] border border-lazule-gold/20 bg-lazule-depth/80 p-4 shadow-mineral backdrop-blur sm:p-5">
           <SearchBar
             value={draftSearchTerm}
             onChange={handleSearchChange}
@@ -206,10 +206,10 @@ export function ProductCatalog() {
 
         <div className="min-w-0">
           <div className="mb-6 grid gap-4">
-            <div className="flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-slate-300 sm:px-5">
+            <div className="lazule-feedback-card flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-slate-300 sm:px-5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
-                  <strong className="text-lazule-mist">{filteredProducts.length}</strong> fragrâncias encontradas na seleção
+                  <strong className="text-lazule-mist">{filteredProducts.length}</strong> fragrâncias curadas para este filtro
                 </span>
                 <span>
                   Total no catálogo: <strong className="text-lazule-gold">{catalogProducts.length}</strong>
@@ -254,11 +254,11 @@ export function ProductCatalog() {
               )}
             </>
           ) : (
-            <div className="rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-6 text-center shadow-mineral sm:p-10">
+            <div className="lazule-surface-premium rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-6 text-center shadow-mineral sm:p-10">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-lazule-gold sm:tracking-[0.35em]">Curadoria LAZULE</p>
-              <h3 className="font-display text-3xl leading-tight text-lazule-mist">Não encontramos esse perfume no momento.</h3>
+              <h3 className="font-display text-3xl leading-tight text-lazule-mist">Ainda não encontramos o match ideal.</h3>
               <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-                Fale com a curadoria LAZULE pelo WhatsApp que ajudamos você a encontrar uma alternativa.
+                A curadoria LAZULE pode sugerir alternativas por vibe, DNA olfativo e ocasião em uma conversa rápida.
               </p>
               <a
                 className="lazule-premium-button lazule-cta-shimmer mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-center text-sm font-semibold text-lazule-night shadow-aureate sm:w-auto"

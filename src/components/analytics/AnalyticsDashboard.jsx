@@ -56,12 +56,12 @@ export function AnalyticsDashboard() {
   const hasEvents = events.length > 0;
 
   const summaryCards = [
-    { label: 'Page views', value: formatNumber(metrics.pageViews), helper: 'Visitas registradas na SPA.' },
-    { label: 'Product views', value: formatNumber(metrics.productViews), helper: 'Visualizações de fragrâncias.' },
+    { label: 'Visitas', value: formatNumber(metrics.pageViews), helper: 'Sessões e páginas vistas na experiência.' },
+    { label: 'Fragrâncias vistas', value: formatNumber(metrics.productViews), helper: 'Interesse por produto e assinatura olfativa.' },
     { label: 'Cliques WhatsApp', value: formatNumber(metrics.whatsappClicks), helper: 'Sinais de intenção comercial.', tone: 'gold' },
-    { label: 'Produto → WhatsApp', value: formatPercent(metrics.productToWhatsappRate), helper: 'whatsapp_click / product_view.' },
+    { label: 'Produto → WhatsApp', value: formatPercent(metrics.productToWhatsappRate), helper: 'Conversão de intenção para conversa.' },
     { label: 'Buscas', value: formatNumber(metrics.searches), helper: 'Termos pesquisados no catálogo.' },
-    { label: 'Sem resultado', value: formatNumber(metrics.emptySearches), helper: 'Demandas não atendidas ainda.' },
+    { label: 'Desejos sem match', value: formatNumber(metrics.emptySearches), helper: 'Oportunidades de sortimento e curadoria.' },
     { label: 'Marcas clicadas', value: formatNumber(metrics.brandClicks), helper: 'Interesse por maison/marca.' },
     { label: 'Categorias', value: formatNumber(metrics.categoryClicks), helper: 'Curadorias acionadas.' },
     { label: 'Recomendações', value: formatNumber(metrics.recommendationClicks), helper: 'Cross-sell validado.' },
@@ -69,20 +69,20 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-      <header className="overflow-hidden rounded-[2.5rem] border border-lazule-gold/20 bg-lazule-depth p-6 shadow-mineral md:p-10">
+      <header className="lazule-surface-premium overflow-hidden rounded-[2.5rem] border border-lazule-gold/20 bg-lazule-depth p-6 shadow-mineral md:p-10">
         <div className="max-w-3xl">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold">LAZULE Business Intelligence</p>
-          <h1 className="mt-4 font-display text-4xl text-lazule-mist md:text-5xl">Analytics Dashboard</h1>
+          <h1 className="mt-4 font-display text-4xl text-lazule-mist md:text-5xl">Inteligência comercial</h1>
           <p className="mt-4 text-sm leading-7 text-lazule-mist/72 md:text-base">
-            Primeira camada operacional para transformar navegação, busca e intenção no WhatsApp em leitura comercial. Fonte atual: snapshot local recente, sem backend e sem dados pessoais.
+            Leitura premium para transformar navegação, busca e intenção no WhatsApp em decisões de curadoria. Fonte atual: snapshot local recente, sem dados pessoais.
           </p>
         </div>
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button type="button" className="lazule-premium-button rounded-full border border-lazule-gold/35 bg-lazule-gold/15 px-5 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-lazule-gold" onClick={refresh}>
-            Atualizar dados
+          <button type="button" className="lazule-premium-button rounded-full border border-lazule-gold/35 bg-lazule-gold/15 px-5 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-lazule-gold" aria-label="Atualizar leitura de analytics" onClick={refresh}>
+            Refinar leitura
           </button>
           <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs text-lazule-mist/68">{formatNumber(events.length)} eventos locais</span>
-          <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs text-lazule-mist/68">Pronto para proteção futura</span>
+          <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs text-lazule-mist/68">Dados agregados</span>
         </div>
       </header>
 
@@ -151,7 +151,7 @@ export function AnalyticsDashboard() {
       </div>
 
 
-      <AnalyticsSection className="mt-6" title="AI Commerce Intelligence" eyebrow="Experimental · intenção anônima + DNA olfativo">
+      <AnalyticsSection className="mt-6" title="AI Commerce Intelligence" eyebrow="Intenção anônima · DNA olfativo · curadoria assistida">
         <div className="grid gap-4 md:grid-cols-3">
           <MetricCard label="Consultas IA" value={formatNumber(aiCommerce.aiQueries)} helper="Pedidos processados pelo Assistente Olfativo." tone="gold" />
           <MetricCard label="IA → WhatsApp" value={formatPercent(aiCommerce.aiWhatsappRate)} helper="Conversão assistente para conversa comercial." />

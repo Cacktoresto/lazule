@@ -145,6 +145,7 @@ function getAppliedReferralLabel(referralContext = {}) {
 function ManualReferralForm({ product, referralContext }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [feedback, setFeedback] = useState('');
   const appliedCode = getAppliedReferralLabel(referralContext);
   const productSlug = createProductSlug(product?.name);
 
@@ -163,11 +164,13 @@ function ManualReferralForm({ product, referralContext }) {
     const result = applyManualReferralCode(code);
 
     if (!result.ok) {
+      setFeedback('');
       setError(result.error || 'Não foi possível aplicar este código.');
       return;
     }
 
     setError('');
+    setFeedback(result.type === 'coupon' ? 'Cupom aplicado à experiência LAZULE.' : 'Código de indicação conectado à sua curadoria.');
     setCode('');
 
     if (result.type === 'coupon') {
@@ -186,6 +189,7 @@ function ManualReferralForm({ product, referralContext }) {
 
     if (result.ok) {
       setError('');
+      setFeedback('Benefício removido com segurança.');
       trackCouponRemoved(buildAnalyticsPayload({ [appliedCode.type]: appliedCode.value }));
     }
   }
@@ -204,20 +208,22 @@ function ManualReferralForm({ product, referralContext }) {
           onChange={(event) => {
             setCode(event.target.value);
             if (error) setError('');
+            if (feedback) setFeedback('');
           }}
           placeholder="Cupom ou código do parceiro"
           aria-label="Cupom ou código do parceiro"
         />
-        <button className="rounded-full border border-lazule-gold/45 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-lazule-royal transition hover:bg-lazule-gold hover:text-lazule-night lg:text-lazule-gold" type="submit">
+        <button className="lazule-pressable rounded-full border border-lazule-gold/45 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-lazule-royal transition hover:bg-lazule-gold hover:text-lazule-night lg:text-lazule-gold" type="submit">
           Aplicar
         </button>
       </form>
       <div className="mt-3 min-h-5 text-xs leading-5">
-        {error ? <p className="text-red-600 lg:text-red-200">{error}</p> : null}
+        {error ? <p className="text-red-600 lg:text-red-200" role="alert">{error}</p> : null}
+        {!error && feedback ? <p className="text-emerald-700 lg:text-emerald-200" role="status">{feedback}</p> : null}
         {!error && appliedCode ? (
           <p className="flex flex-wrap items-center gap-2 text-slate-600 lg:text-slate-300">
             <span><strong className="text-lazule-royal lg:text-lazule-gold">{appliedCode.label}:</strong> {appliedCode.value}</span>
-            <button className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500 underline decoration-lazule-gold/40 underline-offset-4 transition hover:text-lazule-gold" type="button" onClick={handleRemove}>
+            <button className="lazule-pressable text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500 underline decoration-lazule-gold/40 underline-offset-4 transition hover:text-lazule-gold" type="button" onClick={handleRemove}>
               Remover
             </button>
           </p>
@@ -361,7 +367,7 @@ function ProductAccordion({ title, children, defaultOpen = false, product }) {
 
   return (
     <details className="lazule-product-accordion group border-t border-lazule-night/10 py-5 first:border-t-0 lg:border-white/10" open={defaultOpen} onToggle={handleToggle}>
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night transition hover:text-lazule-gold lg:text-lazule-mist">
+      <summary className="lazule-pressable flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl text-left text-sm font-semibold uppercase tracking-[0.22em] text-lazule-night transition hover:text-lazule-gold focus-visible:px-2 lg:text-lazule-mist">
         {title}
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-lazule-night/10 bg-lazule-night/[0.04] text-lazule-gold transition group-open:rotate-45 lg:border-white/10 lg:bg-white/[0.04]">
           +
@@ -519,7 +525,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   const appliedCode = getAppliedReferralLabel(referralContext);
 
   return (
-    <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-lazule-night/90 px-4 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden">
+    <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-lazule-night/90 px-4 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden" role="region" aria-label="Compra rápida pelo WhatsApp">
       <div className="mx-auto flex max-w-md items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
@@ -542,7 +548,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
             trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'sticky_cta' });
           }}
         >
-          Comprar via WhatsApp
+          WhatsApp
         </a>
       </div>
     </div>
@@ -665,7 +671,7 @@ export function ProductDetails({ slug }) {
             rel="noreferrer"
             onClick={() => trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'product_details' })}
           >
-            Comprar via WhatsApp
+            Consultar curadoria no WhatsApp
           </a>
 
           <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
