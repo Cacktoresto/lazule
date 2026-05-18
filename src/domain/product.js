@@ -1,4 +1,5 @@
 import { getAvailabilityStatus } from '../utils/availability.js';
+import { getCommercialStatus, shouldExposeInMainCatalog } from '../utils/commercialStatus.js';
 import { inferCatalogType } from '../utils/catalogFilters.js';
 import { createSearchIndex, createSearchTokens, inferBrandFromName, normalizeSearchText } from '../utils/search.js';
 import { createBrandSlug, createProductSlug } from '../utils/productRouting.js';
@@ -17,6 +18,26 @@ const PUBLIC_PRODUCT_FIELDS = [
   'olfactoryReference',
   'available',
   'featured',
+  'status',
+  'commercialStatus',
+  'concentration',
+  'notes',
+  'accords',
+  'family',
+  'similarTo',
+  'inspirations',
+  'vibeTags',
+  'occasionTags',
+  'weatherTags',
+  'performanceLabel',
+  'projectionLabel',
+  'popularityTier',
+  'description_editorial',
+  'ai_summary',
+  'dna_vector',
+  'dominantDNA',
+  'recommendationHints',
+  'catalogVisibility',
 ];
 
 export function isPromotionalName(value) {
@@ -46,7 +67,8 @@ export function normalizeProduct(rawProduct = {}) {
   const safeName = getSafeProductName(publicProduct);
   const inferredBrand = publicProduct.brand && !isPromotionalName(publicProduct.brand) ? publicProduct.brand : inferBrandFromName(safeName);
   const brand = inferredBrand || inferBrandFromName(safeName);
-  const availability = getAvailabilityStatus(publicProduct);
+  const status = getCommercialStatus(publicProduct);
+  const availability = getAvailabilityStatus({ ...publicProduct, status });
   const catalogType = inferCatalogType({ ...publicProduct, name: safeName, brand });
   const salePrice = Number(publicProduct.salePrice ?? 0);
   const image = String(publicProduct.image ?? '').trim();
@@ -60,9 +82,13 @@ export function normalizeProduct(rawProduct = {}) {
     badges: Array.isArray(publicProduct.badges) ? publicProduct.badges.filter(Boolean) : [],
     description: String(publicProduct.description ?? '').trim(),
     olfactoryReference: String(publicProduct.olfactoryReference ?? '').trim(),
+    status,
+    commercialStatus: status,
     availability,
+    category: publicProduct.category ?? catalogType,
     catalogType,
-    available: publicProduct.available !== false,
+    available: status === 'in_stock' && publicProduct.available !== false,
+    catalogVisibility: publicProduct.catalogVisibility ?? (shouldExposeInMainCatalog({ status }) ? 'catalog' : 'reference'),
     featured: Boolean(publicProduct.featured),
   };
 
@@ -73,11 +99,13 @@ export function normalizeProduct(rawProduct = {}) {
     productSlug: createProductSlug(safeName),
     productPath: `/produto/${encodeURIComponent(createProductSlug(safeName))}`,
     normalizedName: normalizeSearchText(safeName),
-    normalizedCategory: normalizeSearchText(publicProduct.category),
+    normalizedCategory: normalizeSearchText(publicProduct.category ?? catalogType),
     normalizedCatalogType: normalizeSearchText(catalogType),
     normalizedGender: normalizeSearchText(publicProduct.gender),
     normalizedOlfactoryReference: normalizeSearchText(publicProduct.olfactoryReference),
-    searchIndex: createSearchIndex(enrichedProduct),
+    description: publicProduct.description_editorial || enrichedProduct.description,
+    olfactoryReference: enrichedProduct.olfactoryReference || (Array.isArray(publicProduct.similarTo) ? publicProduct.similarTo[0] ?? '' : ''),
+    searchIndex: createSearchIndex({ ...enrichedProduct, description: publicProduct.description_editorial || enrichedProduct.description }),
     searchTokens: createSearchTokens(enrichedProduct),
   };
 }

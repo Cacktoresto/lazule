@@ -11,6 +11,8 @@ export const AVAILABILITY_FILTER_OPTIONS = [
   { label: 'Todas', value: 'all' },
   { label: 'Pronta entrega', value: 'pronta' },
   { label: 'Sob encomenda', value: 'encomenda' },
+  { label: 'Sob consulta', value: 'sob_consulta' },
+  { label: 'Referência olfativa', value: 'referencia' },
   { label: 'Indisponível', value: 'indisponivel' },
 ];
 

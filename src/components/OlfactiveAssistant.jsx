@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
 import { formatBRL } from '../utils/currency';
 import { createProductPath } from '../utils/productRouting';
+import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus';
+import { loadRecommendationKnowledgeBase } from '../data/referenceCatalog';
 import { trackEvent } from '../utils/analytics';
 import { getReferralContext } from '../utils/referral';
 import { ProductImageFallback } from './ProductCard';
@@ -18,6 +20,8 @@ const LOADING_STEPS = ['Lendo atmosfera e intenção…', 'Comparando DNAs arom�
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
   const productPath = createProductPath(product);
+  const directBuy = canDirectBuy(product);
+  const statusMeta = getCommercialStatusMeta(product);
   const referralContext = getReferralContext();
   const whatsappLink = createProductWhatsAppLink(product, { referralContext });
 
@@ -39,32 +43,36 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
     <article className="lazule-ai-card lazule-surface-premium grid w-[min(78vw,18rem)] snap-start grid-cols-[4.2rem_1fr] gap-2.5 overflow-hidden rounded-[1.45rem] border border-white/10 bg-lazule-night/70 p-3 shadow-mineral backdrop-blur-xl min-[390px]:w-[min(76vw,19rem)] min-[390px]:grid-cols-[4.8rem_1fr] sm:w-auto sm:min-w-0 sm:gap-4 sm:rounded-[1.65rem] sm:p-3.5">
       <a
         className="relative aspect-[4/5] overflow-hidden rounded-[1rem] bg-lazule-depth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold sm:rounded-[1.15rem]"
-        href={productPath}
-        onClick={() => trackResultClick('product')}
-        aria-label={`Ver ${product.name}`}
+        href={directBuy ? productPath : whatsappLink}
+        target={directBuy ? undefined : '_blank'}
+        rel={directBuy ? undefined : 'noreferrer'}
+        onClick={() => trackResultClick(directBuy ? 'product' : 'whatsapp')}
+        aria-label={directBuy ? `Ver ${product.name}` : `Consultar ${product.name}`}
       >
         {product.image ? (
           <img className="absolute inset-0 h-full w-full object-cover" src={product.image} alt={`Perfume ${product.name}`} loading="lazy" decoding="async" />
         ) : (
-          <ProductImageFallback label="Curadoria LAZULE" />
+          <ProductImageFallback label={directBuy ? 'Curadoria LAZULE' : 'Curadoria sob consulta'} />
         )}
       </a>
 
       <div className="min-w-0 py-1">
         <p className="line-clamp-1 text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold/80">{product.brand}</p>
-        <a href={productPath} onClick={() => trackResultClick('product')} className="mt-1 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold">
+        <a href={directBuy ? productPath : whatsappLink} target={directBuy ? undefined : '_blank'} rel={directBuy ? undefined : 'noreferrer'} onClick={() => trackResultClick(directBuy ? 'product' : 'whatsapp')} className="mt-1 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold">
           <h3 className="line-clamp-2 font-display text-[1.22rem] leading-[0.98] text-lazule-mist transition hover:text-lazule-gold sm:text-2xl">{product.name}</h3>
         </a>
-        <strong className="mt-1.5 block text-[0.92rem] text-lazule-gold sm:text-base">{formatBRL(product.salePrice)}</strong>
+        <strong className="mt-1.5 block text-[0.92rem] text-lazule-gold sm:text-base">{directBuy ? formatBRL(product.salePrice) : statusMeta.badge}</strong>
         <p className="mt-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-lazule-gold/80">Por que recomendamos?</p>
         <p className="mt-1 line-clamp-2 text-[0.82rem] leading-5 text-slate-300 sm:line-clamp-3 sm:text-sm">{reason}</p>
         <div className="mt-2.5 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
           <a
             className="lazule-premium-button inline-flex min-h-9 items-center rounded-full border border-lazule-gold/35 px-2.5 py-1.5 text-[0.64rem] font-semibold uppercase tracking-[0.12em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night sm:text-xs sm:tracking-[0.14em]"
-            href={productPath}
-            onClick={() => trackResultClick('product')}
+            href={directBuy ? productPath : whatsappLink}
+            target={directBuy ? undefined : '_blank'}
+            rel={directBuy ? undefined : 'noreferrer'}
+            onClick={() => trackResultClick(directBuy ? 'product' : 'whatsapp')}
           >
-            Ver produto
+            {directBuy ? 'Ver produto' : 'Consultar'}
           </a>
           <a
             className="lazule-premium-button inline-flex min-h-9 items-center rounded-full border border-lazule-gold/25 bg-white/[0.035] px-2.5 py-1.5 text-[0.64rem] font-semibold uppercase tracking-[0.12em] text-slate-100 transition hover:bg-lazule-gold hover:text-lazule-night sm:text-xs sm:tracking-[0.14em]"
@@ -73,7 +81,7 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
             rel="noreferrer"
             onClick={() => trackResultClick('whatsapp')}
           >
-            WhatsApp
+            {directBuy ? 'WhatsApp' : statusMeta.shortCtaLabel}
           </a>
         </div>
       </div>
@@ -130,16 +138,26 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
     }
 
     timeoutRef.current = window.setTimeout(() => {
-      const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6 });
-      setResult(nextResult);
-      setIsLoading(false);
+      loadRecommendationKnowledgeBase(products).then((knowledgeBase) => {
+        const nextResult = getOlfactiveRecommendations(safeQuery, knowledgeBase, { limit: 6 });
+        setResult(nextResult);
+        trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
+          query: safeQuery,
+          sourcePage,
+        }));
+      }).catch(() => {
+        const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6 });
+        setResult(nextResult);
+        trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
+          query: safeQuery,
+          sourcePage,
+        }));
+      }).finally(() => {
+        setIsLoading(false);
+      });
       if (loadingIntervalRef.current) {
         window.clearInterval(loadingIntervalRef.current);
       }
-      trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
-        query: safeQuery,
-        sourcePage,
-      }));
     }, 680);
   }
 
