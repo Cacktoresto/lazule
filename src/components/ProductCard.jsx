@@ -43,7 +43,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
   const heroBadge = product.featured ? 'Destaque' : availability.label;
 
   return (
-    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur">
+    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur sm:rounded-[1.8rem]">
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
@@ -72,17 +72,17 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
             <ProductImageFallback label={product.image ? 'Imagem temporariamente indisponível' : 'Imagem em atualização'} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/80 via-transparent to-transparent" />
-          <span className="absolute left-4 top-4 rounded-full border border-lazule-gold/35 bg-lazule-night/58 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-full border border-lazule-gold/35 bg-lazule-night/58 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold backdrop-blur sm:left-4 sm:top-4 sm:px-3 sm:text-[0.65rem] sm:tracking-[0.16em]">
             {heroBadge}
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col px-4 py-4">
-          <p className="line-clamp-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-slate-400">{product.brand}</p>
-          <h3 className="mt-2 line-clamp-2 font-display text-[1.65rem] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold">
+        <div className="flex flex-1 flex-col px-3.5 py-3.5 sm:px-4 sm:py-4">
+          <p className="line-clamp-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-[0.68rem] sm:tracking-[0.24em]">{product.brand}</p>
+          <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold sm:text-[1.65rem]">
             {product.name}
           </h3>
-          <strong className="mt-4 text-xl text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+          <strong className="mt-3 text-lg text-lazule-mist sm:mt-4 sm:text-xl">{formatBRL(product.salePrice)}</strong>
         </div>
       </a>
     </article>

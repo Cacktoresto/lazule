@@ -63,7 +63,7 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
           </span>
         )}
         <div className={`lazule-search-shell group grid gap-3 border border-lazule-gold/20 bg-lazule-night/70 shadow-aureate backdrop-blur-xl transition duration-300 focus-within:border-lazule-gold/65 focus-within:bg-lazule-night/86 focus-within:shadow-[0_18px_54px_rgba(200,162,77,0.14)] sm:grid-cols-[1fr_auto] ${
-          compact ? 'grid-cols-[1fr_auto] rounded-full p-1.5' : 'rounded-[1.8rem] p-2 sm:rounded-full sm:p-2.5'
+          compact ? 'grid-cols-[minmax(0,1fr)_auto] rounded-full p-1' : 'rounded-[1.55rem] p-1.5 sm:rounded-full sm:p-2.5'
         }`}>
           <div className="relative min-w-0">
             <svg
@@ -76,7 +76,7 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
             </svg>
             <input
               id="product-navigation-search"
-              className={`min-h-12 w-full rounded-full border border-white/10 bg-white/[0.075] px-4 pl-11 text-base text-lazule-mist outline-none placeholder:text-slate-400 transition duration-300 hover:border-lazule-gold/40 focus-visible:border-lazule-gold/75 focus-visible:bg-white/[0.12] focus-visible:ring-2 focus-visible:ring-lazule-gold/80 focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night ${compact ? 'py-2' : 'py-3'}`}
+              className={`min-h-11 w-full rounded-full border border-white/10 bg-white/[0.075] px-3 pl-10 text-[16px] text-lazule-mist outline-none placeholder:text-slate-400 transition duration-300 hover:border-lazule-gold/40 focus-visible:border-lazule-gold/75 focus-visible:bg-white/[0.12] focus-visible:ring-2 focus-visible:ring-lazule-gold/80 focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-12 sm:px-4 sm:pl-11 ${compact ? 'py-2' : 'py-3'}`}
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -87,7 +87,7 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
             />
           </div>
           <button
-            className={`lazule-premium-button lazule-cta-shimmer min-h-12 rounded-full bg-lazule-gold text-sm font-semibold text-lazule-night shadow-aureate ${compact ? 'px-5' : 'px-6'}`}
+            className={`lazule-premium-button lazule-cta-shimmer min-h-11 rounded-full bg-lazule-gold text-sm font-semibold text-lazule-night shadow-aureate sm:min-h-12 ${compact ? 'px-4 sm:px-5' : 'px-5 sm:px-6'}`}
             type="submit"
             aria-label={compact ? 'Pesquisar perfume' : undefined}
           >
