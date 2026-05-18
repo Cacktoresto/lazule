@@ -408,7 +408,8 @@ function shouldEnrichWithReferral(eventName) {
     || eventName === 'referral_applied'
     || eventName === 'coupon_manual_apply'
     || eventName === 'referral_manual_apply'
-    || eventName === 'coupon_removed';
+    || eventName === 'coupon_removed'
+    || eventName === 'ai_assistant_whatsapp_click';
 }
 
 function mapEventForDestinations(eventName, payload) {
