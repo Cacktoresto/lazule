@@ -22,6 +22,9 @@ const EVENT_GROUPS = {
   brand: new Set(['brand_click', 'brand_view']),
   category: new Set(['category_click']),
   recommendation: new Set(['recommendation_click']),
+  aiQuery: new Set(['ai_assistant_query']),
+  aiClick: new Set(['ai_assistant_result_click']),
+  aiWhatsapp: new Set(['ai_assistant_whatsapp_click']),
 };
 
 function asArray(value) {
@@ -273,6 +276,77 @@ export function aggregateTopRecommendations(events = [], { limit = 8 } = {}) {
   }
 
   return sortRanking([...recommendations.values()], 'count', limit);
+}
+
+
+function incrementIntentMap(map, label, amount = 1) {
+  const safeLabel = normalizeText(label);
+  if (!safeLabel) return;
+  const current = map.get(safeLabel) || { label: safeLabel, count: 0 };
+  current.count += amount;
+  map.set(safeLabel, current);
+}
+
+function incrementProductMap(map, payload, field) {
+  const productName = getProductName(payload);
+  if (!productName || productName === 'Produto não identificado') return;
+  const key = normalizeText(payload.product_slug ?? payload.product_id ?? productName) || productName;
+  const current = map.get(key) || { product_name: productName, count: 0, recommended: 0, clicked: 0, whatsapp: 0 };
+  current.count += 1;
+  current[field] += 1;
+  map.set(key, current);
+}
+
+function getDnaPayload(payload = {}) {
+  return payload.dna && typeof payload.dna === 'object' && !Array.isArray(payload.dna) ? payload.dna : {};
+}
+
+export function aggregateAICommerceIntelligence(events = [], { limit = 8 } = {}) {
+  const intents = new Map();
+  const vibes = new Map();
+  const categories = new Map();
+  const dnaDistribution = new Map();
+  const recommended = new Map();
+  const clicked = new Map();
+  let aiQueries = 0;
+  let noResultSearches = 0;
+  let whatsappConversions = 0;
+
+  for (const event of normalizeAnalyticsEvents(events)) {
+    const eventName = getEventName(event);
+    const payload = getPayload(event);
+
+    if (EVENT_GROUPS.aiQuery.has(eventName)) {
+      aiQueries += 1;
+      (payload.ai_intents ?? payload.detected_intents ?? []).forEach((intent) => incrementIntentMap(intents, intent));
+      Object.entries(getDnaPayload(payload)).forEach(([dimension, value]) => incrementIntentMap(dnaDistribution, dimension, Number(value) || 0));
+      (payload.recommended_product_slugs ?? []).forEach((slug) => incrementIntentMap(recommended, slug));
+      if (toNumber(payload.result_count ?? payload.resultCount, 0) === 0) noResultSearches += 1;
+    }
+
+    if (EVENT_GROUPS.aiClick.has(eventName)) {
+      incrementProductMap(clicked, payload, 'clicked');
+      incrementIntentMap(categories, payload.product_category);
+      (payload.product_vibes ?? []).forEach((vibe) => incrementIntentMap(vibes, vibe));
+    }
+
+    if (EVENT_GROUPS.aiWhatsapp.has(eventName)) {
+      whatsappConversions += 1;
+      incrementProductMap(clicked, payload, 'whatsapp');
+    }
+  }
+
+  return {
+    aiQueries,
+    aiWhatsappRate: calculateConversionRate(aiQueries, whatsappConversions),
+    noResultSearches,
+    dominantIntents: sortRanking([...intents.values()], 'count', limit),
+    dnaDistribution: sortRanking([...dnaDistribution.values()].map((item) => ({ ...item, count: Math.round(item.count * 100) / 100 })), 'count', limit),
+    recommendedProducts: sortRanking([...recommended.values()].map((item) => ({ product_name: item.label, count: item.count })), 'count', limit),
+    clickedProducts: sortRanking([...clicked.values()], 'count', limit),
+    commonVibes: sortRanking([...vibes.values()], 'count', limit),
+    relatedCategories: sortRanking([...categories.values()], 'count', limit),
+  };
 }
 
 export function aggregateFunnel(events = []) {

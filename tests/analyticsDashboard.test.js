@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  aggregateAICommerceIntelligence,
   aggregateFunnel,
   aggregateMetrics,
   aggregateTopProducts,
@@ -108,4 +109,19 @@ test('analytics dashboard does not attribute events when profile has no ref or c
 
   assert.equal(eventMatchesInfluencer(event, {}), false);
   assert.equal(aggregateInfluencerMetrics([event], {}).attributedEvents, 0);
+});
+
+
+test('analytics dashboard aggregates AI commerce intelligence without raw query', () => {
+  const ai = aggregateAICommerceIntelligence([
+    { name: 'ai_assistant_query', timestamp: '2026-05-15T10:00:00.000Z', payload: { ai_intents: ['nightlife', 'sweet'], dna: { sweet: 0.8, nightlife: 0.9 }, result_count: 2, recommended_product_slugs: ['asad'] } },
+    { name: 'ai_assistant_result_click', timestamp: '2026-05-15T10:01:00.000Z', payload: { product_slug: 'asad', product_name: 'Asad', product_category: 'Árabe', product_vibes: ['noite'] } },
+    { name: 'ai_assistant_whatsapp_click', timestamp: '2026-05-15T10:02:00.000Z', payload: { product_slug: 'asad', product_name: 'Asad' } },
+  ]);
+
+  assert.equal(ai.aiQueries, 1);
+  assert.equal(ai.aiWhatsappRate, 1);
+  assert.equal(ai.dominantIntents[0].label, 'nightlife');
+  assert.equal(ai.recommendedProducts[0].product_name, 'asad');
+  assert.equal(ai.clickedProducts[0].product_name, 'Asad');
 });

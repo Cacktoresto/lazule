@@ -1,3 +1,5 @@
+import { getRecommendationEngine } from '../ai/recommendationEngine.js';
+import { generateQueryDNA, getDominantDNA } from '../ai/perfumeDNA.js';
 import { normalizeSearchText } from './search.js';
 
 const DEFAULT_LIMIT = 6;
@@ -140,83 +142,10 @@ function getInferredFilters(intents) {
   };
 }
 
-function getProductScore(product, analysis) {
-  const productText = normalizeSearchText(getProductText(product));
-  const nameText = normalizeSearchText(product.name);
-  const brandText = normalizeSearchText(product.brand);
-  const queryTerms = analysis.normalizedQuery.split(' ').filter((term) => term.length > 2);
-  let score = 0;
-  const reasons = [];
-
-  for (const intent of analysis.scoringIntents) {
-    const config = INTENT_WEIGHTS[intent];
-    if (!config) continue;
-
-    if (config.fields.length && includesAny(productText, config.fields)) {
-      score += config.score;
-      reasons.push(intent);
-    }
-  }
-
-  for (const term of queryTerms) {
-    if (nameText.includes(term)) score += 20;
-    if (brandText.includes(term)) score += 16;
-    if (productText.includes(term)) score += 8;
-  }
-
-  for (const reference of analysis.referenceTerms) {
-    if (productText.includes(normalizeSearchText(reference))) {
-      score += 64;
-      reasons.push('parecido');
-    }
-  }
-
-  if (score > 0) {
-    if (product.featured) score += 8;
-    if (product.available !== false) score += 6;
-    if (Number(product.salePrice) > 0) score += 2;
-  }
-
-  return { score, reasons: unique(reasons) };
-}
-
-function createReason(product, matchedReasons, fallback) {
-  const reasons = matchedReasons.filter((reason) => reason !== 'parecido').slice(0, 3);
-
-  if (matchedReasons.includes('parecido')) {
-    return `Tem conexão com a referência olfativa indicada e entrega perfil ${reasons[0] ?? product.catalogType ?? 'premium'}.`;
-  }
-
-  if (reasons.length >= 2) {
-    return `Combina com ${reasons.join(', ')} e tem presença de curadoria LAZULE.`;
-  }
-
-  if (reasons.length === 1) {
-    return `Boa escolha para quem busca um perfil ${reasons[0]} com acabamento premium.`;
-  }
-
-  if (fallback) {
-    return 'Opção versátil da curadoria para descobrir uma assinatura olfativa com segurança.';
-  }
-
-  return 'Aderente ao pedido pela combinação de nome, marca e descrição do catálogo.';
-}
-
-function rankProducts(products, analysis, { fallback = false } = {}) {
-  return products
-    .map((product, index) => {
-      const { score, reasons } = getProductScore(product, analysis);
-      const fallbackScore = fallback ? (product.featured ? 14 : 0) + (product.available !== false ? 8 : 0) + Math.max(0, 8 - index * 0.01) : 0;
-
-      return {
-        product,
-        score: score + fallbackScore,
-        reasons,
-        reason: createReason(product, reasons, fallback),
-      };
-    })
-    .filter((entry) => fallback || entry.score > 0)
-    .sort((a, b) => b.score - a.score || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'));
+function createRecommendationAnalyticsDNA(queryDNA = {}) {
+  return Object.fromEntries(
+    getDominantDNA(queryDNA, { threshold: 0.25, limit: 6 }).map(({ dimension, value }) => [dimension, value]),
+  );
 }
 
 export function getOlfactiveRecommendations(query, catalogProducts = [], options = {}) {
@@ -225,12 +154,13 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   const intentAnalysis = detectOlfactiveIntents(query);
   const referenceTerms = detectReferenceTerms(intentAnalysis.normalizedQuery);
   const detectedIntents = unique([...intentAnalysis.detectedIntents, ...(referenceTerms.length ? ['parecido'] : [])]);
-  const scoringIntents = detectedIntents.length ? detectedIntents : FALLBACK_INTENTS;
+  const queryDNA = generateQueryDNA(intentAnalysis.normalizedQuery);
   const analysis = {
     ...intentAnalysis,
     detectedIntents,
-    scoringIntents,
+    scoringIntents: detectedIntents.length ? detectedIntents : FALLBACK_INTENTS,
     referenceTerms,
+    queryDNA,
   };
 
   if (!safeCatalog.length) {
@@ -243,15 +173,22 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
       recommendations: [],
       fallbackUsed: true,
       queryNormalized: analysis.normalizedQuery,
+      queryDNA,
+      dominantDNA: createRecommendationAnalyticsDNA(queryDNA),
+      engine: 'heuristic-dna-v1',
     };
   }
 
-  const ranked = rankProducts(safeCatalog, analysis);
-  const minimumCount = Math.min(MINIMUM_RECOMMENDATIONS, safeCatalog.length, limit);
-  const shouldFallback = ranked.length < minimumCount;
-  const recommendations = (shouldFallback ? rankProducts(safeCatalog, { ...analysis, scoringIntents: FALLBACK_INTENTS }, { fallback: true }) : ranked)
-    .slice(0, limit)
-    .map(({ product, reason, score, reasons }) => ({ product, reason, score, matchedIntents: reasons }));
+  const engine = getRecommendationEngine(options.engine);
+  const rankedRecommendations = engine.search(query, safeCatalog, { limit, analysis });
+  const recommendations = rankedRecommendations.map((entry) => ({
+    product: entry.product,
+    reason: entry.reason,
+    score: Math.round(entry.score * 1000) / 1000,
+    matchedIntents: entry.matchedIntents,
+    dnaSimilarity: entry.dnaSimilarity,
+    perfumeDNA: entry.perfumeDNA,
+  }));
 
   return {
     intent: detectedIntents[0] ?? analysis.primaryIntent,
@@ -260,18 +197,32 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
     inferredFilters: getInferredFilters(detectedIntents),
     products: recommendations.map((recommendation) => recommendation.product),
     recommendations,
-    fallbackUsed: shouldFallback,
+    fallbackUsed: detectedIntents.length === 0 || rankedRecommendations.length < Math.min(MINIMUM_RECOMMENDATIONS, safeCatalog.length, limit) || rankedRecommendations.every((entry) => entry.score < 0.2),
     queryNormalized: analysis.normalizedQuery,
+    queryDNA,
+    dominantDNA: createRecommendationAnalyticsDNA(queryDNA),
+    engine: engine.id,
   };
 }
 
 export function createOlfactiveAssistantAnalyticsPayload(result = {}, { query = '', sourcePage = 'home', product } = {}) {
+  const safeQuery = sanitizeOlfactiveQuery(query);
+  const safeIntents = result.detectedIntents ?? [];
+
   return {
-    query_length: sanitizeOlfactiveQuery(query).length,
-    detected_intents: result.detectedIntents ?? [],
+    query_length: safeQuery.length,
+    detected_intents: safeIntents,
+    ai_intents: safeIntents,
     primary_intent: result.intent,
+    dna: result.dominantDNA ?? createRecommendationAnalyticsDNA(result.queryDNA ?? generateQueryDNA(safeQuery)),
     result_count: result.recommendations?.length ?? result.products?.length ?? 0,
+    recommended_product_slugs: (result.recommendations ?? []).map((recommendation) => recommendation.product?.productSlug ?? recommendation.product?.id).filter(Boolean).slice(0, 6),
     product_slug: product?.productSlug,
+    product_id: product?.id,
+    product_name: product?.name,
+    product_category: product?.category ?? product?.catalogType,
+    product_vibes: Array.isArray(product?.vibe) ? product.vibe.slice(0, 4) : [],
     source_page: sourcePage,
+    privacy: 'anonymized_intent_only',
   };
 }

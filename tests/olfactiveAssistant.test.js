@@ -119,3 +119,15 @@ test('olfactive analytics payload avoids raw query text', () => {
   assert.equal(Object.hasOwn(payload, 'query'), false);
   assert.equal(Object.hasOwn(payload, 'search_term'), false);
 });
+
+test('olfactive assistant persists only anonymized AI intelligence payload', () => {
+  const result = getOlfactiveRecommendations('quero cheiro igual meu ex doce para noite', catalog, { limit: 2 });
+  const payload = createOlfactiveAssistantAnalyticsPayload(result, { query: 'quero cheiro igual meu ex doce para noite', sourcePage: 'home' });
+
+  assert.equal(Object.prototype.hasOwnProperty.call(payload, 'query'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(payload, 'search_term'), false);
+  assert.ok(payload.query_length > 0);
+  assert.ok(payload.ai_intents.includes('doce'));
+  assert.ok(payload.dna.sweet > 0);
+  assert.equal(payload.privacy, 'anonymized_intent_only');
+});

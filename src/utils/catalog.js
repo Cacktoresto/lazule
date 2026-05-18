@@ -1,5 +1,6 @@
 import { getAllProducts, getAllProductsAsync } from '../data/catalogRepository.js';
 import { getLocalCatalogProducts } from '../data/localCatalogAdapter.js';
+import { getRelatedProducts } from '../ai/recommendationEngine.js';
 import { normalizeSearchText } from './search.js';
 import { createBrandSlug, createProductSlug } from './productRouting.js';
 
@@ -525,7 +526,22 @@ function addRecommendationProducts(recommendations, candidates, currentProduct, 
   }
 }
 
-export function getProductRecommendations(currentProduct, allProducts = getCatalogProducts(), { min = 4, max = 8 } = {}) {
+export function getProductRecommendations(currentProduct, allProducts = getCatalogProducts(), { min = 4, max = 8, engine = 'dna' } = {}) {
+  if (engine === 'dna') {
+    const relatedProducts = getRelatedProducts(currentProduct, allProducts, { limit: max });
+    const enoughRelatedProducts = relatedProducts.length >= Math.min(min, Math.max(0, allProducts.length - 1));
+    const currentGenderForDNA = currentProduct.normalizedGender;
+    const hasOppositeGender = relatedProducts.some((product) => isOppositeGender(currentGenderForDNA, product.normalizedGender));
+    const currentCommercialCategory = getCommercialCategory(currentProduct);
+    const priorityCategoryCount = relatedProducts.filter((product) => getCommercialCategory(product) === currentCommercialCategory).length;
+    const preservesPriorityCategory = !isPriorityCategory(currentCommercialCategory) || priorityCategoryCount > relatedProducts.length / 2;
+    const relatedLineKeys = relatedProducts.map(getProductLineKey).filter(Boolean);
+    const hasDuplicateLine = new Set(relatedLineKeys).size !== relatedLineKeys.length;
+
+    if (enoughRelatedProducts && !hasOppositeGender && preservesPriorityCategory && !hasDuplicateLine) {
+      return relatedProducts;
+    }
+  }
   const targetCount = Math.max(0, Math.min(max, allProducts.length - 1));
   const currentGender = currentProduct.normalizedGender;
   const sameGenderProducts = allProducts.filter(
