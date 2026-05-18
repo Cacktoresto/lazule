@@ -386,3 +386,14 @@ Os helpers ficam em `src/utils/analytics.js`:
 ### Privacidade
 
 A arquitetura coleta apenas comportamento agregado e intenção comercial. Não colete nem envie nome de cliente, telefone, endereço, dados sensíveis ou conteúdo da conversa do WhatsApp nos payloads de analytics.
+
+## Assistente Olfativo Inteligente
+
+A LAZULE inclui uma primeira experiência IA-like para descoberta de perfumes: o **Assistente Olfativo**. O cliente descreve o perfume ideal em linguagem natural e recebe recomendações explicáveis do catálogo atual.
+
+- **Sem custo externo nesta versão:** não usa OpenAI, embeddings, API externa ou backend obrigatório.
+- **Motor heurístico local:** detecta intenções como fresco, doce, amadeirado, sedutor, elegante, trabalho, noite, calor, frio, presente, masculino, feminino, árabe, importado, custo-benefício, potente, discreto e parecido/inspirado.
+- **Catálogo preservado:** recomenda a partir dos produtos normalizados existentes, sem alterar checkout ou fluxo de catálogo.
+- **Privacidade:** analytics não salva texto bruto nem dados pessoais; registra apenas tamanho da consulta, intenções, quantidade de resultados, produto clicado e página de origem.
+
+Próximos passos possíveis: OpenAI, embeddings, busca vetorial e persistência de atributos olfativos no Supabase.

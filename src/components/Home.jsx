@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ProductNavigationSearch } from './ProductNavigationSearch';
+import { OlfactiveAssistant } from './OlfactiveAssistant';
 import { ProductCard } from './ProductCard';
 import { getAllProducts } from '../data/catalogRepository';
 import { getFeaturedCollections } from '../utils/catalog';
@@ -126,7 +127,7 @@ export function Home() {
     applyHomeSeo();
   }, []);
 
-  const { collections, heroProduct, brands } = useMemo(() => {
+  const { collections, heroProduct, brands, products } = useMemo(() => {
     const products = getAllProducts();
     const featuredCollections = getFeaturedCollections(products);
     const [firstHeroProduct] = featuredCollections.weeklySelection.length ? featuredCollections.weeklySelection : products;
@@ -137,6 +138,7 @@ export function Home() {
       collections: featuredCollections,
       heroProduct: firstHeroProduct,
       brands: visibleBrands.length ? visibleBrands : [...availableBrandSet].slice(0, 8),
+      products,
     };
   }, []);
 
@@ -189,6 +191,8 @@ export function Home() {
           <ProductNavigationSearch className="lazule-home-search" compact />
         </div>
       </div>
+
+      <OlfactiveAssistant products={products} sourcePage="home" />
 
       <Reveal className="mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-12">
         <SectionHeading eyebrow="Descoberta rápida" title="Escolha pelo desejo" actionHref="/catalogo" />
