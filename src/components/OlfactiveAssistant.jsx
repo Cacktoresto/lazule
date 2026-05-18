@@ -11,9 +11,9 @@ import {
   sanitizeOlfactiveQuery,
 } from '../utils/olfactiveAssistant';
 
-const QUICK_SUGGESTIONS = ['Noite', 'Fresco', 'Doce', 'Trabalho', 'Presente', 'Árabe potente', 'Elegante'];
-const DEFAULT_PROMPT = 'Ex.: algo doce, forte e sedutor para usar à noite';
-const LOADING_STEPS = ['Analisando perfil olfativo…', 'Comparando DNAs aromáticos…', 'Refinando curadoria LAZULE…', 'Selecionando rastro, ocasião e presença…'];
+const QUICK_SUGGESTIONS = ['Noite íntima', 'Fresco mineral', 'Doce contido', 'Trabalho elegante', 'Presente memorável', 'Âmbar potente', 'Assinatura limpa'];
+const DEFAULT_PROMPT = 'Ex.: algo escuro, elegante e memorável para um jantar à noite';
+const LOADING_STEPS = ['Lendo atmosfera e intenção…', 'Comparando DNAs aromáticos…', 'Ajustando rastro, pele e ocasião…', 'Finalizando curadoria LAZULE…'];
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
@@ -36,7 +36,7 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
   }
 
   return (
-    <article className="lazule-ai-card grid min-w-[17.5rem] snap-start grid-cols-[5.5rem_1fr] gap-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-lazule-night/70 p-3 shadow-mineral backdrop-blur sm:min-w-0">
+    <article className="lazule-ai-card lazule-surface-premium grid min-w-[18rem] snap-start grid-cols-[5.5rem_1fr] gap-4 overflow-hidden rounded-[1.65rem] border border-white/10 bg-lazule-night/70 p-3.5 shadow-mineral backdrop-blur-xl sm:min-w-0">
       <a
         className="relative aspect-[4/5] overflow-hidden rounded-[1.15rem] bg-lazule-depth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold"
         href={productPath}
@@ -60,14 +60,14 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
         <p className="mt-1 line-clamp-3 text-sm leading-5 text-slate-300">{reason}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <a
-            className="lazule-pressable rounded-full border border-lazule-gold/35 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
+            className="lazule-premium-button rounded-full border border-lazule-gold/35 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
             href={productPath}
             onClick={() => trackResultClick('product')}
           >
             Ver produto
           </a>
           <a
-            className="lazule-pressable rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-100 transition hover:bg-emerald-300 hover:text-lazule-night"
+            className="lazule-premium-button rounded-full border border-lazule-gold/25 bg-white/[0.035] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-100 transition hover:bg-lazule-gold hover:text-lazule-night"
             href={whatsappLink}
             target="_blank"
             rel="noreferrer"
@@ -158,19 +158,20 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
   return (
     <section className={className} aria-labelledby="olfactive-assistant-title">
-      <div className="lazule-surface-premium relative overflow-hidden rounded-[2rem] border border-lazule-gold/18 bg-[radial-gradient(circle_at_18%_0%,rgba(200,162,77,0.15),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.9),rgba(30,58,138,0.5)_48%,rgba(5,8,22,0.92))] p-4 shadow-[0_26px_80px_rgba(2,6,23,0.24)] sm:p-5 lg:p-7">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.07),transparent)] opacity-40" />
+      <div className="lazule-ai-concierge lazule-surface-premium relative overflow-hidden rounded-[2.7rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_18%_0%,rgba(200,162,77,0.13),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.94),rgba(30,58,138,0.38)_48%,rgba(5,8,22,0.95))] p-5 shadow-[0_30px_110px_rgba(2,6,23,0.32)] backdrop-blur-xl sm:p-7 lg:p-9">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.055),transparent)] opacity-40" />
+        <div className="lazule-ai-orb absolute -right-14 -top-14 h-44 w-44 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 opacity-60 blur-[0.2px]" aria-hidden="true" />
         <div className="relative grid gap-5 lg:grid-cols-[0.78fr_1fr] lg:items-start">
           <div>
-            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">LAZULE AI Perfume DNA</p>
-            <h2 id="olfactive-assistant-title" className="mt-3 font-display text-3xl leading-[0.95] text-lazule-mist sm:text-4xl">Assistente Olfativo</h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Descreva sensação, ocasião ou referência e receba uma curadoria explicável com leitura de DNA olfativo.</p>
+            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.36em] text-lazule-gold/90">Concierge olfativo AI</p>
+            <h2 id="olfactive-assistant-title" className="mt-4 max-w-[10ch] font-display text-4xl leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:text-5xl">Inteligência com tato.</h2>
+            <p className="mt-5 max-w-xl text-sm leading-6 text-slate-300">Descreva clima, pele, ocasião ou referência. A LAZULE interpreta intenção e devolve uma curadoria explicável, calma e precisa.</p>
 
             <form className="mt-5 space-y-3.5" onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="olfactive-query">Descreva o perfume ideal</label>
               <textarea
                 id="olfactive-query"
-                className="min-h-28 w-full resize-none rounded-[1.35rem] border border-white/12 bg-lazule-night/70 px-4 py-4 text-base leading-6 text-lazule-mist outline-none transition placeholder:text-slate-500 hover:border-lazule-gold/30 focus:border-lazule-gold/70 focus:ring-2 focus:ring-lazule-gold/30"
+                className="lazule-input-premium min-h-32 w-full resize-none rounded-[1.55rem] border border-white/10 bg-lazule-night/70 px-5 py-5 text-base leading-7 text-lazule-mist outline-none transition placeholder:text-slate-500 hover:border-lazule-gold/30 focus:border-lazule-gold/70 focus:ring-2 focus:ring-lazule-gold/25"
                 value={query}
                 maxLength={180}
                 placeholder={DEFAULT_PROMPT}
@@ -182,7 +183,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   <button
                     key={suggestion}
                     type="button"
-                    className="lazule-pressable shrink-0 snap-start rounded-full border border-lazule-gold/25 bg-lazule-gold/10 px-3.5 py-2 text-sm font-semibold text-lazule-gold transition hover:border-lazule-gold/70 hover:bg-lazule-gold hover:text-lazule-night focus:outline-none focus:ring-2 focus:ring-lazule-gold"
+                    className="lazule-premium-button shrink-0 snap-start rounded-full border border-lazule-gold/25 bg-lazule-gold/10 px-4 py-2.5 text-sm font-semibold text-lazule-gold transition hover:border-lazule-gold/70 hover:bg-lazule-gold hover:text-lazule-night focus:outline-none focus:ring-2 focus:ring-lazule-gold"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
                     {suggestion}
@@ -195,16 +196,16 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                 className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-lazule-night shadow-aureate transition disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
                 disabled={isLoading}
               >
-                <span className="relative z-10">{isLoading ? 'Curando seleção…' : 'Encontrar perfumes'}</span>
+                <span className="relative z-10">{isLoading ? 'Interpretando atmosfera…' : 'Receber curadoria'}</span>
               </button>
             </form>
           </div>
 
-          <div className="relative min-w-0 rounded-[1.55rem] border border-white/10 bg-white/[0.04] p-4 sm:p-5" aria-live="polite">
+          <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.9rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6" aria-live="polite">
             {!result && !isLoading ? (
               <div className="flex min-h-[14rem] flex-col justify-center text-center sm:text-left">
-                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Comece pela vibe</p>
-                <h3 className="mt-3 font-display text-2xl leading-tight text-lazule-mist">Diga ocasião, intensidade ou referência.</h3>
+                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Comece pela sensação</p>
+                <h3 className="mt-3 font-display text-3xl leading-tight tracking-[-0.03em] text-lazule-mist">Diga atmosfera, intensidade ou memória.</h3>
                 <p className="mt-4 text-sm leading-6 text-slate-300">Experimente: {initialExamples}. A curadoria é privada, rápida e orientada por sinais olfativos — sem expor dados pessoais.</p>
               </div>
             ) : null}
@@ -212,7 +213,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
             {isLoading ? (
               <div className="flex min-h-[14rem] items-center justify-center text-center" role="status" aria-live="polite">
                 <div>
-                  <span className="lazule-ai-orb mx-auto block h-14 w-14 rounded-full border border-lazule-gold/50 bg-lazule-gold/10 shadow-aureate" aria-hidden="true" />
+                  <span className="lazule-ai-orb mx-auto block h-16 w-16 rounded-full border border-lazule-gold/45 bg-lazule-gold/10 shadow-aureate" aria-hidden="true" />
                   <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-lazule-gold">{LOADING_STEPS[loadingStepIndex]}</p><p className="mt-3 text-xs leading-5 text-slate-300">Ajustando presença, ocasião e assinatura para uma recomendação mais precisa.</p>
                 </div>
               </div>
@@ -223,7 +224,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between" style={{ '--result-delay': '0ms' }}>
                   <div>
                     <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Resultado</p>
-                    <h3 className="mt-2 font-display text-3xl leading-tight text-lazule-mist">{hasRecommendations ? 'Sua curadoria inteligente' : 'Curadoria em ajuste'}</h3>
+                    <h3 className="mt-2 font-display text-3xl leading-tight tracking-[-0.03em] text-lazule-mist">{hasRecommendations ? 'Sua curadoria inteligente' : 'Curadoria em ajuste'}</h3>
                   </div>
                   {result.detectedIntents?.length ? (
                     <div className="flex flex-wrap gap-2">
