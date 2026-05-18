@@ -108,8 +108,8 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
   const spotlightProducts = curatedProducts.slice(0, 3);
 
   return (
-    <Reveal className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-14">
-      <div className="lazule-surface-premium relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.032] p-4 shadow-[0_30px_100px_rgba(2,6,23,0.30)] backdrop-blur-xl sm:rounded-[2.4rem] sm:p-7 lg:p-9">
+    <Reveal className="mx-auto max-w-7xl px-3 py-7 min-[390px]:px-4 sm:px-8 sm:py-14">
+      <div className="lazule-surface-premium relative overflow-hidden rounded-[1.55rem] border border-white/10 bg-white/[0.032] p-3.5 shadow-[0_30px_100px_rgba(2,6,23,0.30)] backdrop-blur-xl min-[390px]:rounded-[1.85rem] min-[390px]:p-4 sm:rounded-[2.4rem] sm:p-7 lg:p-9">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_0%,rgba(200,162,77,0.13),transparent_26%),radial-gradient(circle_at_88%_20%,rgba(37,99,235,0.13),transparent_30%)]" />
         <div className="relative mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
@@ -129,7 +129,7 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
             {discoveryPaths.map((path, index) => (
               <a
                 key={path.title}
-                className={`lazule-discovery-card lazule-touch-card lazule-reveal-item relative flex min-h-36 min-w-[16rem] snap-start scroll-ml-4 flex-col justify-between overflow-hidden rounded-[1.65rem] border border-white/10 bg-gradient-to-br ${path.gradient} p-5 transition focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-40`}
+                className={`lazule-discovery-card lazule-touch-card lazule-reveal-item relative flex min-h-32 w-[min(78vw,15rem)] shrink-0 snap-start scroll-ml-3 flex-col justify-between overflow-hidden rounded-[1.35rem] border border-white/10 bg-gradient-to-br ${path.gradient} p-4 transition focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-40 sm:w-auto sm:min-w-[16rem] sm:rounded-[1.65rem] sm:p-5`}
                 href={path.href}
                 style={{ '--item-delay': `${index * 50}ms` }}
                 onClick={() => trackCategoryClick(path.title, { source_page: 'home_unified_discovery', category_label: path.label })}
@@ -146,7 +146,7 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
             ))}
           </div>
 
-          <aside className="lazule-surface-premium space-y-5 rounded-[1.65rem] border border-white/10 bg-lazule-night/40 p-5">
+          <aside className="lazule-surface-premium space-y-4 rounded-[1.35rem] border border-white/10 bg-lazule-night/40 p-4 sm:space-y-5 sm:rounded-[1.65rem] sm:p-5">
             <div>
               <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Seleção agora</p>
               <div className="mt-3 grid gap-2.5">
@@ -199,13 +199,13 @@ function ProductRail({ eyebrow, title, products, actionHref }) {
   }
 
   return (
-    <Reveal className="py-7 sm:py-10">
+    <Reveal className="py-6 sm:py-10">
       <SectionHeading eyebrow={eyebrow} title={title} actionHref={actionHref} />
-      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-4 pt-1 sm:gap-5">
+      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-3 pt-1 sm:gap-5 sm:pb-4">
         {products.map((product, index) => (
           <div
             key={product.id}
-            className="lazule-reveal-item w-[min(76vw,17rem)] shrink-0 snap-start scroll-ml-4 sm:w-[20rem] sm:max-w-[19rem]"
+            className="lazule-reveal-item w-[min(70vw,14.5rem)] shrink-0 snap-start scroll-ml-3 min-[390px]:w-[min(68vw,15.5rem)] sm:w-[20rem] sm:max-w-[19rem]"
             style={{ '--item-delay': `${Math.min(index, 5) * 55}ms` }}
           >
             <ProductCard product={product} analyticsSection="home_editorial_rail" />
@@ -237,19 +237,19 @@ export function Home() {
   }, []);
 
   return (
-    <>
+    <div className="lazule-home-shell overflow-x-clip">
       <section id="top" className="lazule-hero relative overflow-hidden bg-lazule-depth">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(248,250,252,0.10),transparent_22%),linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.9)_100%)]" />
         <div className="pointer-events-none absolute inset-x-[10%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/35 to-transparent opacity-70" />
-        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(760px,78svh)] max-w-7xl content-end gap-7 px-4 pb-9 pt-8 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
+        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(680px,72svh)] max-w-7xl content-end gap-5 px-3 pb-7 pt-6 min-[390px]:px-4 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
           <div className="lazule-hero-copy relative z-10 max-w-xl pb-1">
             <p className="mb-4 text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold sm:mb-5 sm:text-[0.68rem] sm:tracking-[0.46em]">LAZULE FRAGRANCES</p>
-            <h1 className="max-w-[11ch] font-display text-[clamp(3.15rem,16vw,4.35rem)] leading-[0.86] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-8xl">Perfume com percepção.</h1>
-            <p className="mt-5 max-w-[32rem] text-[0.98rem] leading-7 text-slate-200/85 sm:mt-6 sm:text-lg">
+            <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,13.5vw,3.55rem)] leading-[0.86] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-8xl">Perfume com percepção.</h1>
+            <p className="mt-4 max-w-[32rem] text-[0.92rem] leading-6 text-slate-200/85 sm:mt-6 sm:text-lg">
               Uma boutique digital escura, calma e inteligente para encontrar fragrâncias por atmosfera, ocasião e presença.
             </p>
             <a
-              className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 text-center text-sm font-semibold uppercase tracking-[0.15em] text-lazule-night shadow-aureate min-[390px]:w-auto sm:mt-8 sm:px-7 sm:tracking-[0.18em]"
+              className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-lazule-gold px-6 text-center text-sm font-semibold uppercase tracking-[0.15em] text-lazule-night shadow-aureate min-[390px]:w-auto sm:mt-8 sm:px-7 sm:tracking-[0.18em]"
               href="/catalogo"
               onClick={() => trackEvent('hero_cta_click', { source_page: 'home', cta_location: 'hero_primary' })}
             >
@@ -258,7 +258,7 @@ export function Home() {
           </div>
 
           <a
-            className="lazule-hero-product lazule-surface-premium group relative mx-auto block aspect-[4/5] w-full max-w-[min(19.5rem,88vw)] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur-xl sm:max-w-[25rem] sm:rounded-[2.8rem] md:mr-0"
+            className="lazule-hero-product lazule-surface-premium group relative mx-auto block aspect-[4/5] w-full max-w-[min(16.5rem,84vw)] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur-xl sm:max-w-[25rem] sm:rounded-[2.8rem] md:mr-0"
             href={heroProduct ? `/catalogo?busca=${encodeURIComponent(heroProduct.name)}` : '/catalogo'}
             aria-label="Abrir destaque LAZULE"
             onClick={() => heroProduct && trackProductSelect(heroProduct, { source_page: 'home_hero_product', section: 'home_hero_product', interaction_type: 'hero_product' })}
@@ -273,7 +273,7 @@ export function Home() {
               />
             ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/20 to-transparent" />
-            <div className="absolute inset-x-4 bottom-4 rounded-[1.45rem] border border-white/10 bg-lazule-night/70 p-4 backdrop-blur-xl sm:inset-x-5 sm:bottom-5 sm:rounded-[1.8rem] sm:p-5">
+            <div className="absolute inset-x-3 bottom-3 rounded-[1.2rem] border border-white/10 bg-lazule-night/70 p-3 backdrop-blur-xl sm:inset-x-5 sm:bottom-5 sm:rounded-[1.8rem] sm:p-5">
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-lazule-gold">Destaque</p>
               <p className="mt-2 line-clamp-1 font-display text-[1.35rem] leading-none text-lazule-mist sm:text-2xl">{heroProduct?.name ?? 'Curadoria LAZULE'}</p>
             </div>
@@ -281,17 +281,17 @@ export function Home() {
         </div>
       </section>
 
-      <div className="lazule-sticky-search sticky top-[8.6rem] z-30 border-y border-white/10 bg-lazule-night/76 px-3 py-2.5 shadow-[0_18px_52px_rgba(2,6,23,0.24)] backdrop-blur-2xl sm:top-[7.35rem] sm:px-4 sm:py-3 md:top-[4.75rem]">
+      <div className="lazule-sticky-search sticky top-[calc(4.5rem+env(safe-area-inset-top,0px))] z-30 border-y border-white/10 bg-lazule-night/76 px-2.5 py-2 shadow-[0_18px_52px_rgba(2,6,23,0.24)] backdrop-blur-2xl sm:top-[7.35rem] sm:px-4 sm:py-3 md:top-[4.75rem]">
         <div className="mx-auto max-w-3xl">
           <ProductNavigationSearch className="lazule-home-search" compact />
         </div>
       </div>
 
-      <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-14" />
+      <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-7 min-[390px]:px-4 sm:px-8 sm:py-14" />
 
       <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} />
 
-      <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 lg:pb-28">
+      <main className="mx-auto max-w-7xl px-3 pb-14 min-[390px]:px-4 sm:px-8 lg:pb-28">
         <ProductRail eyebrow="Mais desejados" title="Ícones em rotação" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />
         <ProductRail eyebrow="Árabes" title="Intensidade limpa" products={collections.arabicHighlights.slice(0, 6)} actionHref="/catalogo?tipo=%C3%81rabe" />
 
@@ -305,6 +305,6 @@ export function Home() {
 
         <CatalogHighlights collections={collections} className="mt-14 sm:mt-16 lg:mt-20" />
       </main>
-    </>
+    </div>
   );
 }
