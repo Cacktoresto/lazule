@@ -52,3 +52,9 @@ Eventos adicionados:
 - Conectar uma camada OpenAI para linguagem natural mais flexível.
 - Persistir vetores/atributos olfativos em Supabase quando fizer sentido.
 - Adicionar avaliação de satisfação da curadoria sem coletar PII.
+
+## AI Commerce Intelligence local-first
+
+A camada experimental de AI Commerce vive em `src/ai/` e foi desenhada para evoluir o Assistente Olfativo sem dependências externas. O `perfumeDNA.js` normaliza perfumes e consultas em um DNA olfativo determinístico; o `recommendationEngine.js` aplica ranking híbrido, explicações e relacionados inteligentes. A interface já separa a engine heurística atual de placeholders para semantic search, embeddings, pgvector/Supabase e OpenAI futuros.
+
+A estratégia de analytics salva apenas intenção anonimizada (`ai_intents`, DNA dominante, contagens, slugs e categorias), nunca a query bruta do usuário em eventos da IA. O dashboard admin consolida esses sinais na seção “AI Commerce Intelligence”.

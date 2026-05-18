@@ -13,6 +13,7 @@ import {
 
 const QUICK_SUGGESTIONS = ['Noite', 'Fresco', 'Doce', 'Trabalho', 'Presente', 'Árabe potente', 'Elegante'];
 const DEFAULT_PROMPT = 'Ex.: algo doce, forte e sedutor para usar à noite';
+const LOADING_STEPS = ['Analisando perfil olfativo...', 'Comparando perfis aromáticos...', 'Montando curadoria explicável...'];
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
@@ -55,7 +56,8 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
           <h3 className="line-clamp-2 font-display text-2xl leading-[0.98] text-lazule-mist transition hover:text-lazule-gold">{product.name}</h3>
         </a>
         <strong className="mt-2 block text-base text-lazule-gold">{formatBRL(product.salePrice)}</strong>
-        <p className="mt-2 line-clamp-3 text-sm leading-5 text-slate-300">{reason}</p>
+        <p className="mt-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-lazule-gold/80">Por que recomendamos?</p>
+        <p className="mt-1 line-clamp-3 text-sm leading-5 text-slate-300">{reason}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <a
             className="rounded-full border border-lazule-gold/35 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
@@ -83,7 +85,9 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const [query, setQuery] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStepIndex, setLoadingStepIndex] = useState(0);
   const timeoutRef = useRef(null);
+  const loadingIntervalRef = useRef(null);
 
   const initialExamples = useMemo(() => QUICK_SUGGESTIONS.slice(0, 4).join(' · '), []);
 
@@ -93,6 +97,9 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
     return () => {
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
+      }
+      if (loadingIntervalRef.current) {
+        window.clearInterval(loadingIntervalRef.current);
       }
     };
   }, [sourcePage]);
@@ -108,6 +115,15 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
     setQuery(safeQuery);
     setIsLoading(true);
+    setLoadingStepIndex(0);
+
+    if (loadingIntervalRef.current) {
+      window.clearInterval(loadingIntervalRef.current);
+    }
+
+    loadingIntervalRef.current = window.setInterval(() => {
+      setLoadingStepIndex((current) => (current + 1) % LOADING_STEPS.length);
+    }, 260);
 
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
@@ -117,6 +133,9 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
       const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6 });
       setResult(nextResult);
       setIsLoading(false);
+      if (loadingIntervalRef.current) {
+        window.clearInterval(loadingIntervalRef.current);
+      }
       trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
         query: safeQuery,
         sourcePage,
@@ -143,9 +162,9 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.07),transparent)] opacity-40" />
         <div className="relative grid gap-6 lg:grid-cols-[0.82fr_1fr] lg:items-start">
           <div>
-            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">Curadoria IA-like</p>
+            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">Perfume DNA Engine</p>
             <h2 id="olfactive-assistant-title" className="mt-3 font-display text-4xl leading-[0.92] text-lazule-mist sm:text-5xl">Assistente Olfativo</h2>
-            <p className="mt-4 max-w-xl text-base leading-7 text-slate-300">Descreva o perfume ideal e receba uma curadoria LAZULE.</p>
+            <p className="mt-4 max-w-xl text-base leading-7 text-slate-300">Descreva o perfume ideal e receba uma curadoria explicável por DNA olfativo.</p>
 
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="olfactive-query">Descreva o perfume ideal</label>
@@ -176,7 +195,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                 className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-lazule-night shadow-aureate transition disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
                 disabled={isLoading}
               >
-                <span className="relative z-10">{isLoading ? 'Curando opções...' : 'Encontrar perfumes'}</span>
+                <span className="relative z-10">{isLoading ? 'Calculando DNA...' : 'Encontrar perfumes'}</span>
               </button>
             </form>
           </div>
@@ -186,7 +205,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               <div className="flex min-h-[18rem] flex-col justify-center text-center sm:text-left">
                 <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Comece pela vibe</p>
                 <h3 className="mt-3 font-display text-3xl leading-tight text-lazule-mist">Diga ocasião, intensidade ou referência.</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-300">Experimente: {initialExamples}. A primeira versão é heurística, privada e sem API externa.</p>
+                <p className="mt-4 text-sm leading-6 text-slate-300">Experimente: {initialExamples}. O motor é heurístico, privado, determinístico e sem API externa.</p>
               </div>
             ) : null}
 
@@ -194,7 +213,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               <div className="flex min-h-[18rem] items-center justify-center text-center">
                 <div>
                   <span className="mx-auto block h-12 w-12 animate-pulse rounded-full border border-lazule-gold/50 bg-lazule-gold/10 shadow-aureate" />
-                  <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-lazule-gold">Analisando intenção</p>
+                  <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-lazule-gold">{LOADING_STEPS[loadingStepIndex]}</p>
                 </div>
               </div>
             ) : null}

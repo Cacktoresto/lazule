@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  aggregateAICommerceIntelligence,
   aggregateFunnel,
   aggregateMetrics,
   aggregateTopBrands,
@@ -42,6 +43,7 @@ function useLocalAnalyticsDashboard() {
       brands: aggregateTopBrands(events),
       categories: aggregateTopCategories(events),
       recommendations: aggregateTopRecommendations(events),
+      aiCommerce: aggregateAICommerceIntelligence(events),
       funnel: aggregateFunnel(events),
     };
   }, [refreshToken]);
@@ -50,7 +52,7 @@ function useLocalAnalyticsDashboard() {
 }
 
 export function AnalyticsDashboard() {
-  const { events, metrics, products, searches, brands, categories, recommendations, funnel, refresh } = useLocalAnalyticsDashboard();
+  const { events, metrics, products, searches, brands, categories, recommendations, aiCommerce, funnel, refresh } = useLocalAnalyticsDashboard();
   const hasEvents = events.length > 0;
 
   const summaryCards = [
@@ -147,6 +149,57 @@ export function AnalyticsDashboard() {
           />
         </AnalyticsSection>
       </div>
+
+
+      <AnalyticsSection className="mt-6" title="AI Commerce Intelligence" eyebrow="Experimental · intenção anônima + DNA olfativo">
+        <div className="grid gap-4 md:grid-cols-3">
+          <MetricCard label="Consultas IA" value={formatNumber(aiCommerce.aiQueries)} helper="Pedidos processados pelo Assistente Olfativo." tone="gold" />
+          <MetricCard label="IA → WhatsApp" value={formatPercent(aiCommerce.aiWhatsappRate)} helper="Conversão assistente para conversa comercial." />
+          <MetricCard label="Sem resultado IA" value={formatNumber(aiCommerce.noResultSearches)} helper="Oportunidades de sortimento detectadas sem texto bruto." />
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <RankingList
+            title="Intenções dominantes"
+            items={aiCommerce.dominantIntents}
+            getPrimary={(item) => item.label}
+            getValue={(item) => formatNumber(item.count)}
+          />
+          <RankingList
+            title="Distribuição DNA"
+            items={aiCommerce.dnaDistribution}
+            getPrimary={(item) => item.label}
+            getSecondary={() => 'doce · fresco · sedutor · elegante · trabalho · noite'}
+            getValue={(item) => formatNumber(item.count)}
+          />
+          <RankingList
+            title="Vibes em crescimento"
+            items={aiCommerce.commonVibes}
+            getPrimary={(item) => item.label}
+            getValue={(item) => formatNumber(item.count)}
+          />
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <RankingList
+            title="Mais recomendados pela IA"
+            items={aiCommerce.recommendedProducts}
+            getPrimary={(item) => item.product_name}
+            getValue={(item) => formatNumber(item.count)}
+          />
+          <RankingList
+            title="Mais clicados pela IA"
+            items={aiCommerce.clickedProducts}
+            getPrimary={(item) => item.product_name}
+            getSecondary={(item) => `${formatNumber(item.whatsapp)} WhatsApp`}
+            getValue={(item) => formatNumber(item.count)}
+          />
+          <RankingList
+            title="Categorias relacionadas"
+            items={aiCommerce.relatedCategories}
+            getPrimary={(item) => item.label}
+            getValue={(item) => formatNumber(item.count)}
+          />
+        </div>
+      </AnalyticsSection>
 
       <AnalyticsSection className="mt-6" title="Inteligência de busca" eyebrow="Desejo declarado">
         <div className="grid gap-6 lg:grid-cols-2">
