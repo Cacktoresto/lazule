@@ -1,3 +1,5 @@
+import { COMMERCIAL_STATUS, getCommercialStatus } from './commercialStatus.js';
+
 const AVAILABILITY_STYLES = {
   pronta: {
     label: 'Pronta entrega',
@@ -13,6 +15,16 @@ const AVAILABILITY_STYLES = {
     label: 'Últimas unidades',
     className: 'border-lazule-gold/45 bg-lazule-gold/10 text-lazule-gold',
     availableOnly: true,
+  },
+  sob_consulta: {
+    label: 'Sob consulta',
+    className: 'border-sky-300/35 bg-sky-400/10 text-sky-200',
+    availableOnly: false,
+  },
+  referencia: {
+    label: 'Curadoria sob consulta',
+    className: 'border-lazule-gold/35 bg-lazule-gold/10 text-lazule-gold',
+    availableOnly: false,
   },
   indisponivel: {
     label: 'Indisponível',
@@ -30,6 +42,16 @@ function normalizeAvailabilityText(value) {
 }
 
 export function getAvailabilityStatus(product) {
+  const commercialStatus = getCommercialStatus(product);
+
+  if (commercialStatus === COMMERCIAL_STATUS.ON_REQUEST) {
+    return { key: 'sob_consulta', ...AVAILABILITY_STYLES.sob_consulta };
+  }
+
+  if (commercialStatus === COMMERCIAL_STATUS.REFERENCE_ONLY) {
+    return { key: 'referencia', ...AVAILABILITY_STYLES.referencia };
+  }
+
   const badges = Array.isArray(product?.badges) ? product.badges : [];
   const declaredStatus = normalizeAvailabilityText(product?.availability ?? product?.availabilityStatus ?? product?.stockStatus);
   const searchableStatus = normalizeAvailabilityText([declaredStatus, ...badges].filter(Boolean).join(' '));

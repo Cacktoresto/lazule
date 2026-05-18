@@ -2,6 +2,7 @@ import { formatBRL } from './currency.js';
 import { createProductPath } from './productRouting.js';
 import { createCanonicalUrl } from './seo.js';
 import { formatReferralForWhatsapp } from './referral.js';
+import { canDirectBuy, getCommercialStatusMeta } from './commercialStatus.js';
 
 const WHATSAPP_NUMBER = '5521975110562';
 const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -36,7 +37,9 @@ export function createProductWhatsAppMessage(productOrName, price, productUrl, o
   const product = typeof productOrName === 'object' && productOrName !== null ? productOrName : null;
   const productName = cleanText(product ? product.name : productOrName, DEFAULT_PRODUCT_NAME);
   const brandName = cleanText(product?.brand ?? options.brand, DEFAULT_BRAND_NAME);
-  const formattedPrice = hasValue(product?.salePrice ?? price) ? formatBRL(product?.salePrice ?? price) : 'sob consulta';
+  const directBuy = product ? canDirectBuy(product) : true;
+  const statusMeta = product ? getCommercialStatusMeta(product) : getCommercialStatusMeta('in_stock');
+  const formattedPrice = directBuy && hasValue(product?.salePrice ?? price) ? formatBRL(product?.salePrice ?? price) : 'sob consulta';
   const variation = cleanText(product?.variation ?? product?.size ?? options.variation ?? options.size);
   const quantity = cleanText(options.quantity ?? product?.quantity);
   const canonicalUrl = getProductUrl(product ?? { name: productName }, productUrl ?? options.productUrl);
@@ -45,6 +48,7 @@ export function createProductWhatsAppMessage(productOrName, price, productUrl, o
   const details = [
     `Produto: ${productName}`,
     `Marca: ${brandName}`,
+    `Status: ${directBuy ? statusMeta.label : 'sob consulta'}`,
     `Preço: ${formattedPrice}`,
   ];
 
@@ -60,6 +64,14 @@ export function createProductWhatsAppMessage(productOrName, price, productUrl, o
 
   if (referralLines) {
     details.push(referralLines);
+  }
+
+  if (!directBuy) {
+    return [
+      `Olá! Quero consultar disponibilidade e valor do perfume ${productName} da marca ${brandName}.`,
+      ...details,
+      'Pode me orientar pela curadoria LAZULE, por favor?',
+    ].join('\n');
   }
 
   return [

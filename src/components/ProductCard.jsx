@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAvailabilityStatus } from '../utils/availability';
+import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus';
 import { trackProductSelect } from '../utils/analytics';
 import { createProductPath } from '../utils/productRouting';
 
-export function ProductImageFallback({ label = 'Imagem em atualização' } = {}) {
+export function ProductImageFallback({ label = 'Imagem em curadoria' } = {}) {
   return (
     <div
       className="lazule-image-fallback absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_28%_18%,rgba(200,162,77,0.22),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(37,99,235,0.34),transparent_28%),linear-gradient(135deg,#050816_0%,#1E3A8A_52%,#0F172A_100%)]"
@@ -40,7 +41,9 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
   const [hasImageFailed, setHasImageFailed] = useState(false);
   const productPath = createProductPath(product);
   const availability = product.availability ?? getAvailabilityStatus(product);
-  const heroBadge = product.featured ? 'Destaque' : availability.label;
+  const commercialMeta = getCommercialStatusMeta(product);
+  const heroBadge = product.featured && canDirectBuy(product) ? 'Destaque' : commercialMeta.badge || availability.label;
+  const priceLabel = canDirectBuy(product) ? formatBRL(product.salePrice) : 'Sob consulta';
 
   return (
     <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur sm:rounded-[1.8rem]">
@@ -69,7 +72,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
               />
             </>
           ) : (
-            <ProductImageFallback label={product.image ? 'Imagem temporariamente indisponível' : 'Imagem em atualização'} />
+            <ProductImageFallback label={product.image ? 'Imagem temporariamente indisponível' : 'Curadoria sob consulta'} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/80 via-transparent to-transparent" />
           <span className="absolute left-3 top-3 rounded-full border border-lazule-gold/35 bg-lazule-night/58 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold backdrop-blur sm:left-4 sm:top-4 sm:px-3 sm:text-[0.65rem] sm:tracking-[0.16em]">
@@ -82,7 +85,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
           <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold sm:text-[1.65rem]">
             {product.name}
           </h3>
-          <strong className="mt-3 text-lg text-lazule-mist sm:mt-4 sm:text-xl">{formatBRL(product.salePrice)}</strong>
+          <strong className="mt-3 text-lg text-lazule-mist sm:mt-4 sm:text-xl">{priceLabel}</strong>
         </div>
       </a>
     </article>

@@ -5,6 +5,7 @@ import { getProductRecommendations } from '../utils/catalog';
 import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
+import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus';
 import { applyManualReferralCode, getReferralChangeEventName, getReferralContext, removeReferralField } from '../utils/referral';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
@@ -522,6 +523,8 @@ function Recommendations({ products }) {
 
 function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   const disabled = !whatsAppLink;
+  const directBuy = canDirectBuy(product);
+  const statusMeta = getCommercialStatusMeta(product);
   const appliedCode = getAppliedReferralLabel(referralContext);
 
   return (
@@ -529,7 +532,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
       <div className="mx-auto flex max-w-md items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
-          <strong className="block truncate text-lg text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+          <strong className="block truncate text-lg text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           {appliedCode ? (
             <p className="mt-1 truncate text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold/85">
               {appliedCode.label}: {appliedCode.value}
@@ -540,7 +543,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
           className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
           href={whatsAppLink || '#'}
           aria-disabled={disabled}
-          aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
+          aria-label={`${directBuy ? 'Comprar' : 'Consultar'} ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
           target="_blank"
           rel="noreferrer"
           onClick={() => {
@@ -548,7 +551,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
             trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'sticky_cta' });
           }}
         >
-          WhatsApp
+          {directBuy ? 'WhatsApp' : statusMeta.shortCtaLabel}
         </a>
       </div>
     </div>
@@ -620,6 +623,8 @@ export function ProductDetails({ slug }) {
   const olfactoryReference = String(product.olfactoryReference || '').trim();
   const productUrl = createCanonicalUrl(createProductPath(product));
   const whatsAppLink = createProductWhatsAppLink(product, { productUrl, referralContext });
+  const directBuy = canDirectBuy(product);
+  const statusMeta = getCommercialStatusMeta(product);
   const showGender = shouldShowGender(product.category, product.gender);
   const accordionItems = getAccordionItems(product, description, olfactoryReference);
 
@@ -648,7 +653,7 @@ export function ProductDetails({ slug }) {
           <div className="mt-7 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-5 lg:border-white/10">
             <div>
               <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
-              <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{formatBRL(product.salePrice)}</strong>
+              <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
             </div>
             <span className={`rounded-full border px-3 py-1 text-[0.68rem] ${product.availability.className}`}>{product.availability.label}</span>
           </div>
@@ -666,12 +671,12 @@ export function ProductDetails({ slug }) {
           <a
             className="lazule-premium-button lazule-cta-shimmer mt-6 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] lg:inline-flex"
             href={whatsAppLink}
-            aria-label={`Comprar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
+            aria-label={`${directBuy ? 'Comprar' : 'Consultar'} ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
             target="_blank"
             rel="noreferrer"
             onClick={() => trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'product_details' })}
           >
-            Consultar curadoria no WhatsApp
+            {statusMeta.ctaLabel}
           </a>
 
           <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
