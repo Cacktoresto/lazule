@@ -81,7 +81,7 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
   );
 }
 
-export function OlfactiveAssistant({ products = [], sourcePage = 'home', className = '' }) {
+export function OlfactiveAssistant({ products = [], sourcePage = 'home', className = 'mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-10' }) {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -157,7 +157,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const hasRecommendations = recommendations.length > 0;
 
   return (
-    <section className={`mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-10 ${className}`} aria-labelledby="olfactive-assistant-title">
+    <section className={className} aria-labelledby="olfactive-assistant-title">
       <div className="lazule-surface-premium relative overflow-hidden rounded-[2.2rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_18%_0%,rgba(200,162,77,0.18),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(30,58,138,0.58)_48%,rgba(5,8,22,0.94))] p-4 shadow-mineral sm:p-6 lg:p-8">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.07),transparent)] opacity-40" />
         <div className="relative grid gap-6 lg:grid-cols-[0.82fr_1fr] lg:items-start">
