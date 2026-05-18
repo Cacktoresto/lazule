@@ -5,6 +5,8 @@ import { navigateSpa } from '../../utils/navigation.js';
 import { trackInfluencerInviteOpened, trackInfluencerSignupCompleted } from '../../utils/analytics.js';
 import { isPartnerInviteAcceptable, isSafeInviteToken, normalizePartnerInvite, PARTNER_INVITE_STATUS } from '../../utils/partnerInvites.js';
 
+const isDevEnvironment = import.meta.env.DEV;
+
 function getFriendlyInviteError(status) {
   if (status === PARTNER_INVITE_STATUS.EXPIRED) {
     return 'Este convite expirou. Solicite um novo acesso ao time LAZULE.';
@@ -50,7 +52,7 @@ export function InfluencerInvite({ token }) {
     async function loadInvite() {
       if (!isSafeInviteToken(normalizedToken) || !supabaseAuthClient.isConfigured) {
         setStatus(PARTNER_INVITE_STATUS.INVALID);
-        setLoadError('Convite inválido ou autenticação indisponível.');
+        setLoadError('Convite temporariamente indisponível. Solicite um novo acesso ao time LAZULE.');
         setIsLoading(false);
         return;
       }
@@ -61,7 +63,7 @@ export function InfluencerInvite({ token }) {
 
       if (error || !data) {
         setStatus(PARTNER_INVITE_STATUS.INVALID);
-        setLoadError(error?.message || 'Convite não encontrado.');
+        setLoadError(isDevEnvironment && error?.message ? error.message : 'Convite não encontrado ou temporariamente indisponível. Solicite um novo acesso ao time LAZULE.');
       } else {
         const normalizedInvite = normalizePartnerInvite(Array.isArray(data) ? data[0] : data);
         setInvite(normalizedInvite);
@@ -115,7 +117,7 @@ export function InfluencerInvite({ token }) {
 
     if (signupResult.error) {
       setIsSubmitting(false);
-      setFormError(signupResult.error.message || 'Não foi possível criar seu acesso agora.');
+      setFormError(isDevEnvironment && signupResult.error.message ? signupResult.error.message : 'Não foi possível criar seu acesso agora. Confira os dados e tente novamente com calma.');
       return;
     }
 
@@ -131,7 +133,7 @@ export function InfluencerInvite({ token }) {
     setIsSubmitting(false);
 
     if (acceptResult.error) {
-      setFormError(acceptResult.error.message || 'Não foi possível finalizar o convite.');
+      setFormError(isDevEnvironment && acceptResult.error.message ? acceptResult.error.message : 'Não foi possível finalizar o convite agora. Seu acesso permanece protegido; tente novamente em instantes.');
       return;
     }
 

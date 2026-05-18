@@ -100,7 +100,9 @@ test('analytics normalizes product payloads and handles incomplete products safe
 test('analytics creates search payloads with consistent fields', () => {
   const payload = createSearchAnalyticsPayload({ searchTerm: 'sauvage', resultCount: 3, sourcePage: 'catalog' });
 
-  assert.equal(payload.search_term, 'sauvage');
+  assert.equal(payload.search_term, 'consulta curta (1 termo)');
+  assert.equal(payload.query_terms, 1);
+  assert.equal(payload.privacy, 'anonymized_search_signal');
   assert.equal(payload.result_count, 3);
   assert.equal(payload.source_page, 'catalog');
 });
@@ -119,10 +121,11 @@ test('analytics deduplicates events and falls back safely without configured pix
   assert.equal(event.metaStandardName, 'ViewContent');
 });
 
-test('analytics ignores admin routes in public tracking', () => {
+test('analytics ignores private routes in public tracking', () => {
   resetAnalyticsForTests();
 
   assert.equal(trackPageView({ path: '/admin/analytics', routeName: 'admin_analytics' }), null);
+  assert.equal(trackPageView({ path: '/influencer', routeName: 'influencer_dashboard' }), null);
   assert.equal(getAnalyticsSnapshot().events.length, 0);
 });
 
@@ -422,6 +425,7 @@ test('promo and influencer routes emit analytics payloads with referral context'
   assert.equal(promoVisit.payload.utm_source, 'instagram');
   assert.equal(promoVisit.payload.utm_campaign, 'maio');
   assert.equal(promoVisit.payload.source_page, 'promo_route');
+  assert.equal(promoVisit.payload.page_path, '/promo');
 
   uninstallBrowserGlobals();
   installBrowserGlobals('?coupon=cria10&utm_source=instagram&utm_campaign=maio', '/i/lucas');
@@ -438,6 +442,7 @@ test('promo and influencer routes emit analytics payloads with referral context'
   assert.equal(influencerVisit.payload.utm_source, 'instagram');
   assert.equal(influencerVisit.payload.utm_campaign, 'maio');
   assert.equal(influencerVisit.payload.source_page, 'influencer_route');
+  assert.equal(influencerVisit.payload.page_path, '/i/lucas?coupon=cria10&utm_source=instagram&utm_campaign=maio');
   assert.ok(snapshot.events.some((event) => event.name === 'referral_applied' && event.payload.ref === 'lucas'));
 
   uninstallBrowserGlobals();

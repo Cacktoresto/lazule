@@ -181,17 +181,39 @@ function getCurrentPagePath() {
   return `${window.location.pathname}${window.location.search}${window.location.hash}` || '/';
 }
 
-function isAdminAnalyticsPath(pagePath = getCurrentPagePath()) {
-  return String(pagePath || '').startsWith('/admin/');
+function isSensitiveAnalyticsPath(pagePath = getCurrentPagePath()) {
+  const normalizedPath = String(pagePath || '').trim();
+
+  return normalizedPath === '/admin'
+    || normalizedPath.startsWith('/admin/')
+    || normalizedPath === '/influencer'
+    || normalizedPath.startsWith('/influencer/')
+    || normalizedPath.startsWith('/promo/');
+}
+
+function sanitizeAnalyticsPagePath(pagePath = getCurrentPagePath()) {
+  const normalizedPath = String(pagePath || '/').trim() || '/';
+
+  if (normalizedPath.startsWith('/influencer/invite/')) {
+    return '/influencer/invite';
+  }
+
+  if (normalizedPath.startsWith('/promo/')) {
+    return '/promo';
+  }
+
+  return normalizedPath;
 }
 
 function getCanonicalUrl(pagePath = getCurrentPagePath()) {
+  const safePagePath = sanitizeAnalyticsPagePath(pagePath);
+
   if (!canUseWindow()) {
-    return pagePath;
+    return safePagePath;
   }
 
   try {
-    return new URL(pagePath || '/', window.location.origin).toString();
+    return new URL(safePagePath || '/', window.location.origin).toString();
   } catch {
     return window.location.href;
   }
@@ -206,6 +228,29 @@ function normalizeText(value) {
   return String(value || '').trim();
 }
 
+function stripSensitivePayloadFields(payload = {}) {
+  return Object.fromEntries(Object.entries(payload).filter(([key]) => !['search_term', 'searchTerm', 'query', 'invite_token', 'token'].includes(key)));
+}
+
+function createPrivacySafeQuerySignal(value) {
+  const normalizedQuery = normalizeText(value).normalize('NFKC').replace(/\s+/g, ' ');
+  const withoutSensitiveTokens = normalizedQuery
+    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, ' ')
+    .replace(/(?:\+?\d[\s().-]*){8,}/g, ' ')
+    .replace(/[<>]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const tokenCount = withoutSensitiveTokens ? withoutSensitiveTokens.split(/\s+/).length : 0;
+  const lengthBucket = withoutSensitiveTokens.length <= 12 ? 'curta' : withoutSensitiveTokens.length <= 32 ? 'média' : 'longa';
+
+  return compactObject({
+    search_term: withoutSensitiveTokens ? `consulta ${lengthBucket} (${tokenCount} termo${tokenCount === 1 ? '' : 's'})` : 'consulta protegida',
+    query_length: normalizedQuery.length,
+    query_terms: tokenCount,
+    privacy: 'anonymized_search_signal',
+  });
+}
+
 export function createProductAnalyticsPayload(product = {}, extraPayload = {}) {
   const productName = normalizeText(product.product_name ?? product.productName ?? product.name);
   const productSlug = normalizeText(product.product_slug ?? product.productSlug ?? product.slug);
@@ -213,6 +258,7 @@ export function createProductAnalyticsPayload(product = {}, extraPayload = {}) {
   const category = normalizeText(product.category ?? product.catalogType ?? product.type);
 
   return compactObject({
+    ...stripSensitivePayloadFields(extraPayload),
     product_id: productId,
     product_slug: productSlug,
     product_name: productName,
@@ -223,29 +269,30 @@ export function createProductAnalyticsPayload(product = {}, extraPayload = {}) {
     price: normalizePrice(product.price ?? product.salePrice ?? product.sale_price),
     category,
     item_category: category,
-    page_path: getCurrentPagePath(),
-    canonical_url: getCanonicalUrl(),
-    ...extraPayload,
+    page_path: sanitizeAnalyticsPagePath(extraPayload.page_path || getCurrentPagePath()),
+    canonical_url: getCanonicalUrl(extraPayload.page_path || getCurrentPagePath()),
   });
 }
 
 export function createSearchAnalyticsPayload({ searchTerm, resultCount, sourcePage, ...extraPayload } = {}) {
+  const rawQuery = searchTerm ?? extraPayload.search_term ?? extraPayload.query;
+
   return compactObject({
-    search_term: normalizeText(searchTerm ?? extraPayload.search_term ?? extraPayload.query),
+    ...Object.fromEntries(Object.entries(stripSensitivePayloadFields(extraPayload)).filter(([key]) => !['search_term', 'searchTerm', 'query'].includes(key))),
+    ...createPrivacySafeQuerySignal(rawQuery),
     result_count: Number.isFinite(Number(resultCount)) ? Number(resultCount) : undefined,
-    source_page: normalizeText(sourcePage) || getCurrentPagePath(),
-    page_path: getCurrentPagePath(),
+    source_page: normalizeText(sourcePage) || sanitizeAnalyticsPagePath(getCurrentPagePath()),
+    page_path: sanitizeAnalyticsPagePath(getCurrentPagePath()),
     canonical_url: getCanonicalUrl(),
-    ...extraPayload,
   });
 }
 
 function createIntentPayload(payload = {}) {
   return compactObject({
-    source_page: normalizeText(payload.source_page ?? payload.sourcePage ?? payload.section) || getCurrentPagePath(),
-    page_path: getCurrentPagePath(),
-    canonical_url: getCanonicalUrl(),
-    ...payload,
+    ...stripSensitivePayloadFields(payload),
+    source_page: normalizeText(payload.source_page ?? payload.sourcePage ?? payload.section) || sanitizeAnalyticsPagePath(getCurrentPagePath()),
+    page_path: sanitizeAnalyticsPagePath(payload.page_path || getCurrentPagePath()),
+    canonical_url: getCanonicalUrl(payload.page_path || getCurrentPagePath()),
   });
 }
 
@@ -259,9 +306,9 @@ export function normalizeAnalyticsPayload(eventName, payload = {}) {
   }
 
   return compactObject({
-    page_path: getCurrentPagePath(),
-    canonical_url: getCanonicalUrl(),
-    ...payload,
+    ...stripSensitivePayloadFields(payload),
+    page_path: sanitizeAnalyticsPagePath(payload.page_path || getCurrentPagePath()),
+    canonical_url: getCanonicalUrl(payload.page_path || getCurrentPagePath()),
   });
 }
 
@@ -342,7 +389,7 @@ function updateLocalState(event) {
     nextState.counters = { ...(nextState.counters ?? {}), searches: (nextState.counters?.searches ?? 0) + 1 };
     nextState.searches = [
       ...(nextState.searches ?? []),
-      { query: event.payload.search_term, resultCount: event.payload.result_count ?? null, sourcePage: event.payload.source_page, timestamp: event.timestamp },
+      { query: event.payload.search_term, queryTerms: event.payload.query_terms ?? null, resultCount: event.payload.result_count ?? null, sourcePage: event.payload.source_page, timestamp: event.timestamp },
     ].slice(-MAX_STORED_SEARCHES);
   }
 
@@ -457,7 +504,12 @@ export function trackEvent(eventName, payload = {}, options = {}) {
 
   const candidatePath = payload?.page_path || getCurrentPagePath();
 
-  if (isAdminAnalyticsPath(candidatePath)) {
+  const canTrackSensitiveReferralEvent = eventName === 'promo_route_visit'
+    || eventName === 'influencer_route_visit'
+    || eventName === 'referral_applied'
+    || eventName === 'coupon_detected';
+
+  if (isSensitiveAnalyticsPath(candidatePath) && !canTrackSensitiveReferralEvent) {
     return null;
   }
 

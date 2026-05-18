@@ -9,7 +9,11 @@ function getFriendlyError(error) {
     return '';
   }
 
-  return error.message || 'Não conseguimos liberar o acesso agora. Confira os dados e tente novamente com calma.';
+  if (isDevEnvironment) {
+    return error.message || 'Não conseguimos liberar o acesso agora. Confira os dados e tente novamente com calma.';
+  }
+
+  return 'Não conseguimos liberar o acesso agora. Confira os dados e tente novamente com calma.';
 }
 
 function getUnavailableMessage(authUnavailableReason) {

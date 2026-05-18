@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /influencer/
 Disallow: /promo/
 Disallow: /i/
 Disallow: /indica/
