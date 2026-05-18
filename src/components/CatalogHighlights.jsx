@@ -72,42 +72,49 @@ function HighlightRail({ eyebrow, title, description, products, section }) {
   );
 }
 
-export function CatalogHighlights({ collections }) {
+export function CatalogHighlights({ collections, className = '' }) {
   return (
-    <div className="relative mb-14 overflow-hidden rounded-[3rem] border border-lazule-gold/20 bg-lazule-depth p-5 shadow-mineral sm:p-8">
-      <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-lazule-blue/35 blur-3xl" />
-      <div className="pointer-events-none absolute left-1/4 top-0 h-48 w-48 rounded-full bg-lazule-gold/10 blur-3xl" />
-      <div className="relative">
-        <p className="text-xs font-semibold uppercase tracking-[0.42em] text-lazule-gold">Boutique inteligente</p>
-        <h2 className="mt-4 max-w-3xl font-display text-4xl leading-tight text-lazule-mist sm:text-5xl">
-          Descubra fragrâncias selecionadas por momento, desejo e assinatura olfativa.
-        </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-          Trilhas premium derivadas automaticamente do catálogo atual para facilitar descoberta sem comprometer a curadoria LAZULE.
-        </p>
-
-        <HighlightRail
-          eyebrow="Seleção da semana"
-          title="Escolhas com presença imediata"
-          description="Uma vitrine rotativa pronta para futura integração dinâmica."
-          products={collections.weeklySelection}
-          section="weekly_selection"
-        />
-        <HighlightRail
-          eyebrow="Mais procurados"
-          title="Ícones e referências desejadas"
-          description="Produtos com marcas fortes, destaque editorial ou referência olfativa reconhecida."
-          products={collections.mostWanted}
-          section="most_wanted"
-        />
-        <HighlightRail
-          eyebrow="Árabes em destaque"
-          title="Intensidade oriental em curadoria mineral"
-          description="Fragrâncias árabes reais do catálogo para explorar potência, fixação e assinatura marcante."
-          products={collections.arabicHighlights}
-          section="arabic_highlights"
-        />
+    <section className={`relative ${className || 'mb-14'}`} aria-labelledby="catalog-highlights-title">
+      <div className="mx-auto mb-7 flex max-w-xl items-center gap-4 text-lazule-gold/60 sm:mb-9">
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent via-lazule-gold/45 to-lazule-gold/10" aria-hidden="true" />
+        <span className="text-[0.62rem] font-semibold uppercase tracking-[0.3em] sm:tracking-[0.38em]">Continue explorando</span>
+        <span className="h-px flex-1 bg-gradient-to-l from-transparent via-lazule-gold/45 to-lazule-gold/10" aria-hidden="true" />
       </div>
-    </div>
+      <div className="relative overflow-hidden rounded-[3rem] border border-lazule-gold/20 bg-lazule-depth p-5 shadow-mineral sm:p-8">
+        <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-lazule-blue/35 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/4 top-0 h-48 w-48 rounded-full bg-lazule-gold/10 blur-3xl" />
+        <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-[0.42em] text-lazule-gold">Boutique inteligente</p>
+          <h2 id="catalog-highlights-title" className="mt-4 max-w-3xl font-display text-4xl leading-tight text-lazule-mist sm:text-5xl">
+            Descubra fragrâncias selecionadas por momento, desejo e assinatura olfativa.
+          </h2>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+            Trilhas premium derivadas automaticamente do catálogo atual para facilitar descoberta sem comprometer a curadoria LAZULE.
+          </p>
+
+          <HighlightRail
+            eyebrow="Seleção da semana"
+            title="Escolhas com presença imediata"
+            description="Uma vitrine rotativa pronta para futura integração dinâmica."
+            products={collections.weeklySelection}
+            section="weekly_selection"
+          />
+          <HighlightRail
+            eyebrow="Mais procurados"
+            title="Ícones e referências desejadas"
+            description="Produtos com marcas fortes, destaque editorial ou referência olfativa reconhecida."
+            products={collections.mostWanted}
+            section="most_wanted"
+          />
+          <HighlightRail
+            eyebrow="Árabes em destaque"
+            title="Intensidade oriental em curadoria mineral"
+            description="Fragrâncias árabes reais do catálogo para explorar potência, fixação e assinatura marcante."
+            products={collections.arabicHighlights}
+            section="arabic_highlights"
+          />
+        </div>
+      </div>
+    </section>
   );
 }

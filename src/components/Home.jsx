@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ProductNavigationSearch } from './ProductNavigationSearch';
 import { OlfactiveAssistant } from './OlfactiveAssistant';
 import { ProductCard } from './ProductCard';
+import { CatalogHighlights } from './CatalogHighlights';
 import { getAllProducts } from '../data/catalogRepository';
 import { getFeaturedCollections } from '../utils/catalog';
 import { createBrandPath } from '../utils/productRouting';
@@ -192,8 +193,6 @@ export function Home() {
         </div>
       </div>
 
-      <OlfactiveAssistant products={products} sourcePage="home" />
-
       <Reveal className="mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-12">
         <SectionHeading eyebrow="Descoberta rápida" title="Escolha pelo desejo" actionHref="/catalogo" />
         <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
@@ -244,6 +243,10 @@ export function Home() {
             Uma home mais leve para encontrar o perfume certo com menos fricção, mais imagem e escolhas claras.
           </p>
         </Reveal>
+
+        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto mt-12 max-w-7xl sm:mt-14" />
+
+        <CatalogHighlights collections={collections} className="mt-14 sm:mt-16 lg:mt-20" />
       </main>
     </>
   );

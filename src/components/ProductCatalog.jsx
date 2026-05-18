@@ -194,8 +194,6 @@ export function ProductCatalog() {
         </div>
       </div>
 
-      <CatalogHighlights collections={featuredCollections} />
-
       <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:items-start">
         <AdvancedFilters
           filters={filters}
@@ -273,6 +271,8 @@ export function ProductCatalog() {
           )}
         </div>
       </div>
+
+      <CatalogHighlights collections={featuredCollections} className="mb-0 mt-16 sm:mt-20 lg:mt-24" />
     </section>
   );
 }
