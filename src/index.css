@@ -436,7 +436,7 @@ input {
 
 .lazule-product-hero-frame {
   min-height: clamp(31.5rem, 78svh, 40.5rem);
-  contain: paint;
+  isolation: isolate;
 }
 
 .lazule-product-hero-frame::before {
@@ -949,7 +949,7 @@ body {
   --cursor-x: 0;
   --cursor-y: 0;
   background: #050816;
-  contain: paint;
+  isolation: isolate;
 }
 
 .lazule-atmosphere__depth {
@@ -1454,18 +1454,126 @@ textarea {
   }
 }
 
+
+/* Home mobile scale correction: keep 320-430px layouts native-sized and clipped. */
+.lazule-home-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+@media (max-width: 640px) {
+  .lazule-home-shell .lazule-hero {
+    overflow: clip;
+  }
+
+  .lazule-home-shell .lazule-hero::after {
+    height: 6rem;
+  }
+
+  .lazule-home-shell .lazule-mobile-container {
+    min-height: auto;
+    row-gap: 1.15rem;
+    padding-top: max(1.15rem, env(safe-area-inset-top));
+  }
+
+  .lazule-home-shell .lazule-hero-copy h1 {
+    line-height: 0.9;
+    letter-spacing: -0.048em;
+  }
+
+  .lazule-home-shell .lazule-hero-copy p:last-of-type {
+    max-width: 29rem;
+  }
+
+  .lazule-home-shell .lazule-hero-product {
+    border-radius: 1.45rem;
+    box-shadow:
+      inset 0 1px 0 rgba(248, 250, 252, 0.05),
+      0 14px 42px rgba(2, 6, 23, 0.30);
+  }
+
+  .lazule-home-shell .lazule-sticky-search {
+    top: calc(4.25rem + env(safe-area-inset-top, 0px));
+    padding-inline: max(0.55rem, env(safe-area-inset-left)) max(0.55rem, env(safe-area-inset-right));
+  }
+
+  .lazule-home-search .lazule-search-shell {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem;
+    padding: 0.25rem;
+  }
+
+  .lazule-home-search input {
+    min-height: 2.55rem;
+    padding-left: 2.3rem;
+    padding-right: 0.65rem;
+  }
+
+  .lazule-home-search button {
+    min-height: 2.55rem;
+    min-width: 2.7rem;
+    padding-inline: 0.82rem;
+  }
+
+  .lazule-home-shell .lazule-horizontal-rail {
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+    scroll-padding-inline: 0.75rem;
+  }
+
+  .lazule-home-shell .lazule-rail-fade {
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 1.15rem), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 1.15rem), transparent 100%);
+  }
+
+  .lazule-home-shell .lazule-discovery-card strong {
+    font-size: 1.35rem;
+  }
+
+  .lazule-home-shell .lazule-ai-orb {
+    transform: scale(0.72);
+    transform-origin: top right;
+  }
+
+  .lazule-home-shell .lazule-ai-stage,
+  .lazule-home-shell .lazule-ai-concierge,
+  .lazule-home-shell .lazule-surface-premium {
+    max-width: 100%;
+  }
+
+  .lazule-home-shell .lazule-product-card h3 {
+    font-size: clamp(1.12rem, 5.8vw, 1.38rem);
+  }
+
+  .lazule-home-shell .lazule-product-card strong {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 390px) and (max-width: 640px) {
+  .lazule-home-shell .lazule-mobile-container {
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+  }
+
+  .lazule-home-shell .lazule-hero-product {
+    max-width: min(17.75rem, 82vw);
+  }
+}
+
 @media (max-width: 374px) {
   .lazule-mobile-container {
-    min-height: 74svh;
-    padding-top: 1.25rem;
+    min-height: auto;
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
 
   .lazule-hero-product {
-    max-width: min(17.5rem, 86vw);
+    max-width: min(15.25rem, 82vw);
   }
 
   .lazule-sticky-search {
-    top: 8.15rem;
+    top: calc(4rem + env(safe-area-inset-top, 0px));
   }
 
   .lazule-home-search input::placeholder {
@@ -1478,7 +1586,7 @@ textarea {
   }
 
   .lazule-ai-card {
-    width: min(84vw, 18.5rem);
+    width: min(78vw, 17.25rem);
   }
 }
 
