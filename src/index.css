@@ -742,3 +742,197 @@ input {
     transition: none !important;
   }
 }
+
+/* Premium perception system: calm editorial motion, touch feedback and layered luxury surfaces. */
+:root {
+  --lazule-ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --lazule-ease-silk: cubic-bezier(0.16, 1, 0.3, 1);
+  --lazule-motion-fast: 180ms;
+  --lazule-motion: 280ms;
+  --lazule-motion-slow: 620ms;
+  --lazule-focus-ring: 0 0 0 2px rgba(200, 162, 77, 0.88), 0 0 0 6px rgba(15, 23, 42, 0.78);
+}
+
+.lazule-route-shell {
+  animation: lazule-route-enter var(--lazule-motion-slow) var(--lazule-ease-editorial) both;
+}
+
+@keyframes lazule-route-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.55rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.lazule-surface-premium {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(200, 162, 77, 0.12), transparent 30%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028));
+}
+
+.lazule-surface-premium::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: '';
+  background:
+    linear-gradient(115deg, transparent, rgba(248, 250, 252, 0.08), transparent 62%),
+    radial-gradient(circle at 88% 10%, rgba(37, 99, 235, 0.12), transparent 34%);
+  opacity: 0.62;
+}
+
+.lazule-feedback-card,
+.lazule-dashboard-card,
+.lazule-ai-card {
+  transform: translateZ(0);
+  transition:
+    opacity var(--lazule-motion) ease,
+    transform var(--lazule-motion) var(--lazule-ease-editorial),
+    border-color var(--lazule-motion) ease,
+    background-color var(--lazule-motion) ease,
+    box-shadow var(--lazule-motion) ease;
+}
+
+.lazule-feedback-card:hover,
+.lazule-dashboard-card:hover,
+.lazule-ai-card:hover {
+  transform: translateY(-0.16rem);
+  border-color: rgba(200, 162, 77, 0.28);
+  box-shadow:
+    0 24px 70px rgba(2, 6, 23, 0.42),
+    0 0 0 1px rgba(200, 162, 77, 0.08);
+}
+
+.lazule-pressable {
+  touch-action: manipulation;
+  transition:
+    transform var(--lazule-motion-fast) var(--lazule-ease-editorial),
+    border-color var(--lazule-motion) ease,
+    background-color var(--lazule-motion) ease,
+    color var(--lazule-motion) ease,
+    box-shadow var(--lazule-motion) ease;
+}
+
+.lazule-pressable:active {
+  transform: translateY(0.04rem) scale(0.985);
+}
+
+.lazule-focus-ring:focus-visible,
+.lazule-pressable:focus-visible {
+  outline: none;
+  box-shadow: var(--lazule-focus-ring);
+}
+
+.lazule-ai-orb {
+  position: relative;
+  overflow: hidden;
+}
+
+.lazule-ai-orb::before,
+.lazule-ai-orb::after {
+  position: absolute;
+  inset: 18%;
+  content: '';
+  border-radius: 9999px;
+  background: conic-gradient(from 120deg, rgba(200, 162, 77, 0.10), rgba(248, 250, 252, 0.42), rgba(37, 99, 235, 0.26), rgba(200, 162, 77, 0.10));
+  filter: blur(0.35rem);
+  animation: lazule-ai-breathe 2.8s ease-in-out infinite;
+}
+
+.lazule-ai-orb::after {
+  inset: 36%;
+  background: rgba(200, 162, 77, 0.42);
+  filter: blur(0.7rem);
+  animation-delay: 420ms;
+}
+
+@keyframes lazule-ai-breathe {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: scale(0.92) rotate(0deg);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06) rotate(14deg);
+  }
+}
+
+.lazule-result-reveal > * {
+  opacity: 0;
+  transform: translate3d(0, 0.7rem, 0);
+  animation: lazule-result-in 520ms var(--lazule-ease-editorial) forwards;
+  animation-delay: var(--result-delay, 0ms);
+}
+
+@keyframes lazule-result-in {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.lazule-luxury-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.lazule-luxury-shimmer::after {
+  position: absolute;
+  inset-block: 0;
+  left: -70%;
+  width: 52%;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgba(248, 250, 252, 0.14), transparent);
+  animation: lazule-shimmer 1.8s ease-in-out infinite;
+}
+
+.lazule-safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 0.9rem);
+}
+
+@media (max-width: 640px) {
+  .lazule-mobile-breathe {
+    padding-inline: 1rem;
+  }
+
+  .lazule-product-card:hover,
+  .lazule-feedback-card:hover,
+  .lazule-dashboard-card:hover,
+  .lazule-ai-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lazule-route-shell,
+  .lazule-ai-orb::before,
+  .lazule-ai-orb::after,
+  .lazule-result-reveal > *,
+  .lazule-luxury-shimmer::after {
+    animation: none !important;
+  }
+
+  .lazule-result-reveal > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lazule-feedback-card:hover,
+  .lazule-dashboard-card:hover,
+  .lazule-ai-card:hover,
+  .lazule-pressable:active {
+    transform: none;
+  }
+}

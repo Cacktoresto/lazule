@@ -317,7 +317,7 @@ function App() {
       <MineralBackground />
       <div className="relative z-10">
         <Header immersiveProduct={isProductRoute} />
-        <main>
+        <main key={`${route.pathname}${route.search}`} className="lazule-route-shell">
           {isPromoReferralRouteActive ? (
             <PromoReferralLanding route={route} />
           ) : isAdminLoginRoute ? (
@@ -332,7 +332,7 @@ function App() {
             </RequireInfluencerOrAdmin>
           ) : isAnalyticsDashboardRoute ? (
             <RequireAdmin>
-              <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70">Carregando dashboard LAZULE...</div>}>
+              <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70" role="status" aria-live="polite">Refinando inteligência LAZULE…</div>}>
                 <AnalyticsDashboard />
               </Suspense>
             </RequireAdmin>

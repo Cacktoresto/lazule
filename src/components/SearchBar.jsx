@@ -7,7 +7,7 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
   }
 
   return (
-    <form className="w-full" role="search" aria-label="Pesquisar fragrâncias no catálogo" onSubmit={handleSubmit}>
+    <form className="w-full" role="search" aria-label="Refinar fragrâncias no catálogo" onSubmit={handleSubmit}>
       <label className="block w-full" htmlFor="catalog-search">
         <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold sm:tracking-[0.24em]">
           Busca
@@ -26,7 +26,7 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
       </label>
 
       <div className="mt-3 grid gap-2 sm:flex sm:items-center sm:justify-between">
-        <p className="text-xs leading-5 text-slate-400">Ex.: Sauvage, Invictus, Hacivat, Erba Pura...</p>
+        <p className="text-xs leading-5 text-slate-400">Ex.: Sauvage, Hacivat, presente elegante, noite intensa…</p>
         <div className="grid gap-2 sm:flex sm:shrink-0">
           {hasSearch && (
             <button
@@ -41,7 +41,7 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
             className="lazule-premium-button lazule-cta-shimmer min-h-11 rounded-full bg-lazule-gold px-5 text-sm font-semibold text-lazule-night shadow-aureate"
             type="submit"
           >
-            <span className="relative z-10">Pesquisar</span>
+            <span className="relative z-10">Refinar</span>
           </button>
         </div>
       </div>
