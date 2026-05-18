@@ -1,4 +1,5 @@
 import { getRecommendationEngine } from '../ai/recommendationEngine.js';
+import { createUnavailableDiscoveryConversion, scoreOlfactiveRelationship } from '../ai/olfactiveRelationships.js';
 import { generateQueryDNA, getDominantDNA } from '../ai/perfumeDNA.js';
 import { normalizeSearchText } from './search.js';
 
@@ -87,6 +88,54 @@ function getProductText(product = {}) {
 
 function includesAny(text, terms) {
   return terms.some((term) => text.includes(normalizeSearchText(term)));
+}
+
+function findReferencedPerfume(referenceTerms = [], catalogProducts = [], normalizedQuery = '') {
+  return catalogProducts.find((product) => {
+    const identityTerms = [product.name, `${product.brand ?? ''} ${product.name ?? ''}`, product.olfactoryReference, product.similarTo].flat(Infinity).filter(Boolean);
+    const text = normalizeSearchText(identityTerms.join(' '));
+    const matchesAlias = referenceTerms.some((term) => text.includes(normalizeSearchText(term)));
+    const matchesCatalogName = identityTerms.some((term) => {
+      const normalizedTerm = normalizeSearchText(term);
+      return normalizedTerm.length >= 4 && normalizedQuery.includes(normalizedTerm);
+    });
+    return matchesAlias || matchesCatalogName;
+  }) ?? null;
+}
+
+function createRelationshipReason(referencedPerfume, entry) {
+  if (!referencedPerfume || !entry?.product || referencedPerfume === entry.product) return entry.reason;
+  const relationship = scoreOlfactiveRelationship(referencedPerfume, entry.product, { preferInStock: true });
+  if (!relationship || relationship.score < 0.22) return entry.reason;
+  return relationship.explanation;
+}
+
+function getRecommendationProductKey(product = {}) {
+  return product.productSlug ?? product.id ?? product.name;
+}
+
+function arrangeDiscoveryRecommendations(recommendations = [], discoveryConversion, limit) {
+  if (!discoveryConversion?.alternatives?.length) return recommendations;
+
+  const originalKey = getRecommendationProductKey(discoveryConversion.original);
+  const originalRecommendation = recommendations.find((recommendation) => getRecommendationProductKey(recommendation.product) === originalKey);
+  const alternatives = discoveryConversion.alternatives.map((alternative) => ({
+    product: alternative.product,
+    reason: alternative.explanation,
+    score: alternative.score,
+    matchedIntents: ['alternativa disponível'],
+    dnaSimilarity: alternative.dnaSimilarity,
+    perfumeDNA: alternative.product?.dna_vector,
+  }));
+
+  const ordered = [originalRecommendation, ...alternatives, ...recommendations].filter(Boolean);
+  const seen = new Set();
+  return ordered.filter((recommendation) => {
+    const key = getRecommendationProductKey(recommendation.product);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, limit);
 }
 
 export function sanitizeOlfactiveQuery(query) {
@@ -181,14 +230,17 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
 
   const engine = getRecommendationEngine(options.engine);
   const rankedRecommendations = engine.search(query, safeCatalog, { limit, analysis });
-  const recommendations = rankedRecommendations.map((entry) => ({
+  const referencedPerfume = findReferencedPerfume(referenceTerms, safeCatalog, analysis.normalizedQuery);
+  const discoveryConversion = createUnavailableDiscoveryConversion(referencedPerfume, safeCatalog, { limit: Math.min(4, limit) });
+  const rawRecommendations = rankedRecommendations.map((entry) => ({
     product: entry.product,
-    reason: entry.reason,
+    reason: createRelationshipReason(referencedPerfume, entry),
     score: Math.round(entry.score * 1000) / 1000,
     matchedIntents: entry.matchedIntents,
     dnaSimilarity: entry.dnaSimilarity,
     perfumeDNA: entry.perfumeDNA,
   }));
+  const recommendations = arrangeDiscoveryRecommendations(rawRecommendations, discoveryConversion, limit);
 
   return {
     intent: detectedIntents[0] ?? analysis.primaryIntent,
@@ -197,6 +249,14 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
     inferredFilters: getInferredFilters(detectedIntents),
     products: recommendations.map((recommendation) => recommendation.product),
     recommendations,
+    discoveryConversion,
+    relationshipContext: referencedPerfume ? {
+      product_slug: referencedPerfume.productSlug,
+      product_name: referencedPerfume.name,
+      status: referencedPerfume.status,
+      conversion_type: discoveryConversion?.conversionType,
+      alternative_count: discoveryConversion?.alternatives?.length ?? 0,
+    } : null,
     fallbackUsed: detectedIntents.length === 0 || rankedRecommendations.length < Math.min(MINIMUM_RECOMMENDATIONS, safeCatalog.length, limit) || rankedRecommendations.every((entry) => entry.score < 0.2),
     queryNormalized: analysis.normalizedQuery,
     queryDNA,
@@ -217,6 +277,8 @@ export function createOlfactiveAssistantAnalyticsPayload(result = {}, { query = 
     dna: result.dominantDNA ?? createRecommendationAnalyticsDNA(result.queryDNA ?? generateQueryDNA(safeQuery)),
     result_count: result.recommendations?.length ?? result.products?.length ?? 0,
     recommended_product_slugs: (result.recommendations ?? []).map((recommendation) => recommendation.product?.productSlug ?? recommendation.product?.id).filter(Boolean).slice(0, 6),
+    relationship_context: result.relationshipContext?.product_slug,
+    discovery_conversion_type: result.relationshipContext?.conversion_type,
     product_slug: product?.productSlug,
     product_id: product?.id,
     product_name: product?.name,
