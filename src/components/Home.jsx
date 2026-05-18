@@ -9,30 +9,34 @@ import { createBrandPath } from '../utils/productRouting';
 import { applyHomeSeo } from '../utils/seo';
 import { trackBrandClick, trackCategoryClick, trackEvent, trackProductSelect } from '../utils/analytics';
 
-const categoryTiles = [
+const discoveryPaths = [
   {
     title: 'Importados',
-    label: 'Ícones',
+    label: 'Ícones internacionais',
+    meta: 'clássicos, presenteáveis, assinatura limpa',
     href: '/catalogo?tipo=Importado',
-    gradient: 'from-slate-100/20 via-lazule-blue/20 to-lazule-night',
+    gradient: 'from-slate-100/16 via-lazule-blue/18 to-lazule-night',
   },
   {
-    title: 'Árabes',
-    label: 'Intensos',
+    title: 'Árabes potentes',
+    label: 'Rastro e presença',
+    meta: 'âmbar, doçura, noite, intensidade',
     href: '/catalogo?tipo=%C3%81rabe',
-    gradient: 'from-lazule-gold/30 via-amber-900/20 to-lazule-night',
+    gradient: 'from-lazule-gold/24 via-amber-900/16 to-lazule-night',
   },
   {
-    title: 'Nicho',
-    label: 'Autorais',
+    title: 'Nicho autoral',
+    label: 'Descoberta editorial',
+    meta: 'menos óbvio, mais personalidade',
     href: '/catalogo?tipo=Nicho',
-    gradient: 'from-violet-200/20 via-lazule-royal/30 to-lazule-night',
+    gradient: 'from-violet-200/16 via-lazule-royal/22 to-lazule-night',
   },
   {
-    title: 'Femininos',
-    label: 'Leves',
+    title: 'Femininos leves',
+    label: 'Elegância cotidiana',
+    meta: 'fresco, delicado, trabalho, pele',
     href: '/catalogo?busca=Feminino',
-    gradient: 'from-rose-200/20 via-lazule-blue/20 to-lazule-night',
+    gradient: 'from-rose-200/16 via-lazule-blue/18 to-lazule-night',
   },
 ];
 
@@ -97,6 +101,95 @@ function SectionHeading({ eyebrow, title, actionHref, actionLabel = 'Ver tudo' }
         </a>
       )}
     </div>
+  );
+}
+
+function UnifiedDiscovery({ brands, curatedProducts }) {
+  const spotlightProducts = curatedProducts.slice(0, 3);
+
+  return (
+    <Reveal className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-10">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.035] p-4 shadow-[0_26px_80px_rgba(2,6,23,0.22)] backdrop-blur sm:p-6 lg:p-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_0%,rgba(200,162,77,0.13),transparent_26%),radial-gradient(circle_at_88%_20%,rgba(37,99,235,0.13),transparent_30%)]" />
+        <div className="relative mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-[0.64rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">Descoberta LAZULE</p>
+            <h2 className="mt-2 font-display text-3xl leading-[0.95] text-lazule-mist sm:text-4xl">Escolha como explorar.</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300 sm:max-w-xl">
+              Um único mapa para navegar por desejo, ocasião, família olfativa e assinaturas de marca — sem camadas repetidas.
+            </p>
+          </div>
+          <a className="lazule-inline-link self-start rounded-full px-1 py-2 text-sm font-semibold text-lazule-gold sm:self-auto" href="/catalogo">
+            Explorar catálogo
+          </a>
+        </div>
+
+        <div className="relative grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+          <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0">
+            {discoveryPaths.map((path, index) => (
+              <a
+                key={path.title}
+                className={`lazule-discovery-card lazule-touch-card lazule-reveal-item relative flex min-h-32 min-w-[15rem] snap-start scroll-ml-4 flex-col justify-between overflow-hidden rounded-[1.45rem] border border-white/10 bg-gradient-to-br ${path.gradient} p-4 transition hover:border-lazule-gold/45 focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-36`}
+                href={path.href}
+                style={{ '--item-delay': `${index * 50}ms` }}
+                onClick={() => trackCategoryClick(path.title, { source_page: 'home_unified_discovery', category_label: path.label })}
+              >
+                <span className="flex items-center justify-between gap-3">
+                  <span className="text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold">{path.label}</span>
+                  <span className="h-px w-8 bg-lazule-gold/60" aria-hidden="true" />
+                </span>
+                <span>
+                  <strong className="block font-display text-[1.65rem] font-normal leading-none text-lazule-mist">{path.title}</strong>
+                  <span className="mt-2 block text-xs leading-5 text-slate-300">{path.meta}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+
+          <aside className="space-y-4 rounded-[1.45rem] border border-white/10 bg-lazule-night/38 p-4">
+            <div>
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Seleção agora</p>
+              <div className="mt-3 grid gap-2.5">
+                {spotlightProducts.map((product, index) => (
+                  <a
+                    key={product.id ?? product.productSlug ?? product.name}
+                    className="lazule-reveal-item group flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[0.045] px-3 py-2.5 transition hover:border-lazule-gold/35 hover:bg-white/[0.075]"
+                    href={`/catalogo?busca=${encodeURIComponent(product.name)}`}
+                    style={{ '--item-delay': `${220 + index * 45}ms` }}
+                    onClick={() => trackProductSelect(product, { source_page: 'home_unified_discovery', section: 'home_curated_discovery', interaction_type: 'curated_shortcut' })}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-lazule-mist">{product.name}</span>
+                      <span className="mt-0.5 block truncate text-xs text-slate-400">{product.brand || 'Curadoria LAZULE'}</span>
+                    </span>
+                    <span className="text-xs font-semibold text-lazule-gold transition group-hover:translate-x-0.5">Ver</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {brands.length ? (
+              <div className="border-t border-white/10 pt-4">
+                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Assinaturas</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {brands.slice(0, 6).map((brand, index) => (
+                    <a
+                      key={brand}
+                      className="lazule-brand-pill lazule-reveal-item rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-xs font-semibold text-slate-200 backdrop-blur transition hover:border-lazule-gold/55 hover:text-lazule-gold focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
+                      href={createBrandPath(brand)}
+                      style={{ '--item-delay': `${360 + index * 35}ms` }}
+                      onClick={() => trackBrandClick(brand, { source_page: 'home_unified_discovery' })}
+                    >
+                      {brand}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </aside>
+        </div>
+      </div>
+    </Reveal>
   );
 }
 
@@ -193,46 +286,11 @@ export function Home() {
         </div>
       </div>
 
-      <Reveal className="mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-12">
-        <SectionHeading eyebrow="Descoberta rápida" title="Escolha pelo desejo" actionHref="/catalogo" />
-        <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
-          {categoryTiles.map((category, index) => (
-            <a
-              key={category.title}
-              className={`lazule-touch-card lazule-reveal-item relative flex h-40 min-w-[9.8rem] snap-start scroll-ml-4 flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br ${category.gradient} p-5 shadow-mineral transition hover:border-lazule-gold/45 focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night`}
-              href={category.href}
-              style={{ '--item-delay': `${index * 55}ms` }}
-              onClick={() => trackCategoryClick(category.title, { source_page: 'home_category_tiles', category_label: category.label })}
-            >
-              <span className="h-1 w-10 rounded-full bg-lazule-gold/90" />
-              <span>
-                <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">{category.label}</span>
-                <strong className="mt-2 block font-display text-2xl font-normal text-lazule-mist">{category.title}</strong>
-              </span>
-            </a>
-          ))}
-        </div>
-      </Reveal>
+      <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-10" />
 
-      <Reveal className="mx-auto max-w-7xl px-4 pb-7 sm:px-8">
-        <SectionHeading eyebrow="Marcas" title="Navegue por assinatura" actionHref="/catalogo" />
-        <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 pt-1">
-          {brands.map((brand, index) => (
-            <a
-              key={brand}
-              className="lazule-brand-pill lazule-reveal-item shrink-0 snap-start rounded-full border border-white/10 bg-white/[0.055] px-5 py-3 text-sm font-semibold text-slate-200 backdrop-blur transition hover:border-lazule-gold/55 hover:text-lazule-gold focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
-              href={createBrandPath(brand)}
-              style={{ '--item-delay': `${Math.min(index, 7) * 42}ms` }}
-              onClick={() => trackBrandClick(brand, { source_page: 'home_brand_rail' })}
-            >
-              {brand}
-            </a>
-          ))}
-        </div>
-      </Reveal>
+      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} />
 
       <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 lg:pb-24">
-        <ProductRail eyebrow="Seleção LAZULE" title="Poucos, bons, agora" products={collections.weeklySelection.slice(0, 6)} actionHref="/catalogo" />
         <ProductRail eyebrow="Mais desejados" title="Ícones em rotação" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />
         <ProductRail eyebrow="Árabes" title="Intensidade limpa" products={collections.arabicHighlights.slice(0, 6)} actionHref="/catalogo?tipo=%C3%81rabe" />
 
@@ -243,8 +301,6 @@ export function Home() {
             Uma home mais leve para encontrar o perfume certo com menos fricção, mais imagem e escolhas claras.
           </p>
         </Reveal>
-
-        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto mt-12 max-w-7xl sm:mt-14" />
 
         <CatalogHighlights collections={collections} className="mt-14 sm:mt-16 lg:mt-20" />
       </main>

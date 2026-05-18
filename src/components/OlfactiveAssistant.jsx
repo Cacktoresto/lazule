@@ -158,19 +158,19 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
   return (
     <section className={className} aria-labelledby="olfactive-assistant-title">
-      <div className="lazule-surface-premium relative overflow-hidden rounded-[2.2rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_18%_0%,rgba(200,162,77,0.18),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(30,58,138,0.58)_48%,rgba(5,8,22,0.94))] p-4 shadow-mineral sm:p-6 lg:p-8">
+      <div className="lazule-surface-premium relative overflow-hidden rounded-[2rem] border border-lazule-gold/18 bg-[radial-gradient(circle_at_18%_0%,rgba(200,162,77,0.15),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.9),rgba(30,58,138,0.5)_48%,rgba(5,8,22,0.92))] p-4 shadow-[0_26px_80px_rgba(2,6,23,0.24)] sm:p-5 lg:p-7">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.07),transparent)] opacity-40" />
-        <div className="relative grid gap-6 lg:grid-cols-[0.82fr_1fr] lg:items-start">
+        <div className="relative grid gap-5 lg:grid-cols-[0.78fr_1fr] lg:items-start">
           <div>
             <p className="text-[0.66rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">LAZULE AI Perfume DNA</p>
-            <h2 id="olfactive-assistant-title" className="mt-3 font-display text-4xl leading-[0.92] text-lazule-mist sm:text-5xl">Assistente Olfativo</h2>
-            <p className="mt-4 max-w-xl text-base leading-7 text-slate-300">Descreva sensação, ocasião ou referência e receba uma curadoria explicável com leitura de DNA olfativo.</p>
+            <h2 id="olfactive-assistant-title" className="mt-3 font-display text-3xl leading-[0.95] text-lazule-mist sm:text-4xl">Assistente Olfativo</h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Descreva sensação, ocasião ou referência e receba uma curadoria explicável com leitura de DNA olfativo.</p>
 
-            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+            <form className="mt-5 space-y-3.5" onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="olfactive-query">Descreva o perfume ideal</label>
               <textarea
                 id="olfactive-query"
-                className="min-h-32 w-full resize-none rounded-[1.45rem] border border-white/12 bg-lazule-night/70 px-4 py-4 text-base leading-6 text-lazule-mist outline-none transition placeholder:text-slate-500 hover:border-lazule-gold/30 focus:border-lazule-gold/70 focus:ring-2 focus:ring-lazule-gold/30"
+                className="min-h-28 w-full resize-none rounded-[1.35rem] border border-white/12 bg-lazule-night/70 px-4 py-4 text-base leading-6 text-lazule-mist outline-none transition placeholder:text-slate-500 hover:border-lazule-gold/30 focus:border-lazule-gold/70 focus:ring-2 focus:ring-lazule-gold/30"
                 value={query}
                 maxLength={180}
                 placeholder={DEFAULT_PROMPT}
@@ -200,17 +200,17 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
             </form>
           </div>
 
-          <div className="relative min-w-0 rounded-[1.8rem] border border-white/10 bg-white/[0.045] p-4 sm:p-5" aria-live="polite">
+          <div className="relative min-w-0 rounded-[1.55rem] border border-white/10 bg-white/[0.04] p-4 sm:p-5" aria-live="polite">
             {!result && !isLoading ? (
-              <div className="flex min-h-[18rem] flex-col justify-center text-center sm:text-left">
+              <div className="flex min-h-[14rem] flex-col justify-center text-center sm:text-left">
                 <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Comece pela vibe</p>
-                <h3 className="mt-3 font-display text-3xl leading-tight text-lazule-mist">Diga ocasião, intensidade ou referência.</h3>
+                <h3 className="mt-3 font-display text-2xl leading-tight text-lazule-mist">Diga ocasião, intensidade ou referência.</h3>
                 <p className="mt-4 text-sm leading-6 text-slate-300">Experimente: {initialExamples}. A curadoria é privada, rápida e orientada por sinais olfativos — sem expor dados pessoais.</p>
               </div>
             ) : null}
 
             {isLoading ? (
-              <div className="flex min-h-[18rem] items-center justify-center text-center" role="status" aria-live="polite">
+              <div className="flex min-h-[14rem] items-center justify-center text-center" role="status" aria-live="polite">
                 <div>
                   <span className="lazule-ai-orb mx-auto block h-14 w-14 rounded-full border border-lazule-gold/50 bg-lazule-gold/10 shadow-aureate" aria-hidden="true" />
                   <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-lazule-gold">{LOADING_STEPS[loadingStepIndex]}</p><p className="mt-3 text-xs leading-5 text-slate-300">Ajustando presença, ocasião e assinatura para uma recomendação mais precisa.</p>
