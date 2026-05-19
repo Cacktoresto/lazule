@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
 import { getProductRecommendations } from '../utils/catalog';
+import { similarPerfumes } from '../data/generated/similarPerfumes.js';
+import { getSimilarPerfumesForProduct } from '../ai/similarPerfumeEngine.js';
 import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
@@ -718,6 +720,51 @@ function RelationshipBlocks({ sections, currentProduct, experience }) {
   );
 }
 
+function SimilarPerfumeSections({ groups = {} }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const railRef = useRef(null);
+
+  useEffect(() => {
+    if (!railRef.current || isVisible) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      });
+    }, { rootMargin: "240px" });
+    observer.observe(railRef.current);
+    return () => observer.disconnect();
+  }, [isVisible]);
+
+  const sections = [
+    { key: "highlySimilar", title: "Perfumes com DNA parecido" },
+    { key: "complementary", title: "Mesma vibe, outra assinatura" },
+    { key: "adventurousAlternatives", title: "Para explorar algo mais ousado" },
+  ].filter((section) => (groups[section.key] || []).length > 0);
+
+  if (!sections.length) return null;
+
+  return (
+    <section ref={railRef} className="lazule-reveal mt-10 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Consultoria olfativa</p>
+      </div>
+      {!isVisible ? <div className="h-24 animate-pulse rounded-2xl bg-white/5" /> : sections.map((section) => (
+        <div key={section.key} className="mb-8 last:mb-0">
+          <h3 className="mb-4 font-display text-2xl text-lazule-mist">{section.title}</h3>
+          <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
+            {(groups[section.key] || []).map((item) => (
+              <RecommendationCard key={item.slug} product={item} context={section.key} explanation={item.explanation} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 function Recommendations({ products }) {
   if (!products.length) {
     return null;
@@ -785,6 +832,7 @@ export function ProductDetails({ slug }) {
   const normalizedSlug = createProductSlug(slug);
   const product = getProductBySlug(normalizedSlug, catalogProducts);
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
+  const similarGroups = useMemo(() => (product ? getSimilarPerfumesForProduct(product, similarPerfumes) : {}), [product]);
   const relationshipSections = useMemo(() => (product ? generateOlfactiveRelationships(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
   const experience = useMemo(() => (product ? createPerfumeExperience(product) : null), [product]);
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
@@ -930,6 +978,7 @@ export function ProductDetails({ slug }) {
         <VibeSection product={product} />
         <OlfactiveDiscoveryTerms product={product} />
         <RelationshipBlocks sections={relationshipSections} currentProduct={product} experience={experience} />
+        <SimilarPerfumeSections groups={similarGroups} />
         <Recommendations products={recommendations} />
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
