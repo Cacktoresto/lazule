@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,9 +33,13 @@ const PRODUCT_CARD_SELECTOR = [
 ].join(',');
 
 const INVALID_UI_PHRASES = [
+  'we use cookies',
+  'cookies',
+  'improve the services',
   'back to top',
   'create a website',
   'kyte',
+  'developed by',
   'loading',
   'order by',
   'masculino',
@@ -71,12 +75,6 @@ function detectCloudflareChallenge(html, url = '') {
     if (pattern.test(html) || pattern.test(url)) {
       evidence.push(label);
     }
-  }
-
-  const volumeMl = extractVolumeMl([name, description, rawProduct.text].join(' '));
-
-  if (/^\d+%\s*off$/i.test(normalizeTextToken(name)) || /loading|skeleton/i.test(normalizeTextToken(name))) {
-    return null;
   }
 
   return {
@@ -454,13 +452,7 @@ async function extractRawProducts(page) {
       }
     }
 
-    const volumeMl = extractVolumeMl([name, description, rawProduct.text].join(' '));
-
-  if (/^\d+%\s*off$/i.test(normalizeTextToken(name)) || /loading|skeleton/i.test(normalizeTextToken(name))) {
-    return null;
-  }
-
-  return {
+    return {
       domNodesObserved,
       retailElementCount: retailElements.length,
       rootCandidateCount: rootCandidates.length,
@@ -929,6 +921,28 @@ function isValidProductCandidate(product) {
   return hasMinimalProductConfidence(product);
 }
 
+function hasPerfumeLikeEvidence(product) {
+  const textBlob = normalizeTextToken([product.name, product.description, product.olfactoryReference, product.rawText].filter(Boolean).join(' '));
+  return /\b(perfume|parfum|fragrancia|fragrance|eau|deo cologne|colonia|edp|edt)\b/.test(textBlob);
+}
+
+function hasStrongProductFields(product) {
+  const hasValidPrice = Number.isFinite(product.costPrice) || Number.isFinite(product.supplierRetailPrice);
+  const hasValidMl = Number.isFinite(product.volumeMl) && product.volumeMl >= 5 && product.volumeMl <= 1_000;
+  const hasValidCategory = Boolean(product.category && !isInvalidUiPhrase(product.category));
+  const normalizedName = normalizeTextToken(product.name || '');
+  const imageAlt = normalizeTextToken(product.imageAlt || '');
+  const hasImageAltMatch = Boolean(imageAlt && normalizedName && (imageAlt.includes(normalizedName) || normalizedName.includes(imageAlt)));
+  return hasValidPrice || hasValidMl || hasValidCategory || hasImageAltMatch;
+}
+
+function shouldRejectBeforeImageDownload(product) {
+  const normalizedName = normalizeTextToken(product.name || '');
+  if (!normalizedName || isInvalidUiPhrase(normalizedName)) return true;
+  if (!hasPerfumeLikeEvidence(product) && !hasStrongProductFields(product)) return true;
+  return false;
+}
+
 function finalNormalizeAndDedupe(products) {
   const report={rawRecordsObserved:products.length,validRecords:0,invalidDiscarded:0,duplicateGroups:0,partialRecordsMerged:0,finalDuplicatesCollapsed:0,uniqueProductsExported:0,productsWithoutImage:0,productsWithoutPrice:0,recoveredNames:0,recoveredReferences:0,extractionWarnings:[]};
   const valid=[];
@@ -986,8 +1000,16 @@ async function downloadImage(product) {
 
 async function hydrateImages(products) {
   await mkdir(IMAGE_DIR, { recursive: true });
+  let imageDownloadsPreventedByPreValidation = 0;
+  const approvedProducts = [];
 
   for (const product of products) {
+    if (shouldRejectBeforeImageDownload(product)) {
+      imageDownloadsPreventedByPreValidation += 1;
+      continue;
+    }
+
+    approvedProducts.push(product);
     if (!product.image) {
       continue;
     }
@@ -1001,7 +1023,21 @@ async function hydrateImages(products) {
     }
   }
 
-  return products;
+  return { products: approvedProducts, imageDownloadsPreventedByPreValidation };
+}
+
+async function cleanupInvalidUiNoiseImages() {
+  await mkdir(IMAGE_DIR, { recursive: true });
+  const files = await readdir(IMAGE_DIR);
+  const removed = [];
+  for (const file of files) {
+    const base = file.replace(path.extname(file), '');
+    if (isInvalidUiPhrase(base)) {
+      await unlink(path.join(IMAGE_DIR, file));
+      removed.push(file);
+    }
+  }
+  return removed;
 }
 
 function serializeValue(value, indentLevel = 2) {
@@ -1158,8 +1194,14 @@ async function main() {
     throw new Error('Nenhum produto foi extraído do fornecedor. Consulte tmp/scraper-debug para snapshots HTML/screenshot.');
   }
 
-  await hydrateImages(finalValidatedProducts);
-  await writeProductsFile(finalValidatedProducts);
+  const removedInvalidImages = await cleanupInvalidUiNoiseImages();
+  if (removedInvalidImages.length > 0) {
+    log(`Cleanup removeu ${removedInvalidImages.length} imagens inválidas já baixadas.`);
+  }
+
+  const hydrationResult = await hydrateImages(finalValidatedProducts);
+  log(`Métrica imageDownloadsPreventedByPreValidation=${hydrationResult.imageDownloadsPreventedByPreValidation}`);
+  await writeProductsFile(hydrationResult.products);
 
   log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
   log(`Imagens salvas em: ${path.relative(ROOT_DIR, IMAGE_DIR)}`);
