@@ -10,6 +10,7 @@ import { applyManualReferralCode, getReferralChangeEventName, getReferralContext
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 import { generateOlfactiveRelationships, getExplorableOlfactiveTerms } from '../ai/olfactiveRelationships';
+import { createPerfumeExperience } from '../ai/perfumeExperience';
 
 function normalizeProductClassifier(value) {
   return String(value || '')
@@ -441,6 +442,127 @@ function getAccordionItems(product, description, olfactoryReference) {
   ];
 }
 
+
+function trackExperienceEvent(eventName, experience, extra = {}, options) {
+  trackEvent(eventName, {
+    product_slug: experience.productSlug,
+    status: experience.status,
+    dominant_dimensions: experience.dominantDimensions,
+    source_page: 'product',
+    ...extra,
+  }, options);
+}
+
+function PerfumeExperienceLayer({ product, experience, whatsAppLink }) {
+  return (
+    <section className="lazule-reveal mt-10 overflow-hidden rounded-[2.65rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.22),transparent_32rem),linear-gradient(145deg,rgba(10,20,42,0.94),rgba(4,8,18,0.88))] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
+      <div className="flex flex-col gap-4 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Perfil olfativo</p>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">DNA olfativo</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+            Um mapa sensorial da curadoria LAZULE — leitura estética do perfume, sem promessas científicas absolutas.
+          </p>
+        </div>
+        <div className="rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-gold/10 p-4 text-sm leading-6 text-lazule-mist lg:max-w-sm">
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Assinatura LAZULE</p>
+          <p className="mt-2 font-display text-2xl leading-tight">{experience.signature.text}</p>
+          {experience.inCuration ? <p className="mt-2 text-xs text-slate-300">Perfil olfativo em curadoria.</p> : null}
+        </div>
+      </div>
+
+      <div className="mt-7 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-3">
+          {experience.dimensions.map((dimension, index) => (
+            <button
+              key={dimension.id}
+              type="button"
+              className="lazule-dna-row lazule-reveal-item w-full rounded-[1.35rem] border border-white/10 bg-white/[0.045] p-4 text-left transition hover:border-lazule-gold/35 hover:bg-white/[0.07]"
+              style={{ '--item-delay': `${index * 55}ms`, '--dna-width': `${Math.round(dimension.value * 100)}%` }}
+              onClick={() => trackExperienceEvent('dna_dimension_click', experience, { dimension: dimension.id, dimension_level: dimension.level })}
+            >
+              <span className="flex items-center justify-between gap-3 text-sm">
+                <span className="font-semibold text-lazule-mist">{dimension.label}</span>
+                <span className="shrink-0 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold">{dimension.level}</span>
+              </span>
+              <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+                <span className="lazule-dna-meter block h-full rounded-full bg-gradient-to-r from-lazule-gold/75 via-[#dfbd68] to-white/80" />
+              </span>
+              <span className="mt-2 block text-xs leading-5 text-slate-400">{dimension.tone}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          <ExperienceChipPanel title="Ideal para" eyebrow="Uso ideal" items={experience.idealUsage} experience={experience} eventName="ideal_usage_click" />
+          <PerformancePanel performance={experience.performance} />
+          <div className="rounded-[1.6rem] border border-white/10 bg-lazule-night/45 p-5">
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Status comercial</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">{experience.statusCta.supportingCopy}</p>
+            <a
+              className="lazule-premium-button mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-semibold text-lazule-night shadow-aureate"
+              href={whatsAppLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => trackWhatsappClick({ product_id: product.id, product_slug: experience.productSlug, product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'experience_status' })}
+            >
+              {experience.statusCta.ctaLabel}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ExperienceChipPanel({ title, eyebrow, items, experience, eventName }) {
+  if (!items.length) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-5">
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">{eyebrow}</p>
+      <h3 className="mt-2 font-display text-2xl text-lazule-mist">{title}</h3>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <button
+            key={`${item.type}-${item.label}`}
+            type="button"
+            className="lazule-touch-card min-h-10 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.13em] text-lazule-gold"
+            onClick={() => trackExperienceEvent(eventName, experience, { usage_type: item.type, usage_label: item.label })}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PerformancePanel({ performance }) {
+  return (
+    <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-5">
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Presença</p>
+      <h3 className="mt-2 font-display text-2xl text-lazule-mist">Performance esperada</h3>
+      <div className="mt-4 space-y-3">
+        {performance.map((item) => (
+          <div key={item.id} className="rounded-2xl bg-lazule-night/45 p-3" style={{ '--dna-width': `${Math.round(item.value * 100)}%` }}>
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-slate-200">{item.label}</span>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-[0.64rem] uppercase tracking-[0.12em] text-lazule-gold">{item.level}</span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+              <span className="lazule-dna-meter block h-full rounded-full bg-gradient-to-r from-lazule-gold/70 to-white/70" />
+            </div>
+            {item.disclaimer ? <p className="mt-2 text-[0.68rem] leading-4 text-slate-400">{item.disclaimer}</p> : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function VibeSection({ product }) {
   const vibeItems = getVibeItems(product);
 
@@ -513,7 +635,7 @@ function OlfactiveDiscoveryTerms({ product }) {
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Mapa olfativo</p>
           <h2 className="mt-2 font-display text-3xl text-lazule-mist">Explore notas e acordes</h2>
         </div>
-        <p className="max-w-xl text-sm leading-6 text-slate-300">Atalhos contextuais para descobrir perfumes por direção olfativa, sem criar uma taxonomia pública pesada.</p>
+        <p className="max-w-xl text-sm leading-6 text-slate-300">Toque em uma nota para descobrir perfumes com a mesma assinatura.</p>
       </div>
       <div className="mt-6 flex flex-wrap gap-2">
         {terms.map((item) => (
@@ -539,7 +661,7 @@ function OlfactiveDiscoveryTerms({ product }) {
   );
 }
 
-function RelationshipBlocks({ sections, currentProduct }) {
+function RelationshipBlocks({ sections, currentProduct, experience }) {
   if (!sections.length) {
     return null;
   }
@@ -568,7 +690,13 @@ function RelationshipBlocks({ sections, currentProduct }) {
             </div>
             <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
               {section.items.map((item) => (
-                <div key={`${section.id}-${item.product.id ?? item.product.productSlug}`} onClick={() => trackEvent(section.id === 'available_alternatives' ? 'alternative_perfume_click' : 'relationship_click', {
+                <div key={`${section.id}-${item.product.id ?? item.product.productSlug}`} onClick={() => {
+                  trackExperienceEvent('related_signature_click', experience, {
+                    related_product_slug: item.product.productSlug || createProductSlug(item.product.name),
+                    relationship_block: section.id,
+                    relationship_score: item.score,
+                  });
+                  trackEvent(section.id === 'available_alternatives' ? 'alternative_perfume_click' : 'relationship_click', {
                   product_id: currentProduct.id,
                   product_slug: currentProduct.productSlug,
                   related_product_id: item.product.id,
@@ -577,7 +705,8 @@ function RelationshipBlocks({ sections, currentProduct }) {
                   relationship_score: item.score,
                   source_page: 'product',
                   conversion_type: section.id === 'available_alternatives' ? 'unavailable_to_in_stock' : undefined,
-                })}>
+                  });
+                }}>
                   <RecommendationCard product={item.product} context={section.id} explanation={item.explanation} />
                 </div>
               ))}
@@ -657,6 +786,7 @@ export function ProductDetails({ slug }) {
   const product = getProductBySlug(normalizedSlug, catalogProducts);
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
   const relationshipSections = useMemo(() => (product ? generateOlfactiveRelationships(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
+  const experience = useMemo(() => (product ? createPerfumeExperience(product) : null), [product]);
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
 
   useEffect(() => {
@@ -679,6 +809,16 @@ export function ProductDetails({ slug }) {
 
     return preloadProductImage(product.image);
   }, [product]);
+
+  useEffect(() => {
+    if (!product || !experience) {
+      return;
+    }
+
+    trackExperienceEvent('perfume_dna_view', experience, {}, { dedupeKey: `perfume_dna_view|${experience.productSlug}`, dedupeMs: 30000 });
+    trackExperienceEvent('olfactive_signature_view', experience, {}, { dedupeKey: `signature_view|${experience.productSlug}`, dedupeMs: 30000 });
+    trackExperienceEvent('performance_profile_view', experience, {}, { dedupeKey: `performance_view|${experience.productSlug}`, dedupeMs: 30000 });
+  }, [product, experience]);
 
   useEffect(() => {
     const revealItems = Array.from(document.querySelectorAll('.lazule-reveal'));
@@ -773,6 +913,8 @@ export function ProductDetails({ slug }) {
             {statusMeta.ctaLabel}
           </a>
 
+          <p className="mt-4 text-sm leading-6 text-slate-600 lg:text-slate-300">{experience?.statusCta.supportingCopy}</p>
+
           <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
             {accordionItems.map((item) => (
               <ProductAccordion key={item.title} title={item.title} defaultOpen={item.defaultOpen} product={product}>
@@ -784,9 +926,10 @@ export function ProductDetails({ slug }) {
       </div>
 
       <div className="px-4 lg:px-0">
+        <PerfumeExperienceLayer product={product} experience={experience} whatsAppLink={whatsAppLink} />
         <VibeSection product={product} />
         <OlfactiveDiscoveryTerms product={product} />
-        <RelationshipBlocks sections={relationshipSections} currentProduct={product} />
+        <RelationshipBlocks sections={relationshipSections} currentProduct={product} experience={experience} />
         <Recommendations products={recommendations} />
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />

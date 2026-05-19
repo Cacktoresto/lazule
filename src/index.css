@@ -1774,3 +1774,32 @@ textarea {
     min-height: clamp(30rem, 70svh, 38rem);
   }
 }
+
+.lazule-dna-row {
+  touch-action: manipulation;
+}
+
+.lazule-dna-meter {
+  width: var(--dna-width, 42%);
+  min-width: 1.4rem;
+  transform-origin: left center;
+  animation: lazule-dna-fill 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes lazule-dna-fill {
+  from {
+    transform: scaleX(0.18);
+    opacity: 0.45;
+  }
+
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lazule-dna-meter {
+    animation: none;
+  }
+}

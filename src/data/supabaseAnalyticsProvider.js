@@ -12,6 +12,12 @@ export const REMOTE_ANALYTICS_ALLOWED_EVENTS = new Set([
   'coupon_removed',
   'influencer_invite_opened',
   'influencer_signup_completed',
+  'perfume_dna_view',
+  'dna_dimension_click',
+  'olfactive_signature_view',
+  'ideal_usage_click',
+  'performance_profile_view',
+  'related_signature_click',
 ]);
 
 const METADATA_ALLOWLIST = new Set([
@@ -41,6 +47,15 @@ const METADATA_ALLOWLIST = new Set([
   'category',
   'item_category',
   'price',
+  'status',
+  'dominant_dimensions',
+  'dimension',
+  'dimension_level',
+  'usage_type',
+  'usage_label',
+  'related_product_slug',
+  'relationship_block',
+  'relationship_score',
 ]);
 
 function readRuntimeEnv(name) {
