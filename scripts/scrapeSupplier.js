@@ -20,6 +20,8 @@ const CATEGORY_PATHS = [
 const CATEGORY_BY_TEXT = new Set(['All', ...CATEGORY_PATHS.map((category) => category.name)]);
 const INITIAL_RENDER_WAIT_MS = 4_000;
 const PRODUCT_TEXT_MAX_LENGTH = 1_600;
+const MAX_LOG_LENGTH = 1_000;
+const DEBUG_SCRAPER_HTML = String(process.env.DEBUG_SCRAPER_HTML || '').toLowerCase() === 'true';
 
 const PRODUCT_CARD_SELECTOR = [
   'article[class*=\"product\" i]',
@@ -84,11 +86,15 @@ function detectCloudflareChallenge(html, url = '') {
 }
 
 function log(message) {
-  console.log(`${LOG_PREFIX} ${message}`);
+  console.log(`${LOG_PREFIX} ${truncateLogText(message)}`);
 }
 
 function warn(message) {
-  console.warn(`${LOG_PREFIX} [warn] ${message}`);
+  console.warn(`${LOG_PREFIX} [warn] ${truncateLogText(message)}`);
+}
+function truncateLogText(message) {
+  const text = String(message ?? '');
+  return text.length > MAX_LOG_LENGTH ? `${text.slice(0, MAX_LOG_LENGTH)}… [truncated]` : text;
 }
 
 function slugify(value) {
@@ -380,7 +386,7 @@ async function autoScroll(page) {
 }
 
 async function extractRawProducts(page) {
-  return page.evaluate((maxLength, strictSelector) => {
+  return page.evaluate(({ maxLength, strictSelector }) => {
     function visibleText(element) {
       return element.innerText?.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n').trim() || '';
     }
@@ -459,26 +465,36 @@ async function extractRawProducts(page) {
       selectorCandidateCount: selectorCandidates.length,
       products: [...candidatesByText.values()],
     };
-  }, PRODUCT_TEXT_MAX_LENGTH, PRODUCT_CARD_SELECTOR);
+  }, { maxLength: PRODUCT_TEXT_MAX_LENGTH, strictSelector: PRODUCT_CARD_SELECTOR });
 }
 
-async function saveDebugSnapshot(page, category, reason) {
+async function saveDebugSnapshot(page, category, reason, options = {}) {
+  const { writeHtml = true, writeScreenshot = true } = options;
   try {
     await mkdir(DEBUG_DIR, { recursive: true });
     const baseName = `${slugify(category.name)}-${Date.now()}`;
     const htmlPath = path.join(DEBUG_DIR, `${baseName}.html`);
     const screenshotPath = path.join(DEBUG_DIR, `${baseName}.png`);
-
-    await writeFile(htmlPath, await page.content());
+    let htmlSaved = false;
+    let screenshotSaved = false;
+    if (writeHtml) {
+      await writeFile(htmlPath, await page.content());
+      htmlSaved = true;
+    }
 
     try {
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      warn(`${reason}. Snapshot salvo em ${path.relative(ROOT_DIR, htmlPath)} e ${path.relative(ROOT_DIR, screenshotPath)}.`);
+      if (writeScreenshot) {
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        screenshotSaved = true;
+      }
+      warn(`${reason}. Snapshot salvo${htmlSaved ? ` HTML=${path.relative(ROOT_DIR, htmlPath)}` : ''}${screenshotSaved ? ` PNG=${path.relative(ROOT_DIR, screenshotPath)}` : ''}.`);
     } catch (error) {
-      warn(`${reason}. Snapshot HTML salvo em ${path.relative(ROOT_DIR, htmlPath)}; screenshot falhou: ${error.message}.`);
+      warn(`${reason}. Snapshot parcial salvo; screenshot falhou: ${error.message}.`);
     }
+    return { htmlSaved, screenshotSaved };
   } catch (error) {
     warn(`${reason}. Não foi possível salvar snapshot de debug: ${error.message}.`);
+    return { htmlSaved: false, screenshotSaved: false };
   }
 }
 
@@ -1125,7 +1141,7 @@ async function scrapeCategory(page, category) {
       `Candidatos em ${category.name}: domNodesObserved=${extraction.domNodesObserved}, candidateCards=${extraction.selectorCandidateCount}, dom=${extraction.products.length}, html=${htmlRawProducts.length}, scripts=${scriptRawProducts.length}, rede=${networkRawProducts.length}, retailElements=${extraction.retailElementCount}, roots=${extraction.rootCandidateCount}`,
     );
 
-    if (rawProducts.length === 0) {
+    if (rawProducts.length === 0 && DEBUG_SCRAPER_HTML) {
       await saveDebugSnapshot(page, category, `Nenhum candidato a produto encontrado em ${category.name}`);
     }
 
@@ -1134,7 +1150,7 @@ async function scrapeCategory(page, category) {
       .filter(Boolean);
 
     if (parsedProducts.length === 0 && rawProducts.length > 0) {
-      await saveDebugSnapshot(page, category, `Candidatos encontrados, mas nenhum produto válido parseado em ${category.name}`);
+      await saveDebugSnapshot(page, category, `Candidatos encontrados, mas nenhum produto válido parseado em ${category.name}`, { writeHtml: true, writeScreenshot: true });
     }
 
     return parsedProducts;
@@ -1152,7 +1168,14 @@ async function main() {
   page.setDefaultTimeout(15_000);
   page.setDefaultNavigationTimeout(45_000);
   const products = [];
-  const blockedCategories = [];
+  const runReport = {
+    successfulCategories: [],
+    failedCategories: [],
+    emptyCategories: [],
+    errorByCategory: {},
+    screenshotsSaved: 0,
+    htmlSnapshotsSaved: 0,
+  };
 
   try {
     for (const category of CATEGORY_PATHS) {
@@ -1160,27 +1183,24 @@ async function main() {
         const categoryProducts = await scrapeCategory(page, category);
         log(`Produtos válidos em ${category.name}: ${categoryProducts.length}`);
         products.push(...categoryProducts);
-      } catch (error) {
-        if (error instanceof SupplierBlockedError) {
-          blockedCategories.push(error.categoryName);
-          warn(`Categoria bloqueada por Cloudflare/Turnstile: ${error.categoryName}. Evidências: ${error.evidence.join(', ')}.`);
-          break;
+        if (categoryProducts.length === 0) {
+          runReport.emptyCategories.push({ category: category.name, reason: 'no-valid-products' });
+        } else {
+          runReport.successfulCategories.push(category.name);
         }
-
-        warn(`Falha ao raspar categoria ${category.name}: ${error.message}`);
-        await saveDebugSnapshot(page, category, `Falha inesperada em ${category.name}`);
+      } catch (error) {
+        runReport.failedCategories.push(category.name);
+        runReport.errorByCategory[category.name] = truncateLogText(error.message);
+        const helperName = error?.helperName || error?.name || 'unknown-helper';
+        const stage = error?.stage || 'category-extraction';
+        warn(`Falha categoria=${category.name} stage=${stage} helper=${helperName}: ${error.message}`);
+        const snap = await saveDebugSnapshot(page, category, `Falha inesperada em ${category.name}`, { writeHtml: true, writeScreenshot: true });
+        if (snap.htmlSaved) runReport.htmlSnapshotsSaved += 1;
+        if (snap.screenshotSaved) runReport.screenshotsSaved += 1;
       }
     }
   } finally {
     await browser.close();
-  }
-
-  if (blockedCategories.length > 0 && products.length === 0) {
-    throw new Error(
-      `Scraper interrompido: Cloudflare/Turnstile bloqueou ${blockedCategories.join(', ')}. ` +
-        'Consulte tmp/scraper-debug para HTML/screenshot/amostras de rede. ' +
-        'Use API/export autorizado do fornecedor ou uma sessão liberada; o script não tenta contornar desafio antibot.',
-    );
   }
 
   log(`Total bruto: ${products.length}`);
@@ -1202,6 +1222,21 @@ async function main() {
   const hydrationResult = await hydrateImages(finalValidatedProducts);
   log(`Métrica imageDownloadsPreventedByPreValidation=${hydrationResult.imageDownloadsPreventedByPreValidation}`);
   await writeProductsFile(hydrationResult.products);
+  const invalidUiElementsDiscarded = report.invalidDiscarded;
+  const promoCardsDiscarded = products.filter((p) => /^-?\d+%\s*off$/i.test(normalizeTextToken(p.name || ''))).length;
+  log(`FinalReport=${JSON.stringify({
+    totalRawRecords: products.length,
+    totalAfterFinalDedupe: dedupedProducts.length,
+    totalAfterFinalValidation: finalValidatedProducts.length,
+    imageDownloadsPreventedByPreValidation: hydrationResult.imageDownloadsPreventedByPreValidation,
+    invalidUiElementsDiscarded,
+    promoCardsDiscarded,
+    successfulCategories: runReport.successfulCategories,
+    failedCategories: runReport.failedCategories,
+    errorByCategory: runReport.errorByCategory,
+    screenshotsSaved: runReport.screenshotsSaved,
+    htmlSnapshotsSaved: runReport.htmlSnapshotsSaved,
+  })}`);
 
   log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
   log(`Imagens salvas em: ${path.relative(ROOT_DIR, IMAGE_DIR)}`);
