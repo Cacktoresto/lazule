@@ -131,3 +131,17 @@ test('olfactive assistant persists only anonymized AI intelligence payload', () 
   assert.ok(payload.dna.sweet > 0);
   assert.equal(payload.privacy, 'anonymized_intent_only');
 });
+
+test('semantic consolidation groups overlapping luxury directions deterministically', () => {
+  const result = getOlfactiveRecommendations('quero aura elegante e presença executiva com luxo discreto', catalog, { limit: 3 });
+
+  assert.ok(result.memoryAwareChips.length <= 3);
+  assert.ok(result.memoryAwareChips.includes('Luxo discreto'));
+});
+
+test('progressive semantic disclosure keeps refinement hierarchy concise', () => {
+  const result = getOlfactiveRecommendations('mais sedutor e noturno', catalog, { limit: 3 });
+  const refinements = result.memoryAwareChips;
+
+  assert.ok(refinements.length <= 3);
+});

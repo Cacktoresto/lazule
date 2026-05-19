@@ -81,8 +81,46 @@ const INTENT_REFINEMENTS = {
   trabalho: ['presença executiva', 'executivo moderno', 'sofisticação fria'],
 };
 
+const SEMANTIC_CLUSTERS = {
+  luxo_editorial: ['luxo discreto', 'aura elegante', 'presenca executiva', 'homem rico', 'homem limpo sofisticado', 'sofisticacao fria', 'executivo moderno', 'assinatura sofisticada', 'camisa branca', 'hotel de luxo'],
+  noturno_sedutor: ['seducao elegante', 'mais sedutor', 'mais noturno', 'aura misteriosa', 'assinatura noturna', 'mais intenso'],
+  limpo_refinado: ['mais limpo', 'frescor refinado', 'frio elegante', 'energia old money'],
+};
+
+const CLUSTER_LABELS = {
+  luxo_editorial: 'Luxo discreto',
+  noturno_sedutor: 'Assinatura noturna',
+  limpo_refinado: 'Frescor refinado',
+};
+
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
+}
+
+function normalizeSemanticLabel(value = '') {
+  return normalizeSearchText(String(value).toLowerCase().trim());
+}
+
+export function consolidateSemanticDirections(values = [], { limit = 3 } = {}) {
+  const seenClusters = new Set();
+  const canonical = [];
+
+  unique(values).forEach((value) => {
+    const normalized = normalizeSemanticLabel(value);
+    const cluster = Object.entries(SEMANTIC_CLUSTERS).find(([, terms]) => terms.some((term) => normalizeSemanticLabel(term) === normalized))?.[0];
+
+    if (!cluster) {
+      canonical.push(value);
+      return;
+    }
+
+    if (!seenClusters.has(cluster)) {
+      seenClusters.add(cluster);
+      canonical.push(CLUSTER_LABELS[cluster]);
+    }
+  });
+
+  return unique(canonical).slice(0, limit);
 }
 
 function getProductText(product = {}) {
@@ -277,10 +315,10 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   });
   const recommendations = arrangeDiscoveryRecommendations(rawRecommendations, discoveryConversion, limit);
   const memory = aggregateTasteMemory(tasteSignals);
-  const memoryAwareChips = createMemoryAwareChips(memory, [
+  const memoryAwareChips = consolidateSemanticDirections(createMemoryAwareChips(memory, [
     ...getSemanticRefinementPaths({ detectedIntents, semanticIntent: semanticInterpretation }),
     ...collectionInsights.balancingDirections.map((label) => label.toLowerCase()),
-  ]);
+  ]), { limit: 3 });
 
   return {
     intent: detectedIntents[0] ?? analysis.primaryIntent,
@@ -343,11 +381,11 @@ export function getLivingSemanticSuggestions(query = '', result = null) {
     .flatMap(([, suggestions]) => suggestions);
 
   const dynamic = result ? getSemanticRefinementPaths(result) : [];
-  return unique([...seeded, ...dynamic, ...Object.values(LIVING_SEARCH_BY_STEM).flat().slice(0, 8)]);
+  return consolidateSemanticDirections([...seeded, ...dynamic, ...Object.values(LIVING_SEARCH_BY_STEM).flat().slice(0, 8)], { limit: 4 });
 }
 
 export function getSemanticRefinementPaths(result = {}) {
   const fromIntents = (result.detectedIntents ?? []).flatMap((intent) => INTENT_REFINEMENTS[intent] ?? []);
   const fromThemes = (result.semanticIntent?.themes ?? []).flatMap((theme) => INTENT_REFINEMENTS[theme] ?? []);
-  return unique([...fromIntents, ...fromThemes, 'mais sofisticado', 'aura elegante']).slice(0, 8);
+  return consolidateSemanticDirections([...fromIntents, ...fromThemes, 'mais sofisticado', 'aura elegante'], { limit: 4 });
 }
