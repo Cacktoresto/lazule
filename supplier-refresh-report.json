@@ -1,41 +1,16 @@
 {
-  "generatedAt": "2026-05-19T13:59:50.498Z",
+  "generatedAt": "2026-05-19T16:37:31.479Z",
   "dryRun": false,
   "summary": {
-    "newProducts": 6,
-    "updatedProducts": 258,
+    "newProducts": 0,
+    "updatedProducts": 264,
     "unavailableProducts": 0,
-    "imageChanges": 11,
-    "priceChanges": 3,
+    "imageChanges": 0,
+    "priceChanges": 0,
     "mergeConflicts": 0,
     "preservedEnrichedFields": 0
   },
-  "newProducts": [
-    {
-      "id": "armani-stronger-with-you-parfum-100ml",
-      "name": "Armani | Stronger with You Parfum 100ml"
-    },
-    {
-      "id": "ch-212-vip-black-edp-100ml",
-      "name": "CH | 212 VIP Black EDP 100ml"
-    },
-    {
-      "id": "chanel-allure-homme-sport-edt-100ml",
-      "name": "Chanel | Allure Homme Sport EDT 100ml"
-    },
-    {
-      "id": "chanel-allure-homme-sport-extreme-edp-100ml",
-      "name": "Chanel | Allure Homme Sport Extreme EDP 100ml"
-    },
-    {
-      "id": "chanel-bleu-de-chanel-edp-100ml",
-      "name": "Chanel | Bleu de Chanel EDP 100ml"
-    },
-    {
-      "id": "chanel-bleu-de-chanel-edt-150ml",
-      "name": "Chanel | Bleu de Chanel EDT 150ml"
-    }
-  ],
+  "newProducts": [],
   "updatedProducts": [
     {
       "id": "acqua-di-gioia-edp-100ml",
@@ -218,6 +193,11 @@
       "confidence": "exact"
     },
     {
+      "id": "armani-stronger-with-you-parfum-100ml",
+      "name": "Armani | Stronger with You Parfum 100ml",
+      "confidence": "exact"
+    },
+    {
       "id": "armani-my-way-edp-90ml",
       "name": "Armani My Way EDP 90ml",
       "confidence": "exact"
@@ -315,6 +295,11 @@
     {
       "id": "ch-212-nyc-edt-100ml",
       "name": "CH | 212 NYC EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-black-edp-100ml",
+      "name": "CH | 212 VIP Black EDP 100ml",
       "confidence": "exact"
     },
     {
@@ -425,6 +410,26 @@
     {
       "id": "ch-hc-men-edt-100ml",
       "name": "CH HC Men EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "chanel-allure-homme-sport-edt-100ml",
+      "name": "Chanel | Allure Homme Sport EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "chanel-allure-homme-sport-extreme-edp-100ml",
+      "name": "Chanel | Allure Homme Sport Extreme EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "chanel-bleu-de-chanel-edp-100ml",
+      "name": "Chanel | Bleu de Chanel EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "chanel-bleu-de-chanel-edt-150ml",
+      "name": "Chanel | Bleu de Chanel EDT 150ml",
       "confidence": "exact"
     },
     {
@@ -1329,94 +1334,8 @@
     }
   ],
   "unavailableProducts": [],
-  "imageChanges": [
-    {
-      "id": "armani-stronger-with-you-edt-100ml",
-      "name": "Armani | Stronger with You EDT 100ml",
-      "from": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_d1e69d1d-8754-401f-9461-baf67eaaf8e0.jpg?alt=media",
-      "to": null
-    },
-    {
-      "id": "azzaro-wanted-edt-100ml",
-      "name": "Azzaro Wanted EDT 100ml",
-      "from": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_44881d4a-2872-42ce-aec7-0582ff2c9755.jpg?alt=media",
-      "to": null
-    },
-    {
-      "id": "ch-212-vip-men-edt-200ml",
-      "name": "CH | 212 VIP Men EDT 200ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_6c5b85fe-2cea-4bfd-bc19-b8153e0f87a2.jpg?alt=media"
-    },
-    {
-      "id": "ch-bad-boy-cobalt-edp-100ml",
-      "name": "CH | Bad Boy Cobalt EDP 100ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_84e43a82-5fdf-4396-adae-b3d5117850f5.jpg?alt=media"
-    },
-    {
-      "id": "ch-bad-boy-cobalt-edp-150ml",
-      "name": "CH | Bad Boy Cobalt EDP 150ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_4509f577-4c9c-4a50-a353-a3f2064488a0.jpg?alt=media"
-    },
-    {
-      "id": "ch-bad-boy-edt-100ml",
-      "name": "CH | Bad Boy EDT 100ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_a31a05c4-abec-46f0-b810-83e7f46fd6c6.jpg?alt=media"
-    },
-    {
-      "id": "ch-bad-boy-extreme-edp-100ml",
-      "name": "CH | Bad Boy Extreme EDP 100ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_27213be2-2a3a-4086-88a9-a01c750d082c.jpg?alt=media"
-    },
-    {
-      "id": "ch-bad-boy-le-parfum-100ml",
-      "name": "CH | Bad Boy Le Parfum 100ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_6ce63754-702a-487b-8f19-26a57a2252ac.jpg?alt=media"
-    },
-    {
-      "id": "ch-hc-men-edt-100ml",
-      "name": "CH HC Men EDT 100ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_1bd2e89e-2e53-4c21-baba-d6cf7069c4ef.jpg?alt=media"
-    },
-    {
-      "id": "ck-be-edt-100ml",
-      "name": "CK be EDT 100ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_f0293227-6668-42ce-ade6-9d2f0f27a6fa.jpg?alt=media"
-    },
-    {
-      "id": "ck-be-edt-200ml",
-      "name": "CK be EDT 200ml",
-      "from": null,
-      "to": "https://firebasestorage.stagebeta.kyte.site/v0/b/kyte-7c484.appspot.com/o/aqfOkh84fGNGGTDUv8MVFQY42QG3%2Fthumb_280_f0293227-6668-42ce-ade6-9d2f0f27a6fa.jpg?alt=media"
-    }
-  ],
-  "priceChanges": [
-    {
-      "id": "armani-acqua-di-gio-edt-100ml",
-      "name": "Armani | Acqua di Gio EDT 100ml",
-      "from": 550,
-      "to": 570
-    },
-    {
-      "id": "ch-bad-boy-extreme-edp-100ml",
-      "name": "CH | Bad Boy Extreme EDP 100ml",
-      "from": 560,
-      "to": 570
-    },
-    {
-      "id": "ch-hc-men-edt-100ml",
-      "name": "CH HC Men EDT 100ml",
-      "from": 500,
-      "to": 520
-    }
-  ],
+  "imageChanges": [],
+  "priceChanges": [],
   "mergeConflicts": [],
   "preservedEnrichedFields": []
 }
