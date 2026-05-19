@@ -309,9 +309,9 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   ) : null}
                 </div>
 
-                <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200">
-                  <p className="text-lazule-gold">Sua assinatura parece caminhar para uma presença mais refinada e segura.</p>
-                  <p className="mt-1 text-xs text-slate-300">Menos ruído, mais assinatura.</p>
+                <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-slate-200 transition-all duration-500">
+                  <p className="text-lazule-gold leading-relaxed">{result.recommendations?.[0]?.reason ?? 'Sua direção olfativa sugere elegância com presença discreta e assinatura refinada.'}</p>
+                  <p className="mt-2 text-xs text-slate-300">Curadoria viva, com continuidade entre suas buscas.</p>
                 </div>
 
 
