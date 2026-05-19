@@ -22,7 +22,10 @@
     "build:knowledge-graph": "node scripts/ingestion/buildKnowledgeGraphArtifacts.js",
     "extract:facts": "node scripts/ingestion/extractFragranceFacts.js",
     "generate:fragrance-seeds": "node scripts/ingestion/generateFragranceSeeds.js",
-    "discover:fragrances": "node scripts/ingestion/discoverFragranceUrls.js"
+    "discover:fragrances": "node scripts/ingestion/discoverFragranceUrls.js",
+    "enrich:olfactive": "node scripts/ingestion/buildOlfactiveSemanticEnrichment.js",
+    "validate:olfactive-enrichment": "node scripts/ingestion/validateOlfactiveEnrichment.js",
+    "build:embedding-index": "node scripts/ingestion/buildEmbeddingIndex.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
