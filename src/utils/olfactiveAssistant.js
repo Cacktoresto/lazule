@@ -3,6 +3,7 @@ import { createUnavailableDiscoveryConversion, scoreOlfactiveRelationship } from
 import { generateQueryDNA, getDominantDNA } from '../ai/perfumeDNA.js';
 import { createSemanticExplanation, getSemanticAnalyticsTags, interpretSemanticIntent, scoreSemanticMatch } from '../ai/semanticOlfactiveSearch.js';
 import { normalizeSearchText } from './search.js';
+import { aggregateTasteMemory, buildPersonalOlfactiveProfile, createMemoryAwareChips, normalizeMemorySignal } from '../ai/tasteMemoryEngine.js';
 
 const DEFAULT_LIMIT = 6;
 const MINIMUM_RECOMMENDATIONS = 3;
@@ -213,6 +214,8 @@ function createRecommendationAnalyticsDNA(queryDNA = {}) {
 }
 
 export function getOlfactiveRecommendations(query, catalogProducts = [], options = {}) {
+  const tasteSignals = Array.isArray(options.tasteSignals) ? options.tasteSignals.map(normalizeMemorySignal) : [];
+  const memoryProfile = buildPersonalOlfactiveProfile(tasteSignals);
   const limit = Math.min(Math.max(Number(options.limit) || DEFAULT_LIMIT, 1), DEFAULT_LIMIT);
   const safeCatalog = Array.isArray(catalogProducts) ? catalogProducts.filter(Boolean) : [];
   const intentAnalysis = detectOlfactiveIntents(query);
@@ -266,6 +269,8 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   });
   });
   const recommendations = arrangeDiscoveryRecommendations(rawRecommendations, discoveryConversion, limit);
+  const memory = aggregateTasteMemory(tasteSignals);
+  const memoryAwareChips = createMemoryAwareChips(memory, getSemanticRefinementPaths({ detectedIntents, semanticIntent: semanticInterpretation }));
 
   return {
     intent: detectedIntents[0] ?? analysis.primaryIntent,
@@ -288,6 +293,9 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
     queryDNA,
     dominantDNA: createRecommendationAnalyticsDNA(queryDNA),
     semanticTags: getSemanticAnalyticsTags(semanticInterpretation),
+    tasteMemory: memory,
+    personalProfile: memoryProfile,
+    memoryAwareChips,
     engine: engine.id,
   };
 }
