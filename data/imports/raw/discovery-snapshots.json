@@ -1,0 +1,406 @@
+{
+  "generatedAt": "2026-05-19T08:55:19.762Z",
+  "internalOnly": true,
+  "summary": {
+    "seeds": 1,
+    "successfulDiscoveries": 0,
+    "blockedSources": 11,
+    "lowConfidenceCandidates": 5,
+    "graphGapCoverageImprovements": 0,
+    "skippedSearchEntryCandidates": 5
+  },
+  "rawDiscoveryAttempts": [
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.fragrantica.com/perfume/dior-sauvage",
+        "source": "fragrantica",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "trusted",
+        "candidateKind": "direct_page",
+        "extractionTarget": true,
+        "confidence": "medium",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:17.005Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.fragrantica.com/fragrance/dior-sauvage",
+        "source": "fragrantica",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "trusted",
+        "candidateKind": "direct_page",
+        "extractionTarget": true,
+        "confidence": "medium",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:17.256Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.fragrantica.com/search/dior%20sauvage",
+        "source": "fragrantica",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "trusted",
+        "candidateKind": "search_entry",
+        "extractionTarget": false,
+        "confidence": "low",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:17.507Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.parfumo.com/perfume/dior-sauvage",
+        "source": "parfumo",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "acceptable",
+        "candidateKind": "direct_page",
+        "extractionTarget": true,
+        "confidence": "medium",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:17.758Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.parfumo.com/fragrance/dior-sauvage",
+        "source": "parfumo",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "acceptable",
+        "candidateKind": "direct_page",
+        "extractionTarget": true,
+        "confidence": "medium",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:18.008Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.parfumo.com/search/dior%20sauvage",
+        "source": "parfumo",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "acceptable",
+        "candidateKind": "search_entry",
+        "extractionTarget": false,
+        "confidence": "low",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:18.259Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://basenotes.com/perfume/dior-sauvage",
+        "source": "basenotes",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "weak",
+        "candidateKind": "direct_page",
+        "extractionTarget": true,
+        "confidence": "medium",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:18.509Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://basenotes.com/fragrance/dior-sauvage",
+        "source": "basenotes",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "weak",
+        "candidateKind": "direct_page",
+        "extractionTarget": true,
+        "confidence": "medium",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:18.760Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://basenotes.com/search/dior%20sauvage",
+        "source": "basenotes",
+        "sourceType": "fragrance_pattern",
+        "sourceReputation": "weak",
+        "candidateKind": "search_entry",
+        "extractionTarget": false,
+        "confidence": "low",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:19.010Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://www.google.com/search?q=%22Dior%20Sauvage%22%20perfume%20notes",
+        "source": "google",
+        "sourceType": "generic_search",
+        "sourceReputation": "acceptable",
+        "candidateKind": "search_entry",
+        "extractionTarget": false,
+        "confidence": "low",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:19.261Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    },
+    {
+      "query": "Dior Sauvage",
+      "candidate": {
+        "url": "https://duckduckgo.com/?q=%22Dior%20Sauvage%22%20perfume%20notes",
+        "source": "duckduckgo",
+        "sourceType": "generic_search",
+        "sourceReputation": "weak",
+        "candidateKind": "search_entry",
+        "extractionTarget": false,
+        "confidence": "low",
+        "status": "candidate_only",
+        "curationState": "needs_review",
+        "discoveredAt": "2026-05-19T08:55:19.511Z"
+      },
+      "validation": {
+        "ok": false,
+        "blocked": true,
+        "reason": "HTTP 403"
+      }
+    }
+  ],
+  "rejectedCandidates": [],
+  "blockedCandidates": [
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.fragrantica.com/perfume/dior-sauvage",
+      "source": "fragrantica",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "trusted",
+      "candidateKind": "direct_page",
+      "extractionTarget": true,
+      "confidence": "medium",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:17.005Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.fragrantica.com/fragrance/dior-sauvage",
+      "source": "fragrantica",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "trusted",
+      "candidateKind": "direct_page",
+      "extractionTarget": true,
+      "confidence": "medium",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:17.256Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.fragrantica.com/search/dior%20sauvage",
+      "source": "fragrantica",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "trusted",
+      "candidateKind": "search_entry",
+      "extractionTarget": false,
+      "confidence": "low",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:17.507Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.parfumo.com/perfume/dior-sauvage",
+      "source": "parfumo",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "acceptable",
+      "candidateKind": "direct_page",
+      "extractionTarget": true,
+      "confidence": "medium",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:17.758Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.parfumo.com/fragrance/dior-sauvage",
+      "source": "parfumo",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "acceptable",
+      "candidateKind": "direct_page",
+      "extractionTarget": true,
+      "confidence": "medium",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:18.008Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.parfumo.com/search/dior%20sauvage",
+      "source": "parfumo",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "acceptable",
+      "candidateKind": "search_entry",
+      "extractionTarget": false,
+      "confidence": "low",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:18.259Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://basenotes.com/perfume/dior-sauvage",
+      "source": "basenotes",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "weak",
+      "candidateKind": "direct_page",
+      "extractionTarget": true,
+      "confidence": "medium",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:18.509Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://basenotes.com/fragrance/dior-sauvage",
+      "source": "basenotes",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "weak",
+      "candidateKind": "direct_page",
+      "extractionTarget": true,
+      "confidence": "medium",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:18.760Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://basenotes.com/search/dior%20sauvage",
+      "source": "basenotes",
+      "sourceType": "fragrance_pattern",
+      "sourceReputation": "weak",
+      "candidateKind": "search_entry",
+      "extractionTarget": false,
+      "confidence": "low",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:19.010Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://www.google.com/search?q=%22Dior%20Sauvage%22%20perfume%20notes",
+      "source": "google",
+      "sourceType": "generic_search",
+      "sourceReputation": "acceptable",
+      "candidateKind": "search_entry",
+      "extractionTarget": false,
+      "confidence": "low",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:19.261Z",
+      "reason": "HTTP 403"
+    },
+    {
+      "query": "Dior Sauvage",
+      "url": "https://duckduckgo.com/?q=%22Dior%20Sauvage%22%20perfume%20notes",
+      "source": "duckduckgo",
+      "sourceType": "generic_search",
+      "sourceReputation": "weak",
+      "candidateKind": "search_entry",
+      "extractionTarget": false,
+      "confidence": "low",
+      "status": "candidate_only",
+      "curationState": "needs_review",
+      "discoveredAt": "2026-05-19T08:55:19.511Z",
+      "reason": "HTTP 403"
+    }
+  ],
+  "normalizedCandidates": [
+    {
+      "query": "Dior Sauvage",
+      "candidates": [],
+      "status": "needs_review",
+      "no_url_found": true,
+      "fallbackRecord": {
+        "name": "Dior Sauvage",
+        "status": "semantic_only",
+        "curationState": "needs_review",
+        "knowledgeConfidence": "incomplete",
+        "factualFieldsMissing": true
+      }
+    }
+  ]
+}

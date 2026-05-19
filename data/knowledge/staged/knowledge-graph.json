@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-05-19T08:57:45.442Z",
+  "schemaVersion": "7.8.0",
+  "embeddingReadiness": {
+    "enabled": false,
+    "strategy": "vector-slot-reserved"
+  },
+  "visibleCatalogIds": [],
+  "semanticOnlyIds": [],
+  "graph": {
+    "generatedAt": "2026-05-19T08:57:45.442Z",
+    "totalNodes": 0,
+    "totalSemanticOnly": 0,
+    "nodes": [],
+    "edges": {}
+  },
+  "relationships": {},
+  "metrics": {
+    "totalImported": 0,
+    "totalApproved": 0,
+    "confidenceDistribution": {},
+    "clusterDistribution": {},
+    "sourceReputationDistribution": {},
+    "graphHealth": {
+      "internalOnly": true,
+      "orphanFragrances": [],
+      "lowRelationshipNodes": [],
+      "overconnectedSemanticClusters": [],
+      "duplicateSemanticNeighborhoods": "clean",
+      "weakWardrobeBalancingCoverage": 0,
+      "lowConfidenceRegions": []
+    }
+  },
+  "internalSignals": {
+    "sourceReputationEnabled": true,
+    "rawSnapshotsEnabled": true
+  }
+}

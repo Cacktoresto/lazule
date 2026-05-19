@@ -1,0 +1,15 @@
+[
+  {
+    "query": "Dior Sauvage",
+    "candidates": [],
+    "status": "needs_review",
+    "no_url_found": true,
+    "fallbackRecord": {
+      "name": "Dior Sauvage",
+      "status": "semantic_only",
+      "curationState": "needs_review",
+      "knowledgeConfidence": "incomplete",
+      "factualFieldsMissing": true
+    }
+  }
+]
