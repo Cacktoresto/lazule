@@ -108,15 +108,15 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
   const spotlightProducts = curatedProducts.slice(0, 3);
 
   return (
-    <Reveal className="mx-auto max-w-7xl px-3 py-7 min-[390px]:px-4 sm:px-8 sm:py-14">
-      <div className="lazule-surface-premium relative overflow-hidden rounded-[1.55rem] border border-white/10 bg-white/[0.032] p-3.5 shadow-[0_30px_100px_rgba(2,6,23,0.30)] backdrop-blur-xl min-[390px]:rounded-[1.85rem] min-[390px]:p-4 sm:rounded-[2.4rem] sm:p-7 lg:p-9">
+    <Reveal className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10">
+      <div className="lazule-surface-premium relative overflow-hidden rounded-[1.55rem] border border-white/10 bg-white/[0.032] p-3.5 shadow-[0_22px_72px_rgba(2,6,23,0.26)] backdrop-blur-xl min-[390px]:rounded-[1.85rem] min-[390px]:p-4 sm:rounded-[2.4rem] sm:p-7 lg:p-9">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_0%,rgba(200,162,77,0.13),transparent_26%),radial-gradient(circle_at_88%_20%,rgba(37,99,235,0.13),transparent_30%)]" />
         <div className="relative mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <p className="text-[0.64rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">Descoberta LAZULE</p>
             <h2 className="mt-2 max-w-[12ch] font-display text-[clamp(2rem,10vw,2.45rem)] leading-[0.95] text-lazule-mist sm:max-w-none sm:text-4xl">Escolha como explorar.</h2>
             <p className="mt-3 text-sm leading-6 text-slate-300 sm:max-w-xl">
-              Um mapa silencioso para navegar por desejo, ocasião e assinatura — curado como uma conversa privada, sem ruído de marketplace.
+              Navegue por desejo, ocasião e assinatura com ritmo editorial e sem ruído.
             </p>
           </div>
           <a className="lazule-inline-link self-start rounded-full px-1 py-2 text-sm font-semibold text-lazule-gold sm:self-auto" href="/catalogo">
@@ -125,7 +125,7 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
         </div>
 
         <div className="relative grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-          <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0">
+          <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0">
             {discoveryPaths.map((path, index) => (
               <a
                 key={path.title}
@@ -172,7 +172,7 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
               <div className="border-t border-white/10 pt-4">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Assinaturas</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {brands.slice(0, 6).map((brand, index) => (
+                  {brands.slice(0, 4).map((brand, index) => (
                     <a
                       key={brand}
                       className="lazule-brand-pill lazule-reveal-item rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-xs font-semibold text-slate-200 backdrop-blur transition hover:border-lazule-gold/55 hover:text-lazule-gold focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
@@ -241,12 +241,12 @@ export function Home() {
       <section id="top" className="lazule-hero relative overflow-hidden bg-lazule-depth">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(248,250,252,0.10),transparent_22%),linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.9)_100%)]" />
         <div className="pointer-events-none absolute inset-x-[10%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/35 to-transparent opacity-70" />
-        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(680px,72svh)] max-w-7xl content-end gap-5 px-3 pb-7 pt-6 min-[390px]:px-4 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
+        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(640px,70svh)] max-w-7xl content-end gap-4 px-3 pb-6 pt-5 min-[390px]:px-4 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
           <div className="lazule-hero-copy relative z-10 max-w-xl pb-1">
             <p className="mb-4 text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold sm:mb-5 sm:text-[0.68rem] sm:tracking-[0.46em]">LAZULE FRAGRANCES</p>
             <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,13.5vw,3.55rem)] leading-[0.86] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-8xl">Perfume com percepção.</h1>
             <p className="mt-4 max-w-[32rem] text-[0.92rem] leading-6 text-slate-200/85 sm:mt-6 sm:text-lg">
-              Uma boutique digital escura, calma e inteligente para encontrar fragrâncias por atmosfera, ocasião e presença.
+              Uma curadoria digital calma para encontrar fragrâncias por atmosfera, ocasião e presença.
             </p>
             <a
               className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-lazule-gold px-6 text-center text-sm font-semibold uppercase tracking-[0.15em] text-lazule-night shadow-aureate min-[390px]:w-auto sm:mt-8 sm:px-7 sm:tracking-[0.18em]"
@@ -287,7 +287,7 @@ export function Home() {
         </div>
       </div>
 
-      <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-7 min-[390px]:px-4 sm:px-8 sm:py-14" />
+      <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
 
       <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} />
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const MINERAL_PARTICLES = [
+  // intentionally sparse for premium atmospheric restraint
   { left: '7%', top: '14%', size: '0.18rem', tone: 'bg-lazule-gold/45', delay: '0s', duration: '26s' },
   { left: '18%', top: '72%', size: '0.12rem', tone: 'bg-lazule-blue/40', delay: '-6s', duration: '31s' },
   { left: '29%', top: '30%', size: '0.14rem', tone: 'bg-lazule-gold/35', delay: '-11s', duration: '29s' },
@@ -64,9 +65,9 @@ export function MineralBackground() {
       <div className="lazule-atmosphere__nebula absolute inset-[-8%]" />
       <div className="lazule-atmosphere__wave absolute inset-[-12%]" />
       <div className="lazule-atmosphere__vignette absolute inset-0" />
-      <div className="lazule-atmosphere__noise absolute inset-0" />
-      <div className="absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-lazule-blue/10 blur-3xl lazule-mineral-drift" />
-      <div className="absolute -right-24 top-20 h-80 w-80 rounded-full bg-lazule-gold/10 blur-3xl lazule-mineral-drift [animation-delay:-9s]" />
+      <div className="lazule-atmosphere__noise absolute inset-0 opacity-40" />
+      <div className="absolute -left-24 top-1/4 h-64 w-64 rounded-full bg-lazule-blue/8 blur-3xl lazule-mineral-drift" />
+      <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-lazule-gold/8 blur-3xl lazule-mineral-drift [animation-delay:-9s]" />
 
       {LIGHT_TRAILS.slice(0, 2).map((trail) => (
         <span
@@ -82,7 +83,7 @@ export function MineralBackground() {
         />
       ))}
 
-      {MINERAL_PARTICLES.map((particle) => (
+      {MINERAL_PARTICLES.slice(0, 6).map((particle) => (
         <span
           key={`${particle.left}-${particle.top}`}
           className={`absolute rounded-full ${particle.tone} lazule-mineral-particle shadow-[0_0_18px_rgba(200,162,77,0.30)] blur-[0.2px]`}
