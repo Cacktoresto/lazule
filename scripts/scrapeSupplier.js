@@ -52,6 +52,12 @@ function detectCloudflareChallenge(html, url = '') {
     }
   }
 
+  const volumeMl = extractVolumeMl([name, description, rawProduct.text].join(' '));
+
+  if (/^\d+%\s*off$/i.test(normalizeTextToken(name)) || /loading|skeleton/i.test(normalizeTextToken(name))) {
+    return null;
+  }
+
   return {
     blocked: evidence.length >= 2,
     evidence,
@@ -85,6 +91,71 @@ function normalizeName(value) {
     .replace(/\s+/g, ' ')
     .replace(/[^a-z0-9 |.-]/g, '')
     .trim();
+}
+
+
+
+function normalizeTextToken(value) {
+  return (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[|_]+/g, ' ')
+    .replace(/[–—-]+/g, ' ')
+    .replace(/\b(eau\s+de\s+parfum|eau\s+de\s+toilette)\b/g, (m) => (m.includes('toilette') ? 'edt' : 'edp'))
+    .replace(/\b(parfum|perfume)\b/g, 'edp')
+    .replace(/\b(limited\s+edition|l\.e\.|\ble\b)\b/g, ' limited edition ')
+    .replace(/[^a-z0-9%.,:/\s]/g, ' ')
+    .replace(/(\d)\s*ml\b/g, '$1ml')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractVolumeMl(text) {
+  const m = normalizeTextToken(text).match(/\b(\d{2,4})\s*ml\b/);
+  return m ? Number(m[1]) : null;
+}
+
+function normalizeImageUrl(url) {
+  if (!url) return '';
+  try {
+    const u = new URL(url, SUPPLIER_URL);
+    u.search = '';
+    return u.toString();
+  } catch {
+    return url.split('?')[0].trim();
+  }
+}
+
+function imageFingerprint(url) {
+  const normalized = normalizeImageUrl(url);
+  if (!normalized) return '';
+  try {
+    const u = new URL(normalized);
+    return `${u.host}${u.pathname}`.toLowerCase();
+  } catch {
+    return normalized.toLowerCase();
+  }
+}
+
+function normalizePriceLine(text) {
+  return text.replace(/R\$\s*R\$/gi, 'R$ ').replace(/\s+/g, ' ').trim();
+}
+
+function extractOlfactoryReferenceFromText(text) {
+  if (!text) return '';
+  const refPatterns = [
+    /(?:ref\.?\s*olfativa|refer[eê]ncia\s*olfativa|refer[eê]ncia|ref\.?|inspirado\s+em|similar\s+a)\s*:?\s*([^\n|]+)$/i,
+  ];
+  const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  for (const line of lines) {
+    for (const pattern of refPatterns) {
+      const m = line.match(pattern);
+      if (m?.[1]) return normalizeTextToken(m[1]).slice(0, 120);
+    }
+  }
+  const m = normalizeTextToken(text).match(/(?:ref\.?\s*olfativa|referencia|inspirado em|similar a)\s*:?\s*([a-z0-9 ]{3,80})/i);
+  return m?.[1]?.trim() || '';
 }
 
 function parseMoneyToNumber(value) {
@@ -171,8 +242,7 @@ function getPublicBadges(category, gender, available) {
 }
 
 function extractOlfactoryReference(description) {
-  const match = description.match(/(?:ref\.?\s*olfativa|refer[eê]ncia\s*olfativa)\s*:?\s*(.+)/i);
-  return match?.[1]?.trim() || '';
+  return extractOlfactoryReferenceFromText(description);
 }
 
 function isProductNameLine(line) {
@@ -197,7 +267,7 @@ function parseProduct(rawProduct, fallbackCategory, sourceUrl) {
     return null;
   }
 
-  const retailLine = lines.find((line) => /varejo/i.test(line));
+  const retailLine = normalizePriceLine(lines.find((line) => /varejo/i.test(line)) || '');
   const supplierRetailPrice = retailLine ? extractMoneyValues(retailLine).at(-1) : null;
   const costPriceCandidates = lines
     .filter((line) => !/varejo/i.test(line))
@@ -224,9 +294,15 @@ function parseProduct(rawProduct, fallbackCategory, sourceUrl) {
     .filter((line) => !/R\$|varejo/i.test(line))
     .join(' ')
     .trim();
-  const olfactoryReference = extractOlfactoryReference(description);
+  const olfactoryReference = extractOlfactoryReferenceFromText([description, retailLine, rawProduct.text].filter(Boolean).join('\n'));
   const available = !/indispon[ií]vel|esgotado|sem estoque/i.test(rawProduct.text);
   const gender = inferGender(category);
+
+  const volumeMl = extractVolumeMl([name, description, rawProduct.text].join(' '));
+
+  if (/^\d+%\s*off$/i.test(normalizeTextToken(name)) || /loading|skeleton/i.test(normalizeTextToken(name))) {
+    return null;
+  }
 
   return {
     id: slugify(name),
@@ -244,6 +320,8 @@ function parseProduct(rawProduct, fallbackCategory, sourceUrl) {
     available,
     featured: false,
     sourceUrl,
+    volumeMl,
+    rawText: rawProduct.text || '',
   };
 }
 
@@ -363,7 +441,13 @@ async function extractRawProducts(page) {
       }
     }
 
-    return {
+    const volumeMl = extractVolumeMl([name, description, rawProduct.text].join(' '));
+
+  if (/^\d+%\s*off$/i.test(normalizeTextToken(name)) || /loading|skeleton/i.test(normalizeTextToken(name))) {
+    return null;
+  }
+
+  return {
       bodyTextLength: document.body.innerText?.length || 0,
       retailElementCount: retailElements.length,
       rootCandidateCount: rootCandidates.length,
@@ -761,23 +845,77 @@ function createNetworkCollector(page, category) {
   };
 }
 
-function chooseBetterDuplicate(currentProduct, nextProduct) {
-  const currentScore = [currentProduct.category !== 'All', Boolean(currentProduct.image), Boolean(currentProduct.description)].filter(Boolean).length;
-  const nextScore = [nextProduct.category !== 'All', Boolean(nextProduct.image), Boolean(nextProduct.description)].filter(Boolean).length;
-
-  return nextScore > currentScore ? nextProduct : currentProduct;
+function buildCanonicalIdentityKey(product) {
+  const name = normalizeTextToken(product.name);
+  const category = normalizeTextToken(product.category || 'all');
+  const reference = normalizeTextToken(product.olfactoryReference || '');
+  const volume = product.volumeMl ? `${product.volumeMl}ml` : '';
+  const sourceCategory = normalizeTextToken(product.sourceCategory || product.category || '');
+  const brand = normalizeTextToken(product.brand || '').split(' ')[0] || '';
+  return [name, category, reference, volume, sourceCategory, brand].filter(Boolean).join('|');
 }
 
-function deduplicateByName(products) {
-  const productsByName = new Map();
+function productScore(p) {
+  const missing = ['image','retailLine','supplierRetailPrice','costPrice','olfactoryReference','category','description'].filter((k)=>!p[k]).length;
+  return (p.image?80:0)+(p.retailLine?60:0)+(Number.isFinite(p.supplierRetailPrice)?50:0)+(Number.isFinite(p.costPrice)?40:0)+(p.olfactoryReference?30:0)+(p.category?20:0)+((p.description||p.rawText||'').length/40)-missing*5;
+}
 
-  for (const product of products) {
-    const key = normalizeName(product.name);
-    const currentProduct = productsByName.get(key);
-    productsByName.set(key, currentProduct ? chooseBetterDuplicate(currentProduct, product) : product);
+function mergeDuplicateRecords(records) {
+  const sorted=[...records].sort((a,b)=>productScore(b)-productScore(a));
+  const winner={...sorted[0]};
+  const images=new Set([winner.image, ...(winner.allImages||[])].filter(Boolean).map(normalizeImageUrl));
+  const altNames=new Set([winner.name]);
+  const altUrls=new Set([winner.sourceUrl]);
+  const altPrices=[];
+  const rawFragments=[];
+  for (const rec of sorted) {
+    if (!winner.image && rec.image) winner.image=rec.image;
+    if (!winner.retailLine && rec.retailLine) winner.retailLine=rec.retailLine;
+    if (!Number.isFinite(winner.supplierRetailPrice) && Number.isFinite(rec.supplierRetailPrice)) winner.supplierRetailPrice=rec.supplierRetailPrice;
+    if (!Number.isFinite(winner.costPrice) && Number.isFinite(rec.costPrice)) winner.costPrice=rec.costPrice;
+    if (!winner.olfactoryReference && rec.olfactoryReference) winner.olfactoryReference=rec.olfactoryReference;
+    if (!winner.description && rec.description) winner.description=rec.description;
+    if (!winner.category && rec.category) winner.category=rec.category;
+    if (rec.image) images.add(normalizeImageUrl(rec.image));
+    if (rec.name) altNames.add(rec.name);
+    if (rec.sourceUrl) altUrls.add(rec.sourceUrl);
+    if (Number.isFinite(rec.supplierRetailPrice) || Number.isFinite(rec.costPrice)) altPrices.push({supplierRetailPrice:rec.supplierRetailPrice,costPrice:rec.costPrice});
+    if (rec.rawText) rawFragments.push(rec.rawText);
   }
+  winner.allImages=[...images];
+  winner.image=winner.image?normalizeImageUrl(winner.image):'';
+  winner.alternateNames=[...altNames].filter((n)=>n!==winner.name);
+  winner.alternateSourceUrls=[...altUrls].filter((u)=>u!==winner.sourceUrl);
+  winner.alternatePrices=altPrices;
+  winner.duplicateEvidence={canonicalKey:buildCanonicalIdentityKey(winner),score:productScore(winner)};
+  winner.extractionSources=['dom/html/script/network'];
+  winner.duplicateCount=records.length;
+  winner.rawFragments=rawFragments;
+  return winner;
+}
 
-  return [...productsByName.values()].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+function isValidProductCandidate(product) {
+  const name = normalizeTextToken(product.name || '');
+  if (!name || /^\d+%\s*off$/.test(name) || /^(off|desconto)$/.test(name)) return false;
+  if (/loading|skeleton|placeholder/.test(name)) return false;
+  const hasMetadata = Boolean(product.image || product.description || product.olfactoryReference || Number.isFinite(product.supplierRetailPrice) || Number.isFinite(product.costPrice));
+  return hasMetadata;
+}
+
+function finalNormalizeAndDedupe(products) {
+  const report={rawRecordsObserved:products.length,validRecords:0,invalidDiscarded:0,duplicateGroups:0,partialRecordsMerged:0,finalDuplicatesCollapsed:0,uniqueProductsExported:0,productsWithoutImage:0,productsWithoutPrice:0,recoveredNames:0,recoveredReferences:0,extractionWarnings:[]};
+  const valid=[];
+  for (const p of products){ if (isValidProductCandidate(p)) valid.push(p); else report.invalidDiscarded+=1; }
+  report.validRecords=valid.length;
+  const groups=new Map();
+  for (const p of valid){ const k=buildCanonicalIdentityKey(p); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(p);} 
+  report.duplicateGroups=[...groups.values()].filter(g=>g.length>1).length;
+  const merged=[];
+  for (const g of groups.values()){ const m=mergeDuplicateRecords(g); if(g.length>1){report.finalDuplicatesCollapsed+=g.length-1; report.partialRecordsMerged+=1;} merged.push(m);} 
+  report.uniqueProductsExported=merged.length;
+  report.productsWithoutImage=merged.filter((p)=>!p.image).length;
+  report.productsWithoutPrice=merged.filter((p)=>!Number.isFinite(p.costPrice)&&!Number.isFinite(p.supplierRetailPrice)).length;
+  return {products:merged.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')),report};
 }
 
 function getImageExtension(contentType, imageUrl) {
@@ -983,8 +1121,9 @@ async function main() {
   }
 
   log(`Total bruto: ${products.length}`);
-  const uniqueProducts = deduplicateByName(products);
-  log(`Total após deduplicação por nome: ${uniqueProducts.length}`);
+  const { products: uniqueProducts, report } = finalNormalizeAndDedupe(products);
+  log(`Total após deduplicação final: ${uniqueProducts.length}`);
+  log(`Relatório: ${JSON.stringify(report)}`);
 
   if (uniqueProducts.length === 0) {
     throw new Error('Nenhum produto foi extraído do fornecedor. Consulte tmp/scraper-debug para snapshots HTML/screenshot.');
