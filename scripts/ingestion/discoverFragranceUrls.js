@@ -7,11 +7,13 @@ import { generateGenericSearchCandidates } from './discoveryAdapters/genericSear
 const DEFAULT_INPUT = 'data/imports/raw/fragrance-seeds-designer_masculine.txt';
 const OUTPUT_PATH = 'data/imports/raw/discovered-fragrance-urls.json';
 const SNAPSHOT_PATH = 'data/imports/raw/discovery-snapshots.json';
+const DOMAIN_ALLOWLIST_PATH = 'scripts/ingestion/config/extractionDomainAllowlist.json';
 const DEFAULT_TIMEOUT_MS = Number(process.env.LAZULE_DISCOVERY_TIMEOUT_MS ?? 6000);
 const DEFAULT_DELAY_MS = Number(process.env.LAZULE_DISCOVERY_DELAY_MS ?? 250);
 const USER_AGENT = 'LAZULE-FragranceDiscoverySeeder/7.7 (+https://lazulefragrances.com.br; low-impact discovery)';
 const REPUTATION_WEIGHTS = Object.freeze({ trusted: 0.35, acceptable: 0.2, weak: 0.05, noisy: -0.1 });
 
+const DOMAIN_RULES = JSON.parse(fs.readFileSync(DOMAIN_ALLOWLIST_PATH, 'utf8'));
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const normalize = (value = '') => String(value).trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
 const safeNow = () => new Date().toISOString();
@@ -27,6 +29,22 @@ export function parseSeedInput(filePath = DEFAULT_INPUT) {
   return [...new Set(raw.split(/\r?\n/).map((line) => normalize(line)).filter((line) => line && !line.startsWith('#')))].sort((a, b) => a.localeCompare(b));
 }
 
+function classifyCandidate(candidate) {
+  const parsed = new URL(candidate.url);
+  const hostname = parsed.hostname.replace(/^www\./i, '').toLowerCase();
+  const pathname = parsed.pathname.toLowerCase();
+  const isSearchEngine = DOMAIN_RULES.blockedDomains.some((d) => hostname === d || hostname.endsWith(`.${d}`));
+  const allowedDomain = DOMAIN_RULES.approvedDomains.some((d) => hostname === d || hostname.endsWith(`.${d}`));
+  const isHomepage = pathname === '/' || pathname === '';
+  const isCategory = /\/(collections?|category|categories|catalog|brands?)\b/.test(pathname);
+  const isLogin = /\/(login|signin|sign-in|account|auth)\b/.test(pathname);
+  const directProductPattern = /\/(perfume|fragrance|product|products|p)\//.test(pathname) || /-/g.test(pathname);
+
+  const searchEntry = candidate.candidateKind === 'search_entry' || candidate.sourceType === 'generic_search' || isSearchEngine;
+  const extractionTarget = Boolean(!searchEntry && !isHomepage && !isCategory && !isLogin && (allowedDomain || directProductPattern));
+  return { searchEntry, extractionTarget, hostname };
+}
+
 function scoreCandidate(query, candidate, validated) {
   const queryNorm = normalize(query).toLowerCase();
   const urlNorm = String(candidate.url).toLowerCase();
@@ -36,7 +54,8 @@ function scoreCandidate(query, candidate, validated) {
   const cleanliness = /\?.*=/.test(urlNorm) ? 0.1 : 0.25;
   const rep = REPUTATION_WEIGHTS[candidate.reputation] ?? 0;
   const validation = validated.ok ? 0.25 : validated.blocked ? -0.15 : -0.05;
-  const score = Math.max(0, Math.min(1, (proximity * 0.4) + cleanliness + rep + validation));
+  const targetBoost = candidate.extractionTarget ? 0.1 : -0.2;
+  const score = Math.max(0, Math.min(1, (proximity * 0.4) + cleanliness + rep + validation + targetBoost));
   return score >= 0.7 ? 'high' : score >= 0.45 ? 'medium' : 'low';
 }
 
@@ -56,8 +75,7 @@ async function validateCandidate(url) {
 
 export function rankGraphPriority(query, graphSignals = {}) {
   const hints = graphSignals[query] ?? {};
-  const score = (hints.lowDensity ? 2 : 0) + (hints.lowConfidence ? 2 : 0) + (hints.missingWardrobe ? 1 : 0) + (hints.underrepresentedAccord ? 1 : 0);
-  return score;
+  return (hints.lowDensity ? 2 : 0) + (hints.lowConfidence ? 2 : 0) + (hints.missingWardrobe ? 1 : 0) + (hints.underrepresentedAccord ? 1 : 0);
 }
 
 export async function discoverFragranceUrls({ inputPath = DEFAULT_INPUT, runNextStep = false } = {}) {
@@ -66,6 +84,8 @@ export async function discoverFragranceUrls({ inputPath = DEFAULT_INPUT, runNext
   const rows = [];
   const blockedCandidates = [];
   const rejectedCandidates = [];
+  let searchEntrySkipped = 0;
+
   for (const query of seeds) {
     const generated = [...generateFragrancePatternCandidates(query), ...generateGenericSearchCandidates(query)];
     const seen = new Set();
@@ -73,25 +93,34 @@ export async function discoverFragranceUrls({ inputPath = DEFAULT_INPUT, runNext
     for (const candidate of generated) {
       if (seen.has(candidate.url)) continue;
       seen.add(candidate.url);
+      const classification = classifyCandidate(candidate);
       const validated = await validateCandidate(candidate.url);
-      const confidence = scoreCandidate(query, candidate, validated);
       const normalized = {
         url: candidate.url,
         source: candidate.source,
         sourceType: candidate.sourceType,
         sourceReputation: candidate.reputation,
-        confidence,
+        candidateKind: classification.searchEntry ? 'search_entry' : 'direct_page',
+        extractionTarget: classification.extractionTarget,
+        confidence: 'low',
         status: 'candidate_only',
         curationState: 'needs_review',
         discoveredAt: safeNow(),
       };
+      normalized.confidence = scoreCandidate(query, normalized, validated);
       attempts.push({ query, candidate: normalized, validation: validated });
       if (validated.blocked) blockedCandidates.push({ query, ...normalized, reason: validated.reason });
       if (!validated.ok && !validated.blocked) rejectedCandidates.push({ query, ...normalized, reason: validated.reason });
+      if (classification.searchEntry) searchEntrySkipped += 1;
       if (validated.ok) candidates.push(normalized);
       await sleep(DEFAULT_DELAY_MS);
     }
-    const finalCandidates = candidates.sort((a, b) => `${b.confidence}:${b.source}`.localeCompare(`${a.confidence}:${a.source}`)).slice(0, 5);
+
+    const directExtractionCandidates = candidates.filter((c) => c.extractionTarget);
+    const finalCandidates = directExtractionCandidates
+      .sort((a, b) => `${b.confidence}:${b.source}`.localeCompare(`${a.confidence}:${a.source}`))
+      .slice(0, 5);
+
     rows.push(finalCandidates.length > 0 ? { query, candidates: finalCandidates, status: 'needs_review' } : {
       query,
       candidates: [],
@@ -116,6 +145,7 @@ export async function discoverFragranceUrls({ inputPath = DEFAULT_INPUT, runNext
       blockedSources: blockedCandidates.length,
       lowConfidenceCandidates: attempts.filter((a) => a.candidate.confidence === 'low').length,
       graphGapCoverageImprovements: rows.filter((r) => r.candidates.length > 0).length,
+      skippedSearchEntryCandidates: searchEntrySkipped,
     },
     rawDiscoveryAttempts: attempts,
     rejectedCandidates,

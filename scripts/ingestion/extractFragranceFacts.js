@@ -26,7 +26,10 @@ export function parseInputTargets(arg) {
     if (Array.isArray(parsed) && parsed.every((v) => /^https?:\/\//i.test(String(v)))) return parsed.filter((v) => /^https?:\/\//i.test(String(v)));
     if (Array.isArray(parsed.urls)) return parsed.urls.filter((v) => /^https?:\/\//i.test(String(v)));
     if (Array.isArray(parsed) && parsed.every((v) => v && typeof v === 'object' && 'query' in v)) {
-      return parsed.flatMap((entry) => (entry.candidates ?? []).map((c) => c?.url).filter((u) => /^https?:\/\//i.test(String(u))));
+      return parsed.flatMap((entry) => (entry.candidates ?? [])
+        .filter((c) => c?.extractionTarget !== false)
+        .map((c) => c?.url)
+        .filter((u) => /^https?:\/\//i.test(String(u))));
     }
     throw new Error('JSON inválido: use array de URLs, {"urls": []} ou saída discover:fragrances.');
   }
@@ -108,7 +111,16 @@ async function main() {
   const urls = parseInputTargets(arg);
   const seen = new Set();
   const records = [];
-  const report = { total: urls.length, success: 0, blockedOrFailed: 0, incomplete: 0, duplicates: 0, sentToNeedsReview: 0 };
+  const report = { total: urls.length, success: 0, blockedOrFailed: 0, incomplete: 0, duplicates: 0, sentToNeedsReview: 0, skippedSearchEntry: 0 };
+
+  if (arg.endsWith('.json')) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(arg, 'utf8'));
+      if (Array.isArray(parsed) && parsed.every((v) => v && typeof v === 'object' && 'query' in v)) {
+        report.skippedSearchEntry = parsed.flatMap((entry) => entry.candidates ?? []).filter((c) => c?.extractionTarget === false && c?.candidateKind === 'search_entry').length;
+      }
+    } catch {}
+  }
 
   for (const url of urls) {
     if (seen.has(url)) { report.duplicates += 1; continue; }
@@ -136,7 +148,7 @@ async function main() {
 
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(records, null, 2));
-  console.log(`Relatório: total=${report.total}, sucesso=${report.success}, bloqueadas/falharam=${report.blockedOrFailed}, incompletas=${report.incomplete}, duplicadas=${report.duplicates}, needs_review=${report.sentToNeedsReview}`);
+  console.log(`Relatório: total=${report.total}, sucesso=${report.success}, bloqueadas/falharam=${report.blockedOrFailed}, incompletas=${report.incomplete}, duplicadas=${report.duplicates}, needs_review=${report.sentToNeedsReview}, skipped_search_entry=${report.skippedSearchEntry}`);
   console.log(`Arquivo salvo em ${OUTPUT_PATH}`);
 
   if (runPipeline) {
