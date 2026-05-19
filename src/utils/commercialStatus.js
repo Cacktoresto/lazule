@@ -2,6 +2,7 @@ export const COMMERCIAL_STATUS = Object.freeze({
   IN_STOCK: 'in_stock',
   ON_REQUEST: 'on_request',
   REFERENCE_ONLY: 'reference_only',
+  SEMANTIC_ONLY: 'semantic_only',
 });
 
 export const VALID_COMMERCIAL_STATUSES = Object.freeze(Object.values(COMMERCIAL_STATUS));
@@ -34,6 +35,16 @@ const STATUS_COPY = Object.freeze({
     canDirectBuy: false,
     appearsInCatalog: false,
   },
+  [COMMERCIAL_STATUS.SEMANTIC_ONLY]: {
+    label: 'Camada semântica interna',
+    badge: 'Inteligência invisível',
+    ctaLabel: 'Sem CTA comercial',
+    shortCtaLabel: 'Interno',
+    availabilityKey: 'semantico',
+    canDirectBuy: false,
+    appearsInCatalog: false,
+  },
+
 });
 
 function normalizeStatusText(value) {
@@ -51,6 +62,7 @@ export function normalizeCommercialStatus(value, fallback = COMMERCIAL_STATUS.IN
   if (['pronta', 'pronta_entrega', 'available', 'disponivel'].includes(normalized)) return COMMERCIAL_STATUS.IN_STOCK;
   if (['sob_consulta', 'consulta', 'onrequest', 'sob_encomenda', 'encomenda'].includes(normalized)) return COMMERCIAL_STATUS.ON_REQUEST;
   if (['referencia', 'reference', 'referenceonly', 'referencia_olfativa'].includes(normalized)) return COMMERCIAL_STATUS.REFERENCE_ONLY;
+  if (['semantic', 'semantic_only', 'semantico', 'interno_semantico'].includes(normalized)) return COMMERCIAL_STATUS.SEMANTIC_ONLY;
   return VALID_COMMERCIAL_STATUSES.includes(fallback) ? fallback : COMMERCIAL_STATUS.IN_STOCK;
 }
 
@@ -76,5 +88,6 @@ export function canDirectBuy(product = {}) {
 }
 
 export function shouldExposeInMainCatalog(product = {}) {
-  return getCommercialStatus(product) !== COMMERCIAL_STATUS.REFERENCE_ONLY;
+  const status = getCommercialStatus(product);
+  return ![COMMERCIAL_STATUS.REFERENCE_ONLY, COMMERCIAL_STATUS.SEMANTIC_ONLY].includes(status);
 }

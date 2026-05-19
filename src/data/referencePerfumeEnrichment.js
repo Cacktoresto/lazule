@@ -1,4 +1,5 @@
 import { DNA_LABELS, generatePerfumeDNA, getDominantDNA } from '../ai/perfumeDNA.js';
+import { assignOlfactiveCluster, normalizeSemanticTags, RELATIONSHIP_CONFIDENCE } from '../ai/olfactiveKnowledgeGraph.js';
 import { normalizeProducts } from '../domain/product.js';
 import { getCommercialStatusMeta, VALID_COMMERCIAL_STATUSES } from '../utils/commercialStatus.js';
 import { createSearchTokens, normalizeSearchText } from '../utils/search.js';
@@ -75,6 +76,7 @@ export function normalizeReferencePerfume(rawPerfume = {}) {
     salePrice: rawPerfume.salePrice ?? null,
     available: statusMeta.canDirectBuy,
     catalogVisibility: statusMeta.appearsInCatalog ? 'catalog' : 'reference',
+    knowledgeVisibility: statusMeta.appearsInCatalog ? 'public' : 'internal',
     badges: unique([statusMeta.badge, rawPerfume.catalogType, rawPerfume.gender]),
     olfactoryReference: normalizeArray(rawPerfume.similarTo)[0] ?? '',
   };
@@ -100,6 +102,16 @@ export function normalizeReferencePerfume(rawPerfume = {}) {
   normalized.slug = normalized.productSlug;
   normalized.id = `ref-${normalized.productSlug}`;
   normalized.searchTokens = createSearchTokens({ ...normalized, description: normalized.description_editorial });
+  normalized.semanticTags = normalizeSemanticTags([
+    ...normalized.accords,
+    ...normalized.vibeTags,
+    ...normalized.inspirations,
+    ...normalized.occasionTags,
+    ...normalized.weatherTags,
+    normalized.family,
+  ]);
+  normalized.olfactiveCluster = assignOlfactiveCluster(normalized);
+  normalized.knowledgeConfidence = normalized.status === 'semantic_only' ? RELATIONSHIP_CONFIDENCE.INFERRED : RELATIONSHIP_CONFIDENCE.HIGH;
   normalized.tags = unique([
     normalized.catalogType,
     normalized.gender,
@@ -143,7 +155,7 @@ export function validateReferencePerfumes(perfumes = []) {
     if (!perfume.description_editorial) errors.push(`${label}: description_editorial ausente.`);
     if (!perfume.dna_vector || typeof perfume.dna_vector !== 'object') errors.push(`${label}: dna_vector inválido.`);
     if (FORBIDDEN_FIELDS.some((field) => Object.hasOwn(perfume, field))) errors.push(`${label}: contém campo proibido de texto copiado.`);
-    if (perfume.status === 'reference_only' && (perfume.available || perfume.catalogVisibility === 'catalog')) errors.push(`${label}: reference_only não pode aparecer como compra direta.`);
+    if (['reference_only','semantic_only'].includes(perfume.status) && (perfume.available || perfume.catalogVisibility === 'catalog')) errors.push(`${label}: status interno não pode aparecer como compra direta.`);
     if (perfume.status !== 'in_stock' && /comprar agora/i.test(String(perfume.ctaLabel ?? perfume.description_editorial))) errors.push(`${label}: CTA proibido para consulta.`);
   });
 
