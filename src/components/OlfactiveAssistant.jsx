@@ -9,13 +9,17 @@ import { getReferralContext } from '../utils/referral';
 import { ProductImageFallback } from './ProductCard';
 import {
   createOlfactiveAssistantAnalyticsPayload,
+  getLivingSemanticSuggestions,
   getOlfactiveRecommendations,
+  getSemanticRefinementPaths,
   sanitizeOlfactiveQuery,
 } from '../utils/olfactiveAssistant';
 
 const QUICK_SUGGESTIONS = ['Noite íntima', 'Fresco mineral', 'Doce contido', 'Trabalho elegante', 'Presente memorável', 'Âmbar potente', 'Assinatura limpa'];
 const DEFAULT_PROMPT = 'Ex.: algo escuro, elegante e memorável para um jantar à noite';
 const LOADING_STEPS = ['Lendo atmosfera e intenção…', 'Comparando DNAs aromáticos…', 'Ajustando rastro, pele e ocasião…', 'Finalizando curadoria LAZULE…'];
+const AURA_PATHWAYS = ['Luxo discreto', 'Homem limpo', 'Presença executiva', 'Sedução elegante', 'Aura misteriosa', 'Sofisticação fria', 'Energia old money', 'Assinatura noturna', 'Frescor refinado', 'Academia premium'];
+const DISCOVERY_MODULES = ['Explore por sensação', 'Explore por presença', 'Explore por ocasião', 'Explore por clima', 'Explore por assinatura'];
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
@@ -94,6 +98,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStepIndex, setLoadingStepIndex] = useState(0);
+  const [activeRefinements, setActiveRefinements] = useState([]);
   const timeoutRef = useRef(null);
   const loadingIntervalRef = useRef(null);
 
@@ -173,6 +178,13 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
   const recommendations = result?.recommendations ?? [];
   const hasRecommendations = recommendations.length > 0;
+  const livingSuggestions = useMemo(() => getLivingSemanticSuggestions(query, result).slice(0, 6), [query, result]);
+  const onboardingSuggestions = useMemo(() => getLivingSemanticSuggestions('', null).slice(0, 5), []);
+
+  useEffect(() => {
+    if (!result) return;
+    setActiveRefinements(getSemanticRefinementPaths(result).slice(0, 5));
+  }, [result]);
 
   return (
     <section className={`${className} lazule-ai-section`} aria-labelledby="olfactive-assistant-title">
@@ -181,9 +193,13 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
         <div className="lazule-ai-orb absolute -right-16 -top-16 h-36 w-36 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 opacity-35 blur-[0.2px] sm:-right-14 sm:-top-14 sm:h-44 sm:w-44 sm:opacity-60" aria-hidden="true" />
         <div className="relative grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1fr)] lg:items-start">
           <div className="min-w-0">
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold/90 sm:text-[0.66rem] sm:tracking-[0.36em]">Concierge olfativo AI</p>
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold/90 sm:text-[0.66rem] sm:tracking-[0.36em]">Concierge olfativo</p>
             <h2 id="olfactive-assistant-title" className="mt-3 max-w-[12ch] font-display text-[clamp(1.95rem,9.5vw,2.45rem)] leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:mt-4 sm:max-w-[10ch] sm:text-5xl">Inteligência com tato.</h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-5">Descreva clima, pele, ocasião ou referência. A LAZULE interpreta intenção e devolve uma curadoria explicável, calma e precisa.</p>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-5">Descreva clima, presença, ocasião ou memória. A LAZULE traduz sua intenção em assinaturas olfativas com curadoria calma, editorial e precisa.</p>
+
+            <div className="mt-4 flex flex-wrap gap-2 sm:mt-5" aria-label="Momentos de descoberta">
+              {DISCOVERY_MODULES.map((label) => <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.67rem] font-semibold uppercase tracking-[0.14em] text-slate-200">{label}</span>)}
+            </div>
 
             <form className="lazule-ai-form mt-4 min-w-0 space-y-3.5 sm:mt-5" onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="olfactive-query">Descreva o perfume ideal</label>
@@ -197,7 +213,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               />
 
               <div className="lazule-ai-chips flex min-w-0 max-w-full flex-wrap gap-1.5 pb-1 sm:gap-2" aria-label="Sugestões rápidas">
-                {QUICK_SUGGESTIONS.map((suggestion) => (
+                {(query.trim() ? livingSuggestions : QUICK_SUGGESTIONS).map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
@@ -208,6 +224,12 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   </button>
                 ))}
               </div>
+
+              {query.trim() ? (
+                <div className="flex flex-wrap gap-1.5" aria-label="Assinaturas em evolução">
+                  {livingSuggestions.slice(0, 4).map((suggestion) => <span key={`live-${suggestion}`} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1 text-[0.68rem] text-lazule-gold/90 transition-all duration-300">{suggestion}</span>)}
+                </div>
+              ) : null}
 
               <button
                 type="submit"
@@ -222,9 +244,12 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
           <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.3rem] border border-white/10 bg-white/[0.04] p-3.5 sm:rounded-[1.9rem] sm:p-6" aria-live="polite">
             {!result && !isLoading ? (
               <div className="min-w-0 max-w-full overflow-hidden flex min-h-[9.5rem] flex-col justify-center text-center sm:min-h-[14rem] sm:text-left">
-                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Comece pela sensação</p>
-                <h3 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">Diga atmosfera, intensidade ou memória.</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-300">Experimente: {initialExamples}. A curadoria é privada, rápida e orientada por sinais olfativos — sem expor dados pessoais.</p>
+                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Descubra sua assinatura</p>
+                <h3 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">Como você quer ser percebido hoje?</h3>
+                <p className="mt-4 text-sm leading-6 text-slate-300">Comece por uma sensação: {initialExamples}. Perfis próximos podem evoluir para presença executiva, frescor refinado ou sedução elegante.</p>
+                <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:justify-start">
+                  {onboardingSuggestions.map((suggestion) => <button key={`onboarding-${suggestion}`} type="button" onClick={() => handleSuggestionClick(suggestion)} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1.5 text-xs text-lazule-gold">{suggestion}</button>)}
+                </div>
               </div>
             ) : null}
 
@@ -242,7 +267,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between" style={{ '--result-delay': '0ms' }}>
                   <div>
                     <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Resultado</p>
-                    <h3 className="mt-2 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">{hasRecommendations ? 'Sua curadoria inteligente' : 'Curadoria em ajuste'}</h3>
+                    <h3 className="mt-2 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">{hasRecommendations ? 'Sua curadoria de assinatura' : 'Curadoria em ajuste'}</h3>
                   </div>
                   {result.detectedIntents?.length ? (
                     <div className="flex flex-wrap gap-2">
@@ -253,6 +278,11 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   ) : null}
                 </div>
 
+                <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200">
+                  <p className="text-lazule-gold">Sua assinatura parece caminhar para uma presença mais refinada e segura.</p>
+                  <p className="mt-1 text-xs text-slate-300">Perfis nessa direção costumam equilibrar impacto elegante, limpeza olfativa e memorabilidade discreta.</p>
+                </div>
+
                 {result.discoveryConversion ? (
                   <div className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
                     <p className="font-semibold text-lazule-gold">{result.discoveryConversion.title}</p>
@@ -260,9 +290,27 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   </div>
                 ) : result.fallbackUsed ? (
                   <p className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
-                    A leitura não encontrou uma combinação absoluta; refinamos alternativas versáteis com melhor aderência ao seu briefing.
+                    Não encontramos uma assinatura exatamente nessa direção, mas essas curadorias conversam com a presença que você procura.
                   </p>
                 ) : null}
+
+                {!!activeRefinements.length && (
+                  <div className="mb-4">
+                    <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Na mesma direção olfativa</p>
+                    <div className="flex flex-wrap gap-2">
+                      {activeRefinements.map((chip) => (
+                        <button key={chip} type="button" onClick={() => handleSuggestionClick(chip)} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1.5 text-xs text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night">{chip}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mb-4">
+                  <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Explore por aura</p>
+                  <div className="lazule-horizontal-rail flex gap-2 overflow-x-auto pb-1">
+                    {AURA_PATHWAYS.map((aura) => <button key={aura} type="button" onClick={() => handleSuggestionClick(aura)} className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-100 hover:border-lazule-gold/60 hover:text-lazule-gold">{aura}</button>)}
+                  </div>
+                </div>
 
                 <div className="lazule-ai-results lazule-horizontal-rail lazule-rail-fade flex min-w-0 max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible" style={{ '--result-delay': '90ms' }}>
                   {recommendations.map((recommendation) => (

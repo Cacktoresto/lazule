@@ -64,6 +64,20 @@ const REFERENCE_ALIASES = {
 };
 
 const FALLBACK_INTENTS = ['elegante', 'presente'];
+const LIVING_SEARCH_BY_STEM = {
+  'cheiro de': ['homem rico', 'camisa branca', 'hotel de luxo', 'frio elegante'],
+  'perfume para': ['encontro', 'trabalho', 'noite', 'presença marcante'],
+  luxo: ['luxo discreto', 'madeiras refinadas', 'aura elegante'],
+  sexy: ['mais noturno', 'sedução elegante', 'mais intenso'],
+};
+
+const INTENT_REFINEMENTS = {
+  elegante: ['luxo discreto', 'madeiras refinadas', 'assinatura sofisticada', 'presença executiva'],
+  sedutor: ['mais sedutor', 'mais intenso', 'assinatura noturna', 'aura misteriosa'],
+  discreto: ['mais limpo', 'frescor refinado', 'luxo mais discreto'],
+  noite: ['mais noturno', 'sedução elegante', 'aura misteriosa'],
+  trabalho: ['presença executiva', 'executivo moderno', 'sofisticação fria'],
+};
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
@@ -301,4 +315,20 @@ export function createOlfactiveAssistantAnalyticsPayload(result = {}, { query = 
     source_page: sourcePage,
     privacy: 'anonymized_intent_only',
   };
+}
+
+export function getLivingSemanticSuggestions(query = '', result = null) {
+  const safe = sanitizeOlfactiveQuery(query).toLowerCase();
+  const seeded = Object.entries(LIVING_SEARCH_BY_STEM)
+    .filter(([stem]) => safe.includes(stem))
+    .flatMap(([, suggestions]) => suggestions);
+
+  const dynamic = result ? getSemanticRefinementPaths(result) : [];
+  return unique([...seeded, ...dynamic, ...Object.values(LIVING_SEARCH_BY_STEM).flat().slice(0, 8)]);
+}
+
+export function getSemanticRefinementPaths(result = {}) {
+  const fromIntents = (result.detectedIntents ?? []).flatMap((intent) => INTENT_REFINEMENTS[intent] ?? []);
+  const fromThemes = (result.semanticIntent?.themes ?? []).flatMap((theme) => INTENT_REFINEMENTS[theme] ?? []);
+  return unique([...fromIntents, ...fromThemes, 'mais sofisticado', 'aura elegante']).slice(0, 8);
 }
