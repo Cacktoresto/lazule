@@ -1,0 +1,18 @@
+{
+  "approvedDomains": [
+    "fragrantica.com",
+    "parfumo.com",
+    "basenotes.com",
+    "fragrancex.com",
+    "fragrancenet.com",
+    "sephora.com",
+    "ulta.com",
+    "notino.com"
+  ],
+  "blockedDomains": [
+    "google.com",
+    "duckduckgo.com",
+    "bing.com",
+    "yahoo.com"
+  ]
+}

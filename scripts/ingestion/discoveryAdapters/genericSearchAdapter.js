@@ -10,6 +10,7 @@ export function generateGenericSearchCandidates(query) {
     sourceType: 'generic_search',
     reputation: source.reputation,
     qualityHint: 'search',
+    candidateKind: 'search_entry',
     url: source.source === 'google'
       ? `https://www.google.com/search?q=${encoded}`
       : `https://duckduckgo.com/?q=${encoded}`,

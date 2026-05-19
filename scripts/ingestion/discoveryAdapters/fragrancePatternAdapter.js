@@ -19,8 +19,8 @@ export function generateFragrancePatternCandidates(query) {
   const encoded = encodeURIComponent(clean);
 
   return BASE_SOURCES.flatMap((entry) => ([
-    { url: `${entry.baseUrl}/search/${encoded}`, source: entry.source, sourceType: 'fragrance_pattern', reputation: entry.reputation, qualityHint: 'search' },
-    { url: `${entry.baseUrl}/perfume/${compact}`, source: entry.source, sourceType: 'fragrance_pattern', reputation: entry.reputation, qualityHint: 'slug' },
-    { url: `${entry.baseUrl}/fragrance/${slug}`, source: entry.source, sourceType: 'fragrance_pattern', reputation: entry.reputation, qualityHint: 'slug' },
+    { url: `${entry.baseUrl}/perfume/${compact}`, source: entry.source, sourceType: 'fragrance_pattern', reputation: entry.reputation, qualityHint: 'slug', candidateKind: 'direct_page' },
+    { url: `${entry.baseUrl}/fragrance/${slug}`, source: entry.source, sourceType: 'fragrance_pattern', reputation: entry.reputation, qualityHint: 'slug', candidateKind: 'direct_page' },
+    { url: `${entry.baseUrl}/search/${encoded}`, source: entry.source, sourceType: 'fragrance_pattern', reputation: entry.reputation, qualityHint: 'search', candidateKind: 'search_entry' },
   ]));
 }
