@@ -7,6 +7,7 @@ const IMPORTS_DIR = path.join(ROOT_DIR, 'data/imports');
 const FALLBACK_INPUT_FILE = path.join(ROOT_DIR, 'data/supplier-products.json');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'src/data/products.js');
 const REPORT_FILE = path.join(ROOT_DIR, 'supplier-refresh-report.json');
+const INTERNAL_OUTPUT_FILE = path.join(ROOT_DIR, 'data/imports/raw/supplier-refresh-internal.json');
 const LOG_PREFIX = '[LAZULE import]';
 const GENERIC_CATEGORIES = new Set(['', 'catalogo', 'catálogo', 'todos', 'tudo', 'all', 'catalog']);
 
@@ -31,6 +32,24 @@ const UPDATABLE_FIELDS = new Set([
   'stockIndicators',
   'supplierMetadata',
 ]);
+
+const PRIVATE_FIELD_KEYS = new Set([
+  'sourceUrl',
+  'supplierUrl',
+  'extractionSource',
+  'rawExtraction',
+  'supplierMetadata',
+  'stockIndicators',
+  'costPrice',
+  'supplierCost',
+  'supplierRetailPrice',
+  'wholesalePrice',
+  'margin',
+  'margem',
+  'profit',
+]);
+
+const PRIVATE_FIELD_PATTERNS = [/^supplier/i, /^private/i, /^debug/i, /^internal/i, /^raw/i, /source/i, /extract/i];
 
 const PROTECTED_FIELDS = [
   'enrichedDescription',
@@ -548,6 +567,21 @@ function countByCategory(products) {
   }, new Map());
 }
 
+
+function isPrivateFieldKey(key) {
+  if (PRIVATE_FIELD_KEYS.has(key)) {
+    return true;
+  }
+
+  return PRIVATE_FIELD_PATTERNS.some((pattern) => pattern.test(key));
+}
+
+function sanitizePublicProduct(product) {
+  return Object.fromEntries(
+    Object.entries(product).filter(([key]) => !isPrivateFieldKey(key)),
+  );
+}
+
 function serializeValue(value, indentLevel = 2) {
   const indent = ' '.repeat(indentLevel);
   const nextIndent = ' '.repeat(indentLevel + 2);
@@ -785,16 +819,18 @@ async function main() {
   const products = deduplicateByName(normalizedProducts);
   const existingProducts = await loadExistingProducts();
   const { mergedCatalog, report } = mergeProducts(existingProducts, products, { dryRun });
-  const serializedProducts = mergedCatalog.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
+  const publicCatalog = mergedCatalog.map(sanitizePublicProduct);
+  const serializedProducts = publicCatalog.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
 
   if (!dryRun) {
     await writeFile(OUTPUT_FILE, `export const products = [\n${serializedProducts},\n];\n`);
   }
   await writeFile(REPORT_FILE, `${JSON.stringify(report, null, 2)}\n`);
+  await writeFile(INTERNAL_OUTPUT_FILE, `${JSON.stringify({ generatedAt: new Date().toISOString(), products: mergedCatalog }, null, 2)}\n`);
   logReport(
     filePayloads.map((payload) => ({ filePath: payload.filePath, rawCount: payload.rawProducts.length, fallbackCategory: payload.fallbackCategory })),
     metrics,
-    mergedCatalog,
+    publicCatalog,
   );
   if (dryRun) {
     log('Modo dry-run habilitado: src/data/products.js não foi modificado.');
