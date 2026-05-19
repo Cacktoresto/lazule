@@ -21,6 +21,27 @@ const CATEGORY_BY_TEXT = new Set(['All', ...CATEGORY_PATHS.map((category) => cat
 const INITIAL_RENDER_WAIT_MS = 4_000;
 const PRODUCT_TEXT_MAX_LENGTH = 1_600;
 
+const PRODUCT_CARD_SELECTOR = [
+  'article[class*=\"product\" i]',
+  'li[class*=\"product\" i]',
+  '[data-testid*=\"product\" i]',
+  '[data-cy*=\"product\" i]',
+  '[class*=\"catalog\" i] article',
+  '[class*=\"catalog\" i] li',
+  '[class*=\"product-list\" i] > *',
+  '[class*=\"product-grid\" i] > *',
+].join(',');
+
+const INVALID_UI_PHRASES = [
+  'back to top',
+  'create a website',
+  'kyte',
+  'loading',
+  'order by',
+  'masculino',
+  'feminino',
+];
+
 
 class SupplierBlockedError extends Error {
   constructor(categoryName, evidence) {
@@ -361,7 +382,7 @@ async function autoScroll(page) {
 }
 
 async function extractRawProducts(page) {
-  return page.evaluate((maxLength) => {
+  return page.evaluate((maxLength, strictSelector) => {
     function visibleText(element) {
       return element.innerText?.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n').trim() || '';
     }
@@ -402,7 +423,8 @@ async function extractRawProducts(page) {
       return candidate;
     }
 
-    const retailElements = [...document.querySelectorAll('body *')]
+    const domNodesObserved = document.querySelectorAll('body *').length;
+    const retailElements = [...document.querySelectorAll(strictSelector)]
       .filter((element) => {
         const text = visibleText(element);
         return hasProductPriceShape(text) && countRetail(text) === 1 && text.length <= maxLength;
@@ -415,16 +437,7 @@ async function extractRawProducts(page) {
       .filter((candidate) => countRetail(candidate.text) === 1)
       .filter((candidate) => candidate.text.length <= maxLength);
 
-    const selectorCandidates = [...document.querySelectorAll([
-      'article',
-      'li',
-      '[role="listitem"]',
-      '[class*="product" i]',
-      '[class*="card" i]',
-      '[class*="item" i]',
-      '[data-testid*="product" i]',
-      '[data-cy*="product" i]',
-    ].join(','))]
+    const selectorCandidates = [...document.querySelectorAll(strictSelector)]
       .map((element) => ({ element, text: visibleText(element), image: getImage(element) }))
       .filter((candidate) => hasProductPriceShape(candidate.text))
       .filter((candidate) => countRetail(candidate.text) === 1)
@@ -448,13 +461,13 @@ async function extractRawProducts(page) {
   }
 
   return {
-      bodyTextLength: document.body.innerText?.length || 0,
+      domNodesObserved,
       retailElementCount: retailElements.length,
       rootCandidateCount: rootCandidates.length,
       selectorCandidateCount: selectorCandidates.length,
       products: [...candidatesByText.values()],
     };
-  }, PRODUCT_TEXT_MAX_LENGTH);
+  }, PRODUCT_TEXT_MAX_LENGTH, PRODUCT_CARD_SELECTOR);
 }
 
 async function saveDebugSnapshot(page, category, reason) {
@@ -894,12 +907,26 @@ function mergeDuplicateRecords(records) {
   return winner;
 }
 
+function isInvalidUiPhrase(text) {
+  const normalized = normalizeTextToken(text);
+  if (!normalized) return true;
+  if (INVALID_UI_PHRASES.some((phrase) => normalized === phrase || normalized.includes(phrase))) return true;
+  if (/^-?\d+%\s*off$/.test(normalized) || /^%\s*off$/.test(normalized) || /^(off|desconto|promocao)$/.test(normalized)) return true;
+  return false;
+}
+
+function hasMinimalProductConfidence(product) {
+  const tokenCount = normalizeTextToken(product.name || '').split(/\s+/).filter((t) => t.length > 2 && !/^\d+$/.test(t)).length;
+  return tokenCount >= 2 || Number.isFinite(product.supplierRetailPrice) || Boolean(product.image) || Number.isFinite(product.volumeMl);
+}
+
 function isValidProductCandidate(product) {
   const name = normalizeTextToken(product.name || '');
-  if (!name || /^\d+%\s*off$/.test(name) || /^(off|desconto)$/.test(name)) return false;
+  if (!name || isInvalidUiPhrase(name)) return false;
   if (/loading|skeleton|placeholder/.test(name)) return false;
   const hasMetadata = Boolean(product.image || product.description || product.olfactoryReference || Number.isFinite(product.supplierRetailPrice) || Number.isFinite(product.costPrice));
-  return hasMetadata;
+  if (!hasMetadata) return false;
+  return hasMinimalProductConfidence(product);
 }
 
 function finalNormalizeAndDedupe(products) {
@@ -1059,7 +1086,7 @@ async function scrapeCategory(page, category) {
       ...networkRawProducts,
     ];
     log(
-      `Candidatos em ${category.name}: dom=${extraction.products.length}, html=${htmlRawProducts.length}, scripts=${scriptRawProducts.length}, rede=${networkRawProducts.length}, retailElements=${extraction.retailElementCount}, roots=${extraction.rootCandidateCount}, selectors=${extraction.selectorCandidateCount}, bodyText=${extraction.bodyTextLength}`,
+      `Candidatos em ${category.name}: domNodesObserved=${extraction.domNodesObserved}, candidateCards=${extraction.selectorCandidateCount}, dom=${extraction.products.length}, html=${htmlRawProducts.length}, scripts=${scriptRawProducts.length}, rede=${networkRawProducts.length}, retailElements=${extraction.retailElementCount}, roots=${extraction.rootCandidateCount}`,
     );
 
     if (rawProducts.length === 0) {
@@ -1121,16 +1148,18 @@ async function main() {
   }
 
   log(`Total bruto: ${products.length}`);
-  const { products: uniqueProducts, report } = finalNormalizeAndDedupe(products);
-  log(`Total após deduplicação final: ${uniqueProducts.length}`);
+  const { products: dedupedProducts, report } = finalNormalizeAndDedupe(products);
+  const finalValidatedProducts = dedupedProducts.filter(isValidProductCandidate);
+  log(`Total após deduplicação final: ${dedupedProducts.length}`);
+  log(`Total após validação final pré-imagem: ${finalValidatedProducts.length}`);
   log(`Relatório: ${JSON.stringify(report)}`);
 
-  if (uniqueProducts.length === 0) {
+  if (finalValidatedProducts.length === 0) {
     throw new Error('Nenhum produto foi extraído do fornecedor. Consulte tmp/scraper-debug para snapshots HTML/screenshot.');
   }
 
-  await hydrateImages(uniqueProducts);
-  await writeProductsFile(uniqueProducts);
+  await hydrateImages(finalValidatedProducts);
+  await writeProductsFile(finalValidatedProducts);
 
   log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
   log(`Imagens salvas em: ${path.relative(ROOT_DIR, IMAGE_DIR)}`);

@@ -18,6 +18,16 @@
   const LOG_PREFIX = '[LAZULE browser extractor]';
   const CATEGORY_NAMES = new Set(['All', 'Masculinos', 'Femininos', 'Kit', 'Árabe', 'Nicho', 'Pastas Isabelle']);
   const IGNORED_IMAGE_PATTERN = /logo|icon|favicon|banner|placeholder|sprite|brand|avatar|whatsapp|facebook|instagram/i;
+  const STRICT_PRODUCT_CARD_SELECTOR = [
+    'article[class*="product" i]',
+    'li[class*="product" i]',
+    '[data-testid*="product" i]',
+    '[data-cy*="product" i]',
+    '[class*="catalog" i] article',
+    '[class*="catalog" i] li',
+    '[class*="product-grid" i] > *',
+  ].join(',');
+  const INVALID_UI_PHRASES = ['back to top', 'create a website', 'kyte', 'loading', 'order by', 'masculino', 'feminino'];
 
   function log(message, extra) {
     if (extra !== undefined) {
@@ -226,11 +236,23 @@
     return merged;
   }
 
+  function isInvalidUiText(value) {
+    const normalized = normalizeIdentityPart(value);
+    if (!normalized) return true;
+    if (INVALID_UI_PHRASES.some((phrase) => normalized === phrase || normalized.includes(phrase))) return true;
+    if (/^-?\d+%\s*off$/.test(normalized) || /^%\s*off$/.test(normalized) || /^(off|desconto|promocao)$/.test(normalized)) return true;
+    return false;
+  }
+
   function findProductElements() {
-    return [...document.querySelectorAll('article,li,[role="listitem"],[class*="product" i],[class*="card" i],[class*="item" i],[data-testid*="product" i],[data-cy*="product" i]')]
+    return [...document.querySelectorAll(STRICT_PRODUCT_CARD_SELECTOR)]
       .filter((element) => {
         const text = visibleText(element);
-        return /R\$|varejo/i.test(text) && text.length <= CONFIG.maxProductTextLength;
+        if (!text || text.length > CONFIG.maxProductTextLength) return false;
+        if (isInvalidUiText(text)) return false;
+        const hasTitle = Boolean(detectName(element, text));
+        const hasAnySupport = /R\$|varejo/i.test(text) || Boolean(getImageData(element).image) || /\b(?:masculino|feminino|nicho|arabe|kit)\b/i.test(text);
+        return hasTitle && hasAnySupport;
       });
   }
 
@@ -286,6 +308,12 @@
     const productsByKey = new Map();
     const uniqueKeys = new Set();
     const report = {
+      domNodesObserved: 0,
+      candidateCards: 0,
+      validCards: 0,
+      invalidUiElementsDiscarded: 0,
+      promoCardsDiscarded: 0,
+      imageDownloadsPrevented: 0,
       totalDomCardsObserved: 0,
       uniqueProductsExtracted: 0,
       duplicateMerges: 0,
@@ -311,7 +339,9 @@
 
       await sleep(CONFIG.scrollDelayMs);
       const beforeCount = uniqueKeys.size;
+      report.domNodesObserved += document.querySelectorAll('body *').length;
       const cards = findProductElements();
+      report.candidateCards += cards.length;
       report.totalDomCardsObserved += cards.length;
 
       const scanPasses = [0, CONFIG.lazySettleDelayMs];
@@ -322,6 +352,24 @@
         for (const card of cardsInPass) {
           const product = extractFromCard(card, fallbackCategory);
           if (!product || !product.name) continue;
+          if (isInvalidUiText(product.name) || isInvalidUiText(product.rawText)) {
+            report.invalidUiElementsDiscarded += 1;
+            report.imageDownloadsPrevented += product.image ? 1 : 0;
+            continue;
+          }
+          if (/^-?\d+%\s*off$/i.test(product.name)) {
+            report.promoCardsDiscarded += 1;
+            report.imageDownloadsPrevented += product.image ? 1 : 0;
+            continue;
+          }
+          const tokenCount = normalizeIdentityPart(product.name).split(' ').filter((t) => t.length > 2).length;
+          const minimalConfidence = tokenCount >= 2 || Number.isFinite(product.supplierRetailPrice) || Boolean(product.image) || /\b\d{2,4}\s*ml\b/i.test(product.rawText);
+          if (!minimalConfidence) {
+            report.invalidUiElementsDiscarded += 1;
+            report.imageDownloadsPrevented += product.image ? 1 : 0;
+            continue;
+          }
+          report.validCards += 1;
 
           const identity = buildIdentityKey(product);
           if (!uniqueKeys.has(identity)) {
