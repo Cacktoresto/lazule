@@ -1,0 +1,6526 @@
+{
+  "generatedAt": "2026-05-19T18:41:19.281Z",
+  "version": "phase-9.5-olfactive-semantic-enrichment-v1",
+  "items": [
+    {
+      "slug": "acqua-di-gioia-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "afnan-historic-doria-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "afnan-historic-olmeda-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "afnan-supremacy-collector-s-edition-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "afnan-turathi-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "afnan-turathi-eletric-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-haramain-amber-oud-gold-edition-edp-120ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-haramain-conception-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-haramain-freya-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-haramain-amber-oud-gold-edition",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-haramain-l-aventure",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-attar-al-wesal-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-bareeq-al-dhahab-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-durra-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-durrat-al-aroos-edp-85ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-durrat-al-aroos-love-edp-85ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-sabah-al-ward-delilah-edp-100ml-lancamento",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-sabah-al-ward-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-sabah-al-ward-sugar-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-shagaf-al-ward-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "al-wataniah-tiara-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "amouage-outlands-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "amouage-interlude-man",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "amouage-reflection-man",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-iconic-edp-105ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-intense-man-edt-105ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-intense-man-extrait-70ml-lancamento",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-intense-man-parfum-105ml-edicao-limitada",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-lionheart-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-man-edt-105ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-milestone-edp-105ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-precieux-extrait-de-parfum-55ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-urban-man-elixir-edp-105ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-woman-edp-105ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-infinity-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-odyssey-mandarin-sky-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-yum-yum-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-intense-man",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armaf-club-de-nuit-milestone",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armani-acqua-di-gio-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armani-acqua-di-gio-profondo-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armani-my-way-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armani-stronger-with-you-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "armani-stronger-with-you-parfum-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "aurora-scents-black-obsidian-xdp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "aurora-scents-cleopatra-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "aurora-scents-pharaoh-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "aurora-scents-vanilla-espresso-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "azzaro-pour-homme-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "azzaro-the-most-wanted-edp-intense-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "azzaro-the-most-wanted-parfum-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "azzaro-wanted-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bdk-parfums-gris-charnel",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bvlgari-aqva-pour-homme-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bvlgari-man-glacial-essence-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bvlgari-man-rain-essence-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bvlgari-omnia-amethyste-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bvlgari-omnia-crystalline-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "bvlgari-pour-homme-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "byredo-bal-d-afrique",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "byredo-mojave-ghost",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "carolina-herrera-good-girl",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-heroes-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-men-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-men-edt-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-men-heroes-edt-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-nyc-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-black-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-black-elixir-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-black-ny-rodeo-ed-limitada-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-men-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-men-edt-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-rose-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-212-vip-rose-elixir-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-bad-boy-cobalt-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-bad-boy-cobalt-edp-150ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-bad-boy-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-bad-boy-extreme-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-bad-boy-le-parfum-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-carolina-herrera-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-good-girl-blush-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-good-girl-blush-elixir-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-good-girl-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-good-girl-edp-legere-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-good-girl-sparkling-ice-edp80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-hc-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-hc-men-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-la-bomba-edp-80ml-lancamento",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-very-good-girl-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ch-very-good-girl-elixir-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chanel-bleu-de-chanel",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chanel-allure-homme-sport-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chanel-allure-homme-sport-extreme-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chanel-bleu-de-chanel-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chanel-bleu-de-chanel-edt-150ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chanel-coco-mademoiselle",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "chloe-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ck-be-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ck-be-edt-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ck-defy-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ck-euphoria-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ck-one-edt-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "ck-one-essence-parfum-intense-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-aventus",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-centaurus-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-green-irish-tweed-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-queen-of-silk-edp-75ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-green-irish-tweed",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-millesime-imperial",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "creed-silver-mountain-water",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "d-e-g-light-blue-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "d-e-g-light-blue-edt-25ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "d-e-g-light-blue-edt-75ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "d-e-g-pour-femme-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-fahrenheit-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-homme-cologne-125ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-homme-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-homme-intense-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-homme-parfum-75ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-hypnotic-poison-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-j-adore-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-j-adore-parfum-d-eau-edp-sem-alcool-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-blooming-bouquet-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-blooming-bouquet-edt-30ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-blooming-bouquet-edt-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-essence-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-parfum-35ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-parfum-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-miss-dior-parfum-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-sauvage-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-sauvage-elixir-60ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-sauvage-parfum-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dior-sauvage",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dolce-e-gabbana-light-blue",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "dolce-e-gabbana-light-blue-pour-homme",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "flower-by-kenzo-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "flower-by-kenzo-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "fragrance-world-ace-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "fragrance-world-just-anabi-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "fragrance-world-just-aswad-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "fragrance-world-just-azraq-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "fragrance-world-just-wardi-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "frederic-malle-musc-ravageur",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "frederic-malle-portrait-of-a-lady",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "french-avenue-aether-extrait-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "french-avenue-veneno-bianco-xdp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "french-avenue-vulcan-baie-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "french-avenue-vulcan-black-friday-xdp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "french-avenue-vulcan-feu-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "giorgio-armani-acqua-di-gio-profondo",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "giorgio-armani-acqua-di-gio-profumo",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "givenchy-ange-ou-demon-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "givenchy-gentleman-society-edp-extreme-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "givenchy-l-interdit-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "givenchy-l-interdit-parfum-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "gucci-guilty-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "gucci-guilty-femme-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "gucci-guilty-femme-elixir-60ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "hermes-terre-d-hermes",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "hugo-boss-bottled-absolu-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "hugo-boss-bottled-edt-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "hugo-boss-bottled-night-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "initio-atomic-rose",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "initio-musk-therapy-xdp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "initio-oud-for-greatness-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "initio-oud-for-greatness",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "initio-side-effect",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jean-paul-gaultier-le-male-le-parfum",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jean-paul-gaultier-ultra-male",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-classique-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-divine-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-divine-le-parfum-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-la-belle-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-la-belle-parfum-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-scandal-absolu-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-scandal-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-scandal-intense-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "jpg-scandal-le-parfum-edp-intense-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kilian-angels-share",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kilian-love-don-t-be-shy",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-1-million-100ml-gel-de-banho",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-1-million-100ml-mini-10ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-212-men-100ml-mini-10ml-pos-barba-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-212-vip-rose-80ml-mini-10ml-hidratante-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-acqua-di-gio-edp",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-acqua-di-gio-edt",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-ch-hc-100ml-10ml-hidratante-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-d-e-g-devotion-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-fame",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-gabriela-sabatini-60ml-necessaire",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-good-girl-80ml-10ml-hidratante-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-good-girl-80ml-hidratante-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-invictus-100ml-desodorante-150ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-invictus-victory-100ml-gel-de-banho-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-l-interdit-80ml-batom",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-la-bomba-80ml-hidratante-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-la-vie-est-belle",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-le-male-75ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-million-gold-for-her-90ml-mini-5ml-hidratante-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-moschino-toy-boy-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-my-way-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-olympea-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-scandal-intense-80ml-hidratante-75ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-terre-d-hermes-100ml-gel-de-banho-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-versace-bright-crystal",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-versace-dylan-purple-50ml-gel-de-banho-50ml-hidratante-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "kit-ysl-y-100ml-10ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lancome-la-vie-est-belle",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lancome-idole-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lancome-la-vie-est-belle-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lancome-la-vie-est-belle-iris-absolu-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-asad",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-fakhar-black",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-khamrah",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-al-noble-safeer-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-al-noble-wazeer-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-ameer-al-arab-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-ameer-al-arab-imperium-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-ameerat-al-arab-prive-rose-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-asad-collection-kit-4x25ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-asad-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-asad-elixir-edp-100ml-lancamento",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-asad-kit",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-atheeri-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-bade-e-al-oud-noble-blush-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-bade-e-al-oud-oud-for-glory-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-dalal-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-eclaire-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-eclaire-pistache-edp-100ml-lancamento",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-fakhar-black-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-fakhar-extrait-gold-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-fakhar-platin-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-fakhar-rose-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-haya-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-her-confession-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-khamrah-dukhan-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-khamrah-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-khanjar-edp-85ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-musamam-white-intense-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-qaa-ed-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-teriaq-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-tharwah-gold-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-the-kingdom-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-yara-rosa-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "lattafa-yara",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "le-labo-another-13",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "le-labo-santal-33",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "louis-vuitton-afternoon-swim",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "louis-vuitton-imagination",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-alpine-homme-sport-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-chants-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-como-moiselle-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-delilah-blanc-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-la-vivacite-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-no-2-men-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-perseus-exclusif-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-philos-opus-noir-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-rose-seduction-vip-pour-femme-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-salvo-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-salvo-intense-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-alhambra-so-candid-masculino-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "maison-francis-kurkdjian-baccarat-rouge-540",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "mugler-alien-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "mugler-angel-estrela-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "mugler-angel-hidratante-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "mugler-angel-pasta-200ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "nishane-ani",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "nishane-hacivat",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "nishane-hacivat-x-xdp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "nishane-hacivat-xdp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "orientica-amber-rouge-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "orientica-azure-fantasy-extrato-de-parfum-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "orientica-royal-amber-luxury-collection-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "orientica-velvet-gold-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "parfums-de-marly-delina",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "parfums-de-marly-herod",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "parfums-de-marly-layton",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "parfums-de-marly-oriana",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "parfums-de-marly-delina-la-rosee-edp-75ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "parfums-de-marly-pegasus",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "paris-corner-fayora-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "paris-corner-marshmallow-blush-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-fame-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-fame-intense-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-fame-parfum-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-lady-million-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-olympea-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-olympea-parfum-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-xs-black-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "pr-xs-pure-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "prada-candy-edp-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "prada-paradoxe-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "prada-paradoxe-intense-edp-90ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rabanne-invictus",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rabanne-one-million",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rasasi-hawas-for-him",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rasasi-hawas-black-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rasasi-hawas-kobra-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rasasi-hawas-tropical-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rayhaan-elixir-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "rayhaan-pacific-aura-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "sisterland-red-rose-united-colors-of-benetton-edt-80ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "stephane-humbert-lucas-god-of-fire-parfum-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "tom-ford-fucking-fabulous",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "tom-ford-lost-cherry",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "tom-ford-ombre-leather",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "tom-ford-oud-wood",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "tom-ford-tobacco-vanille",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "tom-ford-neroli-portofino-edp-50ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "valentino-donna-born-in-roma-coral-fantasy-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "valentino-donna-born-in-roma-extradose-parfum-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "valentino-donna-born-in-roma-intense-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "valentino-donna-born-in-roma-yellow-dream-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "versace-eros",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "versace-eros-flame",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "versace-dylan-turquoise-edt-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-erba-pura",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-naxos",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-accento-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-casamorati-mefisto-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-erba-gold-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-erba-pura-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "xerjoff-renaissance-edp-100ml",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "inferred",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "yves-saint-laurent-black-opium",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    },
+    {
+      "slug": "yves-saint-laurent-libre",
+      "sources": [
+        "internal_catalog",
+        "internal_reference_catalog"
+      ],
+      "sourceUrls": [],
+      "extractedFields": [
+        "notes",
+        "accords",
+        "family",
+        "similarTo",
+        "concentration"
+      ],
+      "confidence": "consensus",
+      "extractedAt": "2026-05-19T18:41:19.281Z",
+      "verified": false,
+      "inferred": true,
+      "fieldsRequiringReview": []
+    }
+  ]
+}
