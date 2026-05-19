@@ -17,11 +17,10 @@ import {
   sanitizeOlfactiveQuery,
 } from '../utils/olfactiveAssistant';
 
-const QUICK_SUGGESTIONS = ['Noite íntima', 'Fresco mineral', 'Doce contido', 'Trabalho elegante', 'Presente memorável', 'Âmbar potente', 'Assinatura limpa'];
+const QUICK_SUGGESTIONS = ['Luxo discreto', 'Assinatura noturna', 'Frescor refinado', 'Presença executiva'];
 const DEFAULT_PROMPT = 'Ex.: algo escuro, elegante e memorável para um jantar à noite';
 const LOADING_STEPS = ['Lendo atmosfera e intenção…', 'Comparando DNAs aromáticos…', 'Ajustando rastro, pele e ocasião…', 'Finalizando curadoria LAZULE…'];
-const AURA_PATHWAYS = ['Luxo discreto', 'Homem limpo', 'Presença executiva', 'Sedução elegante', 'Aura misteriosa', 'Sofisticação fria', 'Energia old money', 'Assinatura noturna', 'Frescor refinado', 'Academia premium'];
-const DISCOVERY_MODULES = ['Explore por sensação', 'Explore por presença', 'Explore por ocasião', 'Explore por clima', 'Explore por assinatura'];
+const DISCOVERY_MODULES = ['Sua direção olfativa'];
 const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
@@ -211,11 +210,11 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const recommendations = result?.recommendations ?? [];
   const hasRecommendations = recommendations.length > 0;
   const livingSuggestions = useMemo(() => getLivingSemanticSuggestions(query, result).slice(0, 6), [query, result]);
-  const onboardingSuggestions = useMemo(() => getLivingSemanticSuggestions('', null).slice(0, 5), []);
+  const onboardingSuggestions = useMemo(() => getLivingSemanticSuggestions('', null).slice(0, 3), []);
 
   useEffect(() => {
     if (!result) return;
-    setActiveRefinements(getSemanticRefinementPaths(result).slice(0, 5));
+    setActiveRefinements(getSemanticRefinementPaths(result).slice(0, 2));
   }, [result]);
 
   return (
@@ -227,7 +226,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
           <div className="min-w-0">
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold/90 sm:text-[0.66rem] sm:tracking-[0.36em]">Concierge olfativo</p>
             <h2 id="olfactive-assistant-title" className="mt-3 max-w-[12ch] font-display text-[clamp(1.95rem,9.5vw,2.45rem)] leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:mt-4 sm:max-w-[10ch] sm:text-5xl">Inteligência com tato.</h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-5">Descreva clima, presença, ocasião ou memória. A LAZULE traduz sua intenção em assinaturas olfativas com curadoria calma, editorial e precisa.</p>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-5">Descreva sua intenção. A LAZULE responde com uma direção olfativa clara e calma.</p>
 
             <div className="mt-4 flex flex-wrap gap-2 sm:mt-5" aria-label="Momentos de descoberta">
               {DISCOVERY_MODULES.map((label) => <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.67rem] font-semibold uppercase tracking-[0.14em] text-slate-200">{label}</span>)}
@@ -245,7 +244,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               />
 
               <div className="lazule-ai-chips flex min-w-0 max-w-full flex-wrap gap-1.5 pb-1 sm:gap-2" aria-label="Sugestões rápidas">
-                {(query.trim() ? livingSuggestions : QUICK_SUGGESTIONS).map((suggestion) => (
+                {(query.trim() ? livingSuggestions.slice(0, 3) : QUICK_SUGGESTIONS.slice(0, 3)).map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
@@ -278,7 +277,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               <div className="min-w-0 max-w-full overflow-hidden flex min-h-[9.5rem] flex-col justify-center text-center sm:min-h-[14rem] sm:text-left">
                 <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Descubra sua assinatura</p>
                 <h3 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">Como você quer ser percebido hoje?</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-300">Comece por uma sensação: {initialExamples}. Perfis próximos podem evoluir para presença executiva, frescor refinado ou sedução elegante.</p>
+                <p className="mt-4 text-sm leading-6 text-slate-300">Comece por uma sensação: {initialExamples}.</p>
                 <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:justify-start">
                   {onboardingSuggestions.map((suggestion) => <button key={`onboarding-${suggestion}`} type="button" onClick={() => handleSuggestionClick(suggestion)} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1.5 text-xs text-lazule-gold">{suggestion}</button>)}
                 </div>
@@ -303,7 +302,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   </div>
                   {result.detectedIntents?.length ? (
                     <div className="flex flex-wrap gap-2">
-                      {result.detectedIntents.slice(0, 3).map((intent) => (
+                      {result.detectedIntents.slice(0, 1).map((intent) => (
                         <span key={intent} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">{intent}</span>
                       ))}
                     </div>
@@ -312,7 +311,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
                 <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200">
                   <p className="text-lazule-gold">Sua assinatura parece caminhar para uma presença mais refinada e segura.</p>
-                  <p className="mt-1 text-xs text-slate-300">Perfis nessa direção costumam equilibrar impacto elegante, limpeza olfativa e memorabilidade discreta.</p>
+                  <p className="mt-1 text-xs text-slate-300">Menos ruído, mais assinatura.</p>
                 </div>
 
 
@@ -328,7 +327,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   <div className="mb-4">
                     <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Continuando sua curadoria</p>
                     <div className="flex flex-wrap gap-2">
-                      {result.memoryAwareChips.slice(0, 6).map((chip) => <span key={`mem-${chip}`} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold/90">{chip}</span>)}
+                      {result.memoryAwareChips.slice(0, 2).map((chip) => <span key={`mem-${chip}`} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold/90">{chip}</span>)}
                     </div>
                   </div>
                 ) : null}
@@ -355,12 +354,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   </div>
                 )}
 
-                <div className="mb-4">
-                  <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Explore por aura</p>
-                  <div className="lazule-horizontal-rail flex gap-2 overflow-x-auto pb-1">
-                    {AURA_PATHWAYS.map((aura) => <button key={aura} type="button" onClick={() => handleSuggestionClick(aura)} className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-100 hover:border-lazule-gold/60 hover:text-lazule-gold">{aura}</button>)}
-                  </div>
-                </div>
+
 
                 <div className="lazule-ai-results lazule-horizontal-rail lazule-rail-fade flex min-w-0 max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible" style={{ '--result-delay': '90ms' }}>
                   {recommendations.map((recommendation) => (
