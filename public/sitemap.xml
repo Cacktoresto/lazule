@@ -71,6 +71,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://lazulefragrances.com.br/marca/chanel</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://lazulefragrances.com.br/marca/chloe</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -411,6 +416,11 @@
     <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://lazulefragrances.com.br/produto/armani-stronger-with-you-parfum-100ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
     <loc>https://lazulefragrances.com.br/produto/armani-my-way-edp-90ml</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -507,6 +517,11 @@
   </url>
   <url>
     <loc>https://lazulefragrances.com.br/produto/ch-212-nyc-edt-100ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://lazulefragrances.com.br/produto/ch-212-vip-black-edp-100ml</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
@@ -617,6 +632,26 @@
   </url>
   <url>
     <loc>https://lazulefragrances.com.br/produto/ch-hc-men-edt-100ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://lazulefragrances.com.br/produto/chanel-allure-homme-sport-edt-100ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://lazulefragrances.com.br/produto/chanel-allure-homme-sport-extreme-edp-100ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://lazulefragrances.com.br/produto/chanel-bleu-de-chanel-edp-100ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://lazulefragrances.com.br/produto/chanel-bleu-de-chanel-edt-150ml</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
