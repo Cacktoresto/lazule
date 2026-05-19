@@ -16,6 +16,7 @@
   };
 
   const LOG_PREFIX = '[LAZULE browser extractor]';
+  const MAX_LOG_LENGTH = 1000;
   const CATEGORY_NAMES = new Set(['All', 'Masculinos', 'Femininos', 'Kit', 'Árabe', 'Nicho', 'Pastas Isabelle']);
   const IGNORED_IMAGE_PATTERN = /logo|icon|favicon|banner|placeholder|sprite|brand|avatar|whatsapp|facebook|instagram/i;
   const STRICT_PRODUCT_CARD_SELECTOR = [
@@ -27,15 +28,19 @@
     '[class*="catalog" i] li',
     '[class*="product-grid" i] > *',
   ].join(',');
-  const INVALID_UI_PHRASES = ['back to top', 'create a website', 'kyte', 'loading', 'order by', 'masculino', 'feminino'];
+  const INVALID_UI_PHRASES = ['we use cookies', 'cookies', 'improve the services', 'developed by', 'back to top', 'create a website', 'kyte', 'loading', 'order by', 'masculino', 'feminino'];
+  const truncateLogText = (value) => {
+    const text = String(value ?? '');
+    return text.length > MAX_LOG_LENGTH ? `${text.slice(0, MAX_LOG_LENGTH)}… [truncated]` : text;
+  };
 
   function log(message, extra) {
     if (extra !== undefined) {
-      console.log(`${LOG_PREFIX} ${message}`, extra);
+      console.log(`${LOG_PREFIX} ${truncateLogText(message)}`, extra);
       return;
     }
 
-    console.log(`${LOG_PREFIX} ${message}`);
+    console.log(`${LOG_PREFIX} ${truncateLogText(message)}`);
   }
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
