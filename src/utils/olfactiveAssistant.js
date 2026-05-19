@@ -4,6 +4,7 @@ import { generateQueryDNA, getDominantDNA } from '../ai/perfumeDNA.js';
 import { createSemanticExplanation, getSemanticAnalyticsTags, interpretSemanticIntent, scoreSemanticMatch } from '../ai/semanticOlfactiveSearch.js';
 import { normalizeSearchText } from './search.js';
 import { aggregateTasteMemory, buildPersonalOlfactiveProfile, createMemoryAwareChips, normalizeMemorySignal } from '../ai/tasteMemoryEngine.js';
+import { analyzeCollectionWardrobe } from '../ai/collectionIntelligenceEngine.js';
 
 const DEFAULT_LIMIT = 6;
 const MINIMUM_RECOMMENDATIONS = 3;
@@ -223,6 +224,8 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   const detectedIntents = unique([...intentAnalysis.detectedIntents, ...(referenceTerms.length ? ['parecido'] : [])]);
   const semanticInterpretation = interpretSemanticIntent(intentAnalysis.normalizedQuery);
   const queryDNA = generateQueryDNA(intentAnalysis.normalizedQuery);
+  const collectionInsights = analyzeCollectionWardrobe(options.collectionEntries || [], { tasteMemory: memoryProfile });
+
   const analysis = {
     ...intentAnalysis,
     detectedIntents,
@@ -249,7 +252,11 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   }
 
   const engine = getRecommendationEngine(options.engine);
-  const rankedRecommendations = engine.search(query, safeCatalog, { limit, analysis });
+  const rankedRecommendations = engine.search(query, safeCatalog, {
+    limit,
+    analysis,
+    avoidWarm: collectionInsights.gaps.includes('missing_warm') ? false : null,
+  });
   const referencedPerfume = findReferencedPerfume(referenceTerms, safeCatalog, analysis.normalizedQuery);
   const discoveryConversion = createUnavailableDiscoveryConversion(referencedPerfume, safeCatalog, { limit: Math.min(4, limit) });
   const rawRecommendations = rankedRecommendations.map((entry) => {
@@ -270,7 +277,10 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   });
   const recommendations = arrangeDiscoveryRecommendations(rawRecommendations, discoveryConversion, limit);
   const memory = aggregateTasteMemory(tasteSignals);
-  const memoryAwareChips = createMemoryAwareChips(memory, getSemanticRefinementPaths({ detectedIntents, semanticIntent: semanticInterpretation }));
+  const memoryAwareChips = createMemoryAwareChips(memory, [
+    ...getSemanticRefinementPaths({ detectedIntents, semanticIntent: semanticInterpretation }),
+    ...collectionInsights.balancingDirections.map((label) => label.toLowerCase()),
+  ]);
 
   return {
     intent: detectedIntents[0] ?? analysis.primaryIntent,
@@ -296,6 +306,7 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
     tasteMemory: memory,
     personalProfile: memoryProfile,
     memoryAwareChips,
+    collectionInsights,
     engine: engine.id,
   };
 }

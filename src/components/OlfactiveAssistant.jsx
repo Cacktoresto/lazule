@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { COLLECTION_STATES } from '../ai/collectionIntelligenceEngine';
+import { loadWardrobeMemory, saveWardrobeEntry, saveWardrobeMemory } from '../utils/wardrobeMemory';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
 import { formatBRL } from '../utils/currency';
 import { createProductPath } from '../utils/productRouting';
@@ -101,6 +103,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const [loadingStepIndex, setLoadingStepIndex] = useState(0);
   const [activeRefinements, setActiveRefinements] = useState([]);
   const [tasteSignals, setTasteSignals] = useState([]);
+  const [wardrobeMemory, setWardrobeMemory] = useState({ entries: [], favorites: [], inspirations: [] });
   const timeoutRef = useRef(null);
   const loadingIntervalRef = useRef(null);
 
@@ -115,6 +118,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
     } catch {
       setTasteSignals([]);
     }
+    setWardrobeMemory(loadWardrobeMemory(window.localStorage));
   }, []);
 
   useEffect(() => {
@@ -157,7 +161,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
     timeoutRef.current = window.setTimeout(() => {
       loadRecommendationKnowledgeBase(products).then((knowledgeBase) => {
-        const nextResult = getOlfactiveRecommendations(safeQuery, knowledgeBase, { limit: 6, tasteSignals });
+        const nextResult = getOlfactiveRecommendations(safeQuery, knowledgeBase, { limit: 6, tasteSignals, collectionEntries: wardrobeMemory.entries });
         setResult(nextResult);
         const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
         const nextSignals = [...tasteSignals, signal].slice(-36);
@@ -168,7 +172,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
           sourcePage,
         }));
       }).catch(() => {
-        const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6, tasteSignals });
+        const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6, tasteSignals, collectionEntries: wardrobeMemory.entries });
         setResult(nextResult);
         const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
         const nextSignals = [...tasteSignals, signal].slice(-36);
@@ -190,6 +194,13 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   function handleSubmit(event) {
     event.preventDefault();
     runAssistant();
+  }
+
+
+  function handleSaveToWardrobe(product, state = COLLECTION_STATES.owned) {
+    const next = saveWardrobeEntry(wardrobeMemory, product, state);
+    setWardrobeMemory(next);
+    saveWardrobeMemory(next, window.localStorage);
   }
 
   function handleSuggestionClick(suggestion) {
