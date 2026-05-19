@@ -1,6 +1,7 @@
 import { SEMANTIC_PHRASES, SEMANTIC_VOCABULARY } from '../data/generated/semanticVocabulary.js';
 import { normalizeSearchText } from '../utils/search.js';
 import { generatePerfumeDNA } from './perfumeDNA.js';
+import { rankByEmbeddingSimilarity, optionallyLoadPrecomputedEmbeddings } from './olfactiveEmbeddingAdapter.js';
 
 const SCORE_WEIGHTS = { accords: 0.33, vibes: 0.2, occasions: 0.13, weather: 0.08, families: 0.1, luxurySignature: 0.1, confidence: 0.06 };
 let semanticSessionProfile = { tokens: [], directions: { accords: [], vibes: [], families: [], occasions: [], weather: [] }, queries: 0 };
@@ -117,3 +118,44 @@ export function getSemanticDebugArtifact(query, product, interpreted, scoring) {
 export function resetSemanticSessionProfile() { semanticSessionProfile = { tokens: [], directions: { accords: [], vibes: [], families: [], occasions: [], weather: [] }, queries: 0 }; }
 
 export const semanticLayeringHooks = { toBlendVector: (product) => generatePerfumeDNA(product) };
+
+
+const HYBRID_WEIGHTS = { semantic: 0.45, embedding: 0.35, availabilityConfidence: 0.1, diversityCommercial: 0.1 };
+
+export function rankSemanticWithEmbeddings(query = '', products = [], options = {}) {
+  const interpretedIntent = interpretSemanticIntent(query, { updateSession: options.updateSession });
+  const precomputed = optionallyLoadPrecomputedEmbeddings();
+  const semanticScored = products.map((product) => ({
+    product,
+    semantic: scoreSemanticMatch(product, interpretedIntent),
+  }));
+  const embeddingRank = rankByEmbeddingSimilarity({ query, interpreted: interpretedIntent }, products, { precomputedVectors: precomputed.vectors });
+  const embeddingMap = new Map(embeddingRank.ranked.map((entry) => [entry.embedding.slug, entry]));
+
+  const hybrid = semanticScored.map((entry, index) => {
+    const slug = entry.product.productSlug ?? entry.product.id ?? entry.product.name;
+    const emb = embeddingMap.get(slug) ?? { embeddingScore: 0, matchedTokens: [] };
+    const availabilityConfidence = (entry.product.available === false ? 0.3 : 1) * (Number(entry.product.semanticConfidence ?? interpretedIntent.confidenceScore ?? 0.65));
+    const diversityCommercial = Math.max(0.45, (entry.product.featured ? 0.8 : 0.6) - index * 0.002);
+    const highDeterministic = (entry.semantic.score >= 0.62);
+    const embeddingInfluence = highDeterministic ? emb.embeddingScore * 0.55 : emb.embeddingScore;
+    const finalScore = Number((entry.semantic.score * HYBRID_WEIGHTS.semantic + embeddingInfluence * HYBRID_WEIGHTS.embedding + availabilityConfidence * HYBRID_WEIGHTS.availabilityConfidence + diversityCommercial * HYBRID_WEIGHTS.diversityCommercial).toFixed(4));
+    return { ...entry, embeddingScore: emb.embeddingScore, matchedTokens: emb.matchedTokens, finalScore };
+  }).sort((a, b) => b.finalScore - a.finalScore);
+
+  const debug = {
+    query,
+    interpretedIntent,
+    topEmbeddingMatches: embeddingRank.ranked.slice(0, 5).map((item) => ({ slug: item.embedding.slug, embeddingScore: item.embeddingScore, matchedTokens: item.matchedTokens })),
+    results: hybrid.slice(0, 5).map((item) => ({
+      product: item.product.name,
+      semanticScore: item.semantic.score,
+      embeddingScore: item.embeddingScore,
+      finalScore: item.finalScore,
+      matchedTokens: item.matchedTokens,
+      expandedSynonyms: embeddingRank.queryDoc.expandedSynonyms,
+    })),
+  };
+
+  return { interpretedIntent, ranked: hybrid, debug };
+}
