@@ -1,6 +1,7 @@
 import { getRecommendationEngine } from '../ai/recommendationEngine.js';
 import { createUnavailableDiscoveryConversion, scoreOlfactiveRelationship } from '../ai/olfactiveRelationships.js';
 import { generateQueryDNA, getDominantDNA } from '../ai/perfumeDNA.js';
+import { createSemanticExplanation, getSemanticAnalyticsTags, interpretSemanticIntent, scoreSemanticMatch } from '../ai/semanticOlfactiveSearch.js';
 import { normalizeSearchText } from './search.js';
 
 const DEFAULT_LIMIT = 6;
@@ -203,6 +204,7 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   const intentAnalysis = detectOlfactiveIntents(query);
   const referenceTerms = detectReferenceTerms(intentAnalysis.normalizedQuery);
   const detectedIntents = unique([...intentAnalysis.detectedIntents, ...(referenceTerms.length ? ['parecido'] : [])]);
+  const semanticInterpretation = interpretSemanticIntent(intentAnalysis.normalizedQuery);
   const queryDNA = generateQueryDNA(intentAnalysis.normalizedQuery);
   const analysis = {
     ...intentAnalysis,
@@ -210,6 +212,7 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
     scoringIntents: detectedIntents.length ? detectedIntents : FALLBACK_INTENTS,
     referenceTerms,
     queryDNA,
+    semanticInterpretation,
   };
 
   if (!safeCatalog.length) {
@@ -232,18 +235,27 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
   const rankedRecommendations = engine.search(query, safeCatalog, { limit, analysis });
   const referencedPerfume = findReferencedPerfume(referenceTerms, safeCatalog, analysis.normalizedQuery);
   const discoveryConversion = createUnavailableDiscoveryConversion(referencedPerfume, safeCatalog, { limit: Math.min(4, limit) });
-  const rawRecommendations = rankedRecommendations.map((entry) => ({
+  const rawRecommendations = rankedRecommendations.map((entry) => {
+    const semanticScoring = scoreSemanticMatch(entry.product, semanticInterpretation);
+    const relationshipReason = createRelationshipReason(referencedPerfume, entry);
+    const semanticReason = createSemanticExplanation(entry.product, semanticInterpretation, semanticScoring);
+    return ({
     product: entry.product,
-    reason: createRelationshipReason(referencedPerfume, entry),
+    reason: detectedIntents.includes('parecido') ? relationshipReason : semanticReason,
     score: Math.round(entry.score * 1000) / 1000,
     matchedIntents: entry.matchedIntents,
     dnaSimilarity: entry.dnaSimilarity,
     perfumeDNA: entry.perfumeDNA,
-  }));
+    semanticScore: semanticScoring.score,
+    semanticConfidence: semanticScoring.confidence,
+    semanticThemes: semanticInterpretation.themes,
+  });
+  });
   const recommendations = arrangeDiscoveryRecommendations(rawRecommendations, discoveryConversion, limit);
 
   return {
     intent: detectedIntents[0] ?? analysis.primaryIntent,
+    semanticIntent: semanticInterpretation,
     detectedIntents,
     detectedTerms: analysis.detectedTerms,
     inferredFilters: getInferredFilters(detectedIntents),
@@ -261,6 +273,7 @@ export function getOlfactiveRecommendations(query, catalogProducts = [], options
     queryNormalized: analysis.normalizedQuery,
     queryDNA,
     dominantDNA: createRecommendationAnalyticsDNA(queryDNA),
+    semanticTags: getSemanticAnalyticsTags(semanticInterpretation),
     engine: engine.id,
   };
 }
@@ -273,6 +286,7 @@ export function createOlfactiveAssistantAnalyticsPayload(result = {}, { query = 
     query_length: safeQuery.length,
     detected_intents: safeIntents,
     ai_intents: safeIntents,
+    semantic_tags: result.semanticTags ?? [],
     primary_intent: result.intent,
     dna: result.dominantDNA ?? createRecommendationAnalyticsDNA(result.queryDNA ?? generateQueryDNA(safeQuery)),
     result_count: result.recommendations?.length ?? result.products?.length ?? 0,
