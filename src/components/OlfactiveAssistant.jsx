@@ -20,6 +20,7 @@ const DEFAULT_PROMPT = 'Ex.: algo escuro, elegante e memorável para um jantar �
 const LOADING_STEPS = ['Lendo atmosfera e intenção…', 'Comparando DNAs aromáticos…', 'Ajustando rastro, pele e ocasião…', 'Finalizando curadoria LAZULE…'];
 const AURA_PATHWAYS = ['Luxo discreto', 'Homem limpo', 'Presença executiva', 'Sedução elegante', 'Aura misteriosa', 'Sofisticação fria', 'Energia old money', 'Assinatura noturna', 'Frescor refinado', 'Academia premium'];
 const DISCOVERY_MODULES = ['Explore por sensação', 'Explore por presença', 'Explore por ocasião', 'Explore por clima', 'Explore por assinatura'];
+const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
@@ -99,10 +100,22 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStepIndex, setLoadingStepIndex] = useState(0);
   const [activeRefinements, setActiveRefinements] = useState([]);
+  const [tasteSignals, setTasteSignals] = useState([]);
   const timeoutRef = useRef(null);
   const loadingIntervalRef = useRef(null);
 
   const initialExamples = useMemo(() => QUICK_SUGGESTIONS.slice(0, 4).join(' · '), []);
+
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(TASTE_MEMORY_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed?.events)) setTasteSignals(parsed.events.slice(-36));
+    } catch {
+      setTasteSignals([]);
+    }
+  }, []);
 
   useEffect(() => {
     trackEvent('ai_assistant_view', { source_page: sourcePage }, { dedupeKey: `ai_assistant_view|${sourcePage}`, dedupeMs: 3000 });
@@ -144,15 +157,23 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
     timeoutRef.current = window.setTimeout(() => {
       loadRecommendationKnowledgeBase(products).then((knowledgeBase) => {
-        const nextResult = getOlfactiveRecommendations(safeQuery, knowledgeBase, { limit: 6 });
+        const nextResult = getOlfactiveRecommendations(safeQuery, knowledgeBase, { limit: 6, tasteSignals });
         setResult(nextResult);
+        const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
+        const nextSignals = [...tasteSignals, signal].slice(-36);
+        setTasteSignals(nextSignals);
+        window.localStorage.setItem(TASTE_MEMORY_STORAGE_KEY, JSON.stringify({ events: nextSignals }));
         trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
           query: safeQuery,
           sourcePage,
         }));
       }).catch(() => {
-        const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6 });
+        const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6, tasteSignals });
         setResult(nextResult);
+        const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
+        const nextSignals = [...tasteSignals, signal].slice(-36);
+        setTasteSignals(nextSignals);
+        window.localStorage.setItem(TASTE_MEMORY_STORAGE_KEY, JSON.stringify({ events: nextSignals }));
         trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
           query: safeQuery,
           sourcePage,
@@ -282,6 +303,24 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                   <p className="text-lazule-gold">Sua assinatura parece caminhar para uma presença mais refinada e segura.</p>
                   <p className="mt-1 text-xs text-slate-300">Perfis nessa direção costumam equilibrar impacto elegante, limpeza olfativa e memorabilidade discreta.</p>
                 </div>
+
+
+                {result.personalProfile?.memory?.profileNotes?.length ? (
+                  <div className="mb-4 rounded-2xl border border-lazule-gold/20 bg-white/[0.03] px-4 py-3 text-sm text-slate-200">
+                    <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">{result.personalProfile.signatureTitle}</p>
+                    <p className="mt-2 text-slate-200">{result.personalProfile.memory.profileNotes[0]}.</p>
+                    <p className="mt-1 text-xs text-slate-400">{result.personalProfile.journeyNarrative}</p>
+                  </div>
+                ) : null}
+
+                {result.memoryAwareChips?.length ? (
+                  <div className="mb-4">
+                    <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Continuando sua curadoria</p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.memoryAwareChips.slice(0, 6).map((chip) => <span key={`mem-${chip}`} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold/90">{chip}</span>)}
+                    </div>
+                  </div>
+                ) : null}
 
                 {result.discoveryConversion ? (
                   <div className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
