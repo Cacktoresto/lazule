@@ -17,10 +17,10 @@ import {
   sanitizeOlfactiveQuery,
 } from '../utils/olfactiveAssistant';
 
-const QUICK_SUGGESTIONS = ['Luxo discreto', 'Assinatura noturna', 'Frescor refinado', 'Presença executiva'];
-const DEFAULT_PROMPT = 'Ex.: algo escuro, elegante e memorável para um jantar à noite';
-const LOADING_STEPS = ['Lendo atmosfera e intenção…', 'Comparando DNAs aromáticos…', 'Ajustando rastro, pele e ocasião…', 'Finalizando curadoria LAZULE…'];
-const DISCOVERY_MODULES = ['Sua direção olfativa'];
+const QUICK_SUGGESTIONS = ['Explore sua assinatura', 'Descubra direções olfativas', 'Perfumes para presença refinada', 'Elegância com calor sutil'];
+const DEFAULT_PROMPT = 'Ex.: uma assinatura discreta, elegante e memorável para a noite';
+const LOADING_STEPS = ['Lendo sua atmosfera…', 'Selecionando caminhos olfativos…', 'Ajustando presença e textura…', 'Finalizando sua curadoria…'];
+const DISCOVERY_MODULES = ['Sua direção olfativa', 'Continuando sua curadoria'];
 const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
@@ -225,8 +225,8 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
         <div className="relative grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1fr)] lg:items-start">
           <div className="min-w-0">
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold/90 sm:text-[0.66rem] sm:tracking-[0.36em]">Concierge olfativo</p>
-            <h2 id="olfactive-assistant-title" className="mt-3 max-w-[12ch] font-display text-[clamp(1.95rem,9.5vw,2.45rem)] leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:mt-4 sm:max-w-[10ch] sm:text-5xl">Inteligência com tato.</h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-5">Descreva sua intenção. A LAZULE responde com uma direção olfativa clara e calma.</p>
+            <h2 id="olfactive-assistant-title" className="mt-3 max-w-[12ch] font-display text-[clamp(1.95rem,9.5vw,2.45rem)] leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:mt-4 sm:max-w-[10ch] sm:text-5xl">Curadoria com presença.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-5">Descreva o momento. A LAZULE revela caminhos olfativos com calma, intenção e continuidade.</p>
 
             <div className="mt-4 flex flex-wrap gap-2 sm:mt-5" aria-label="Momentos de descoberta">
               {DISCOVERY_MODULES.map((label) => <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.67rem] font-semibold uppercase tracking-[0.14em] text-slate-200">{label}</span>)}
