@@ -1,0 +1,1311 @@
+{
+  "generatedAt": "2026-05-19T13:47:59.073Z",
+  "dryRun": true,
+  "summary": {
+    "newProducts": 0,
+    "updatedProducts": 258,
+    "unavailableProducts": 0,
+    "imageChanges": 0,
+    "priceChanges": 0,
+    "mergeConflicts": 0,
+    "preservedEnrichedFields": 0
+  },
+  "newProducts": [],
+  "updatedProducts": [
+    {
+      "id": "acqua-di-gioia-edp-100ml",
+      "name": "Acqua di Gioia EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "afnan-historic-doria-edp-100ml",
+      "name": "AFNAN | Historic Doria EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "afnan-historic-olmeda-edp-100ml",
+      "name": "AFNAN | Historic Olmeda EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "afnan-supremacy-collector-s-edition-edp-100ml",
+      "name": "AFNAN | Supremacy Collector's Edition EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "afnan-turathi-edp-90ml",
+      "name": "AFNAN | Turathi EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "afnan-turathi-eletric-edp-90ml",
+      "name": "AFNAN | Turathi Eletric EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-haramain-amber-oud-gold-edition-edp-120ml",
+      "name": "Al Haramain | Amber Oud Gold Edition EDP 120ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-haramain-conception-edp-100ml",
+      "name": "Al Haramain | Conception EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-haramain-freya-edp-100ml",
+      "name": "Al Haramain | Freya EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-attar-al-wesal-edp-100ml",
+      "name": "Al Wataniah | Attar al Wesal EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-bareeq-al-dhahab-edp-100ml",
+      "name": "Al Wataniah | Bareeq al Dhahab EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-durra-edp-100ml",
+      "name": "Al Wataniah | Durra EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-durrat-al-aroos-edp-85ml",
+      "name": "Al Wataniah | Durrat Al Aroos EDP 85ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-durrat-al-aroos-love-edp-85ml",
+      "name": "Al Wataniah | Durrat Al Aroos Love EDP 85ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-sabah-al-ward-delilah-edp-100ml-lancamento",
+      "name": "Al Wataniah | Sabah al Ward Delilah EDP 100ml [Lançamento]",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-sabah-al-ward-edp-100ml",
+      "name": "Al Wataniah | Sabah al Ward EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-sabah-al-ward-sugar-edp-100ml",
+      "name": "Al Wataniah | Sabah al Ward Sugar EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-shagaf-al-ward-edp-100ml",
+      "name": "Al Wataniah | Shagaf al Ward EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "al-wataniah-tiara-edp-100ml",
+      "name": "Al Wataniah | Tiara EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "amouage-outlands-100ml",
+      "name": "Amouage | Outlands 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-iconic-edp-105ml",
+      "name": "ARMAF | Club de nuit Iconic EDP 105ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-intense-man-edt-105ml",
+      "name": "ARMAF | Club de nuit Intense man EDT 105ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-intense-man-extrait-70ml-lancamento",
+      "name": "ARMAF | Club de nuit Intense man Extrait 70ml [Lançamento]",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-intense-man-parfum-105ml-edicao-limitada",
+      "name": "ARMAF | Club de nuit Intense man Parfum 105ml Edição Limitada",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-lionheart-edp-100ml",
+      "name": "ARMAF | Club de nuit Lionheart EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-man-edt-105ml",
+      "name": "ARMAF | Club de nuit man EDT 105ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-milestone-edp-105ml",
+      "name": "ARMAF | Club de nuit Milestone EDP 105ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-precieux-extrait-de-parfum-55ml",
+      "name": "ARMAF | Club de nuit Precieux Extrait de Parfum 55ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-urban-man-elixir-edp-105ml",
+      "name": "ARMAF | Club de nuit Urban Man Elixir EDP 105ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-club-de-nuit-woman-edp-105ml",
+      "name": "ARMAF | Club de nuit Woman EDP 105ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-infinity-edp-100ml",
+      "name": "ARMAF | Infinity EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-odyssey-mandarin-sky-edp-100ml",
+      "name": "ARMAF | Odyssey Mandarin Sky EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armaf-yum-yum-edp-100ml",
+      "name": "ARMAF | Yum Yum EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armani-acqua-di-gio-edt-100ml",
+      "name": "Armani | Acqua di Gio EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armani-acqua-di-gio-profondo-edt-100ml",
+      "name": "Armani | Acqua di Gio Profondo EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armani-stronger-with-you-edt-100ml",
+      "name": "Armani | Stronger with You EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "armani-my-way-edp-90ml",
+      "name": "Armani My Way EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "aurora-scents-black-obsidian-xdp-100ml",
+      "name": "Aurora Scents | Black Obsidian XDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "aurora-scents-cleopatra-edp-100ml",
+      "name": "Aurora Scents | Cleopatra EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "aurora-scents-pharaoh-edp-100ml",
+      "name": "Aurora Scents | Pharaoh EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "aurora-scents-vanilla-espresso-edp-100ml",
+      "name": "Aurora Scents | Vanilla Espresso EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "azzaro-pour-homme-edt-100ml",
+      "name": "Azzaro | Pour Homme EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "azzaro-the-most-wanted-edp-intense-100ml",
+      "name": "Azzaro The Most Wanted EDP Intense 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "azzaro-the-most-wanted-parfum-100ml",
+      "name": "Azzaro The Most Wanted Parfum 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "azzaro-wanted-edt-100ml",
+      "name": "Azzaro Wanted EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "bvlgari-aqva-pour-homme-edt-100ml",
+      "name": "BVLGARI | Aqva Pour Homme EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "bvlgari-man-glacial-essence-edp-100ml",
+      "name": "BVLGARI | Man Glacial Essence EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "bvlgari-man-rain-essence-edp-100ml",
+      "name": "BVLGARI | Man Rain Essence EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "bvlgari-omnia-amethyste-edt-100ml",
+      "name": "BVLGARI | Omnia Amethyste EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "bvlgari-omnia-crystalline-edt-100ml",
+      "name": "BVLGARI | Omnia Crystalline EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "bvlgari-pour-homme-edp-100ml",
+      "name": "BVLGARI | Pour Homme EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-heroes-edp-80ml",
+      "name": "CH | 212 Heroes EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-men-edt-100ml",
+      "name": "CH | 212 Men EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-men-edt-200ml",
+      "name": "CH | 212 Men EDT 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-men-heroes-edt-90ml",
+      "name": "CH | 212 Men Heroes EDT 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-nyc-edt-100ml",
+      "name": "CH | 212 NYC EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-black-elixir-edp-100ml",
+      "name": "CH | 212 VIP Black Elixir EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-black-ny-rodeo-ed-limitada-edp-100ml",
+      "name": "CH | 212 VIP Black NY Rodeo Ed. Limitada EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-men-edt-100ml",
+      "name": "CH | 212 VIP Men EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-men-edt-200ml",
+      "name": "CH | 212 VIP Men EDT 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-rose-edp-80ml",
+      "name": "CH | 212 VIP Rosé EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-212-vip-rose-elixir-edp-80ml",
+      "name": "CH | 212 VIP Rosé ELIXIR EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-bad-boy-cobalt-edp-100ml",
+      "name": "CH | Bad Boy Cobalt EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-bad-boy-cobalt-edp-150ml",
+      "name": "CH | Bad Boy Cobalt EDP 150ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-bad-boy-edt-100ml",
+      "name": "CH | Bad Boy EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-bad-boy-extreme-edp-100ml",
+      "name": "CH | Bad Boy Extreme EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-bad-boy-le-parfum-100ml",
+      "name": "CH | Bad Boy Le Parfum 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-carolina-herrera-edt-100ml",
+      "name": "CH | Carolina Herrera EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-good-girl-blush-edp-80ml",
+      "name": "CH | Good Girl Blush EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-good-girl-blush-elixir-80ml",
+      "name": "CH | Good Girl Blush Elixir 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-good-girl-edp-80ml",
+      "name": "CH | Good Girl EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-good-girl-edp-legere-80ml",
+      "name": "CH | Good Girl EDP Légère 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-good-girl-sparkling-ice-edp80ml",
+      "name": "CH | Good Girl Sparkling Ice EDP80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-la-bomba-edp-80ml-lancamento",
+      "name": "CH | La Bomba EDP 80ml [Lançamento]",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-very-good-girl-edp-80ml",
+      "name": "CH | Very Good Girl EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-very-good-girl-elixir-edp-80ml",
+      "name": "CH | Very Good Girl Elixir EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-hc-edt-100ml",
+      "name": "CH HC EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ch-hc-men-edt-100ml",
+      "name": "CH HC Men EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "chloe-edp-100ml",
+      "name": "Chloé EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ck-euphoria-edp-100ml",
+      "name": "CK | Euphoria EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ck-be-edt-100ml",
+      "name": "CK be EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ck-be-edt-200ml",
+      "name": "CK be EDT 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ck-defy-edt-100ml",
+      "name": "CK Defy EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ck-one-edt-200ml",
+      "name": "CK one EDT 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "ck-one-essence-parfum-intense-100ml",
+      "name": "CK one essence Parfum intense 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "creed-centaurus-edp-100ml",
+      "name": "Creed | Centaurus EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "creed-green-irish-tweed-edp-100ml",
+      "name": "Creed | Green Irish Tweed EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "creed-queen-of-silk-edp-75ml",
+      "name": "Creed | Queen of Silk EDP 75ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "d-e-g-light-blue-edt-100ml",
+      "name": "D&G | Light Blue EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "d-e-g-light-blue-edt-25ml",
+      "name": "D&G | Light Blue EDT 25ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "d-e-g-light-blue-edt-75ml",
+      "name": "D&G | Light Blue EDT 75ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "d-e-g-pour-femme-edt-100ml",
+      "name": "D&G | Pour Femme EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-fahrenheit-edt-100ml",
+      "name": "Dior | Fahrenheit EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-homme-cologne-125ml",
+      "name": "Dior | Homme Cologne 125ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-homme-edt-100ml",
+      "name": "Dior | Homme EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-homme-intense-edp-100ml",
+      "name": "Dior | Homme Intense EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-homme-parfum-75ml",
+      "name": "Dior | Homme Parfum 75ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-hypnotic-poison-edt-100ml",
+      "name": "Dior | Hypnotic Poison EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-j-adore-edp-100ml",
+      "name": "Dior | J'adore EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-j-adore-parfum-d-eau-edp-sem-alcool-100ml",
+      "name": "Dior | J'adore Parfum d'eau EDP Sem Álcool 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-blooming-bouquet-edt-100ml",
+      "name": "Dior | Miss Dior Blooming Bouquet EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-blooming-bouquet-edt-30ml",
+      "name": "Dior | Miss Dior Blooming Bouquet EDT 30ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-blooming-bouquet-edt-50ml",
+      "name": "Dior | Miss Dior Blooming Bouquet EDT 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-edp-100ml",
+      "name": "Dior | Miss Dior EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-essence-80ml",
+      "name": "Dior | Miss Dior Essence 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-parfum-35ml",
+      "name": "Dior | Miss Dior Parfum 35ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-parfum-50ml",
+      "name": "Dior | Miss Dior Parfum 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-miss-dior-parfum-80ml",
+      "name": "Dior | Miss Dior Parfum 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-sauvage-edp-100ml",
+      "name": "Dior | Sauvage EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-sauvage-elixir-60ml",
+      "name": "Dior | Sauvage Elixir 60ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "dior-sauvage-parfum-100ml",
+      "name": "Dior | Sauvage Parfum 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "flower-by-kenzo-edp-100ml",
+      "name": "Flower by Kenzo EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "flower-by-kenzo-edt-100ml",
+      "name": "Flower by Kenzo EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "fragrance-world-ace-edp-80ml",
+      "name": "Fragrance World | Ace EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "fragrance-world-just-anabi-edp-100ml",
+      "name": "Fragrance World | Just Anabi EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "fragrance-world-just-aswad-edp-100ml",
+      "name": "Fragrance World | Just Aswad EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "fragrance-world-just-azraq-edp-100ml",
+      "name": "Fragrance World | Just Azraq EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "fragrance-world-just-wardi-edp-100ml",
+      "name": "Fragrance World | Just Wardi EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "french-avenue-aether-extrait-100ml",
+      "name": "French Avenue | Aether Extrait 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "french-avenue-veneno-bianco-xdp-100ml",
+      "name": "French Avenue | Veneno Bianco XDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "french-avenue-vulcan-baie-edp-100ml",
+      "name": "French Avenue | Vulcan Baie EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "french-avenue-vulcan-black-friday-xdp-100ml",
+      "name": "French Avenue | Vulcan Black Friday XDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "french-avenue-vulcan-feu-edp-100ml",
+      "name": "French Avenue | Vulcan Feu EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "givenchy-ange-ou-demon-edp-100ml",
+      "name": "Givenchy | ange ou démon EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "givenchy-gentleman-society-edp-extreme-100ml",
+      "name": "Givenchy | Gentleman Society EDP Extrême 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "givenchy-l-interdit-edp-80ml",
+      "name": "Givenchy | L'Interdit EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "givenchy-l-interdit-parfum-80ml",
+      "name": "Givenchy | L'Interdit Parfum 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "gucci-guilty-edp-90ml",
+      "name": "Gucci Guilty EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "gucci-guilty-femme-edp-90ml",
+      "name": "Gucci Guilty Femme EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "gucci-guilty-femme-elixir-60ml",
+      "name": "Gucci Guilty Femme Elixir 60ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "hugo-boss-bottled-absolu-edp-100ml",
+      "name": "Hugo Boss Bottled Absolu EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "hugo-boss-bottled-edt-200ml",
+      "name": "Hugo Boss Bottled EDT 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "hugo-boss-bottled-night-edt-100ml",
+      "name": "Hugo Boss Bottled Night EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "initio-musk-therapy-xdp-90ml",
+      "name": "Initio | Musk Therapy XDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "initio-oud-for-greatness-90ml",
+      "name": "Initio | Oud for Greatness 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-classique-edp-100ml",
+      "name": "JPG | Classique EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-divine-edp-100ml",
+      "name": "JPG | Divine EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-divine-le-parfum-100ml",
+      "name": "JPG | Divine Le Parfum 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-la-belle-edp-100ml",
+      "name": "JPG | La Belle EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-la-belle-parfum-edp-100ml",
+      "name": "JPG | La Belle Parfum EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-scandal-absolu-80ml",
+      "name": "JPG | Scandal Absolu 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-scandal-edp-80ml",
+      "name": "JPG | Scandal EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-scandal-intense-edp-80ml",
+      "name": "JPG | Scandal Intense EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "jpg-scandal-le-parfum-edp-intense-80ml",
+      "name": "JPG | Scandal Le Parfum EDP Intense 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-1-million-100ml-gel-de-banho",
+      "name": "Kit 1 Million 100ml + Gel de Banho",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-1-million-100ml-mini-10ml",
+      "name": "Kit 1 Million 100ml + Mini 10ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-212-men-100ml-mini-10ml-pos-barba-100ml",
+      "name": "Kit 212 Men 100ml + Mini 10ml + Pós Barba 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-212-vip-rose-80ml-mini-10ml-hidratante-100ml",
+      "name": "Kit 212 VIP Rosé 80ml + Mini 10ml + Hidratante 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-acqua-di-gio-edp",
+      "name": "Kit Acqua di Gio EDP",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-acqua-di-gio-edt",
+      "name": "Kit Acqua di Gio EDT",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-ch-hc-100ml-10ml-hidratante-100ml",
+      "name": "Kit CH HC 100ml + 10ml + Hidratante 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-d-e-g-devotion-50ml",
+      "name": "Kit D&G Devotion 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-fame",
+      "name": "Kit Fame",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-gabriela-sabatini-60ml-necessaire",
+      "name": "Kit Gabriela Sabatini 60ml + Necessaire",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-good-girl-80ml-10ml-hidratante-100ml",
+      "name": "Kit Good Girl 80ml + 10ml + Hidratante 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-good-girl-80ml-hidratante-100ml",
+      "name": "Kit Good Girl 80ml + Hidratante 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-invictus-100ml-desodorante-150ml",
+      "name": "Kit Invictus 100ml + Desodorante 150ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-invictus-victory-100ml-gel-de-banho-100ml",
+      "name": "Kit Invictus Victory 100ml + Gel de Banho 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-l-interdit-80ml-batom",
+      "name": "Kit L'Interdit 80ml + Batom",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-la-bomba-80ml-hidratante-100ml",
+      "name": "Kit La Bomba 80ml + Hidratante 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-la-vie-est-belle",
+      "name": "Kit La Vie est Belle",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-le-male-75ml",
+      "name": "Kit Le Male 75ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-million-gold-for-her-90ml-mini-5ml-hidratante-100ml",
+      "name": "Kit Million Gold for her 90ml + Mini 5ml + Hidratante 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-moschino-toy-boy-50ml",
+      "name": "Kit Moschino Toy Boy 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-my-way-50ml",
+      "name": "Kit My Way 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-olympea-80ml",
+      "name": "Kit Olympéa 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-scandal-intense-80ml-hidratante-75ml",
+      "name": "Kit Scandal Intense 80ml + Hidratante 75ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-terre-d-hermes-100ml-gel-de-banho-80ml",
+      "name": "Kit Terre D'Hermès 100ml + Gel de Banho 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-versace-bright-crystal",
+      "name": "Kit Versace Bright Crystal",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-versace-dylan-purple-50ml-gel-de-banho-50ml-hidratante-50ml",
+      "name": "Kit Versace Dylan Purple 50ml + Gel de banho 50ml + Hidratante 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "kit-ysl-y-100ml-10ml",
+      "name": "Kit YSL Y 100ml + 10ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lancome-idole-edp-100ml",
+      "name": "Lancôme | Idôle EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lancome-la-vie-est-belle-edp-100ml",
+      "name": "Lancôme | La vie est belle EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lancome-la-vie-est-belle-iris-absolu-edp-100ml",
+      "name": "Lancôme | La vie est belle Iris Absolu EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-al-noble-safeer-edp-100ml",
+      "name": "Lattafa | Al Noble Safeer EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-al-noble-wazeer-edp-100ml",
+      "name": "Lattafa | Al Noble Wazeer EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-ameer-al-arab-edp-100ml",
+      "name": "Lattafa | Ameer al Arab EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-ameer-al-arab-imperium-edp-100ml",
+      "name": "Lattafa | Ameer al Arab Imperium EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-ameerat-al-arab-prive-rose-edp-100ml",
+      "name": "Lattafa | Ameerat al Arab Prive Rose EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-asad-collection-kit-4x25ml",
+      "name": "Lattafa | Asad Collection Kit 4x25ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-asad-edp-100ml",
+      "name": "Lattafa | ASAD EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-asad-elixir-edp-100ml-lancamento",
+      "name": "Lattafa | Asad Elixir EDP 100ml [Lançamento]",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-asad-kit",
+      "name": "Lattafa | ASAD Kit",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-atheeri-edp-100ml",
+      "name": "Lattafa | Atheeri EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-bade-e-al-oud-noble-blush-edp-100ml",
+      "name": "Lattafa | Bade'e Al Oud - Noble Blush EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-bade-e-al-oud-oud-for-glory-edp-100ml",
+      "name": "Lattafa | Bade'e Al Oud - Oud for Glory EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-dalal-edp-100ml",
+      "name": "Lattafa | Dalal EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-eclaire-edp-100ml",
+      "name": "Lattafa | Eclaire EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-eclaire-pistache-edp-100ml-lancamento",
+      "name": "Lattafa | Eclaire Pistache EDP 100ml [Lançamento]",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-fakhar-black-edp-100ml",
+      "name": "Lattafa | Fakhar Black EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-fakhar-extrait-gold-edp-100ml",
+      "name": "Lattafa | Fakhar Extrait Gold EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-fakhar-platin-edp-100ml",
+      "name": "Lattafa | Fakhar Platin EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-fakhar-rose-edp-100ml",
+      "name": "Lattafa | Fakhar Rosé EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-haya-edp-100ml",
+      "name": "Lattafa | Haya EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-her-confession-edp-100ml",
+      "name": "Lattafa | Her Confession EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-khamrah-dukhan-edp-100ml",
+      "name": "Lattafa | Khamrah Dukhan EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-khamrah-edp-100ml",
+      "name": "Lattafa | Khamrah EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-khanjar-edp-85ml",
+      "name": "Lattafa | Khanjar EDP 85ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-musamam-white-intense-edp-100ml",
+      "name": "Lattafa | Musamam White Intense EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-qaa-ed-edp-100ml",
+      "name": "Lattafa | Qaa'ed EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-teriaq-edp-100ml",
+      "name": "Lattafa | Teriaq EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-tharwah-gold-edp-100ml",
+      "name": "Lattafa | Tharwah Gold EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-the-kingdom-edp-100ml",
+      "name": "Lattafa | The Kingdom EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "lattafa-yara-rosa-edp-100ml",
+      "name": "Lattafa | Yara Rosa EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-alpine-homme-sport-edp-100ml",
+      "name": "Maison Alhambra | Alpine Homme Sport EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-chants-edp-100ml",
+      "name": "Maison Alhambra | Chants EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-como-moiselle-edp-100ml",
+      "name": "Maison Alhambra | Como Moiselle EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-delilah-blanc-edp-100ml",
+      "name": "Maison Alhambra | Delilah Blanc EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-la-vivacite-edp-100ml",
+      "name": "Maison Alhambra | La Vivacité EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-no-2-men-edp-80ml",
+      "name": "Maison Alhambra | No. 2 Men EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-perseus-exclusif-edp-100ml",
+      "name": "Maison Alhambra | Perseus Exclusif EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-philos-opus-noir-edp-100ml",
+      "name": "Maison Alhambra | Philos Opus Noir EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-rose-seduction-vip-pour-femme-edp-100ml",
+      "name": "Maison Alhambra | Rose Seduction VIP Pour Femme EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-salvo-edp-100ml",
+      "name": "Maison Alhambra | Salvo EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-salvo-intense-edp-100ml",
+      "name": "Maison Alhambra | Salvo Intense EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "maison-alhambra-so-candid-masculino-edp-100ml",
+      "name": "Maison Alhambra | So Candid (Masculino) EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "mugler-alien-edp-90ml",
+      "name": "MUGLER | Alien EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "mugler-angel-estrela-edp-100ml",
+      "name": "MUGLER | Angel Estrela EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "mugler-angel-hidratante-200ml",
+      "name": "MUGLER | Angel Hidratante 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "mugler-angel-pasta-200ml",
+      "name": "MUGLER | Angel Pasta 200ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "nishane-hacivat-x-xdp-100ml",
+      "name": "Nishane | Hacivat X XDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "nishane-hacivat-xdp-100ml",
+      "name": "Nishane | Hacivat XDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "orientica-amber-rouge-edp-80ml",
+      "name": "ORIENTICA | Amber Rouge EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "orientica-azure-fantasy-extrato-de-parfum-80ml",
+      "name": "ORIENTICA | Azure Fantasy Extrato de Parfum 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "orientica-royal-amber-luxury-collection-edp-80ml",
+      "name": "ORIENTICA | Royal Amber Luxury Collection EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "orientica-velvet-gold-edp-80ml",
+      "name": "ORIENTICA | Velvet Gold EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "parfums-de-marly-delina-la-rosee-edp-75ml",
+      "name": "Parfums de Marly | Delina La Rosée EDP 75ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "paris-corner-fayora-edp-100ml",
+      "name": "Paris Corner | Fayora EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "paris-corner-marshmallow-blush-edp-100ml",
+      "name": "Paris Corner | Marshmallow Blush EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-fame-edp-80ml",
+      "name": "PR | Fame EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-fame-intense-edp-80ml",
+      "name": "PR | Fame Intense EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-fame-parfum-80ml",
+      "name": "PR | Fame Parfum 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-lady-million-edp-80ml",
+      "name": "PR | Lady Million EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-olympea-edp-80ml",
+      "name": "PR | Olympéa EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-olympea-parfum-80ml",
+      "name": "PR | Olympéa Parfum 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-xs-black-edp-80ml",
+      "name": "PR | XS Black EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "pr-xs-pure-edp-80ml",
+      "name": "PR | XS Pure EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "prada-candy-edp-80ml",
+      "name": "Prada | Candy EDP 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "prada-paradoxe-edp-90ml",
+      "name": "Prada | Paradoxe EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "prada-paradoxe-intense-edp-90ml",
+      "name": "Prada | Paradoxe Intense EDP 90ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "rasasi-hawas-black-edp-100ml",
+      "name": "Rasasi | Hawas Black EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "rasasi-hawas-kobra-edp-100ml",
+      "name": "Rasasi | Hawas Kobra EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "rasasi-hawas-tropical-edp-100ml",
+      "name": "Rasasi | Hawas Tropical EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "rayhaan-elixir-edp-100ml",
+      "name": "Rayhaan Elixir EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "rayhaan-pacific-aura-edp-100ml",
+      "name": "Rayhaan Pacific Aura EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "sisterland-red-rose-united-colors-of-benetton-edt-80ml",
+      "name": "Sisterland Red Rose United Colors of Benetton EDT 80ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "stephane-humbert-lucas-god-of-fire-parfum-50ml",
+      "name": "Stephane Humbert Lucas | God of Fire Parfum 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "tom-ford-neroli-portofino-edp-50ml",
+      "name": "Tom Ford | Neroli Portofino EDP 50ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "valentino-donna-born-in-roma-coral-fantasy-edp-100ml",
+      "name": "Valentino Donna | Born in Roma Coral Fantasy EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "valentino-donna-born-in-roma-extradose-parfum-100ml",
+      "name": "Valentino Donna | Born in Roma Extradose Parfum 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "valentino-donna-born-in-roma-intense-edp-100ml",
+      "name": "Valentino Donna | Born in Roma Intense EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "valentino-donna-born-in-roma-yellow-dream-edp-100ml",
+      "name": "Valentino Donna | Born in Roma Yellow Dream EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "versace-dylan-turquoise-edt-100ml",
+      "name": "Versace | Dylan Turquoise EDT 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "xerjoff-accento-edp-100ml",
+      "name": "Xerjoff | Accento EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "xerjoff-casamorati-mefisto-edp-100ml",
+      "name": "Xerjoff | Casamorati Mefisto EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "xerjoff-erba-gold-edp-100ml",
+      "name": "Xerjoff | Erba Gold EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "xerjoff-erba-pura-edp-100ml",
+      "name": "Xerjoff | Erba Pura EDP 100ml",
+      "confidence": "exact"
+    },
+    {
+      "id": "xerjoff-renaissance-edp-100ml",
+      "name": "Xerjoff | Renaissance EDP 100ml",
+      "confidence": "exact"
+    }
+  ],
+  "unavailableProducts": [],
+  "imageChanges": [],
+  "priceChanges": [],
+  "mergeConflicts": [],
+  "preservedEnrichedFields": []
+}
