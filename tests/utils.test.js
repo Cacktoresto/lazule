@@ -162,6 +162,24 @@ test('remote analytics builds a PII-safe Supabase payload for allowed events', (
   assert.ok(!Object.hasOwn(row.metadata, 'customer_name'));
   assert.ok(!Object.hasOwn(row.metadata, 'phone'));
   assert.ok(!Object.hasOwn(row.metadata, 'email'));
+
+  const dnaRow = createRemoteAnalyticsPayload({
+    name: 'perfume_dna_view',
+    timestamp: '2026-05-16T10:01:00.000Z',
+    payload: {
+      page_path: '/produto/asad',
+      product_slug: 'asad',
+      status: 'in_stock',
+      dominant_dimensions: ['elegant', 'projection'],
+      raw_query: 'quero perfume para meu telefone 999',
+    },
+  });
+
+  assert.equal(dnaRow.event_name, 'perfume_dna_view');
+  assert.equal(dnaRow.product_slug, 'asad');
+  assert.equal(dnaRow.metadata.status, 'in_stock');
+  assert.equal(dnaRow.metadata.dominant_dimensions, 'elegant,projection');
+  assert.ok(!Object.hasOwn(dnaRow.metadata, 'raw_query'));
 });
 
 test('remote analytics only allows approved event names and blocks admin paths', () => {
@@ -169,6 +187,8 @@ test('remote analytics only allows approved event names and blocks admin paths',
   assert.equal(isRemoteAnalyticsAllowedEvent('referral_applied'), true);
   assert.equal(isRemoteAnalyticsAllowedEvent('product_view'), true);
   assert.equal(isRemoteAnalyticsAllowedEvent('whatsapp_click'), true);
+  assert.equal(isRemoteAnalyticsAllowedEvent('perfume_dna_view'), true);
+  assert.equal(isRemoteAnalyticsAllowedEvent('related_signature_click'), true);
   assert.equal(isRemoteAnalyticsAllowedEvent('search'), false);
   assert.equal(createRemoteAnalyticsPayload({ name: 'search', payload: { page_path: '/catalogo', search_term: 'oud' } }), null);
   assert.equal(createRemoteAnalyticsPayload({ name: 'product_view', payload: { page_path: '/admin/analytics', product_id: 'asad' } }), null);
