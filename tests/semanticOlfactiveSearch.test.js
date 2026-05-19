@@ -1,44 +1,42 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createSemanticExplanation, interpretSemanticIntent, scoreSemanticMatch, semanticLayeringHooks } from '../src/ai/semanticOlfactiveSearch.js';
-import { getOlfactiveRecommendations } from '../src/utils/olfactiveAssistant.js';
+import { createSemanticExplanation, getSemanticAnalyticsTags, interpretSemanticIntent, resetSemanticSessionProfile, scoreSemanticMatch } from '../src/ai/semanticOlfactiveSearch.js';
 
-const product = {
-  id: 'rich-clean',
-  name: 'Executive Linen',
-  description: 'Perfume limpo, sofisticado, musk, amadeirado e elegante para escritório.',
-  vibe: ['elegante', 'limpo', 'executivo'],
-  accords: ['woody', 'musky', 'citrus'],
-  weatherTags: ['calor', 'ameno'],
-  occasions: ['trabalho'],
-  performance: 'projeção moderada e refinada',
-};
+const marineProduct = { name: 'Ocean Executive', description: 'marine aquatic salty fresh clean luxo discreto para escritorio', accords: ['marine', 'aquatic'], vibeTags: ['clean', 'airy'], weatherTags: ['hot'], occasions: ['office'] };
+const sweetNightProduct = { name: 'Amber Night', description: 'vanilla amber warm spicy sedutor sofisticado noite', accords: ['amber', 'vanilla'], vibeTags: ['sensual', 'night'], weatherTags: ['cold'], occasions: ['night'] };
 
-test('interprets archetype and semantic vibe language deterministically', () => {
-  const result = interpretSemanticIntent('quero cheiro de CEO com energia old money');
-  assert.ok(result.themes.includes('executive'));
-  assert.ok(result.themes.includes('luxury'));
-  assert.ok(result.confidence > 0.4);
+test('semantic interpreter maps metaphor and PT-BR slang deterministically', () => {
+  resetSemanticSessionProfile();
+  const interpretation = interpretSemanticIntent('cheiro de oceano');
+  assert.ok(interpretation.accords.includes('marine'));
+  assert.ok(interpretation.vibes.includes('airy'));
+  assert.equal(interpretation.confidence, 'high');
+
+  const slang = interpretSemanticIntent('cheiro de patrão');
+  assert.ok(slang.vibes.includes('executive'));
 });
 
-test('scores abstract semantic matches and generates premium explanation', () => {
-  const interpreted = interpretSemanticIntent('cheiro de homem rico e limpo');
-  const scored = scoreSemanticMatch(product, interpreted);
-  const explanation = createSemanticExplanation(product, interpreted, scored);
-  assert.ok(scored.score > 0.25);
-  assert.match(explanation, /perfil|assinatura/i);
+test('weighted semantic retrieval protects against drift', () => {
+  const interpreted = interpretSemanticIntent('perfume executivo');
+  const good = scoreSemanticMatch(marineProduct, interpreted);
+  const bad = scoreSemanticMatch(sweetNightProduct, interpreted);
+  assert.ok(good.score > bad.score);
 });
 
-test('hybrid olfactive search injects semantic tags and avoids hallucinated products', () => {
-  const catalog = [product, { id: 'dark', name: 'Dark Resin', description: 'resinoso intenso noturno', vibe: ['dark'] }];
-  const result = getOlfactiveRecommendations('perfume de vilão elegante', catalog, { limit: 2 });
-  assert.ok(Array.isArray(result.semanticTags));
-  assert.equal(result.products.every((item) => catalog.some((c) => c.id === item.id)), true);
+test('session continuity increases aligned direction', () => {
+  resetSemanticSessionProfile();
+  interpretSemanticIntent('escritorio');
+  const second = interpretSemanticIntent('cheiro limpo');
+  const scored = scoreSemanticMatch(marineProduct, second);
+  assert.ok(scored.breakdown.continuityBoost > 0);
 });
 
-test('layering and future preference hooks remain lightweight and deterministic', () => {
-  const compatibility = semanticLayeringHooks.getCompatibilitySignals(product, { ...product, id: 'b' });
-  assert.ok(compatibility.overlap >= 0);
-  assert.ok(Array.isArray(semanticLayeringHooks.preferenceHooks.likedVibes));
+test('semantic engine never returns empty atmospheric recommendation state', () => {
+  const interpreted = interpretSemanticIntent('perfume sedutor doce');
+  const scored = scoreSemanticMatch(sweetNightProduct, interpreted);
+  const explanation = createSemanticExplanation(sweetNightProduct, interpreted, scored);
+  const tags = getSemanticAnalyticsTags(interpreted);
+  assert.ok(explanation.length > 25);
+  assert.ok(tags.length > 0);
 });
