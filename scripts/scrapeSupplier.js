@@ -1,7 +1,9 @@
 import { chromium } from 'playwright';
-import { mkdir, readdir, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, rename, unlink, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
 const SUPPLIER_URL = 'https://rjperfumaria.catalog.kyte.site/';
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -22,6 +24,7 @@ const INITIAL_RENDER_WAIT_MS = 4_000;
 const PRODUCT_TEXT_MAX_LENGTH = 1_600;
 const MAX_LOG_LENGTH = 1_000;
 const DEBUG_SCRAPER_HTML = String(process.env.DEBUG_SCRAPER_HTML || '').toLowerCase() === 'true';
+const execFileAsync = promisify(execFile);
 
 const PRODUCT_CARD_SELECTOR = [
   'article[class*=\"product\" i]',
@@ -954,9 +957,14 @@ function hasStrongProductFields(product) {
 
 function shouldRejectBeforeImageDownload(product) {
   const normalizedName = normalizeTextToken(product.name || '');
-  if (!normalizedName || isInvalidUiPhrase(normalizedName)) return true;
+  if (!normalizedName || isInvalidUiPhrase(normalizedName) || isPromoOnlyName(product.name)) return true;
   if (!hasPerfumeLikeEvidence(product) && !hasStrongProductFields(product)) return true;
   return false;
+}
+
+function isPromoOnlyName(name) {
+  const normalized = normalizeTextToken(name || '');
+  return /^-?\d+%\s*off$/.test(normalized);
 }
 
 function finalNormalizeAndDedupe(products) {
@@ -1017,11 +1025,15 @@ async function downloadImage(product) {
 async function hydrateImages(products) {
   await mkdir(IMAGE_DIR, { recursive: true });
   let imageDownloadsPreventedByPreValidation = 0;
+  let promoImagesPrevented = 0;
   const approvedProducts = [];
 
   for (const product of products) {
     if (shouldRejectBeforeImageDownload(product)) {
       imageDownloadsPreventedByPreValidation += 1;
+      if (isPromoOnlyName(product.name)) {
+        promoImagesPrevented += 1;
+      }
       continue;
     }
 
@@ -1039,7 +1051,7 @@ async function hydrateImages(products) {
     }
   }
 
-  return { products: approvedProducts, imageDownloadsPreventedByPreValidation };
+  return { products: approvedProducts, imageDownloadsPreventedByPreValidation, promoImagesPrevented };
 }
 
 async function cleanupInvalidUiNoiseImages() {
@@ -1048,7 +1060,8 @@ async function cleanupInvalidUiNoiseImages() {
   const removed = [];
   for (const file of files) {
     const base = file.replace(path.extname(file), '');
-    if (isInvalidUiPhrase(base)) {
+    const isPromoLeakFile = /(^|-)\\d+%-?off$/i.test(base);
+    if (isInvalidUiPhrase(base) || isPromoLeakFile) {
       await unlink(path.join(IMAGE_DIR, file));
       removed.push(file);
     }
@@ -1056,32 +1069,20 @@ async function cleanupInvalidUiNoiseImages() {
   return removed;
 }
 
-function serializeValue(value, indentLevel = 2) {
-  const indent = ' '.repeat(indentLevel);
-  const nextIndent = ' '.repeat(indentLevel + 2);
-
-  if (Array.isArray(value)) {
-    return `[${value.map((item) => serializeValue(item, 0)).join(', ')}]`;
-  }
-
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value)
-      .map(([key, entryValue]) => `${nextIndent}${key}: ${serializeValue(entryValue, indentLevel + 2)}`)
-      .join(',\n');
-    return `{\n${entries},\n${indent}}`;
-  }
-
-  if (typeof value === 'string') {
-    return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
-  }
-
-  return String(value);
+function serializeProductsFile(products) {
+  return `export const products = ${JSON.stringify(products, null, 2)};\n`;
 }
 
-async function writeProductsFile(products) {
-  const serializedProducts = products.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
-  const content = `export const products = [\n${serializedProducts},\n];\n`;
-  await writeFile(OUTPUT_FILE, content);
+async function writeProductsFileAtomically(products) {
+  const tempPath = `${OUTPUT_FILE}.tmp`;
+  await writeFile(tempPath, serializeProductsFile(products));
+  try {
+    await execFileAsync('node', ['--check', tempPath]);
+  } catch (error) {
+    await unlink(tempPath).catch(() => {});
+    throw new Error(`node --check falhou para ${tempPath}: ${error.stderr || error.message}`);
+  }
+  await rename(tempPath, OUTPUT_FILE);
 }
 
 async function scrapeCategory(page, category) {
@@ -1221,7 +1222,17 @@ async function main() {
 
   const hydrationResult = await hydrateImages(finalValidatedProducts);
   log(`Métrica imageDownloadsPreventedByPreValidation=${hydrationResult.imageDownloadsPreventedByPreValidation}`);
-  await writeProductsFile(hydrationResult.products);
+  let serializationValid = false;
+  let productFileWritten = false;
+  let productFileWriteAborted = false;
+  try {
+    await writeProductsFileAtomically(hydrationResult.products);
+    serializationValid = true;
+    productFileWritten = true;
+  } catch (error) {
+    productFileWriteAborted = true;
+    throw error;
+  }
   const invalidUiElementsDiscarded = report.invalidDiscarded;
   const promoCardsDiscarded = products.filter((p) => /^-?\d+%\s*off$/i.test(normalizeTextToken(p.name || ''))).length;
   log(`FinalReport=${JSON.stringify({
@@ -1229,6 +1240,11 @@ async function main() {
     totalAfterFinalDedupe: dedupedProducts.length,
     totalAfterFinalValidation: finalValidatedProducts.length,
     imageDownloadsPreventedByPreValidation: hydrationResult.imageDownloadsPreventedByPreValidation,
+    serializationValid,
+    productFileWritten,
+    productFileWriteAborted,
+    promoImagesRemoved: removedInvalidImages.length,
+    promoImagesPrevented: hydrationResult.promoImagesPrevented,
     invalidUiElementsDiscarded,
     promoCardsDiscarded,
     successfulCategories: runReport.successfulCategories,
