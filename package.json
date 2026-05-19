@@ -14,7 +14,12 @@
     "test:utils": "node --test tests/*.test.js",
     "prebuild": "node scripts/generateSeoAssets.js public",
     "enrich:referencePerfumes": "node scripts/enrichReferencePerfumes.js",
-    "validate:referencePerfumes": "node scripts/validateReferencePerfumes.js"
+    "validate:referencePerfumes": "node scripts/validateReferencePerfumes.js",
+    "ingest:knowledge": "node scripts/ingestion/ingestFragrances.js",
+    "normalize:knowledge": "node scripts/ingestion/normalizeFragranceData.js",
+    "enrich:knowledge": "node scripts/ingestion/enrichFragranceSemanticData.js",
+    "validate:knowledge": "node scripts/ingestion/validateKnowledgeEntries.js",
+    "build:knowledge-graph": "node scripts/ingestion/buildKnowledgeGraphArtifacts.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
