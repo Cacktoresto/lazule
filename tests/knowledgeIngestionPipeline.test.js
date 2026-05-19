@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   parseInputRecords, normalizeFragranceEntry, enrichFragranceSemanticData,
-  validateKnowledgeEntries, buildKnowledgeGraphArtifacts, computeKnowledgeConfidence,
+  validateKnowledgeEntries, buildKnowledgeGraphArtifacts, computeKnowledgeConfidence, computeSourceReputation,
 } from '../src/ai/knowledgeIngestionPipeline.js';
 
 test('supports CSV JSON NDJSON parsing', () => {
@@ -42,4 +42,14 @@ test('graph build is stable and idempotent', () => {
   const a2 = buildKnowledgeGraphArtifacts(base);
   assert.deepEqual(a1.graph.nodes, a2.graph.nodes);
   assert.equal(a1.semanticOnlyIds.length, 1);
+});
+
+
+test('source reputation and graph health metrics are internal only', () => {
+  const rep = computeSourceReputation({ sourceConsistency: 0.95, extractionQuality: 0.9, semanticReliability: 0.9, duplicationFrequency: 0.05, malformedExtractionFrequency: 0.01 });
+  assert.equal(rep.tier, 'trusted');
+  const base = [{ name: 'A', brand: 'B', notes: 'n1,n2,n3', accords: 'fresh,woody', semanticTags: 'clean,day,office', curationState: 'approved', status: 'in_stock', knowledgeVisibility: 'public', sourceStats: { sourceConsistency: 0.3 } }].map(normalizeFragranceEntry).map(enrichFragranceSemanticData);
+  const artifact = buildKnowledgeGraphArtifacts(base);
+  assert.equal(artifact.metrics.graphHealth.internalOnly, true);
+  assert.equal(artifact.internalSignals.sourceReputationEnabled, true);
 });

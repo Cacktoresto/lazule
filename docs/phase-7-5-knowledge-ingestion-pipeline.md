@@ -41,3 +41,55 @@ Artifacts are staged under `data/knowledge/artifacts` and include:
 - metrics for future dashboarding (confidence/cluster distributions)
 
 This split structure supports lazy loading and future embedding/ANN integration without requiring architecture rewrites.
+
+## Phase 7.8 Additions
+
+### Fragrance Seed Starter Generator
+Use curated internal seed dictionaries (no scraping/fetching) to bootstrap categories:
+- `npm run generate:fragrance-seeds -- --category designer_masculine --limit 100`
+- outputs `data/imports/raw/fragrance-seeds-{category}.txt`
+- deterministic, duplicate-resistant per category
+- starter system only (not a complete perfume database)
+
+### Recommended Full Flow
+1. Generate seeds (`generate:fragrance-seeds`).
+2. Discover URLs from seed list (manual/internal workflow).
+3. Extract facts (`extract:facts`).
+4. Ingest knowledge (`ingest:knowledge` + `normalize:knowledge`).
+5. Enrich (`enrich:knowledge`).
+6. Validate (`validate:knowledge`).
+7. Build graph (`build:knowledge-graph`).
+
+### Internal Source Reputation Layers
+Source reliability is internally classified as:
+- `trusted`
+- `acceptable`
+- `weak`
+- `noisy`
+
+Internal metrics tracked:
+- source consistency
+- extraction quality
+- semantic reliability
+- duplication frequency
+- malformed extraction frequency
+
+These metrics influence confidence, enrichment trust posture, and relationship safety scoring. Reputation remains internal-only.
+
+### Raw Snapshot Preservation
+The ingestion pipeline now stores non-destructive snapshots with:
+- raw extraction
+- normalized extraction
+- enriched output
+- validation output
+
+This supports regeneration, enrichment evolution, rollback safety, and confidence recalculation.
+
+### Graph Health Metrics (Internal)
+Artifacts now include lightweight graph-health metrics:
+- orphan fragrances
+- low-relationship nodes
+- overconnected semantic clusters
+- duplicate semantic neighborhoods
+- weak wardrobe balancing coverage
+- low-confidence regions
