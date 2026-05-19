@@ -21,7 +21,8 @@
     "validate:knowledge": "node scripts/ingestion/validateKnowledgeEntries.js",
     "build:knowledge-graph": "node scripts/ingestion/buildKnowledgeGraphArtifacts.js",
     "extract:facts": "node scripts/ingestion/extractFragranceFacts.js",
-    "generate:fragrance-seeds": "node scripts/ingestion/generateFragranceSeeds.js"
+    "generate:fragrance-seeds": "node scripts/ingestion/generateFragranceSeeds.js",
+    "discover:fragrances": "node scripts/ingestion/discoverFragranceUrls.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

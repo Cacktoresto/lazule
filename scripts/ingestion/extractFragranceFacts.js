@@ -23,9 +23,12 @@ export function parseInputTargets(arg) {
   const content = fs.readFileSync(arg, 'utf8').trim();
   if (arg.endsWith('.json')) {
     const parsed = JSON.parse(content);
-    if (Array.isArray(parsed)) return parsed.filter((v) => /^https?:\/\//i.test(String(v)));
+    if (Array.isArray(parsed) && parsed.every((v) => /^https?:\/\//i.test(String(v)))) return parsed.filter((v) => /^https?:\/\//i.test(String(v)));
     if (Array.isArray(parsed.urls)) return parsed.urls.filter((v) => /^https?:\/\//i.test(String(v)));
-    throw new Error('JSON inválido: use array de URLs ou {"urls": []}.');
+    if (Array.isArray(parsed) && parsed.every((v) => v && typeof v === 'object' && 'query' in v)) {
+      return parsed.flatMap((entry) => (entry.candidates ?? []).map((c) => c?.url).filter((u) => /^https?:\/\//i.test(String(u))));
+    }
+    throw new Error('JSON inválido: use array de URLs, {"urls": []} ou saída discover:fragrances.');
   }
   return content.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^https?:\/\//i.test(line));
 }
