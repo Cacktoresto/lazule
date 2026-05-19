@@ -21,9 +21,9 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.26), transparent 28rem),
-    radial-gradient(circle at 88% 8%, rgba(200, 162, 77, 0.12), transparent 24rem),
-    #0f172a;
+    radial-gradient(circle at 14% 16%, rgba(37, 99, 235, 0.18), transparent 30rem),
+    radial-gradient(circle at 86% 10%, rgba(200, 162, 77, 0.08), transparent 26rem),
+    #0b1120;
 }
 
 ::selection {
@@ -72,11 +72,12 @@ body {
 }
 
 .lazule-mineral-particle {
-  animation: lazule-mineral-float 22s ease-in-out infinite;
+  animation: lazule-mineral-float 30s ease-in-out infinite;
+  opacity: 0.72;
 }
 
 .lazule-mineral-drift {
-  animation: lazule-mineral-drift 30s ease-in-out infinite;
+  animation: lazule-mineral-drift 42s ease-in-out infinite;
 }
 
 .lazule-premium-button {
@@ -85,11 +86,11 @@ body {
   isolation: isolate;
   transform: translateY(0);
   transition:
-    transform 260ms ease,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 260ms ease,
     background-color 260ms ease,
-    box-shadow 260ms ease,
-    color 260ms ease;
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 220ms ease;
 }
 
 .lazule-premium-button::after {
@@ -105,10 +106,10 @@ body {
 }
 
 .lazule-premium-button:hover {
-  transform: translateY(-0.18rem);
+  transform: translateY(-0.12rem);
   box-shadow:
-    0 20px 60px rgba(15, 23, 42, 0.34),
-    0 14px 38px rgba(200, 162, 77, 0.16);
+    0 16px 44px rgba(15, 23, 42, 0.30),
+    0 8px 24px rgba(200, 162, 77, 0.12);
 }
 
 .lazule-premium-button:hover::after {
@@ -177,12 +178,12 @@ input {
 }
 
 .lazule-product-card:hover {
-  transform: translateY(-0.32rem);
+  transform: translateY(-0.2rem);
   border-color: rgba(200, 162, 77, 0.42);
   box-shadow:
-    0 26px 80px rgba(15, 23, 42, 0.52),
-    0 0 42px rgba(37, 99, 235, 0.12),
-    0 0 0 1px rgba(200, 162, 77, 0.12);
+    0 20px 56px rgba(15, 23, 42, 0.42),
+    0 0 28px rgba(37, 99, 235, 0.09),
+    0 0 0 1px rgba(200, 162, 77, 0.10);
 }
 
 .lazule-product-card:hover::after {
@@ -266,8 +267,8 @@ input {
   opacity: 0;
   transform: translate3d(0, 1.15rem, 0);
   transition:
-    opacity 640ms ease var(--reveal-delay, 0ms),
-    transform 640ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+    opacity 720ms ease var(--reveal-delay, 0ms),
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
 }
 
 .lazule-reveal.is-visible {
@@ -279,8 +280,8 @@ input {
   opacity: 0;
   transform: translate3d(0, 0.9rem, 0);
   transition:
-    opacity 560ms ease var(--item-delay, 0ms),
-    transform 560ms cubic-bezier(0.22, 1, 0.36, 1) var(--item-delay, 0ms);
+    opacity 620ms ease var(--item-delay, 0ms),
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1) var(--item-delay, 0ms);
 }
 
 .lazule-reveal.is-visible .lazule-reveal-item {
@@ -319,9 +320,9 @@ input {
 
 .lazule-touch-card:hover,
 .lazule-brand-pill:hover {
-  transform: translateY(-0.18rem);
+  transform: translateY(-0.12rem);
   box-shadow:
-    0 22px 58px rgba(2, 6, 23, 0.34),
+    0 16px 42px rgba(2, 6, 23, 0.30),
     0 0 0 1px rgba(200, 162, 77, 0.10);
 }
 
@@ -485,8 +486,8 @@ input {
 }
 
 .lazule-product-info-card {
-  margin-top: clamp(-1.75rem, -5vw, -1.125rem);
-  padding: 2rem 1.5rem 1.5rem;
+  margin-top: clamp(-1.2rem, -4vw, -0.75rem);
+  padding: 1.7rem 1.35rem 1.35rem;
 }
 
 @supports not (height: 1svh) {
@@ -501,8 +502,8 @@ input {
   }
 
   .lazule-product-info-card {
-    margin-top: -2rem;
-    padding: 2.25rem 2rem 2rem;
+    margin-top: -1.35rem;
+    padding: 1.9rem 1.8rem 1.8rem;
   }
 }
 
@@ -1802,4 +1803,16 @@ textarea {
   .lazule-dna-meter {
     animation: none;
   }
+}
+
+
+.lazule-editorial-copy {
+  max-width: 60ch;
+  text-wrap: pretty;
+}
+
+.lazule-quiet-chip {
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.045);
+  color: rgba(226,232,240,0.92);
 }
