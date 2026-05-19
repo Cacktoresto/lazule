@@ -19,7 +19,8 @@
     "normalize:knowledge": "node scripts/ingestion/normalizeFragranceData.js",
     "enrich:knowledge": "node scripts/ingestion/enrichFragranceSemanticData.js",
     "validate:knowledge": "node scripts/ingestion/validateKnowledgeEntries.js",
-    "build:knowledge-graph": "node scripts/ingestion/buildKnowledgeGraphArtifacts.js"
+    "build:knowledge-graph": "node scripts/ingestion/buildKnowledgeGraphArtifacts.js",
+    "extract:facts": "node scripts/ingestion/extractFragranceFacts.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
