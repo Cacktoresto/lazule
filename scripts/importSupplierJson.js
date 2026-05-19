@@ -6,6 +6,7 @@ const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const IMPORTS_DIR = path.join(ROOT_DIR, 'data/imports');
 const FALLBACK_INPUT_FILE = path.join(ROOT_DIR, 'data/supplier-products.json');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'src/data/products.js');
+const REPORT_FILE = path.join(ROOT_DIR, 'supplier-refresh-report.json');
 const LOG_PREFIX = '[LAZULE import]';
 const GENERIC_CATEGORIES = new Set(['', 'catalogo', 'catálogo', 'todos', 'tudo', 'all', 'catalog']);
 
@@ -19,6 +20,29 @@ function createImportMetrics() {
     withoutImage: 0,
   };
 }
+
+const UPDATABLE_FIELDS = new Set([
+  'salePrice',
+  'retailLine',
+  'image',
+  'sourceUrl',
+  'category',
+  'available',
+  'stockIndicators',
+  'supplierMetadata',
+]);
+
+const PROTECTED_FIELDS = [
+  'enrichedDescription',
+  'aiSummary',
+  'dna_vector',
+  'semanticTags',
+  'relationshipHints',
+  'recommendationHints',
+  'clusterAssignments',
+  'editorialCopy',
+  'manualCuration',
+];
 
 function log(message) {
   console.log(`${LOG_PREFIX} ${message}`);
@@ -47,6 +71,25 @@ function normalizeName(value) {
     .replace(/\s+/g, ' ')
     .replace(/[^a-z0-9 |.-]/g, '')
     .trim();
+}
+
+function normalizeTokenSet(value) {
+  return new Set(normalizeComparisonText(value).split(' ').filter(Boolean));
+}
+
+function tokenOverlapScore(left, right) {
+  if (!left.size || !right.size) {
+    return 0;
+  }
+
+  let overlap = 0;
+  for (const token of left) {
+    if (right.has(token)) {
+      overlap += 1;
+    }
+  }
+
+  return overlap / Math.max(left.size, right.size);
 }
 
 function normalizeComparisonText(value) {
@@ -472,6 +515,10 @@ function normalizeProduct(rawProduct, fallbackCategory = '', metrics = createImp
     olfactoryReference,
     available,
     featured: false,
+    retailLine: normalizeRetailLine(rawProduct.retailLine || ''),
+    sourceUrl: String(rawProduct.sourceUrl || '').trim(),
+    stockIndicators: rawProduct.stockIndicators ?? null,
+    supplierMetadata: rawProduct.supplierMetadata ?? null,
   };
 }
 
@@ -521,6 +568,138 @@ function serializeValue(value, indentLevel = 2) {
   }
 
   return String(value);
+}
+
+async function loadExistingProducts() {
+  const moduleUrl = new URL('../src/data/products.js', import.meta.url);
+  const module = await import(moduleUrl);
+  return Array.isArray(module.products) ? module.products : [];
+}
+
+function classifyMatchConfidence(supplierProduct, existingProduct) {
+  const nameA = normalizeComparisonText(supplierProduct.name);
+  const nameB = normalizeComparisonText(existingProduct.name);
+  const brandA = normalizeComparisonText(supplierProduct.brand);
+  const brandB = normalizeComparisonText(existingProduct.brand);
+  const categoryA = normalizeComparisonText(supplierProduct.category);
+  const categoryB = normalizeComparisonText(existingProduct.category);
+  const imageSame = Boolean(supplierProduct.image && existingProduct.image && supplierProduct.image === existingProduct.image);
+  const urlSame = Boolean(supplierProduct.sourceUrl && existingProduct.sourceUrl && supplierProduct.sourceUrl === existingProduct.sourceUrl);
+  const nameScore = tokenOverlapScore(normalizeTokenSet(nameA), normalizeTokenSet(nameB));
+  const categoryScore = tokenOverlapScore(normalizeTokenSet(categoryA), normalizeTokenSet(categoryB));
+  const brandSame = Boolean(brandA && brandB && brandA === brandB);
+
+  if (nameA && nameA === nameB && (brandSame || imageSame || urlSame)) {
+    return 'exact';
+  }
+
+  if ((nameScore >= 0.85 && brandSame) || (nameScore >= 0.9 && (imageSame || urlSame))) {
+    return 'strong';
+  }
+
+  if (nameScore >= 0.65 || (nameScore >= 0.55 && (brandSame || categoryScore >= 0.7))) {
+    return 'weak';
+  }
+
+  return 'uncertain';
+}
+
+function buildRefreshReport() {
+  return {
+    generatedAt: new Date().toISOString(),
+    dryRun: false,
+    summary: {},
+    newProducts: [],
+    updatedProducts: [],
+    unavailableProducts: [],
+    imageChanges: [],
+    priceChanges: [],
+    mergeConflicts: [],
+    preservedEnrichedFields: [],
+  };
+}
+
+function mergeProducts(existingProducts, importedProducts, { dryRun }) {
+  const now = new Date().toISOString();
+  const report = buildRefreshReport();
+  report.dryRun = dryRun;
+  const existingById = new Map(existingProducts.map((item) => [item.id, item]));
+  const existingByName = new Map(existingProducts.map((item) => [normalizeName(item.name), item]));
+  const consumedIds = new Set();
+  const mergedCatalog = [];
+
+  for (const imported of importedProducts) {
+    const directMatch = existingById.get(imported.id);
+    const nameMatch = existingByName.get(normalizeName(imported.name));
+    const match = directMatch || nameMatch || null;
+
+    if (!match) {
+      const created = { ...imported, firstSeenAt: now, supplierLastSeenAt: now, updatedAt: now };
+      mergedCatalog.push(created);
+      report.newProducts.push({ id: created.id, name: created.name });
+      continue;
+    }
+
+    const confidence = classifyMatchConfidence(imported, match);
+    if (confidence === 'weak' || confidence === 'uncertain') {
+      report.mergeConflicts.push({
+        supplierProduct: { id: imported.id, name: imported.name },
+        existingProduct: { id: match.id, name: match.name },
+        confidence,
+        needsReview: true,
+      });
+      mergedCatalog.push(match);
+      consumedIds.add(match.id);
+      continue;
+    }
+
+    consumedIds.add(match.id);
+    const merged = { ...match };
+    for (const [key, value] of Object.entries(imported)) {
+      if (UPDATABLE_FIELDS.has(key)) {
+        if (key === 'salePrice' && match.salePrice !== value) {
+          report.priceChanges.push({ id: match.id, name: match.name, from: match.salePrice, to: value });
+        }
+        if (key === 'image' && match.image !== value) {
+          report.imageChanges.push({ id: match.id, name: match.name, from: match.image || null, to: value || null });
+        }
+        merged[key] = value;
+      }
+    }
+    merged.available = imported.available;
+    merged.updatedAt = now;
+    merged.supplierLastSeenAt = now;
+    merged.firstSeenAt = match.firstSeenAt || now;
+
+    const preserved = PROTECTED_FIELDS.filter((field) => Object.hasOwn(match, field));
+    if (preserved.length > 0) {
+      report.preservedEnrichedFields.push({ id: match.id, name: match.name, fields: preserved });
+    }
+    report.updatedProducts.push({ id: match.id, name: match.name, confidence });
+    mergedCatalog.push(merged);
+  }
+
+  for (const existing of existingProducts) {
+    if (consumedIds.has(existing.id)) {
+      continue;
+    }
+
+    const markedUnavailable = { ...existing, available: false, updatedAt: now };
+    mergedCatalog.push(markedUnavailable);
+    report.unavailableProducts.push({ id: existing.id, name: existing.name });
+  }
+
+  report.summary = {
+    newProducts: report.newProducts.length,
+    updatedProducts: report.updatedProducts.length,
+    unavailableProducts: report.unavailableProducts.length,
+    imageChanges: report.imageChanges.length,
+    priceChanges: report.priceChanges.length,
+    mergeConflicts: report.mergeConflicts.length,
+    preservedEnrichedFields: report.preservedEnrichedFields.length,
+  };
+
+  return { mergedCatalog: deduplicateByName(mergedCatalog), report };
 }
 
 async function pathExists(filePath) {
@@ -593,6 +772,7 @@ function logReport(fileReports, metrics, products) {
 }
 
 async function main() {
+  const dryRun = process.argv.includes('--dry-run');
   const importFiles = await getImportFiles();
   const filePayloads = await Promise.all(importFiles.map(readImportFile));
   const rawProducts = filePayloads.flatMap((payload) =>
@@ -603,15 +783,25 @@ async function main() {
     .map(({ rawProduct, fallbackCategory }) => normalizeProduct(rawProduct, fallbackCategory, metrics))
     .filter(Boolean);
   const products = deduplicateByName(normalizedProducts);
-  const serializedProducts = products.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
+  const existingProducts = await loadExistingProducts();
+  const { mergedCatalog, report } = mergeProducts(existingProducts, products, { dryRun });
+  const serializedProducts = mergedCatalog.map((product) => `  ${serializeValue(product, 2)}`).join(',\n');
 
-  await writeFile(OUTPUT_FILE, `export const products = [\n${serializedProducts},\n];\n`);
+  if (!dryRun) {
+    await writeFile(OUTPUT_FILE, `export const products = [\n${serializedProducts},\n];\n`);
+  }
+  await writeFile(REPORT_FILE, `${JSON.stringify(report, null, 2)}\n`);
   logReport(
     filePayloads.map((payload) => ({ filePath: payload.filePath, rawCount: payload.rawProducts.length, fallbackCategory: payload.fallbackCategory })),
     metrics,
-    products,
+    mergedCatalog,
   );
-  log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
+  if (dryRun) {
+    log('Modo dry-run habilitado: src/data/products.js não foi modificado.');
+  } else {
+    log(`Arquivo atualizado: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
+  }
+  log(`Relatório de refresh: ${path.relative(ROOT_DIR, REPORT_FILE)}`);
 }
 
 main().catch((error) => {
