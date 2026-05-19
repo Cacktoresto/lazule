@@ -1,339 +1,401 @@
 (() => {
   const CONFIG = {
-    maxProductTextLength: 1800,
-    scrollStepRatio: 0.45,
-    minScrollStep: 320,
-    scrollDelayMs: 1200,
-    stableRoundsToStop: 4,
-    maxScrollAttempts: 70,
-    imageTimeoutMs: 1800,
-    imagePollMs: 120,
-    cardFocusDelayMs: 450,
+    maxProductTextLength: 2400,
+    scrollDelayMs: 900,
+    lazySettleDelayMs: 650,
     finalSettleDelayMs: 1200,
     minImageWidth: 80,
     minImageHeight: 80,
+    maxStaleCycles: 5,
+    maxScrollCycles: 200,
+    maxRuntimeMs: 120000,
+    maxProducts: null,
+    bottomThresholdPx: 18,
+    scrollStepRatio: 0.8,
+    scrollLoopWindow: 8,
   };
+
   const LOG_PREFIX = '[LAZULE browser extractor]';
   const CATEGORY_NAMES = new Set(['All', 'Masculinos', 'Femininos', 'Kit', 'Árabe', 'Nicho', 'Pastas Isabelle']);
   const IGNORED_IMAGE_PATTERN = /logo|icon|favicon|banner|placeholder|sprite|brand|avatar|whatsapp|facebook|instagram/i;
 
-  function log(message) {
+  function log(message, extra) {
+    if (extra !== undefined) {
+      console.log(`${LOG_PREFIX} ${message}`, extra);
+      return;
+    }
+
     console.log(`${LOG_PREFIX} ${message}`);
   }
 
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   function normalizeText(value) {
-    return (value || '')
-      .replace(/\u00a0/g, ' ')
-      .replace(/[ \t]+\n/g, '\n')
-      .replace(/\n{2,}/g, '\n')
-      .trim();
+    return (value || '').replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
   }
 
   function visibleText(element) {
     return normalizeText(element?.innerText || element?.textContent || '');
   }
 
-  function getFirstSrcsetUrl(srcset) {
-    return srcset
-      ?.split(',')
-      ?.map((item) => item.trim().split(/\s+/)[0])
-      ?.find(Boolean) || '';
+  function normalizeIdentityPart(value) {
+    return normalizeText(String(value || ''))
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/[|]+/g, ' ')
+      .trim();
   }
 
-  function getBackgroundImageUrl(element) {
-    const backgroundImage = window.getComputedStyle(element).backgroundImage;
-    const match = backgroundImage?.match(/url\(["']?(.+?)["']?\)/i);
+  function getBestSrcsetUrl(srcset) {
+    if (!srcset) return '';
+
+    const parsed = srcset
+      .split(',')
+      .map((item) => item.trim())
+      .map((item) => {
+        const [url, sizeHint] = item.split(/\s+/);
+        const numericHint = Number((sizeHint || '').replace(/\D/g, ''));
+        return { url, score: Number.isFinite(numericHint) ? numericHint : 0 };
+      })
+      .filter((item) => item.url);
+
+    parsed.sort((a, b) => b.score - a.score);
+    return parsed[0]?.url || '';
+  }
+
+  function parseBgImageUrl(element) {
+    const value = window.getComputedStyle(element).backgroundImage;
+    const match = value?.match(/url\(["']?(.+?)["']?\)/i);
     return match?.[1] || '';
   }
 
   function isUsableImageUrl(url) {
-    if (!url || url.startsWith('data:') || url.startsWith('blob:')) {
-      return false;
-    }
-
+    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return false;
     return !IGNORED_IMAGE_PATTERN.test(url);
   }
 
   function isUsableImageElement(image) {
-    if (!image) {
-      return false;
-    }
-
-    const altAndClass = `${image.alt || ''} ${image.className || ''} ${image.id || ''}`;
+    if (!image) return false;
+    const altAndClass = `${image.alt || ''} ${image.title || ''} ${image.className || ''} ${image.id || ''}`;
     const rect = image.getBoundingClientRect();
     const naturalWidth = image.naturalWidth || rect.width;
     const naturalHeight = image.naturalHeight || rect.height;
-
-    return (
-      !IGNORED_IMAGE_PATTERN.test(altAndClass) &&
-      naturalWidth >= CONFIG.minImageWidth &&
-      naturalHeight >= CONFIG.minImageHeight
-    );
+    return !IGNORED_IMAGE_PATTERN.test(altAndClass) && naturalWidth >= CONFIG.minImageWidth && naturalHeight >= CONFIG.minImageHeight;
   }
 
-  function getImageCandidateUrl(image) {
-    const candidates = [
+  function getImageCandidates(image) {
+    return [
       image.currentSrc,
       image.src,
       image.getAttribute('src'),
       image.getAttribute('data-src'),
       image.getAttribute('data-lazy-src'),
       image.getAttribute('data-original'),
-      getFirstSrcsetUrl(image.getAttribute('srcset')),
-      getFirstSrcsetUrl(image.getAttribute('data-srcset')),
-    ];
-
-    return candidates.find(isUsableImageUrl) || '';
+      getBestSrcsetUrl(image.getAttribute('srcset')),
+      getBestSrcsetUrl(image.getAttribute('data-srcset')),
+    ].filter(isUsableImageUrl);
   }
 
-  async function waitForImage(image) {
-    const startedAt = Date.now();
+  function getImageData(element) {
+    const images = [...element.querySelectorAll('img')].filter(isUsableImageElement);
+    const imageCandidates = new Set();
 
-    while (Date.now() - startedAt < CONFIG.imageTimeoutMs) {
-      const hasSource = Boolean(getImageCandidateUrl(image));
-      const isComplete = image.complete || image.naturalWidth > 0;
-
-      if (hasSource && isComplete) {
-        return true;
-      }
-
-      await sleep(CONFIG.imagePollMs);
+    for (const image of images) {
+      for (const candidate of getImageCandidates(image)) imageCandidates.add(candidate);
     }
 
-    return Boolean(getImageCandidateUrl(image));
-  }
-
-  async function waitForVisibleImages(root = document) {
-    const visibleImages = [...root.querySelectorAll('img')].filter((image) => {
-      const rect = image.getBoundingClientRect();
-      return rect.bottom >= 0 && rect.top <= window.innerHeight && rect.right >= 0 && rect.left <= window.innerWidth;
-    });
-
-    await Promise.allSettled(visibleImages.map(waitForImage));
-  }
-
-  function getImageUrl(element) {
-    const imageElements = [...element.querySelectorAll('img')].filter(isUsableImageElement);
-
-    for (const image of imageElements) {
-      const url = getImageCandidateUrl(image);
-
-      if (url) {
-        return url;
-      }
+    for (const bgElement of [element, ...element.querySelectorAll('*')]) {
+      const bgUrl = parseBgImageUrl(bgElement);
+      if (isUsableImageUrl(bgUrl)) imageCandidates.add(bgUrl);
     }
 
-    const elementsWithBackground = [element, ...element.querySelectorAll('*')];
-
-    for (const backgroundElement of elementsWithBackground) {
-      const url = getBackgroundImageUrl(backgroundElement);
-
-      if (isUsableImageUrl(url)) {
-        return url;
-      }
-    }
-
-    return '';
-  }
-
-  function countRetailMarkers(text) {
-    return (text.match(/varejo/gi) || []).length;
-  }
-
-  function hasProductPriceShape(text) {
-    return /R\$/i.test(text) && /varejo/i.test(text) && (text.match(/R\$/gi) || []).length >= 2;
-  }
-
-  function findProductRoot(element) {
-    let candidate = element;
-    let current = element;
-
-    while (current?.parentElement) {
-      const parent = current.parentElement;
-      const parentText = visibleText(parent);
-      const parentRetailCount = countRetailMarkers(parentText);
-
-      if (parentRetailCount > 1 || parentText.length > CONFIG.maxProductTextLength) {
-        break;
-      }
-
-      if (hasProductPriceShape(parentText)) {
-        candidate = parent;
-      }
-
-      current = parent;
-    }
-
-    return candidate;
-  }
-
-  function parseMoneyToNumber(value) {
-    const raw = String(value || '').replace(/R\$|\s/g, '').trim();
-
-    if (!raw) {
-      return null;
-    }
-
-    if (raw.includes(',')) {
-      return Number(raw.replace(/\./g, '').replace(',', '.'));
-    }
-
-    const parts = raw.split('.');
-
-    if (parts.length > 2) {
-      const decimals = parts.at(-1);
-      const integer = parts.slice(0, -1).join('');
-      return Number(`${integer}.${decimals}`);
-    }
-
-    return Number(raw);
-  }
-
-  function extractMoneyValues(text) {
-    return (text.match(/R\$\s*\d+(?:[.,]\d{2})?/gi) || [])
-      .map((match) => parseMoneyToNumber(match))
-      .filter((price) => Number.isFinite(price));
-  }
-
-  function isProductNameLine(line) {
-    const isCategory = CATEGORY_NAMES.has(line);
-    const isPrice = /R\$|varejo/i.test(line);
-    const isUiText = /^(início|inicio|catálogo|catalogo|comprar|ver mais|whatsapp|buscar|menu|all)$/i.test(line);
-    return !isCategory && !isPrice && !isUiText && line.length > 2 && line.length <= 180;
-  }
-
-  function extractOlfactoryReference(description) {
-    const match = description.match(/(?:ref\.?\s*olfativa|refer[eê]ncia\s*olfativa)\s*:?\s*(.+)/i);
-    return match?.[1]?.trim() || '';
-  }
-
-  function parseProductBlock(rawProduct, fallbackCategory) {
-    const lines = rawProduct.text
-      .split('\n')
-      .map((line) => line.replace(/^#+\s*/, '').replace(/\s+/g, ' ').trim())
-      .filter(Boolean);
-    const name = lines.find(isProductNameLine) || '';
-    const category = lines.find((line) => CATEGORY_NAMES.has(line)) || fallbackCategory || '';
-    const retailLine = lines.find((line) => /varejo/i.test(line)) || '';
-    const pricesBeforeRetail = lines
-      .filter((line) => !/varejo/i.test(line))
-      .flatMap((line) => extractMoneyValues(line));
-    const retailPrices = extractMoneyValues(retailLine);
-    const description = lines
-      .filter((line) => line !== name)
-      .filter((line) => line !== category)
-      .filter((line) => !/R\$|varejo/i.test(line))
-      .join(' ')
-      .trim();
-
+    const allImages = [...imageCandidates];
     return {
-      name,
-      category,
-      pricesBeforeRetail,
-      retailLine,
-      supplierRetailPrice: retailPrices.at(-1) ?? null,
-      costPrice: pricesBeforeRetail[0] ?? null,
-      description,
-      olfactoryReference: extractOlfactoryReference(description),
-      image: rawProduct.image || '',
-      sourceUrl: window.location.href,
-      rawText: rawProduct.text,
+      image: allImages[0] || '',
+      allImages,
+      imageMissing: allImages.length === 0,
     };
   }
 
-  async function autoScroll() {
-    let stableRounds = 0;
-    let previousHeight = 0;
-    let previousY = -1;
+  function parseMoneyToNumber(value) {
+    const raw = String(value || '').replace(/R\$\s*R\$/gi, 'R$').replace(/R\$|\s/g, '').trim();
+    if (!raw) return null;
+    const cleaned = raw.replace(/[^\d.,]/g, '');
+    if (!cleaned) return null;
+    if (cleaned.includes(',')) return Number(cleaned.replace(/\./g, '').replace(',', '.'));
+    const pieces = cleaned.split('.');
+    if (pieces.length > 2) return Number(`${pieces.slice(0, -1).join('')}.${pieces.at(-1)}`);
+    return Number(cleaned);
+  }
 
-    for (let attempt = 1; attempt <= CONFIG.maxScrollAttempts; attempt += 1) {
-      const step = Math.max(CONFIG.minScrollStep, Math.floor(window.innerHeight * CONFIG.scrollStepRatio));
-      window.scrollBy(0, step);
-      await sleep(CONFIG.scrollDelayMs);
-      await waitForVisibleImages(document);
+  function extractMoneyValues(text) {
+    const cleanedText = String(text || '').replace(/R\$\s*R\$/gi, 'R$');
+    return (cleanedText.match(/R\$\s*\d{1,3}(?:\.\d{3})*(?:,\d{2})?|R\$\s*\d+(?:[.,]\d{2})?/gi) || [])
+      .map((m) => parseMoneyToNumber(m))
+      .filter((price) => Number.isFinite(price));
+  }
 
-      const height = document.body.scrollHeight;
-      const y = window.scrollY;
-      const reachedBottom = y + window.innerHeight >= height - 8;
-      const unchanged = height === previousHeight && Math.round(y) === Math.round(previousY);
-      stableRounds = unchanged || reachedBottom ? stableRounds + 1 : 0;
+  function cleanupName(name, category) {
+    let out = normalizeText(name)
+      .replace(/\b\d{1,2}%\s*off\b/gi, '')
+      .replace(/\bpromo[cç][aã]o\b/gi, '')
+      .replace(/\bvarejo\b.*$/i, '')
+      .replace(/R\$\s*\d[\d.,]*/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
 
-      log(`scroll ${attempt}: y=${Math.round(y)} altura=${height}`);
-
-      previousHeight = height;
-      previousY = y;
-
-      if (stableRounds >= CONFIG.stableRoundsToStop) {
-        break;
-      }
+    if (category) {
+      const prefix = new RegExp(`^${category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\s*[-:|]?\s*`, 'i');
+      out = out.replace(prefix, '').trim();
     }
 
-    window.scrollTo(0, 0);
-    await sleep(CONFIG.finalSettleDelayMs);
+    return out;
+  }
+
+  function detectCategory(card, fallbackCategory) {
+    const fromCurrent = document.querySelector('[aria-current="page"], [aria-selected="true"], .active, [data-active="true"]')?.textContent?.trim();
+    const cardText = visibleText(card);
+    const fromKnown = [...CATEGORY_NAMES].find((item) => new RegExp(`\\b${item}\\b`, 'i').test(cardText));
+    const fromUrl = window.location.pathname.split('/').filter(Boolean).at(-1)?.replace(/[-_]/g, ' ');
+    const pageHeading = document.querySelector('h1, h2')?.textContent?.trim();
+    return fromKnown || fromCurrent || fallbackCategory || fromUrl || pageHeading || '';
+  }
+
+  function detectName(card, rawText) {
+    const direct = [
+      ...card.querySelectorAll('h1,h2,h3,h4,[title],[aria-label],[data-name],[class*="name" i]'),
+    ]
+      .map((node) => normalizeText(node.getAttribute?.('title') || node.getAttribute?.('aria-label') || node.textContent || ''))
+      .find((value) => value && value.length > 2 && value.length <= 180 && !/R\$|varejo|comprar|whatsapp/i.test(value));
+
+    if (direct) return direct;
+    const firstLine = normalizeText(rawText).split('\n').map((line) => line.trim()).find((line) => line && !/R\$|varejo|comprar|whatsapp/i.test(line));
+    return firstLine || '';
+  }
+
+  function computeConfidence(product) {
+    const hasName = Boolean(product.name);
+    const hasCategory = Boolean(product.category);
+    const hasPrice = Number.isFinite(product.supplierRetailPrice) || Number.isFinite(product.costPrice);
+
+    if (hasName && hasCategory && hasPrice) return 'high';
+    if (hasName && (hasCategory || hasPrice || Boolean(product.image))) return 'medium';
+    return 'low';
+  }
+
+  function buildIdentityKey(product) {
+    return [
+      normalizeIdentityPart(product.name),
+      normalizeIdentityPart(product.category),
+      normalizeIdentityPart(product.retailLine),
+      normalizeIdentityPart(product.image),
+      normalizeIdentityPart(product.sourceUrl),
+    ].join('|');
+  }
+
+  function toSnapshot(card) {
+    const html = normalizeText(card.outerHTML || '').slice(0, 1200);
+    return html;
+  }
+
+  function mergeProductRecords(base, incoming) {
+    const merged = { ...base };
+
+    const candidateFields = ['name', 'category', 'retailLine', 'description', 'olfactoryReference', 'sourceUrl', 'rawText'];
+    for (const field of candidateFields) {
+      if (!merged[field] && incoming[field]) merged[field] = incoming[field];
+    }
+
+    if (!Number.isFinite(merged.costPrice) && Number.isFinite(incoming.costPrice)) merged.costPrice = incoming.costPrice;
+    if (!Number.isFinite(merged.supplierRetailPrice) && Number.isFinite(incoming.supplierRetailPrice)) merged.supplierRetailPrice = incoming.supplierRetailPrice;
+
+    merged.allImages = [...new Set([...(base.allImages || []), ...(incoming.allImages || [])])];
+    merged.alternatePrices = [...new Set([...(base.alternatePrices || []), ...(incoming.alternatePrices || [])])];
+    merged.alternateSourceUrls = [...new Set([...(base.alternateSourceUrls || []), ...(incoming.alternateSourceUrls || [])])];
+    merged.image = merged.image || incoming.image || '';
+    merged.imageMissing = !merged.image;
+    merged.rawCardSnapshot = merged.rawCardSnapshot || incoming.rawCardSnapshot;
+    merged.duplicateCount = (base.duplicateCount || 1) + 1;
+    merged.extractionConfidence = computeConfidence(merged);
+    merged.missingFields = ['name', 'category', 'supplierRetailPrice', 'costPrice', 'image'].filter((field) => {
+      if (field === 'image') return !merged.image;
+      return !merged[field] && !Number.isFinite(merged[field]);
+    });
+    merged.needsReview = merged.extractionConfidence === 'low';
+
+    return merged;
   }
 
   function findProductElements() {
-    const retailElements = [...document.querySelectorAll('body *')]
+    return [...document.querySelectorAll('article,li,[role="listitem"],[class*="product" i],[class*="card" i],[class*="item" i],[data-testid*="product" i],[data-cy*="product" i]')]
       .filter((element) => {
         const text = visibleText(element);
-        return hasProductPriceShape(text) && countRetailMarkers(text) === 1 && text.length <= CONFIG.maxProductTextLength;
+        return /R\$|varejo/i.test(text) && text.length <= CONFIG.maxProductTextLength;
       });
-    const roots = [...new Set(retailElements.map((element) => findProductRoot(element)))];
-    const selectorCandidates = [...document.querySelectorAll([
-      'article',
-      'li',
-      '[role="listitem"]',
-      '[class*="product" i]',
-      '[class*="card" i]',
-      '[class*="item" i]',
-      '[data-testid*="product" i]',
-      '[data-cy*="product" i]',
-    ].join(','))]
-      .filter((element) => {
-        const text = visibleText(element);
-        return hasProductPriceShape(text) && countRetailMarkers(text) === 1 && text.length <= CONFIG.maxProductTextLength;
-      });
-
-    return [...new Set([...roots, ...selectorCandidates])];
   }
 
-  async function extractRawProducts() {
-    const byText = new Map();
-    const productElements = findProductElements();
+  function getScrollContainer() {
+    const candidates = [document.scrollingElement, document.documentElement, document.body].filter(Boolean);
+    return candidates[0];
+  }
 
-    for (const element of productElements) {
-      element.scrollIntoView({ block: 'center' });
-      await sleep(CONFIG.cardFocusDelayMs);
-      await waitForVisibleImages(element);
+  function extractFromCard(card, fallbackCategory) {
+    const rawText = visibleText(card);
+    if (!rawText) return null;
 
-      const text = visibleText(element);
-      const key = text.replace(/\s+/g, ' ').trim();
+    const prices = extractMoneyValues(rawText);
+    const retailLine = normalizeText(rawText.split('\n').find((line) => /varejo/i.test(line)) || '');
+    const name = cleanupName(detectName(card, rawText), fallbackCategory);
+    const category = detectCategory(card, fallbackCategory);
+    const imageData = getImageData(card);
+    const description = normalizeText(rawText.replace(name, '').slice(0, 400));
 
-      if (!key || byText.has(key)) {
-        continue;
+    const product = {
+      name,
+      category,
+      retailLine,
+      supplierRetailPrice: prices.at(-1) ?? null,
+      costPrice: prices[0] ?? null,
+      description,
+      olfactoryReference: (description.match(/(?:ref\.?\s*olfativa|refer[eê]ncia\s*olfativa)\s*:?\s*(.+)/i) || [])[1] || '',
+      image: imageData.image,
+      allImages: imageData.allImages,
+      imageMissing: imageData.imageMissing,
+      sourceUrl: window.location.href,
+      alternateSourceUrls: [window.location.href],
+      rawText,
+      rawCardSnapshot: toSnapshot(card),
+      extractionSource: 'browserExtractor:v2',
+      extractionTimestamp: new Date().toISOString(),
+      alternatePrices: prices,
+      duplicateCount: 1,
+    };
+
+    product.extractionConfidence = computeConfidence(product);
+    product.needsReview = product.extractionConfidence === 'low';
+    product.missingFields = ['name', 'category', 'supplierRetailPrice', 'costPrice', 'image'].filter((field) => {
+      if (field === 'image') return !product.image;
+      return !product[field] && !Number.isFinite(product[field]);
+    });
+
+    return product;
+  }
+
+  async function run() {
+    const startedAt = Date.now();
+    const productsByKey = new Map();
+    const uniqueKeys = new Set();
+    const report = {
+      totalDomCardsObserved: 0,
+      uniqueProductsExtracted: 0,
+      duplicateMerges: 0,
+      confidenceTotals: { high: 0, medium: 0, low: 0 },
+      productsMissingImage: 0,
+      productsMissingPrice: 0,
+      productsMissingCategory: 0,
+      staleCycles: 0,
+      stopReason: 'unknown',
+      runtimeMs: 0,
+      newProductsPerCycle: [],
+    };
+
+    const scrollContainer = getScrollContainer();
+    const fallbackCategory = document.querySelector('[aria-current="page"]')?.textContent?.trim() || document.title || '';
+    const history = [];
+
+    for (let cycle = 1; cycle <= CONFIG.maxScrollCycles; cycle += 1) {
+      if (Date.now() - startedAt >= CONFIG.maxRuntimeMs) {
+        report.stopReason = 'max_runtime';
+        break;
       }
 
-      byText.set(key, {
-        text,
-        image: getImageUrl(element),
-      });
+      await sleep(CONFIG.scrollDelayMs);
+      const beforeCount = uniqueKeys.size;
+      const cards = findProductElements();
+      report.totalDomCardsObserved += cards.length;
+
+      const scanPasses = [0, CONFIG.lazySettleDelayMs];
+      for (const passDelay of scanPasses) {
+        if (passDelay) await sleep(passDelay);
+        const cardsInPass = findProductElements();
+
+        for (const card of cardsInPass) {
+          const product = extractFromCard(card, fallbackCategory);
+          if (!product || !product.name) continue;
+
+          const identity = buildIdentityKey(product);
+          if (!uniqueKeys.has(identity)) {
+            uniqueKeys.add(identity);
+            productsByKey.set(identity, product);
+          } else {
+            const current = productsByKey.get(identity);
+            productsByKey.set(identity, mergeProductRecords(current, product));
+            report.duplicateMerges += 1;
+          }
+        }
+      }
+
+      const newProducts = uniqueKeys.size - beforeCount;
+      report.newProductsPerCycle.push({ cycle, newProducts });
+      report.staleCycles = newProducts === 0 ? report.staleCycles + 1 : 0;
+
+      const top = Math.round(scrollContainer.scrollTop || window.scrollY || 0);
+      const height = Math.round(scrollContainer.scrollHeight || document.body.scrollHeight || 0);
+      const client = Math.round(scrollContainer.clientHeight || window.innerHeight || 0);
+      history.push(`${top}:${height}:${client}`);
+      if (history.length > CONFIG.scrollLoopWindow) history.shift();
+
+      const repeated = history.filter((entry) => entry === history[history.length - 1]).length >= 3;
+      const nearBottom = top + client >= height - CONFIG.bottomThresholdPx;
+
+      if (CONFIG.maxProducts && uniqueKeys.size >= CONFIG.maxProducts) {
+        report.stopReason = 'max_products';
+        break;
+      }
+
+      if (repeated && report.staleCycles > 1) {
+        report.stopReason = 'scroll_loop_detected';
+        break;
+      }
+
+      if (report.staleCycles >= CONFIG.maxStaleCycles) {
+        report.stopReason = nearBottom ? 'bottom_stable' : 'no_new_products';
+        break;
+      }
+
+      if (cycle === CONFIG.maxScrollCycles) {
+        report.stopReason = 'max_scroll_cycles';
+        break;
+      }
+
+      const step = Math.max(200, Math.floor((scrollContainer.clientHeight || window.innerHeight) * CONFIG.scrollStepRatio));
+      scrollContainer.scrollBy({ top: step, behavior: 'auto' });
     }
 
-    window.scrollTo(0, 0);
-    return [...byText.values()];
-  }
+    const products = [...productsByKey.values()];
+    report.uniqueProductsExtracted = products.length;
 
-  function downloadJson(products) {
+    for (const product of products) {
+      report.confidenceTotals[product.extractionConfidence] += 1;
+      if (!product.image) report.productsMissingImage += 1;
+      if (!Number.isFinite(product.supplierRetailPrice) && !Number.isFinite(product.costPrice)) report.productsMissingPrice += 1;
+      if (!product.category) report.productsMissingCategory += 1;
+    }
+
+    report.runtimeMs = Date.now() - startedAt;
+
     const payload = {
       extractedAt: new Date().toISOString(),
       sourceUrl: window.location.href,
       productCount: products.length,
       products,
+      extractionReport: report,
     };
+
+    log(`Extração finalizada com stopReason=${report.stopReason}; produtos=${products.length}; duplicatasMescladas=${report.duplicateMerges}`);
+    console.table(products.map((p) => ({ name: p.name, category: p.category, costPrice: p.costPrice, supplierRetailPrice: p.supplierRetailPrice, confidence: p.extractionConfidence, image: p.image })));
+    log('Relatório de qualidade', report);
+
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -345,41 +407,27 @@
     URL.revokeObjectURL(url);
   }
 
-  function logImageReport(products) {
-    const withImage = products.filter((product) => product.image).length;
-    const withoutImage = products.length - withImage;
-    const coverage = products.length > 0 ? Math.round((withImage / products.length) * 100) : 0;
-    const missingImages = products.filter((product) => !product.image).slice(0, 20).map((product) => product.name);
+  run().catch((error) => {
+    console.error(`${LOG_PREFIX} falha inesperada na extração`, error);
+    const fallbackPayload = {
+      extractedAt: new Date().toISOString(),
+      sourceUrl: window.location.href,
+      productCount: 0,
+      products: [],
+      extractionReport: {
+        stopReason: 'unexpected_error',
+        error: String(error?.message || error),
+      },
+    };
 
-    log(`Total de produtos extraídos: ${products.length}`);
-    log(`Produtos com imagem: ${withImage}`);
-    log(`Produtos sem imagem: ${withoutImage}`);
-    log(`Cobertura de imagem: ${coverage}%`);
-
-    if (missingImages.length > 0) {
-      console.warn(`${LOG_PREFIX} Até 20 produtos sem imagem para debug:`, missingImages);
-    }
-  }
-
-  (async function run() {
-    log('Iniciando scroll automático lento. Aguarde até o download do JSON.');
-    await autoScroll();
-
-    const fallbackCategory = document.querySelector('[aria-current="page"]')?.textContent?.trim() || document.title || '';
-    const rawProducts = await extractRawProducts();
-    const products = rawProducts
-      .map((rawProduct) => parseProductBlock(rawProduct, fallbackCategory))
-      .filter((product) => product.name && Number.isFinite(product.costPrice) && Number.isFinite(product.supplierRetailPrice));
-
-    log(`Blocos encontrados: ${rawProducts.length}`);
-    log(`Produtos válidos: ${products.length}`);
-    logImageReport(products);
-    console.table(products.map(({ name, category, costPrice, supplierRetailPrice, image }) => ({ name, category, costPrice, supplierRetailPrice, image })));
-
-    if (products.length === 0) {
-      console.warn(`${LOG_PREFIX} Nenhum produto válido encontrado. Verifique se você está na página do catálogo após passar pelo Cloudflare e se os produtos estão visíveis.`);
-    }
-
-    downloadJson(products);
-  })();
+    const blob = new Blob([JSON.stringify(fallbackPayload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'supplier-products.partial.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
 })();
