@@ -17,7 +17,7 @@ function vectorize(tokens = []) {
 
 export const OLFATIVE_EMBEDDING_INDEX = {
   "version": "phase-9.5-olfactive-embeddings-enriched-v1",
-  "generatedAt": "2026-05-19T18:41:23.703Z",
+  "generatedAt": "2026-05-19T18:58:04.453Z",
   "embeddingDocuments": [
     {
       "slug": "acqua-di-gioia-edp-100ml",
