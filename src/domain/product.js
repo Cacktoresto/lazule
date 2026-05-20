@@ -3,42 +3,9 @@ import { getCommercialStatus, shouldExposeInMainCatalog } from '../utils/commerc
 import { inferCatalogType } from '../utils/catalogFilters.js';
 import { createSearchIndex, createSearchTokens, inferBrandFromName, normalizeSearchText } from '../utils/search.js';
 import { createBrandSlug, createProductSlug } from '../utils/productRouting.js';
+import { sanitizePublicProduct } from '../data/publicProductSanitizer.js';
 
 const PROMOTIONAL_NAME_PATTERN = /^-?\s*\d+\s*%\s*off$/i;
-const PUBLIC_PRODUCT_FIELDS = [
-  'id',
-  'name',
-  'brand',
-  'category',
-  'gender',
-  'salePrice',
-  'image',
-  'badges',
-  'description',
-  'olfactoryReference',
-  'available',
-  'featured',
-  'status',
-  'commercialStatus',
-  'concentration',
-  'notes',
-  'accords',
-  'family',
-  'similarTo',
-  'inspirations',
-  'vibeTags',
-  'occasionTags',
-  'weatherTags',
-  'performanceLabel',
-  'projectionLabel',
-  'popularityTier',
-  'description_editorial',
-  'ai_summary',
-  'dna_vector',
-  'dominantDNA',
-  'recommendationHints',
-  'catalogVisibility',
-];
 
 export function isPromotionalName(value) {
   return PROMOTIONAL_NAME_PATTERN.test(String(value ?? '').trim());
@@ -59,7 +26,7 @@ export function getSafeProductName(product = {}) {
 }
 
 export function pickPublicProductFields(product = {}) {
-  return Object.fromEntries(PUBLIC_PRODUCT_FIELDS.map((field) => [field, product[field]]));
+  return sanitizePublicProduct(product);
 }
 
 export function normalizeProduct(rawProduct = {}) {

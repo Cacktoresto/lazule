@@ -568,19 +568,6 @@ function countByCategory(products) {
 }
 
 
-function isPrivateFieldKey(key) {
-  if (PRIVATE_FIELD_KEYS.has(key)) {
-    return true;
-  }
-
-  return PRIVATE_FIELD_PATTERNS.some((pattern) => pattern.test(key));
-}
-
-function sanitizePublicProduct(product) {
-  return Object.fromEntries(
-    Object.entries(product).filter(([key]) => !isPrivateFieldKey(key)),
-  );
-}
 
 function serializeValue(value, indentLevel = 2) {
   const indent = ' '.repeat(indentLevel);
