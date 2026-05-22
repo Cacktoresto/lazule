@@ -7,6 +7,7 @@ import {
   generateRecommendationReason,
   getDominantDNA,
 } from './perfumeDNA.js';
+import { buildSemanticRelationships } from './semanticIntelligenceLayer.js';
 
 const DEFAULT_LIMIT = 6;
 const DIVERSITY_BRAND_PENALTY = 0.045;
@@ -165,28 +166,30 @@ function isOppositeGenderValue(currentGender, candidateGender) {
 
 export function getRelatedProducts(currentProduct, allProducts = [], { limit = 8 } = {}) {
   if (!currentProduct || !Array.isArray(allProducts)) return [];
-  const currentDNA = generatePerfumeDNA(currentProduct);
-  const currentText = getProductText(currentProduct);
   const currentGender = getGender(currentProduct);
-  const sameGenderCount = allProducts.filter((candidate) => candidate && !isSameProduct(currentProduct, candidate) && getGender(candidate) === currentGender).length;
-  return allProducts
-    .filter((candidate) => {
-      if (!candidate || isSameProduct(currentProduct, candidate)) return false;
-      return !(sameGenderCount >= 4 && isOppositeGenderValue(currentGender, getGender(candidate)));
-    })
-    .map((candidate) => {
-      const candidateDNA = generatePerfumeDNA(candidate);
-      const candidateText = getProductText(candidate);
-      const dnaSimilarity = calculateDNASimilarity(currentDNA, candidateDNA);
-      const sparsePenalty = getDominantDNA(candidateDNA, { threshold: 0.3, limit: 1 }).length ? 0 : 0.5;
-      const sameVibe = (Array.isArray(currentProduct.vibe) ? currentProduct.vibe : []).some((vibe) => candidateText.includes(normalizeSearchText(vibe))) ? 0.08 : 0;
-      const sameReference = currentProduct.olfactoryReference && normalizeSearchText(currentProduct.olfactoryReference) === normalizeSearchText(candidate.olfactoryReference) ? 0.16 : 0;
-      const categoryComplement = normalizeSearchText(currentProduct.category) === normalizeSearchText(candidate.category) || normalizeSearchText(currentProduct.catalogType) === normalizeSearchText(candidate.catalogType) ? 0.08 : 0;
-      const performanceMatch = currentText.includes('potente') && candidateText.includes('potente') ? 0.05 : 0;
-      return { product: candidate, score: Math.max(0, dnaSimilarity * 0.72 + sameVibe + sameReference + categoryComplement + performanceMatch - sparsePenalty), dnaSimilarity };
-    })
-    .sort((a, b) => b.score - a.score || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'))
-    .filter((item, index, items) => items.findIndex((other) => productKey(other.product) === productKey(item.product)) === index)
-    .slice(0, limit)
-    .map(({ product }) => product);
+  const candidates = allProducts.filter((candidate) => {
+    if (!candidate || isSameProduct(currentProduct, candidate)) return false;
+    const sameGenderCount = allProducts.filter((p) => p && !isSameProduct(currentProduct, p) && getGender(p) === currentGender).length;
+    return !(sameGenderCount >= 4 && isOppositeGenderValue(currentGender, getGender(candidate)));
+  });
+
+  const semantic = buildSemanticRelationships(currentProduct, candidates, { limit });
+
+  const ranked = semantic.related.length
+    ? semantic.related
+    : candidates
+      .map((candidate) => { const dna=generatePerfumeDNA(candidate); const sparsePenalty = getDominantDNA(dna, { threshold: 0.3, limit: 1 }).length ? 0 : 0.35; return { product: candidate, score: Math.max(0, calculateDNASimilarity(generatePerfumeDNA(currentProduct), dna) - sparsePenalty) }; })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((entry) => ({ ...entry, semantic: { score: entry.score, distance: 1 - entry.score, facet: 'fresh_clean', cluster: 'intimate_skin_scent', reasons: ['Fallback por similaridade DNA.'], confidence: 0.5 } }));
+
+  return ranked.map(({ product, semantic: meta }) => ({
+    ...product,
+    relatedSemanticScore: meta.score,
+    relatedSemanticDistance: meta.distance,
+    relatedSemanticFacet: meta.facet,
+    relatedSemanticCluster: meta.cluster,
+    relatedSemanticReasons: meta.reasons,
+    relatedSemanticConfidence: meta.confidence,
+  }));
 }

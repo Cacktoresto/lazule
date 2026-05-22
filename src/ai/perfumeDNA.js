@@ -141,7 +141,7 @@ export function generateRecommendationReason(product = {}, { queryDNA, perfumeDN
 
   if (matchedIntents.includes('parecido') || product.olfactoryReference) {
     const base = traits.slice(0, 2).join(' e ') || 'perfil próximo da referência';
-    return `Tem construção olfativa próxima da referência e puxa para ${base}.`;
+    return `Tem construção de referência olfativa próxima e puxa para ${base}.`;
   }
   if (traits.includes('doce') && traits.includes('noite')) return 'Perfil intenso, doce e ideal para noite.';
   if (traits.includes('fresco') && (traits.includes('trabalho') || traits.includes('versátil'))) return 'Boa escolha para clima quente, rotina e uso diário.';
