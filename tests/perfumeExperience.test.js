@@ -58,9 +58,23 @@ test('selects 5-8 dominant dimensions for the visual DNA layer', () => {
   const dimensions = getDominantExperienceDimensions(amberReference);
 
   assert.ok(dimensions.length >= 5 && dimensions.length <= 8);
-  assert.equal(dimensions[0].id, 'nightlife');
+  assert.ok(['nightlife', 'shareability'].includes(dimensions[0].id));
+  assert.ok(dimensions.some((dimension) => dimension.id === 'shareability'));
+  assert.ok(!dimensions.some((dimension) => ['masculine', 'feminine'].includes(dimension.id)));
   assert.ok(dimensions.some((dimension) => dimension.label === 'Elegância'));
   assert.ok(dimensions.every((dimension) => typeof dimension.value === 'number' && dimension.value > 0 && dimension.value <= 1));
+});
+
+test('shareability dimension favors shared reading for balanced or unisex signatures', () => {
+  const unisexExperience = createPerfumeExperience({
+    ...amberReference,
+    gender: 'Unissex',
+    dna_vector: { ...amberReference.dna_vector, masculine: 0.44, feminine: 0.46, versatility: 0.7, fresh: 0.55 },
+  });
+  const shareability = unisexExperience.dimensions.find((dimension) => dimension.id === 'shareability');
+
+  assert.ok(shareability);
+  assert.ok(['compartilhável', 'unissex moderno', 'assinatura versátil'].includes(shareability.level));
 });
 
 test('generates short human olfactive signature from available signals', () => {
