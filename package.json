@@ -28,7 +28,8 @@
     "build:embedding-index": "node scripts/ingestion/buildEmbeddingIndex.js",
     "validate:generated-artifacts": "node scripts/validateGeneratedArtifacts.js",
     "validate:public-boundary": "node scripts/validatePublicBoundary.js",
-    "validate:embedding-index": "node scripts/validateGeneratedArtifacts.js"
+    "validate:embedding-index": "node scripts/validateGeneratedArtifacts.js",
+    "audit:semantic-visibility": "node scripts/semanticVisibilityAudit.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
