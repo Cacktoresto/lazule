@@ -102,13 +102,15 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
           <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold sm:text-[1.65rem]">
             <HighlightText text={product.name} query={highlightQuery} />
           </h3>
+          <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-300">{product.narrative || product.description || 'Perfil olfativo em curadoria'}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {[product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)].filter(Boolean).slice(0, 3).map((label) => (
+            {(product.semanticFacets?.length ? product.semanticFacets : [product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)]).filter(Boolean).slice(0, 3).map((label) => (
               <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-slate-300">
                 {label}
               </span>
             ))}
           </div>
+          {product.semanticConfidence < 0.66 ? <p className="mt-2 text-[0.62rem] uppercase tracking-[0.12em] text-slate-400">Perfil olfativo em curadoria</p> : null}
           <strong className="mt-3 text-lg text-lazule-mist sm:mt-4 sm:text-xl">{priceLabel}</strong>
         </div>
       </a>

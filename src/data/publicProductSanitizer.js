@@ -3,6 +3,8 @@ const PUBLIC_PRODUCT_FIELDS = [
   'available','featured','status','commercialStatus','concentration','notes','accords','family','similarTo','inspirations',
   'vibeTags','occasionTags','weatherTags','performanceLabel','projectionLabel','popularityTier','description_editorial',
   'ai_summary','dna_vector','dominantDNA','recommendationHints','catalogVisibility',
+  'olfactiveProfile','narrative','signature','personality','occasion','temperature','projection','semanticFacets',
+  'semanticConfidence','semanticReasons','semanticCluster','semanticRelated',
 ];
 
 const PRIVATE_FIELD_PATTERNS = [

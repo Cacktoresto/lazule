@@ -31,7 +31,7 @@ const overlap = (a, b) => {
   return shared / Math.max(a.size, b.size);
 };
 
-function inferFacet(product = {}) {
+export function inferFacet(product = {}) {
   const accords = asSet(product.accords);
   const vibes = asSet(product.vibeTags ?? product.vibe);
   const notes = asSet(product.notes);
@@ -47,7 +47,7 @@ function inferFacet(product = {}) {
   return 'fresh_clean';
 }
 
-function inferCluster(product = {}, facet = inferFacet(product)) {
+export function inferCluster(product = {}, facet = inferFacet(product)) {
   const t = normalizeSearchText([product.performanceLabel, ...(product.occasionTags ?? [])].join(' '));
   if (facet === 'woody_executive') return 'executive_fresh';
   if (facet === 'seductive_dense' && t.includes('noite')) return 'seductive_night';

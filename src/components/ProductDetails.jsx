@@ -427,7 +427,7 @@ function getAccordionItems(product, description, olfactoryReference) {
     },
     {
       title: 'Ocasião',
-      content: `${getProductEssence(product)} Ideal para transformar um momento simples em assinatura pessoal.`,
+      content: `${product.narrative || getProductEssence(product)} Ideal para transformar um momento simples em assinatura pessoal.`,
     },
     {
       title: 'Similaridades',
@@ -439,7 +439,7 @@ function getAccordionItems(product, description, olfactoryReference) {
     },
     {
       title: 'Sobre a fragrância',
-      content: description || 'Uma escolha premium da LAZULE FRAGRANCES para quem prefere perfumes com identidade, presença e acabamento elegante.',
+      content: description || product.narrative || 'Uma escolha premium da LAZULE FRAGRANCES para quem prefere perfumes com identidade, presença e acabamento elegante.',
     },
   ];
 }
@@ -613,8 +613,8 @@ function RecommendationCard({ product, context = 'recommendations', explanation 
           <h3 className="mt-2 line-clamp-2 font-display text-2xl leading-tight text-lazule-mist group-hover:text-lazule-gold">
             {getProductDisplayName(product)}
           </h3>
-          {product.olfactoryReference && <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {product.olfactoryReference}</p>}
-          {explanation ? <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-300">{explanation}</p> : null}
+          <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {product.signature || product.olfactoryReference || 'Perfil olfativo em curadoria'}</p>
+          <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-300">{explanation || product.semanticReasons?.[0] || product.narrative || 'Conexão por assinatura olfativa e contexto de uso.'}</p>
         </div>
         <strong className="mt-5 text-base text-lazule-mist">{canDirectBuy(product) ? formatBRL(product.salePrice) : getCommercialStatusMeta(product).badge}</strong>
       </div>
