@@ -140,16 +140,16 @@ export function generateRecommendationReason(product = {}, { queryDNA, perfumeDN
   const traits = (overlap.length ? overlap : dominant).map((dimension) => DNA_LABELS[dimension]).filter(Boolean);
 
   if (matchedIntents.includes('parecido') || product.olfactoryReference) {
-    const base = traits.slice(0, 2).join(' e ') || 'presença marcante';
-    return `Tem conexão com a referência olfativa indicada e entrega perfil ${base}.`;
+    const base = traits.slice(0, 2).join(' e ') || 'perfil próximo da referência';
+    return `Tem construção olfativa próxima da referência e puxa para ${base}.`;
   }
   if (traits.includes('doce') && traits.includes('noite')) return 'Perfil intenso, doce e ideal para noite.';
   if (traits.includes('fresco') && (traits.includes('trabalho') || traits.includes('versátil'))) return 'Boa escolha para clima quente, rotina e uso diário.';
   if (traits.includes('elegante') && traits.includes('fresco')) return 'Combina elegância, frescor e alta versatilidade.';
   if (traits.includes('árabe') || perfumeDNA.arabic >= 0.55) return 'Perfil árabe de presença forte, com rastro envolvente.';
   if (traits.includes('sedutor')) return `Entrega assinatura ${traits.slice(0, 2).join(' e ')} para ocasiões de impacto.`;
-  if (traits.length >= 2) return `Combina ${traits.slice(0, 3).join(', ')} em uma curadoria coerente.`;
-  if (traits.length === 1) return `Boa escolha para quem busca um perfil ${traits[0]} com acabamento premium.`;
-  if (fallback) return 'Opção versátil da curadoria para descobrir uma assinatura olfativa com segurança.';
+  if (traits.length >= 2) return `Combina ${traits.slice(0, 3).join(', ')} com identidade olfativa clara.`;
+  if (traits.length === 1) return `Boa escolha para quem quer um perfil ${traits[0]} sem neutralizar presença.`;
+  if (fallback) return 'Entrada segura da curadoria, com perfil útil para começar sem perder assinatura.';
   return 'Aderente ao pedido pela leitura do DNA olfativo e contexto do catálogo.';
 }
