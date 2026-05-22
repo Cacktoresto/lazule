@@ -4,6 +4,7 @@ import { getAvailabilityStatus } from '../utils/availability';
 import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus';
 import { trackProductSelect } from '../utils/analytics';
 import { createProductPath } from '../utils/productRouting';
+import { formatSemanticLabels } from '../utils/semanticPresentation';
 
 export function ProductImageFallback({ label = 'Imagem em curadoria' } = {}) {
   return (
@@ -104,7 +105,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
           </h3>
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-300">{product.narrative || product.description || 'Perfil olfativo em curadoria'}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {(product.semanticFacets?.length ? product.semanticFacets : [product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)]).filter(Boolean).slice(0, 3).map((label) => (
+            {formatSemanticLabels((product.semanticFacets?.length ? product.semanticFacets : [product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)]), { limit: 3 }).map((label) => (
               <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-slate-300">
                 {label}
               </span>

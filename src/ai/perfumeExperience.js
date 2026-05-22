@@ -4,6 +4,7 @@ import { COMMERCIAL_STATUS, getCommercialStatus, getCommercialStatusMeta } from 
 import { createProductSlug } from '../utils/productRouting.js';
 import { normalizeSearchText } from '../utils/search.js';
 import { buildOlfactiveNarrative, buildOlfactiveProfile } from './olfactiveEnrichment.js';
+import { formatSemanticLabels, humanizeSemanticTag, humanizeSignature } from '../utils/semanticPresentation.js';
 
 const DIMENSION_META = Object.freeze({
   sweet: { label: 'Doçura', tone: 'âmbar gourmand', priority: 1.02 },
@@ -215,10 +216,10 @@ export function createOlfactiveSignature(product = {}) {
   return {
     text: buildOlfactiveNarrative(profile),
     facets: unique([
-      ...profile.accords.slice(0, 3),
-      profile.signature,
-      profile.personality,
-      profile.occasion.replaceAll('_', ' '),
+      ...formatSemanticLabels(profile.accords.slice(0, 3)),
+      humanizeSignature(profile.signature),
+      humanizeSemanticTag(profile.personality),
+      humanizeSemanticTag(profile.occasion),
     ]).slice(0, 6),
     inCuration: false,
   };
@@ -246,9 +247,9 @@ export function createIdealUsageProfile(product = {}) {
   if (dimensionIds.has('projection')) push('Presença marcante', 'estilo');
   if (dimensionIds.has('versatility')) push('Rotina premium', 'estilo');
 
-  push(enrichment.signature, 'assinatura');
-  push(enrichment.personality, 'personalidade');
-  push(enrichment.occasion.replaceAll('_', ' '), 'contexto');
+  push(humanizeSignature(enrichment.signature), 'assinatura');
+  push(humanizeSemanticTag(enrichment.personality), 'personalidade');
+  push(humanizeSemanticTag(enrichment.occasion), 'contexto');
 
   if (!chips.length) {
     push(getCommercialStatus(product) === COMMERCIAL_STATUS.REFERENCE_ONLY ? 'Curadoria sob consulta' : 'Uso versátil', 'curadoria');
