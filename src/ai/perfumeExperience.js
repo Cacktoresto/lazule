@@ -3,6 +3,7 @@ import { getOlfactiveSignals } from './olfactiveRelationships.js';
 import { COMMERCIAL_STATUS, getCommercialStatus, getCommercialStatusMeta } from '../utils/commercialStatus.js';
 import { createProductSlug } from '../utils/productRouting.js';
 import { normalizeSearchText } from '../utils/search.js';
+import { buildOlfactiveNarrative, buildOlfactiveProfile } from './olfactiveEnrichment.js';
 
 const DIMENSION_META = Object.freeze({
   sweet: { label: 'Doçura', tone: 'âmbar gourmand', priority: 1.02 },
@@ -159,11 +160,10 @@ function pickSignatureLead(signals, dimensions) {
 }
 
 export function createOlfactiveSignature(product = {}) {
-  const signals = getOlfactiveSignals(product);
-  const dimensions = getDominantExperienceDimensions(product, { min: 3, max: 5 });
-  const hasData = hasMeaningfulExperienceData(product, signals);
+  const profile = buildOlfactiveProfile(product);
+  const hasAccords = profile.accords.length > 0 || profile.notes.length > 0;
 
-  if (!hasData) {
+  if (!hasAccords) {
     return {
       text: 'Perfil olfativo em curadoria.',
       facets: unique([product.brand, product.category, getCommercialStatusMeta(product).badge]).slice(0, 3),
@@ -171,27 +171,14 @@ export function createOlfactiveSignature(product = {}) {
     };
   }
 
-  const lead = pickSignatureLead(signals, dimensions);
-  const facetPool = unique([
-    ...signals.vibes,
-    ...signals.occasions,
-    ...signals.weather,
-    ...dimensions.map((item) => item.label.toLowerCase()),
-    ...signals.performance,
-  ]);
-  const facetText = normalized(facetPool.join(' '));
-  const second = facetText.includes('noite') || facetText.includes('jantar') || facetText.includes('encontro')
-    ? 'presença noturna'
-    : facetText.includes('calor') || facetText.includes('dia') || facetText.includes('trabalho')
-      ? 'uso versátil e polido'
-      : facetText.includes('frio') || facetText.includes('intens') || facetText.includes('alta')
-        ? 'presença marcante'
-        : 'acabamento elegante';
-  const third = dimensions.find((item) => ['Sedução', 'Elegância', 'Intensidade', 'Versatilidade'].includes(item.label))?.label.toLowerCase() || 'curadoria premium';
-
   return {
-    text: `${lead}, ${third} e ${second}.`,
-    facets: unique([lead, third, second, ...signals.directions]).slice(0, 5),
+    text: buildOlfactiveNarrative(profile),
+    facets: unique([
+      ...profile.accords.slice(0, 3),
+      profile.signature,
+      profile.personality,
+      profile.occasion.replaceAll('_', ' '),
+    ]).slice(0, 6),
     inCuration: false,
   };
 }
@@ -199,6 +186,7 @@ export function createOlfactiveSignature(product = {}) {
 export function createIdealUsageProfile(product = {}) {
   const signals = getOlfactiveSignals(product);
   const dimensions = getDominantExperienceDimensions(product, { min: 3, max: 6 });
+  const enrichment = buildOlfactiveProfile(product);
   const chips = [];
   const push = (label, type = 'curadoria') => {
     const clean = titleCase(label);
@@ -216,6 +204,10 @@ export function createIdealUsageProfile(product = {}) {
   if (dimensionIds.has('seductive')) push('Encontros', 'ocasião');
   if (dimensionIds.has('projection')) push('Presença marcante', 'estilo');
   if (dimensionIds.has('versatility')) push('Rotina premium', 'estilo');
+
+  push(enrichment.signature, 'assinatura');
+  push(enrichment.personality, 'personalidade');
+  push(enrichment.occasion.replaceAll('_', ' '), 'contexto');
 
   if (!chips.length) {
     push(getCommercialStatus(product) === COMMERCIAL_STATUS.REFERENCE_ONLY ? 'Curadoria sob consulta' : 'Uso versátil', 'curadoria');
