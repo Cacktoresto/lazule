@@ -100,7 +100,7 @@ function containsAnyTerm(text, terms) {
   return terms.some((term) => text.includes(term));
 }
 
-function normalizeCatalogType(value) {
+export function normalizeCatalogType(value) {
   const normalizedValue = normalizeSearchText(value);
   const catalogType = CATALOG_TYPE_OPTIONS.find((option) => normalizeSearchText(option) === normalizedValue);
 
@@ -149,6 +149,10 @@ export function inferCatalogType(product) {
 
   if (containsAnyTerm(searchableText, ARABIC_TERMS)) {
     return 'Árabe';
+  }
+
+  if (containsAnyTerm(searchableText, ['importado', 'designer'])) {
+    return 'Importado';
   }
 
   if (containsAnyTerm(searchableText, NICHE_TERMS)) {

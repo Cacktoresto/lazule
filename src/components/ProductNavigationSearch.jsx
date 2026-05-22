@@ -1,19 +1,8 @@
 import { useMemo, useState } from 'react';
 import { getAllProducts } from '../data/catalogRepository';
 import { navigateSpa } from '../utils/navigation';
-import { createProductPath, createProductSlug } from '../utils/productRouting';
 import { findBestProductMatch } from '../utils/search';
 import { trackEvent, trackSearch } from '../utils/analytics';
-
-function createNotFoundPath(term) {
-  return `/produto-nao-encontrado?q=${encodeURIComponent(term)}`;
-}
-
-function createSuggestionPath(term, product) {
-  const params = new URLSearchParams({ q: term, suggestion: createProductSlug(product.name) });
-
-  return `/produto-sugerido?${params.toString()}`;
-}
 
 export function ProductNavigationSearch({ className = '', compact = false }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,7 +19,7 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
 
     const match = findBestProductMatch(normalizedTerm, catalogProducts);
     const matchedProduct = match?.product ?? null;
-    const destination = match?.destination ?? 'product_not_found';
+    const destination = match?.destination ?? 'catalog_search';
 
     trackEvent('search_submit', { searchTerm: normalizedTerm, sourcePage: compact ? 'home_sticky_search' : 'product_navigation_search' });
     trackSearch({
@@ -42,16 +31,7 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
       product_id: matchedProduct?.id,
     });
 
-    if (!matchedProduct) {
-      navigateSpa(createNotFoundPath(normalizedTerm));
-      return;
-    }
-
-    navigateSpa(
-      destination === 'direct'
-        ? createProductPath(matchedProduct)
-        : createSuggestionPath(normalizedTerm, matchedProduct),
-    );
+    navigateSpa(`/catalogo?busca=${encodeURIComponent(normalizedTerm)}&src=header`);
   }
 
   return (
