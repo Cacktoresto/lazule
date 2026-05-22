@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getAllProducts } from '../data/catalogRepository';
 import { getFeaturedCollections } from '../utils/catalog';
@@ -79,6 +79,8 @@ export function ProductCatalog() {
   const [searchTerm, setSearchTerm] = useState(initialCatalogState.searchTerm);
   const [filters, setFilters] = useState(initialCatalogState.filters);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
+  const [shouldScrollToResults, setShouldScrollToResults] = useState(Boolean(new URLSearchParams(window.location.search).get('src')));
+  const resultsRef = useRef(null);
 
   const catalogProducts = useMemo(() => getAllProducts(), []);
   const featuredCollections = useMemo(() => getFeaturedCollections(catalogProducts), [catalogProducts]);
@@ -152,6 +154,23 @@ export function ProductCatalog() {
     return () => window.clearTimeout(timeoutId);
   }, [filteredProducts.length, searchTerm]);
 
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const normalizedTerm = draftSearchTerm.trim();
+      setSearchTerm(normalizedTerm);
+      setVisibleCount(PRODUCTS_PER_PAGE);
+    }, 280);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [draftSearchTerm]);
+
+  useEffect(() => {
+    if (!shouldScrollToResults || !resultsRef.current) return;
+    resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setShouldScrollToResults(false);
+  }, [filteredProducts.length, shouldScrollToResults]);
+
   function handleFilterChange(filterName, value) {
     setFilters((currentFilters) => ({ ...currentFilters, [filterName]: value }));
     trackEvent('filter_apply', { filter_name: filterName, filter_value: value, source_page: 'catalog' });
@@ -202,17 +221,19 @@ export function ProductCatalog() {
           onReset={resetFilters}
         />
 
-        <div className="min-w-0">
+        <div className="min-w-0" ref={resultsRef} id="catalog-results">
           <div className="mb-6 grid gap-4">
             <div className="lazule-feedback-card flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-slate-300 sm:px-5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
-                  <strong className="text-lazule-mist">{filteredProducts.length}</strong> fragrâncias curadas para este filtro
+                  <strong className="text-lazule-mist">{filteredProducts.length}</strong> resultado(s) {searchTerm ? 'encontrado(s)' : 'curado(s)'}
                 </span>
                 <span>
                   Total no catálogo: <strong className="text-lazule-gold">{catalogProducts.length}</strong>
                 </span>
               </div>
+
+              {searchTerm && <p className="text-lazule-gold">Resultados para: <strong>"{searchTerm}"</strong></p>}
 
               {appliedFilterChips.length > 0 && (
                 <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3" aria-label="Filtros ativos">
@@ -230,7 +251,7 @@ export function ProductCatalog() {
             <>
               <div className="grid gap-4 min-[520px]:grid-cols-2 md:gap-5 xl:grid-cols-3">
                 {visibleProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} analyticsSection="catalog_grid" />
+                  <ProductCard key={product.id} product={product} analyticsSection="catalog_grid" highlightQuery={searchTerm} />
                 ))}
               </div>
 

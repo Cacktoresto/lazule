@@ -36,7 +36,24 @@ function ProductImageSkeleton() {
   );
 }
 
-export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
+function HighlightText({ text, query }) {
+  if (!query?.trim()) return text;
+
+  const escaped = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!escaped) return text;
+  const matcher = new RegExp(`(${escaped})`, 'ig');
+  const parts = String(text).split(matcher);
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === query.trim().toLowerCase() ? (
+      <mark key={`${part}-${index}`} className="rounded bg-lazule-gold/25 px-1 text-lazule-gold">{part}</mark>
+    ) : (
+      <span key={`${part}-${index}`}>{part}</span>
+    ),
+  );
+}
+
+export function ProductCard({ product, analyticsSection = 'catalog_grid', highlightQuery = '' }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
   const [hasImageFailed, setHasImageFailed] = useState(false);
   const productPath = createProductPath(product);
@@ -81,9 +98,9 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid' }) {
         </div>
 
         <div className="flex flex-1 flex-col px-3.5 py-3.5 sm:px-4 sm:py-4">
-          <p className="line-clamp-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-[0.68rem] sm:tracking-[0.24em]">{product.brand}</p>
+          <p className="line-clamp-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-[0.68rem] sm:tracking-[0.24em]"><HighlightText text={product.brand} query={highlightQuery} /></p>
           <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold sm:text-[1.65rem]">
-            {product.name}
+            <HighlightText text={product.name} query={highlightQuery} />
           </h3>
           <strong className="mt-3 text-lg text-lazule-mist sm:mt-4 sm:text-xl">{priceLabel}</strong>
         </div>
