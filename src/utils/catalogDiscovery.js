@@ -1,3 +1,4 @@
+import { buildSemanticRelationships } from '../ai/semanticIntelligenceLayer.js';
 const DISCOVERY_CHIPS = [
   { id: 'amadeirado', label: 'Amadeirado', terms: ['amadeirado', 'woody', 'wood'], occasion: ['noite'], intensity: ['forte'] },
   { id: 'doce', label: 'Doce', terms: ['doce', 'adocicado', 'baunilha', 'vanilla'], weather: ['inverno'] },
@@ -81,6 +82,7 @@ export function getContextualRecommendations({ catalogProducts = [], filteredPro
 
   const scored = basePool
     .map((product) => {
+      const semantic = buildSemanticRelationships(product, basePool, { limit: 4 });
       const text = productText(product);
       const vibe = classifyDiscoveryVibe(product);
       let score = 0;
@@ -89,7 +91,9 @@ export function getContextualRecommendations({ catalogProducts = [], filteredPro
       if (vibe.intensity === 'intenso' && /elixir|intenso|parfum/.test(text)) score += 1;
       if (product.popularityTier === 'high') score += 2;
       if (product.featured) score += 1;
-      return { product, score };
+      score += semantic.relationshipConfidence;
+      if (semantic.facets.includes('seductive_dense') && /noite|date/.test(normalizedSearch)) score += 1.5;
+      return { product, score, semantic };
     })
     .sort((a, b) => b.score - a.score)
     .map((entry) => entry.product);
