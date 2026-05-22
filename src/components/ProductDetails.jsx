@@ -613,7 +613,7 @@ function RecommendationCard({ product, context = 'recommendations', explanation 
           <h3 className="mt-2 line-clamp-2 font-display text-2xl leading-tight text-lazule-mist group-hover:text-lazule-gold">
             {getProductDisplayName(product)}
           </h3>
-          <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {product.signature || product.olfactoryReference || 'Perfil olfativo em curadoria'}</p>
+          <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {humanizeSignature(product.signature || product.olfactoryReference || 'Perfil olfativo em curadoria')}</p>
           <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-300">{explanation || product.semanticReasons?.[0] || product.narrative || 'Conexão por assinatura olfativa e contexto de uso.'}</p>
         </div>
         <strong className="mt-5 text-base text-lazule-mist">{canDirectBuy(product) ? formatBRL(product.salePrice) : getCommercialStatusMeta(product).badge}</strong>
