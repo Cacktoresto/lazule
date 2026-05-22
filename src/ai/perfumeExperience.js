@@ -15,8 +15,7 @@ const DIMENSION_META = Object.freeze({
   nightlife: { label: 'Noite', tone: 'impacto social', priority: 1.03 },
   projection: { label: 'Intensidade', tone: 'rastro percebido', priority: 1.07 },
   versatility: { label: 'Versatilidade', tone: 'uso fácil', priority: 1.01 },
-  masculine: { label: 'Masculino', tone: 'direção clássica', priority: 0.82 },
-  feminine: { label: 'Feminino', tone: 'direção luminosa', priority: 0.82 },
+  shareability: { label: 'Compartilhabilidade', tone: 'leitura de uso, não regra de gênero.', priority: 1.06 },
   arabic: { label: 'Âmbar', tone: 'calor oriental', priority: 1.02 },
   designer: { label: 'Urbano', tone: 'assinatura moderna', priority: 0.93 },
   luxury: { label: 'Luxo', tone: 'curadoria refinada', priority: 1.05 },
@@ -80,6 +79,46 @@ function qualitativeLabel(value, { allowBeastMode = false } = {}) {
   return 'suave';
 }
 
+function classifyShareability(product = {}, signals = getOlfactiveSignals(product), dna = {}) {
+  const masculine = clamp(dna.masculine);
+  const feminine = clamp(dna.feminine);
+  const balance = Math.abs(masculine - feminine);
+  const versatility = clamp(dna.versatility);
+  const fresh = clamp(dna.fresh);
+  const elegant = clamp(dna.elegant);
+  const dense = clamp(Math.max(dna.arabic ?? 0, dna.woody ?? 0, dna.seductive ?? 0, dna.projection ?? 0));
+  const normalizedTags = normalized([
+    product.gender,
+    product.category,
+    product.description,
+    ...signals.accords,
+    ...signals.family,
+    ...signals.vibes,
+    ...signals.inspirations,
+  ].join(' '));
+
+  if (normalizedTags.includes('unissex') || normalizedTags.includes('unisex')) {
+    return { value: Math.max(0.62, 1 - balance * 0.8), level: 'unissex moderno' };
+  }
+
+  const modernBlend = versatility >= 0.58 || (fresh >= 0.52 && elegant >= 0.54);
+  if (balance <= 0.12 && (modernBlend || dense <= 0.72)) {
+    return { value: Math.max(0.58, 1 - balance), level: 'compartilhável' };
+  }
+
+  if (balance <= 0.22 && modernBlend) {
+    return { value: Math.max(0.56, 1 - balance * 0.9), level: 'assinatura versátil' };
+  }
+
+  if (balance <= 0.22) {
+    return { value: Math.max(0.54, 1 - balance * 0.92), level: 'unissex moderno' };
+  }
+
+  return masculine > feminine
+    ? { value: Math.max(0.5, 1 - balance), level: 'tendência masculina' }
+    : { value: Math.max(0.5, 1 - balance), level: 'tendência feminina' };
+}
+
 function hasMeaningfulExperienceData(product = {}, signals = getOlfactiveSignals(product)) {
   return Boolean(
     Object.keys(product.dna_vector || {}).length ||
@@ -98,6 +137,7 @@ function hasMeaningfulExperienceData(product = {}, signals = getOlfactiveSignals
 export function getDominantExperienceDimensions(product = {}, { min = 5, max = 8 } = {}) {
   const signals = getOlfactiveSignals(product);
   const dna = Object.keys(product.dna_vector || {}).length ? product.dna_vector : signals.dna || generatePerfumeDNA(product);
+  const shareability = classifyShareability(product, signals, dna);
   const generatedDominants = getDominantDNA(dna, { threshold: 0.18, limit: 12 });
   const dominantSource = Array.isArray(product.dominantDNA) ? product.dominantDNA : arrayFrom(product.dominantDNA);
   const existingDominants = dominantSource.map((entry) => {
@@ -107,6 +147,7 @@ export function getDominantExperienceDimensions(product = {}, { min = 5, max = 8
 
     return { dimension: normalized(entry), value: 0.74 };
   });
+  existingDominants.push({ dimension: 'shareability', value: shareability.value });
   const merged = [...generatedDominants, ...existingDominants]
     .filter(({ dimension }) => DIMENSION_META[dimension])
     .reduce((acc, entry) => {
@@ -121,7 +162,7 @@ export function getDominantExperienceDimensions(product = {}, { min = 5, max = 8
       label: DIMENSION_META[dimension].label,
       tone: DIMENSION_META[dimension].tone,
       value: Math.max(0.24, Math.round(clamp(value) * 100) / 100),
-      level: qualitativeLabel(value),
+      level: dimension === 'shareability' ? shareability.level : qualitativeLabel(value),
       priorityScore: clamp(value) * DIMENSION_META[dimension].priority,
     }))
     .sort((a, b) => b.priorityScore - a.priorityScore || a.label.localeCompare(b.label))
