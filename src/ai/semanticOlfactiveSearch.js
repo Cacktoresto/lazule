@@ -2,6 +2,7 @@ import { SEMANTIC_PHRASES, SEMANTIC_VOCABULARY } from '../data/generated/semanti
 import { normalizeSearchText } from '../utils/search.js';
 import { generatePerfumeDNA } from './perfumeDNA.js';
 import { rankByEmbeddingSimilarity, optionallyLoadPrecomputedEmbeddings } from './olfactiveEmbeddingAdapter.js';
+import { buildQueryUnderstandingExplainability, interpretUserIntent } from './semanticQueryUnderstanding.js';
 
 const SCORE_WEIGHTS = { accords: 0.33, vibes: 0.2, occasions: 0.13, weather: 0.08, families: 0.1, luxurySignature: 0.1, confidence: 0.06 };
 let semanticSessionProfile = { tokens: [], directions: { accords: [], vibes: [], families: [], occasions: [], weather: [] }, queries: 0 };
@@ -32,15 +33,23 @@ export function interpretSemanticIntent(query = '', options = {}) {
     return acc;
   }, { accords: [], vibes: [], weather: [], families: [], moods: [], occasions: [] });
 
+  const queryUnderstanding = interpretUserIntent(query);
+  interpretation.accords.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.weight >= 0.7).map((signal) => signal.signal));
+  interpretation.vibes.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.weight >= 0.55 && signal.weight < 0.7).map((signal) => signal.signal));
+  interpretation.occasions.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.signal.includes('office') || signal.signal.includes('night')).map((signal) => signal.signal));
+  interpretation.weather.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.signal.includes('summer') || signal.signal.includes('weather')).map((signal) => signal.signal));
+
   Object.keys(interpretation).forEach((key) => { interpretation[key] = unique(interpretation[key]); });
 
   const rawConfidence = matchedKeys.length ? Math.min(1, 0.35 + matchedKeys.length * 0.18 + (phraseKeys.length ? 0.18 : 0)) : 0;
-  const confidenceLevel = rawConfidence >= 0.7 ? 'high' : rawConfidence >= 0.48 ? 'medium' : 'low';
+  const phraseBoost = phraseKeys.length ? 0.35 : 0;
+  const blendedConfidence = Math.min(1, rawConfidence * 0.5 + queryUnderstanding.confidence * 0.5 + phraseBoost);
+  const confidenceLevel = blendedConfidence >= 0.65 ? 'high' : blendedConfidence >= 0.48 ? 'medium' : 'low';
 
-  if (options.updateSession !== false && matchedKeys.length) {
+  if (options.updateSession !== false && (matchedKeys.length || queryUnderstanding.recognizedTokens.length)) {
     semanticSessionProfile = {
       queries: semanticSessionProfile.queries + 1,
-      tokens: unique([...semanticSessionProfile.tokens, ...matchedKeys]).slice(-24),
+      tokens: unique([...semanticSessionProfile.tokens, ...matchedKeys, ...queryUnderstanding.recognizedTokens]).slice(-24),
       directions: {
         accords: unique([...semanticSessionProfile.directions.accords, ...interpretation.accords]).slice(-14),
         vibes: unique([...semanticSessionProfile.directions.vibes, ...interpretation.vibes]).slice(-14),
@@ -51,7 +60,7 @@ export function interpretSemanticIntent(query = '', options = {}) {
     };
   }
 
-  return { normalizedQuery, matchedKeys, ...interpretation, confidence: confidenceLevel, confidenceScore: Number(rawConfidence.toFixed(3)), semanticSessionProfile };
+  return { normalizedQuery, matchedKeys, ...interpretation, confidence: confidenceLevel, confidenceScore: Number(blendedConfidence.toFixed(3)), ambiguityScore: queryUnderstanding.ambiguity, intentConfidence: queryUnderstanding.confidence, expansionStrength: queryUnderstanding.expansionStrength, intentTypes: queryUnderstanding.intentTypes, semanticEntity: queryUnderstanding.semanticEntity, explainability: buildQueryUnderstandingExplainability(queryUnderstanding), semanticSessionProfile };
 }
 
 export function scoreSemanticMatch(product = {}, interpreted = {}) {
