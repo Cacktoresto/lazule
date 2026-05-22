@@ -9,6 +9,7 @@ import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
 import { CatalogHighlights } from './CatalogHighlights';
 import { applyCatalogSeo } from '../utils/seo';
+import { buildDiscoveryGroups, getContextualRecommendations, getDiscoveryChips, matchDiscoveryTags } from '../utils/catalogDiscovery';
 
 const DEFAULT_FILTERS = {
   category: ALL_VALUE,
@@ -80,6 +81,7 @@ export function ProductCatalog() {
   const [filters, setFilters] = useState(initialCatalogState.filters);
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
   const [shouldScrollToResults, setShouldScrollToResults] = useState(Boolean(new URLSearchParams(window.location.search).get('src')));
+  const [activeDiscoveryChipIds, setActiveDiscoveryChipIds] = useState([]);
   const resultsRef = useRef(null);
 
   const catalogProducts = useMemo(() => getAllProducts(), []);
@@ -93,15 +95,20 @@ export function ProductCatalog() {
     };
   }, [catalogProducts]);
 
-  const filteredProducts = useMemo(
+  const baseFilteredProducts = useMemo(
     () => filterAndSortCatalogProducts(catalogProducts, filters, searchTerm),
     [catalogProducts, filters, searchTerm],
   );
+
+  const filteredProducts = useMemo(() => baseFilteredProducts.filter((product) => matchDiscoveryTags(product, activeDiscoveryChipIds)), [baseFilteredProducts, activeDiscoveryChipIds]);
 
   const visibleProducts = useMemo(() => filteredProducts.slice(0, visibleCount), [filteredProducts, visibleCount]);
   const hasMoreProducts = visibleProducts.length < filteredProducts.length;
   const remainingProducts = filteredProducts.length - visibleProducts.length;
   const appliedFilterChips = useMemo(() => getAppliedFilterChips(filters, searchTerm), [filters, searchTerm]);
+  const discoveryChips = useMemo(() => getDiscoveryChips(), []);
+  const discoveryGroups = useMemo(() => buildDiscoveryGroups(catalogProducts, activeDiscoveryChipIds), [catalogProducts, activeDiscoveryChipIds]);
+  const relatedRecommendations = useMemo(() => getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds }), [catalogProducts, filteredProducts, searchTerm, activeDiscoveryChipIds]);
 
   function resetPagination() {
     setVisibleCount(PRODUCTS_PER_PAGE);
@@ -119,6 +126,12 @@ export function ProductCatalog() {
 
   function handleSearchChange(value) {
     setDraftSearchTerm(value);
+  }
+
+
+  function toggleDiscoveryChip(chipId) {
+    setActiveDiscoveryChipIds((currentIds) => currentIds.includes(chipId) ? currentIds.filter((id) => id !== chipId) : [...currentIds, chipId]);
+    resetPagination();
   }
 
   function clearSearch() {
@@ -213,6 +226,22 @@ export function ProductCatalog() {
         </div>
       </div>
 
+      <div className="mb-4 flex flex-wrap gap-2 sm:mb-6">
+        {discoveryChips.map((chip) => {
+          const active = activeDiscoveryChipIds.includes(chip.id);
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => toggleDiscoveryChip(chip.id)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${active ? 'border-lazule-gold/70 bg-lazule-gold/18 text-lazule-gold' : 'border-white/15 bg-white/[0.04] text-slate-300 hover:border-lazule-gold/40 hover:text-lazule-mist'}`}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[320px_1fr] lg:items-start">
         <AdvancedFilters
           filters={filters}
@@ -235,6 +264,21 @@ export function ProductCatalog() {
 
               {searchTerm && <p className="text-lazule-gold">Resultados para: <strong>"{searchTerm}"</strong></p>}
 
+
+              {activeDiscoveryChipIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3" aria-label="Discovery ativo">
+                  {activeDiscoveryChipIds.map((chipId) => {
+                    const chip = discoveryChips.find((entry) => entry.id === chipId);
+                    if (!chip) return null;
+                    return (
+                      <span key={chip.id} className="rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-xs font-semibold text-lazule-gold">
+                        Descoberta: <span className="text-lazule-mist">{chip.label}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
               {appliedFilterChips.length > 0 && (
                 <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3" aria-label="Filtros ativos">
                   {appliedFilterChips.map((chip) => (
@@ -246,6 +290,23 @@ export function ProductCatalog() {
               )}
             </div>
           </div>
+
+
+          {discoveryGroups.length > 0 && (
+            <div className="mb-7 grid gap-3 sm:grid-cols-2">
+              {discoveryGroups.slice(0, 2).map((group) => (
+                <article key={group.id} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                  <p className="text-[0.62rem] uppercase tracking-[0.2em] text-lazule-gold">Curadoria contextual</p>
+                  <h3 className="mt-2 font-display text-xl text-lazule-mist">{group.title}</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {group.products.slice(0, 3).map((product) => (
+                      <a key={product.id} href={product.productPath} className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:border-lazule-gold/45 hover:text-lazule-mist">{product.name}</a>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
 
           {filteredProducts.length > 0 ? (
             <>
@@ -273,7 +334,8 @@ export function ProductCatalog() {
               )}
             </>
           ) : (
-            <div className="lazule-surface-premium rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-6 text-center shadow-mineral sm:p-10">
+            <div className="space-y-4">
+              <div className="lazule-surface-premium rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-6 text-center shadow-mineral sm:p-10">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-lazule-gold sm:tracking-[0.35em]">Curadoria LAZULE</p>
               <h3 className="font-display text-3xl leading-tight text-lazule-mist">Ainda não encontramos o match ideal.</h3>
               <p className="mx-auto mt-4 max-w-2xl text-slate-300">
@@ -288,6 +350,22 @@ export function ProductCatalog() {
               >
                 Pedir curadoria no WhatsApp
               </a>
+              </div>
+              {relatedRecommendations.length > 0 && (
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                  <p className="text-[0.62rem] uppercase tracking-[0.2em] text-lazule-gold">Fallback inteligente</p>
+                  <h4 className="mt-2 font-display text-2xl text-lazule-mist">Você também pode gostar</h4>
+                  <p className="mt-2 text-sm text-slate-300">Selecionamos fragrâncias próximas da vibe buscada para manter sua descoberta fluida.</p>
+                  <div className="mt-4 grid gap-3 min-[480px]:grid-cols-2">
+                    {relatedRecommendations.slice(0, 4).map((product) => (
+                      <a key={product.id} href={product.productPath} className="rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-slate-200 hover:border-lazule-gold/40">
+                        <span className="block text-[0.62rem] uppercase tracking-[0.18em] text-slate-400">{product.brand}</span>
+                        <span className="block text-base text-lazule-mist">{product.name}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
