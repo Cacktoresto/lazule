@@ -1871,6 +1871,27 @@ textarea {
   }
 }
 
+
+@keyframes lazule-awaken {
+  0% { opacity: 0; transform: scale(0.82); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lazule-orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lazule-orbit-chip {
+  0%, 100% { opacity: 0.52; box-shadow: 0 0 0.35rem rgba(127, 170, 255, 0.22); }
+  50% { opacity: 0.95; box-shadow: 0 0 0.7rem rgba(127, 170, 255, 0.34); }
+}
+
+@keyframes lazule-result-handoff {
+  0%, 80% { opacity: 1; transform: scale(1); }
+  88% { opacity: 0.92; transform: scale(1.03); }
+  100% { opacity: 0; transform: scale(0.98); }
+}
 @keyframes lazule-core-rotate {
   0% {
     transform: rotate(0deg) scale(1);
@@ -1978,10 +1999,13 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .lazule-thinking-core,
   .lazule-mineral-core,
   .lazule-laz-mark,
-  .lazule-semantic-chip {
-    animation: none;
+  .lazule-semantic-chip,
+  .lazule-mineral-orbit,
+  .lazule-orbit-chip {
+    animation: none !important;
     opacity: 1;
     transform: none;
     filter: none;
@@ -1989,6 +2013,39 @@ textarea {
 }
 
 
+
+.lazule-thinking-core {
+  animation: lazule-awaken 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards, lazule-result-handoff 5000ms ease-in-out 1;
+}
+
+.lazule-mineral-orbit {
+  position: absolute;
+  border-radius: 9999px;
+  border: 1px solid rgba(134, 172, 247, 0.32);
+}
+
+.lazule-mineral-orbit-outer {
+  inset: -10%;
+  animation: lazule-orbit-spin 12.5s linear infinite;
+}
+
+.lazule-mineral-orbit-inner {
+  inset: 8%;
+  border-color: rgba(88, 132, 218, 0.5);
+  animation: lazule-orbit-spin 7.5s linear infinite reverse;
+}
+
+.lazule-orbit-chip {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(189, 222, 255, 0.96) 0%, rgba(99, 149, 255, 0.75) 55%, rgba(89, 131, 230, 0.2) 100%);
+  animation: lazule-orbit-chip 2.6s ease-in-out infinite;
+}
+
+.lazule-orbit-chip-a { top: -6%; left: 48%; width: 8px; height: 8px; }
+.lazule-orbit-chip-b { top: 45%; right: -8%; width: 7px; height: 7px; animation-delay: 400ms; }
+.lazule-orbit-chip-c { bottom: -5%; left: 24%; width: 6px; height: 6px; animation-delay: 760ms; }
 .lazule-laz-card {
   border-color: rgba(101, 144, 230, 0.45);
   background: linear-gradient(145deg, #061127 0%, #0a1b42 44%, #102b61 100%);
