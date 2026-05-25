@@ -888,25 +888,52 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext }) {
 }
 
 function ProductExperienceSection({ product, experience, whatsAppLink }) {
-  if (!experience || !Array.isArray(experience?.dimensions) || !Array.isArray(experience?.idealUsage) || !Array.isArray(experience?.performance)) {
+  if (import.meta.env.DEV) {
+    console.info('[ProductDetails] ProductExperienceSection', { hasProduct: Boolean(product), hasExperience: Boolean(experience) });
+  }
+  if (!experience) {
     return null;
   }
   return <PerfumeExperienceLayer product={product} experience={experience} whatsAppLink={whatsAppLink} />;
 }
 
 function ProductRecommendationsSection({ products }) {
+  if (import.meta.env.DEV) {
+    console.info('[ProductDetails] ProductRecommendationsSection', { count: Array.isArray(products) ? products.length : 0 });
+  }
   if (!Array.isArray(products) || !products.length) return null;
   return <Recommendations products={products} />;
 }
 
 function ProductRelationshipsSection({ sections, currentProduct, experience }) {
+  if (import.meta.env.DEV) {
+    console.info('[ProductDetails] ProductRelationshipsSection', { hasProduct: Boolean(currentProduct), count: Array.isArray(sections) ? sections.length : 0, hasExperience: Boolean(experience) });
+  }
   if (!Array.isArray(sections) || !sections.length) return null;
   return <RelationshipBlocks sections={sections} currentProduct={currentProduct} experience={experience} />;
 }
 
 function ProductDiscoveryTermsSection({ product, runtimeModules }) {
+  if (import.meta.env.DEV) {
+    const terms = runtimeModules?.olfactiveRelationships?.getExplorableOlfactiveTerms?.(product, { limit: 9 }) || [];
+    console.info('[ProductDetails] ProductDiscoveryTermsSection', {
+      hasProduct: Boolean(product),
+      hasRuntime: Boolean(runtimeModules?.olfactiveRelationships),
+      count: Array.isArray(terms) ? terms.length : 0,
+    });
+  }
   if (!product || !runtimeModules?.olfactiveRelationships) return null;
   return <OlfactiveDiscoveryTerms product={product} runtimeModules={runtimeModules} />;
+}
+
+function SemanticEditorialFallback({ title, copy }) {
+  return (
+    <section className="lazule-reveal mt-10 rounded-[2.4rem] border border-lazule-gold/15 bg-white/[0.03] p-6 shadow-mineral backdrop-blur sm:p-8 lg:mt-14">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-lazule-gold">Curadoria LAZ</p>
+      <h2 className="mt-2 font-display text-3xl text-lazule-mist">{title}</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{copy}</p>
+    </section>
+  );
 }
 
 export function ProductDetails({ slug }) {
@@ -945,6 +972,7 @@ export function ProductDetails({ slug }) {
   }, [catalogProducts, product, runtimeModules]);
 
   const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
+  const semanticRecommendationsCount = safeRecommendations.length;
   const [experience, setExperience] = useState(null);
   const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
@@ -968,6 +996,17 @@ export function ProductDetails({ slug }) {
     loadProductExperienceRuntime()
       .then(({ similarPerfumeEngine, perfumeExperience, olfactiveRelationships }) => {
         if (!isMounted) return;
+        if (import.meta.env.DEV) {
+          console.info('[ProductDetails] runtime module exports', {
+            createPerfumeExperience: typeof perfumeExperience?.createPerfumeExperience === 'function',
+            findSimilarPerfumes: typeof similarPerfumeEngine?.findSimilarPerfumes === 'function',
+            getSimilarPerfumes: typeof similarPerfumeEngine?.getSimilarPerfumes === 'function',
+            getSimilarPerfumesForProduct: typeof similarPerfumeEngine?.getSimilarPerfumesForProduct === 'function',
+            generateOlfactiveRelationships: typeof olfactiveRelationships?.generateOlfactiveRelationships === 'function',
+            buildRelationshipSections: typeof olfactiveRelationships?.buildRelationshipSections === 'function',
+            getExplorableOlfactiveTerms: typeof olfactiveRelationships?.getExplorableOlfactiveTerms === 'function',
+          });
+        }
         setRuntimeModules({ olfactiveRelationships });
         setSimilarGroups(similarPerfumeEngine?.getSimilarPerfumesForProduct?.(product, similarPerfumes) || {});
         setExperience(perfumeExperience?.createPerfumeExperience?.(product) || null);
@@ -1050,6 +1089,30 @@ export function ProductDetails({ slug }) {
   }, [product]);
 
   if (import.meta.env.DEV) console.info('[ProductDetails] produto', { slug: normalizedSlug, found: Boolean(product) });
+  const similarGroupsCount = Object.values(similarGroups || {}).reduce((total, group) => total + (Array.isArray(group) ? group.length : 0), 0);
+  const relationshipSectionsCount = Array.isArray(relationshipSections)
+    ? relationshipSections.reduce((total, section) => total + (Array.isArray(section?.items) ? section.items.length : 0), 0)
+    : 0;
+  const discoveryTerms = runtimeModules?.olfactiveRelationships?.getExplorableOlfactiveTerms?.(product, { limit: 9 }) || [];
+  const discoveryTermsCount = Array.isArray(discoveryTerms) ? discoveryTerms.length : 0;
+
+  if (import.meta.env.DEV) {
+    console.info('[ProductDetails] semantic hydration', {
+      runtimeModulesLoaded: Boolean(runtimeModules),
+      runtimeState: semanticRuntimeState,
+      experienceExists: Boolean(experience),
+      similarGroupsCount,
+      relationshipSectionsCount,
+      discoveryTermsCount,
+      recommendationsCount: semanticRecommendationsCount,
+    });
+    console.info('[ProductDetails] semantic sections calls', {
+      ProductExperienceSection: Boolean(product),
+      ProductRecommendationsSection: true,
+      ProductRelationshipsSection: Boolean(product),
+      ProductDiscoveryTermsSection: Boolean(product),
+    });
+  }
   if (!product) {
     return <ProductNotFound />;
   }
@@ -1067,9 +1130,9 @@ export function ProductDetails({ slug }) {
       <a className="mb-8 hidden text-sm font-semibold text-lazule-gold transition hover:text-[#dfbd68] lg:inline-flex" href="/catalogo">
         ← Voltar ao catálogo
       </a>
-      {semanticRuntimeState !== 'ready' ? (
+      {semanticRuntimeState === 'loading' ? (
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-lazule-gold/80">
-          Preparando curadoria semântica…
+          Curadoria LAZ em preparação…
         </p>
       ) : null}
 
@@ -1079,6 +1142,12 @@ export function ProductDetails({ slug }) {
         <ProductSectionErrorBoundary sectionName="experience">
           <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
         </ProductSectionErrorBoundary>
+        {semanticRuntimeState === 'ready' && !experience ? (
+          <SemanticEditorialFallback
+            title="DNA em atualização editorial"
+            copy="A assinatura olfativa detalhada deste perfume está sendo consolidada. Enquanto isso, mantemos a leitura premium de marca, categoria e contexto para orientar sua escolha."
+          />
+        ) : null}
         <ProductSectionErrorBoundary sectionName="vibe">
           <VibeSection product={product} />
         </ProductSectionErrorBoundary>
@@ -1094,6 +1163,12 @@ export function ProductDetails({ slug }) {
         <ProductSectionErrorBoundary sectionName="recommendations">
           <ProductRecommendationsSection products={safeRecommendations} />
         </ProductSectionErrorBoundary>
+        {semanticRuntimeState === 'ready' && !safeRecommendations.length ? (
+          <SemanticEditorialFallback
+            title="Sugestões em curadoria ativa"
+            copy="Nossas recomendações semânticas estão sendo refinadas para este item. Explore o catálogo por marca, assinatura e ocasião enquanto concluímos a seleção."
+          />
+        ) : null}
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
     </section>
