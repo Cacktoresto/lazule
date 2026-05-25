@@ -1,6 +1,6 @@
 import { trackEvent } from '../utils/analytics';
 
-export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = false }) {
+export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = false, onFocus }) {
   function handleSubmit(event) {
     event.preventDefault();
     onSubmit(value.trim());
@@ -18,7 +18,10 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
           type="search"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          onFocus={() => trackEvent('search_focus', { source_page: 'catalog_search' })}
+          onFocus={() => {
+            trackEvent('search_focus', { source_page: 'catalog_search' });
+            onFocus?.();
+          }}
           placeholder="Descreva sua atmosfera: noite mineral, assinatura limpa, presença marcante…"
           autoComplete="off"
           inputMode="search"

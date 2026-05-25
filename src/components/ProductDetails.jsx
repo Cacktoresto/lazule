@@ -3,7 +3,6 @@ import { formatBRL } from '../utils/currency';
 import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
 import { getProductRecommendations } from '../utils/catalog';
 import { similarPerfumes } from '../data/generated/similarPerfumes.js';
-import { getSimilarPerfumesForProduct } from '../ai/similarPerfumeEngine.js';
 import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
@@ -12,7 +11,7 @@ import { applyManualReferralCode, getReferralChangeEventName, getReferralContext
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 import { generateOlfactiveRelationships, getExplorableOlfactiveTerms } from '../ai/olfactiveRelationships';
-import { createPerfumeExperience } from '../ai/perfumeExperience';
+import { loadProductExperienceRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
 
 function normalizeProductClassifier(value) {
   return String(value || '')
@@ -836,21 +835,46 @@ export function ProductDetails({ slug }) {
   const normalizedSlug = createProductSlug(slug);
   const product = getProductBySlug(normalizedSlug, catalogProducts);
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
-  const similarGroups = useMemo(() => (product ? getSimilarPerfumesForProduct(product, similarPerfumes) : {}), [product]);
+  const [similarGroups, setSimilarGroups] = useState({});
   const relationshipSections = useMemo(() => (product ? generateOlfactiveRelationships(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
-  const experience = useMemo(() => {
+  const [experience, setExperience] = useState(null);
+  const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
+  const [referralContext, setReferralContext] = useState(() => getReferralContext());
+
+  useEffect(() => {
+    preloadSemanticRuntime();
+  }, []);
+
+  useEffect(() => {
     if (!product) {
-      return null;
+      setSimilarGroups({});
+      setExperience(null);
+      setSemanticRuntimeState('idle');
+      return;
     }
 
-    try {
-      return createPerfumeExperience(product);
-    } catch (error) {
-      console.error('Falha ao montar perfume experience', error);
-      return null;
-    }
+    let isMounted = true;
+    setSemanticRuntimeState('loading');
+
+    loadProductExperienceRuntime()
+      .then(({ similarPerfumeEngine, perfumeExperience }) => {
+        if (!isMounted) return;
+        setSimilarGroups(similarPerfumeEngine.getSimilarPerfumesForProduct(product, similarPerfumes));
+        setExperience(perfumeExperience.createPerfumeExperience(product));
+        setSemanticRuntimeState('ready');
+      })
+      .catch((error) => {
+        if (!isMounted) return;
+        console.error('Falha ao montar runtime de experiência', error);
+        setSimilarGroups({});
+        setExperience(null);
+        setSemanticRuntimeState('error');
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [product]);
-  const [referralContext, setReferralContext] = useState(() => getReferralContext());
 
   useEffect(() => {
     const eventName = getReferralChangeEventName();
@@ -936,6 +960,11 @@ export function ProductDetails({ slug }) {
       <a className="mb-8 hidden text-sm font-semibold text-lazule-gold transition hover:text-[#dfbd68] lg:inline-flex" href="/catalogo">
         ← Voltar ao catálogo
       </a>
+      {semanticRuntimeState !== 'ready' ? (
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-lazule-gold/80">
+          Preparando curadoria semântica…
+        </p>
+      ) : null}
 
       <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
         <DetailImage product={product} />
