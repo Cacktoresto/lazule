@@ -7,12 +7,8 @@ const MICROCOPY_STEPS = [
 ];
 
 const DEFAULT_CHIPS = ['Marinho', 'Frescor', 'Clima quente'];
-const MIN_VISIBLE_MS = 2800;
-const SAFETY_TIMEOUT_MS = 5000;
-
-export function SemanticSearchLoading({ isActive, interpretedChips = [], className = '' }) {
+export function SemanticSearchLoading({ isActive, interpretedChips = [], className = '', phase = 'processing', isVisible = true, fadeDurationMs = 420 }) {
   const [isRendered, setIsRendered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [chipRevealCount, setChipRevealCount] = useState(0);
 
@@ -27,7 +23,6 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
     }
 
     setIsRendered(true);
-    setIsVisible(true);
     setStepIndex(0);
     setChipRevealCount(0);
 
@@ -39,14 +34,9 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
       setStepIndex((current) => (current + 1) % MICROCOPY_STEPS.length);
     }, 1500);
 
-    const safetyStopId = window.setTimeout(() => {
-      setIsVisible(false);
-    }, SAFETY_TIMEOUT_MS);
-
     return () => {
       window.clearInterval(chipSequenceId);
       window.clearInterval(stepSequenceId);
-      window.clearTimeout(safetyStopId);
     };
   }, [isActive, chips.length]);
 
@@ -59,27 +49,25 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
       return undefined;
     }
 
-    const hideId = window.setTimeout(() => setIsVisible(false), MIN_VISIBLE_MS);
-    const unmountId = window.setTimeout(() => setIsRendered(false), MIN_VISIBLE_MS + 560);
+    const unmountId = window.setTimeout(() => setIsRendered(false), Math.max(260, fadeDurationMs + 60));
 
     return () => {
-      window.clearTimeout(hideId);
       window.clearTimeout(unmountId);
     };
-  }, [isActive, isRendered]);
+  }, [fadeDurationMs, isActive, isRendered]);
 
   if (!isRendered) return null;
 
-  const visibleChips = chips.slice(0, chipRevealCount);
+  const visibleChips = phase === 'finalizing' ? chips : chips.slice(0, chipRevealCount);
   const step = MICROCOPY_STEPS[stepIndex];
 
   return (
-    <div className={`overflow-hidden transition-all duration-500 motion-reduce:transition-opacity ${isVisible ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'} ${className}`}>
+    <div className={`overflow-hidden transition-all motion-reduce:transition-opacity ${isVisible ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'} ${className}`} style={{ transitionDuration: `${fadeDurationMs}ms` }}>
       <div className="lazule-laz-card relative min-h-[220px] rounded-[1.7rem] border px-4 py-5 shadow-mineral sm:min-h-[250px] sm:px-6 sm:py-6" data-testid="laz-mineral-loading">
         <div className="lazule-laz-ambient pointer-events-none absolute inset-0 rounded-[inherit]" />
 
         <div className="relative grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
-          <div className="lazule-thinking-core relative mx-auto h-[72px] w-[72px] shrink-0 sm:h-24 sm:w-24" aria-hidden="true">
+          <div className={`lazule-thinking-core relative mx-auto h-[72px] w-[72px] shrink-0 sm:h-24 sm:w-24 ${phase === 'finalizing' ? 'animate-pulse' : ''}`} aria-hidden="true">
             <div className="lazule-mineral-halo absolute inset-[-16%]" />
             <div className="lazule-mineral-orbit lazule-mineral-orbit-outer" data-testid="laz-orbit" />
             <div className="lazule-mineral-orbit lazule-mineral-orbit-inner" data-testid="laz-orbit" />
