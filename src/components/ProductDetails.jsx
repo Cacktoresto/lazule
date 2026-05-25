@@ -11,6 +11,7 @@ import { applyManualReferralCode, getReferralChangeEventName, getReferralContext
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 import { loadProductExperienceRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
+import { humanizeSignature as importedHumanizeSignature } from '../utils/semanticPresentation';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -35,6 +36,12 @@ class ProductSectionErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+
+const humanizeSignature = typeof importedHumanizeSignature === 'function'
+  ? importedHumanizeSignature
+  : (value) => String(value || 'Perfil olfativo em curadoria');
+
 
 function normalizeProductClassifier(value) {
   return String(value || '')
