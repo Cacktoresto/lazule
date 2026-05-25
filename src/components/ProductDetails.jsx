@@ -97,6 +97,25 @@ function getProductEssence(product) {
   return 'Elegante, intenso e viciante para noites especiais.';
 }
 
+function getMoodAtmosphereProfile(product = {}) {
+  const pool = normalizeProductClassifier([
+    product.name,
+    product.olfactoryReference,
+    product.signature,
+    product.category,
+    product.gender,
+    ...(Array.isArray(product.vibe) ? product.vibe : []),
+    ...(Array.isArray(product.vibes) ? product.vibes : []),
+  ].filter(Boolean).join(' '));
+
+  if (/\b(marine|aquatic|acquatic|ocean|oceano|salin|sea)\b/.test(pool)) return 'marine';
+  if (/\b(clean|fresh|fresco|crisp|citrico|branco)\b/.test(pool)) return 'clean';
+  if (/\b(executive|luxury|nicho|premium|elegante|royal)\b/.test(pool)) return 'luxury';
+  if (/\b(night|seductive|noite|sensual|intense)\b/.test(pool)) return 'night';
+  if (/\b(leather|couro|smoky|fumaca|incenso|oud)\b/.test(pool)) return 'smoky';
+  return 'signature';
+}
+
 function createEditorialGallery(product) {
   const slides = [
     {
@@ -619,11 +638,12 @@ function VibeSection({ product }) {
   );
 }
 
-function RecommendationCard({ product, context = 'recommendations', explanation }) {
+function RecommendationCard({ product, context = 'recommendations', explanation, index = 0 }) {
   return (
     <a
-      className="lazule-product-card group flex min-h-[19rem] w-[78vw] max-w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition md:w-[20rem]"
+      className="lazule-product-card lazule-reveal-item group flex min-h-[19rem] w-[78vw] max-w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition md:w-[20rem]"
       href={createProductPath(product)}
+      style={{ '--item-delay': `${120 + (index * 85)}ms` }}
       onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: context })}
     >
       <div className="relative min-h-44 overflow-hidden bg-lazule-depth">
@@ -815,8 +835,8 @@ function Recommendations({ products }) {
         </p>
       </div>
       <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
-        {products.map((product) => (
-          <RecommendationCard key={product.id} product={product} />
+        {products.map((product, index) => (
+          <RecommendationCard key={product.id} product={product} index={index} />
         ))}
       </div>
     </section>
@@ -865,14 +885,15 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
   const chips = getVibeItems(product);
+  const moodProfile = getMoodAtmosphereProfile(product);
   const signature = humanizeSignature(product.signature || product.olfactoryReference || 'Assinatura em curadoria');
   const idealUse = experience?.idealUse?.headline || experience?.occasionNarrative || product.narrative || getProductEssence(product);
   const performance = experience?.performance?.summary || 'Performance equilibrada com presença elegante e leitura premium.';
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6">
+    <div className={`grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6 lazule-mood-surface lazule-mood-${moodProfile}`}>
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:rounded-[2.4rem] lg:bg-white/[0.065] lg:p-8 lg:text-lazule-mist">
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:rounded-[2.4rem] lg:bg-white/[0.065] lg:p-8 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
@@ -883,21 +904,29 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           </div>
         </div>
-        <div className="mt-4 rounded-2xl border border-lazule-gold/30 bg-lazule-night/[0.035] p-4 lg:bg-white/[0.03]">
+        <div className="lazule-live-interpretation mt-4 rounded-2xl border border-lazule-gold/30 bg-lazule-night/[0.035] p-4 lg:bg-white/[0.03]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
           <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Performance: {performance}</p>
+          <div className="mt-3 space-y-2" aria-hidden="true">
+            {['intensidade', 'projeção', 'assinatura'].map((label, index) => (
+              <div key={label} className="lazule-olfactive-row" style={{ '--item-delay': `${index * 120}ms` }}>
+                <span className="text-[0.58rem] uppercase tracking-[0.16em] text-slate-500 lg:text-slate-400">{label}</span>
+                <span className="lazule-olfactive-bar" />
+              </div>
+            ))}
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {chips.slice(0, 4).map((chip) => (
-              <span key={chip} className="rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold">
+            {chips.slice(0, 4).map((chip, index) => (
+              <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold" style={{ '--item-delay': `${120 + index * 90}ms` }}>
                 {chip}
               </span>
             ))}
           </div>
         </div>
         <ManualReferralForm product={product} referralContext={referralContext} />
-        <a className="lazule-premium-button lazule-cta-shimmer mt-5 inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
+        <a className="lazule-premium-button lazule-cta-shimmer lazule-cta-glass mt-5 inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
           {statusMeta.ctaLabel}
         </a>
       </article>
