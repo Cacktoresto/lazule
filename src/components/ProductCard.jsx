@@ -64,7 +64,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
   const priceLabel = canDirectBuy(product) ? formatBRL(product.salePrice) : 'Sob consulta';
 
   return (
-    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur sm:rounded-[1.8rem]">
+    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] bg-[#0d1a33cf] shadow-mineral backdrop-blur sm:rounded-[1.8rem]">
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
@@ -93,7 +93,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
             <ProductImageFallback label={product.image ? 'Imagem temporariamente indisponível' : 'Curadoria sob consulta'} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/80 via-transparent to-transparent" />
-          <span className="absolute left-3 top-3 rounded-full border border-lazule-gold/35 bg-lazule-night/58 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold backdrop-blur sm:left-4 sm:top-4 sm:px-3 sm:text-[0.65rem] sm:tracking-[0.16em]">
+          <span className="absolute left-3 top-3 rounded-full border border-[var(--laz-border-premium)] bg-lazule-night/58 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[#eedebd] backdrop-blur sm:left-4 sm:top-4 sm:px-3 sm:text-[0.65rem] sm:tracking-[0.16em]">
             {heroBadge}
           </span>
         </div>
@@ -106,7 +106,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-300">{product.narrative || product.description || 'Perfil olfativo em curadoria'}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {formatSemanticLabels((product.semanticFacets?.length ? product.semanticFacets : [product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)]), { limit: 3 }).map((label) => (
-              <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-slate-300">
+              <span key={label} className="rounded-full border border-[var(--laz-border-mineral)] bg-[#0d1b34] px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-[#cfdbf2]">
                 {label}
               </span>
             ))}
