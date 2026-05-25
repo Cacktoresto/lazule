@@ -5,8 +5,26 @@ import { createSearchIndex, createSearchTokens, inferBrandFromName, normalizeSea
 import { createBrandSlug, createProductSlug } from '../utils/productRouting.js';
 import { sanitizePublicProduct } from '../data/publicProductSanitizer.js';
 import { OLFACTIVE_SEMANTIC_ENRICHMENT } from '../data/generated/olfactiveSemanticEnrichment.js';
-import { buildOlfactiveProfile } from '../ai/olfactiveEnrichment.js';
-import { inferFacet, inferCluster } from '../ai/semanticIntelligenceLayer.js';
+
+
+function buildLightweightOlfactiveProfile(product = {}) {
+  const text = normalizeSearchText([product.description, product.olfactoryReference, product.category, product.gender, ...(product.notes || []), ...(product.badges || [])].filter(Boolean).join(' '));
+  const accords = [];
+  if (text.includes('citr') || text.includes('fresh')) accords.push('citrus');
+  if (text.includes('madeir') || text.includes('woody')) accords.push('woody');
+  if (text.includes('ambar') || text.includes('amber')) accords.push('amber');
+  if (text.includes('doce') || text.includes('sweet') || text.includes('vanilla')) accords.push('sweet');
+  const signature = accords.includes('amber') || accords.includes('sweet') ? 'seductive_night' : 'clean_luxury';
+  return { accords, signature, personality: accords.includes('woody') ? 'executive' : 'elegant', narrative: accords.length ? `Perfil com foco ${accords.slice(0,2).join(' + ')}.` : 'Perfil olfativo em curadoria', occasion: signature === 'seductive_night' ? 'nightlife' : 'daily', temperature: accords.includes('amber') ? 'warm' : 'fresh', projection: accords.includes('amber') ? 'high' : 'moderate' };
+}
+
+function inferSemanticClusterLight(product = {}, profile = {}) {
+  const text = normalizeSearchText([product.category, product.olfactoryReference, profile.signature, ...(profile.accords || [])].join(' '));
+  if (text.includes('arabe') || text.includes('amber')) return 'dark_amber';
+  if (text.includes('citr') || text.includes('fresh')) return 'clean_luxury';
+  if (text.includes('woody')) return 'executive_fresh';
+  return 'intimate_skin_scent';
+}
 
 const ENRICHMENT_BY_SLUG = new Map(OLFACTIVE_SEMANTIC_ENRICHMENT.map((item) => [item.slug, item]));
 
@@ -47,7 +65,7 @@ export function normalizeProduct(rawProduct = {}) {
 
   const productSlug = createProductSlug(safeName);
   const enrichment = ENRICHMENT_BY_SLUG.get(productSlug);
-  const generatedProfile = buildOlfactiveProfile(publicProduct);
+  const generatedProfile = buildLightweightOlfactiveProfile(publicProduct);
   const semanticConfidence = Number(enrichment?.enrichmentConfidence ?? rawProduct.semanticConfidence ?? 0.55);
   const shouldUseFallback = semanticConfidence < 0.66;
   const semanticFacets = [
@@ -85,7 +103,7 @@ export function normalizeProduct(rawProduct = {}) {
     semanticFacets,
     semanticConfidence,
     semanticReasons: shouldUseFallback ? ['Perfil olfativo em curadoria'] : [generatedProfile.narrative, ...(enrichment?.similarIntentQueries || [])].filter(Boolean).slice(0, 3),
-    semanticCluster: inferCluster(publicProduct, inferFacet(publicProduct)),
+    semanticCluster: inferSemanticClusterLight(publicProduct, generatedProfile),
   };
 
   return {
