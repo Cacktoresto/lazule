@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
 import { getProductRecommendations, getProductRecommendationsAsync } from '../utils/catalog';
@@ -11,6 +11,30 @@ import { applyManualReferralCode, getReferralChangeEventName, getReferralContext
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 import { loadProductExperienceRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
+
+class ProductSectionErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    console.error(`[ProductDetails:${this.props.sectionName}] section error`, error);
+    console.error(`[ProductDetails:${this.props.sectionName}] componentStack`, info?.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+
+    return this.props.children;
+  }
+}
 
 function normalizeProductClassifier(value) {
   return String(value || '')
@@ -829,6 +853,55 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   );
 }
 
+function ProductDetailsSafeShell({ product, whatsAppLink, referralContext }) {
+  const directBuy = canDirectBuy(product);
+  const statusMeta = getCommercialStatusMeta(product);
+
+  return (
+    <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
+      <DetailImage product={product} />
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
+        <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
+          {product.brand}
+        </a>
+        <h1 className="mt-4 font-display text-4xl leading-[0.98] text-lazule-night sm:text-5xl lg:text-6xl lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
+        <div className="mt-7 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-5 lg:border-white/10">
+          <div>
+            <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
+            <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
+          </div>
+        </div>
+        <ManualReferralForm product={product} referralContext={referralContext} />
+        <a className="lazule-premium-button lazule-cta-shimmer mt-6 inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
+          {statusMeta.ctaLabel}
+        </a>
+      </article>
+    </div>
+  );
+}
+
+function ProductExperienceSection({ product, experience, whatsAppLink }) {
+  if (!experience || !Array.isArray(experience?.dimensions) || !Array.isArray(experience?.idealUsage) || !Array.isArray(experience?.performance)) {
+    return null;
+  }
+  return <PerfumeExperienceLayer product={product} experience={experience} whatsAppLink={whatsAppLink} />;
+}
+
+function ProductRecommendationsSection({ products }) {
+  if (!Array.isArray(products) || !products.length) return null;
+  return <Recommendations products={products} />;
+}
+
+function ProductRelationshipsSection({ sections, currentProduct, experience }) {
+  if (!Array.isArray(sections) || !sections.length) return null;
+  return <RelationshipBlocks sections={sections} currentProduct={currentProduct} experience={experience} />;
+}
+
+function ProductDiscoveryTermsSection({ product, runtimeModules }) {
+  if (!product || !runtimeModules?.olfactiveRelationships) return null;
+  return <OlfactiveDiscoveryTerms product={product} runtimeModules={runtimeModules} />;
+}
+
 export function ProductDetails({ slug }) {
   const catalogProducts = useMemo(() => getAllProducts(), []);
   const normalizedSlug = createProductSlug(slug);
@@ -974,15 +1047,8 @@ export function ProductDetails({ slug }) {
     return <ProductNotFound />;
   }
 
-  const description = String(product.description || '').trim();
-  const olfactoryReference = String(product.olfactoryReference || '').trim();
   const productUrl = createCanonicalUrl(createProductPath(product));
   const whatsAppLink = createProductWhatsAppLink(product, { productUrl, referralContext });
-  const directBuy = canDirectBuy(product);
-  const statusMeta = getCommercialStatusMeta(product);
-  const availability = product.availability || { label: 'Disponibilidade em curadoria', className: 'border-lazule-gold/30 text-lazule-gold' };
-  const showGender = shouldShowGender(product.category, product.gender);
-  const accordionItems = getAccordionItems(product, description, olfactoryReference);
 
   return (
     <section className="mx-auto max-w-7xl pb-32 lg:px-8 lg:py-20">
@@ -1000,65 +1066,27 @@ export function ProductDetails({ slug }) {
         </p>
       ) : null}
 
-      <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
-        <DetailImage product={product} />
-
-        <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
-          <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
-            {product.brand}
-          </a>
-          <h1 className="mt-4 font-display text-4xl leading-[0.98] text-lazule-night sm:text-5xl lg:text-6xl lg:text-lazule-mist">
-            {getProductDisplayName(product)}
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-slate-700 lg:text-slate-300">{getProductEssence(product)}</p>
-          <div className="mt-7 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-5 lg:border-white/10">
-            <div>
-              <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
-              <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
-            </div>
-            <span className={`rounded-full border px-3 py-1 text-[0.68rem] ${availability.className}`}>{availability.label}</span>
-          </div>
-
-          <ReferralCouponBadge coupon={referralContext.coupon} className="mt-5" />
-
-          <div className="mt-6 flex flex-wrap gap-2 text-xs text-slate-600 lg:text-slate-300">
-            <span>{product.category}</span>
-            {showGender && <span>• {product.gender}</span>}
-            {olfactoryReference && <span>• DNA {olfactoryReference}</span>}
-          </div>
-
-          <ManualReferralForm product={product} referralContext={referralContext} />
-
-          <a
-            className="lazule-premium-button lazule-cta-shimmer mt-6 hidden w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] lg:inline-flex"
-            href={whatsAppLink}
-            aria-label={`${directBuy ? 'Comprar' : 'Consultar'} ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'product_details' })}
-          >
-            {statusMeta.ctaLabel}
-          </a>
-
-          <p className="mt-4 text-sm leading-6 text-slate-600 lg:text-slate-300">{experience?.statusCta?.supportingCopy || 'Curadoria LAZULE com suporte consultivo para orientar compra e ocasião de uso.'}</p>
-
-          <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
-            {accordionItems.map((item) => (
-              <ProductAccordion key={item.title} title={item.title} defaultOpen={item.defaultOpen} product={product}>
-                <p>{item.content}</p>
-              </ProductAccordion>
-            ))}
-          </div>
-        </article>
-      </div>
+      <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
 
       <div className="px-4 lg:px-0">
-        <PerfumeExperienceLayer product={product} experience={experience} whatsAppLink={whatsAppLink} />
-        <VibeSection product={product} />
-        <OlfactiveDiscoveryTerms product={product} runtimeModules={runtimeModules} />
-        <RelationshipBlocks sections={relationshipSections} currentProduct={product} experience={experience} />
-        <SimilarPerfumeSections groups={similarGroups} />
-        <Recommendations products={safeRecommendations} />
+        <ProductSectionErrorBoundary sectionName="experience">
+          <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="vibe">
+          <VibeSection product={product} />
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="discovery_terms">
+          <ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} />
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="relationships">
+          <ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} />
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="similar">
+          <SimilarPerfumeSections groups={similarGroups} />
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="recommendations">
+          <ProductRecommendationsSection products={safeRecommendations} />
+        </ProductSectionErrorBoundary>
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
     </section>
