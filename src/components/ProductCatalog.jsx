@@ -225,7 +225,7 @@ export function ProductCatalog() {
 
     const completionId = window.setTimeout(() => {
       const elapsed = Date.now() - startedAt;
-      const remaining = Math.max(0, 900 - elapsed);
+      const remaining = Math.max(0, 1700 - elapsed);
       window.setTimeout(() => setIsSemanticLoading(false), remaining);
     }, 320);
 
