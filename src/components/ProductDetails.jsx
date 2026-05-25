@@ -861,6 +861,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
 }
 
 function ProductDetailsSafeShell({ product, whatsAppLink, referralContext }) {
+  console.info('[ProductDetails] ProductDetailsSafeShell render', { hasProduct: Boolean(product) });
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
 
@@ -888,9 +889,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext }) {
 }
 
 function ProductExperienceSection({ product, experience, whatsAppLink }) {
-  if (import.meta.env.DEV) {
-    console.info('[ProductDetails] ProductExperienceSection', { hasProduct: Boolean(product), hasExperience: Boolean(experience) });
-  }
+  console.info('[ProductDetails] ProductExperienceSection render', { hasProduct: Boolean(product), hasExperience: Boolean(experience) });
   if (!experience) {
     return null;
   }
@@ -898,30 +897,24 @@ function ProductExperienceSection({ product, experience, whatsAppLink }) {
 }
 
 function ProductRecommendationsSection({ products }) {
-  if (import.meta.env.DEV) {
-    console.info('[ProductDetails] ProductRecommendationsSection', { count: Array.isArray(products) ? products.length : 0 });
-  }
+  console.info('[ProductDetails] ProductRecommendationsSection render', { count: Array.isArray(products) ? products.length : 0 });
   if (!Array.isArray(products) || !products.length) return null;
   return <Recommendations products={products} />;
 }
 
 function ProductRelationshipsSection({ sections, currentProduct, experience }) {
-  if (import.meta.env.DEV) {
-    console.info('[ProductDetails] ProductRelationshipsSection', { hasProduct: Boolean(currentProduct), count: Array.isArray(sections) ? sections.length : 0, hasExperience: Boolean(experience) });
-  }
+  console.info('[ProductDetails] ProductRelationshipsSection render', { hasProduct: Boolean(currentProduct), count: Array.isArray(sections) ? sections.length : 0, hasExperience: Boolean(experience) });
   if (!Array.isArray(sections) || !sections.length) return null;
   return <RelationshipBlocks sections={sections} currentProduct={currentProduct} experience={experience} />;
 }
 
 function ProductDiscoveryTermsSection({ product, runtimeModules }) {
-  if (import.meta.env.DEV) {
-    const terms = runtimeModules?.olfactiveRelationships?.getExplorableOlfactiveTerms?.(product, { limit: 9 }) || [];
-    console.info('[ProductDetails] ProductDiscoveryTermsSection', {
-      hasProduct: Boolean(product),
-      hasRuntime: Boolean(runtimeModules?.olfactiveRelationships),
-      count: Array.isArray(terms) ? terms.length : 0,
-    });
-  }
+  const terms = runtimeModules?.olfactiveRelationships?.getExplorableOlfactiveTerms?.(product, { limit: 9 }) || [];
+  console.info('[ProductDetails] ProductDiscoveryTermsSection render', {
+    hasProduct: Boolean(product),
+    hasRuntime: Boolean(runtimeModules?.olfactiveRelationships),
+    count: Array.isArray(terms) ? terms.length : 0,
+  });
   if (!product || !runtimeModules?.olfactiveRelationships) return null;
   return <OlfactiveDiscoveryTerms product={product} runtimeModules={runtimeModules} />;
 }
@@ -978,12 +971,16 @@ export function ProductDetails({ slug }) {
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
 
   useEffect(() => {
-    if (import.meta.env.DEV) console.info('[ProductDetails] mount', { slug: normalizedSlug });
+    console.info('[ProductDetails] ProductDetails mounted');
+    console.info('[ProductDetails] product slug', normalizedSlug);
+    console.info('[ProductDetails] runtime loading begin (preload)');
     preloadSemanticRuntime();
   }, [normalizedSlug]);
 
   useEffect(() => {
+    console.info('[ProductDetails] semantic hydration effect start', { hasProduct: Boolean(product), slug: normalizedSlug });
     if (!product) {
+      console.info('[ProductDetails] semantic hydration skipped: !product');
       setSimilarGroups({});
       setExperience(null);
       setSemanticRuntimeState('idle');
@@ -991,7 +988,9 @@ export function ProductDetails({ slug }) {
     }
 
     let isMounted = true;
+    console.info('[ProductDetails] semanticRuntimeState transition', { from: semanticRuntimeState, to: 'loading' });
     setSemanticRuntimeState('loading');
+    console.info('[ProductDetails] runtime loading begin');
 
     loadProductExperienceRuntime()
       .then(({ similarPerfumeEngine, perfumeExperience, olfactiveRelationships }) => {
@@ -1010,13 +1009,15 @@ export function ProductDetails({ slug }) {
         setRuntimeModules({ olfactiveRelationships });
         setSimilarGroups(similarPerfumeEngine?.getSimilarPerfumesForProduct?.(product, similarPerfumes) || {});
         setExperience(perfumeExperience?.createPerfumeExperience?.(product) || null);
+        console.info('[ProductDetails] semanticRuntimeState transition', { from: 'loading', to: 'ready' });
         setSemanticRuntimeState('ready');
-        if (import.meta.env.DEV) console.info('[ProductDetails] runtime loaded');
+        console.info('[ProductDetails] runtime loaded');
       })
       .catch((error) => {
         if (!isMounted) return;
         console.error('Falha ao montar runtime de experiência', error);
-        if (import.meta.env.DEV) console.info('[ProductDetails] runtime error', error?.message);
+        console.info('[ProductDetails] semanticRuntimeState transition', { from: 'loading', to: 'error' });
+        console.info('[ProductDetails] runtime error', error?.message);
         setRuntimeModules(null);
         setSimilarGroups({});
         setExperience(null);
@@ -1088,7 +1089,7 @@ export function ProductDetails({ slug }) {
     return () => observer.disconnect();
   }, [product]);
 
-  if (import.meta.env.DEV) console.info('[ProductDetails] produto', { slug: normalizedSlug, found: Boolean(product) });
+  console.info('[ProductDetails] render guard check', { slug: normalizedSlug, found: Boolean(product), semanticRuntimeState, hasRuntimeModules: Boolean(runtimeModules), hasExperience: Boolean(experience) });
   const similarGroupsCount = Object.values(similarGroups || {}).reduce((total, group) => total + (Array.isArray(group) ? group.length : 0), 0);
   const relationshipSectionsCount = Array.isArray(relationshipSections)
     ? relationshipSections.reduce((total, section) => total + (Array.isArray(section?.items) ? section.items.length : 0), 0)
@@ -1114,6 +1115,7 @@ export function ProductDetails({ slug }) {
     });
   }
   if (!product) {
+    console.info('[ProductDetails] early return: ProductNotFound (!product)');
     return <ProductNotFound />;
   }
 
@@ -1137,6 +1139,14 @@ export function ProductDetails({ slug }) {
       ) : null}
 
       <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
+
+      {console.info('[ProductDetails] semantic sections present in JSX', {
+        experience: true,
+        discoveryTerms: true,
+        relationships: true,
+        similar: true,
+        recommendations: true,
+      }) || null}
 
       <div className="px-4 lg:px-0">
         <ProductSectionErrorBoundary sectionName="experience">
