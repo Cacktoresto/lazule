@@ -1987,3 +1987,56 @@ textarea {
     filter: none;
   }
 }
+
+
+.lazule-laz-card {
+  border-color: rgba(101, 144, 230, 0.45);
+  background: linear-gradient(145deg, #061127 0%, #0a1b42 44%, #102b61 100%);
+}
+
+.lazule-laz-ambient {
+  background:
+    radial-gradient(circle at 20% 24%, rgba(123, 178, 255, 0.24), transparent 42%),
+    radial-gradient(circle at 76% 18%, rgba(84, 137, 255, 0.18), transparent 37%),
+    radial-gradient(circle at 52% 100%, rgba(200, 162, 77, 0.08), transparent 50%);
+}
+
+.lazule-mineral-halo {
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(86, 143, 255, 0.33) 0%, rgba(86, 143, 255, 0.04) 58%, transparent 72%);
+  filter: blur(0.45rem);
+}
+
+.lazule-mineral-core {
+  clip-path: polygon(16% 8%, 66% 3%, 94% 30%, 86% 82%, 34% 97%, 6% 58%);
+  background:
+    radial-gradient(circle at 30% 24%, rgba(190, 225, 255, 0.52), transparent 38%),
+    radial-gradient(circle at 70% 80%, rgba(55, 113, 224, 0.44), transparent 44%),
+    linear-gradient(145deg, #2453ad 3%, #173d87 38%, #0d275a 70%, #081a3e 100%);
+  border: 1px solid rgba(133, 174, 253, 0.7);
+  box-shadow:
+    inset 0 0 1.8rem rgba(122, 170, 255, 0.32),
+    0 0.9rem 2.4rem rgba(7, 18, 49, 0.72),
+    0 0 1.8rem rgba(75, 130, 242, 0.42);
+}
+
+.lazule-mineral-vein {
+  background: linear-gradient(90deg, rgba(198, 155, 65, 0.12), rgba(237, 205, 126, 0.82), rgba(198, 155, 65, 0.16));
+}
+
+.lazule-laz-mark {
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+}
+
+@media (max-width: 640px) {
+  .lazule-laz-card {
+    background: linear-gradient(160deg, #071228 0%, #0d2553 100%);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .lazule-laz-card {
+    background: linear-gradient(145deg, #0a1a39 0%, #12306a 100%);
+  }
+}

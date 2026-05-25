@@ -17,7 +17,7 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
       return undefined;
     }
 
-    const entryDelay = window.setTimeout(() => setVisible(true), 140);
+    const entryDelay = window.setTimeout(() => setVisible(true), 80);
     return () => window.clearTimeout(entryDelay);
   }, [isActive]);
 
@@ -28,7 +28,7 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
 
     const intervalId = window.setInterval(() => {
       setStepIndex((current) => (current + 1) % MICROCOPY_STEPS.length);
-    }, 1850);
+    }, 1900);
 
     return () => window.clearInterval(intervalId);
   }, [visible]);
@@ -38,38 +38,37 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
 
   return (
     <div
-      className={`overflow-hidden transition-all duration-500 motion-reduce:transition-opacity ${visible ? 'max-h-[30rem] opacity-100' : 'max-h-0 opacity-0'} ${className}`}
+      className={`overflow-hidden transition-all duration-500 motion-reduce:transition-opacity ${visible ? 'max-h-[34rem] opacity-100' : 'max-h-0 opacity-0'} ${className}`}
       aria-hidden={!visible}
     >
-      <div className="relative rounded-[1.7rem] border border-lazule-gold/30 bg-gradient-to-br from-[#081227] via-lazule-night to-[#0a1d3e] px-4 py-5 shadow-mineral sm:px-6 sm:py-6">
-        <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_18%_22%,rgba(148,191,255,0.16),transparent_40%),radial-gradient(circle_at_82%_8%,rgba(200,162,77,0.14),transparent_30%)]" />
+      <div className="lazule-laz-card relative rounded-[1.7rem] border px-4 py-5 shadow-mineral sm:px-6 sm:py-6">
+        <div className="lazule-laz-ambient pointer-events-none absolute inset-0 rounded-[inherit]" />
 
         <div className="relative grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
-          <div className="relative mx-auto h-24 w-24 shrink-0 sm:h-28 sm:w-28" aria-hidden="true">
+          <div className="relative mx-auto h-28 w-28 shrink-0 sm:h-32 sm:w-32" aria-hidden="true">
+            <div className="lazule-mineral-halo absolute inset-[-14%]" />
             <div className="lazule-mineral-core absolute inset-0" />
             <div className="lazule-mineral-vein lazule-mineral-vein-a" />
             <div className="lazule-mineral-vein lazule-mineral-vein-b" />
             <div className="lazule-mineral-vein lazule-mineral-vein-c" />
-            <span className="lazule-laz-mark absolute inset-0 flex items-center justify-center text-lg font-semibold uppercase tracking-[0.34em] text-[#eef4ff]">LAZ</span>
+            <span className="lazule-laz-mark absolute inset-0 flex items-center justify-center text-xl font-semibold uppercase text-[#eef6ff]">LAZ</span>
           </div>
 
           <div className="space-y-3">
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Agente de curadoria</p>
-            <p className="text-sm text-lazule-mist" role="status" aria-live="polite">{step}</p>
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-[#b9cfff]">Agente de curadoria olfativa</p>
+            <p className="text-sm text-[#edf4ff]" role="status" aria-live="polite">{step}</p>
 
-            {chips.length > 0 ? (
-              <div className="flex flex-wrap gap-2" aria-label="Sinais interpretados">
-                {chips.map((chip, index) => (
-                  <span
-                    key={chip}
-                    className="lazule-semantic-chip rounded-full border border-lazule-gold/30 bg-white/[0.07] px-3 py-1 text-[0.68rem] font-medium text-slate-100"
-                    style={{ animationDelay: `${index * 120}ms` }}
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-            ) : null}
+            <div className="flex flex-wrap gap-2" aria-label="Sinais interpretados">
+              {(chips.length ? chips : ['Intenção', 'Presença', 'Assinatura']).map((chip, index) => (
+                <span
+                  key={chip}
+                  className="lazule-semantic-chip rounded-full border border-[#6f91da]/55 bg-[#0e2b63]/68 px-3 py-1 text-[0.68rem] font-medium text-[#e4efff]"
+                  style={{ animationDelay: `${index * 120}ms` }}
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -77,7 +76,7 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
           {Array.from({ length: 4 }).map((_, index) => (
             <span
               key={index}
-              className="h-9 rounded-xl border border-white/10 bg-white/[0.06] motion-safe:animate-pulse"
+              className="h-9 rounded-xl border border-[#7ca3f6]/28 bg-[#0f2b61]/52 motion-safe:animate-pulse"
               style={{ animationDelay: `${index * 130}ms` }}
             />
           ))}
