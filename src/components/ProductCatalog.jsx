@@ -122,6 +122,7 @@ export function ProductCatalog() {
   const [isSemanticLoading, setIsSemanticLoading] = useState(false);
   const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
   const [interpretedIntent, setInterpretedIntent] = useState({ matchedSignals: [], semanticEntity: null });
+  const [enableSemanticHydration, setEnableSemanticHydration] = useState(false);
   const resultsRef = useRef(null);
 
   const catalogProducts = useMemo(() => getAllProducts(), []);
@@ -143,7 +144,10 @@ export function ProductCatalog() {
   const filteredProducts = useMemo(() => baseFilteredProducts.filter((product) => matchDiscoveryTags(product, activeDiscoveryChipIds)), [baseFilteredProducts, activeDiscoveryChipIds]);
 
   const visibleProducts = useMemo(() => filteredProducts.slice(0, visibleCount), [filteredProducts, visibleCount]);
-  const relatedRecommendations = useMemo(() => getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds }), [catalogProducts, filteredProducts, searchTerm, activeDiscoveryChipIds]);
+  const relatedRecommendations = useMemo(() => {
+    if (!enableSemanticHydration) return [];
+    return getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds });
+  }, [activeDiscoveryChipIds, catalogProducts, enableSemanticHydration, filteredProducts, searchTerm]);
   const heroRecommendation = relatedRecommendations[0] ?? filteredProducts[0] ?? null;
   const spotlightProducts = useMemo(() => {
     const source = [...relatedRecommendations, ...filteredProducts].filter(Boolean);
@@ -170,7 +174,17 @@ export function ProductCatalog() {
   }, [interpretedIntent]);
 
   useEffect(() => {
+    const startedAt = performance.now();
+    if (import.meta.env.DEV) console.info('[Catalog] mount');
     preloadSemanticRuntime();
+    const id = window.setTimeout(() => {
+      setEnableSemanticHydration(true);
+      if (import.meta.env.DEV) console.info('[Catalog] semantic modules hydration enabled');
+    }, 450);
+    if (import.meta.env.DEV) {
+      requestAnimationFrame(() => console.info('[Catalog] first paint ms', Math.round(performance.now() - startedAt)));
+    }
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
@@ -187,6 +201,7 @@ export function ProductCatalog() {
 
     loadSearchRuntime()
       .then(({ queryUnderstanding }) => {
+        if (import.meta.env.DEV) console.info('[Catalog] semantic query runtime loaded');
         if (!isMounted) return;
         setInterpretedIntent(queryUnderstanding.interpretUserIntent(normalizedTerm));
         setSemanticRuntimeState('ready');

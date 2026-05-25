@@ -835,6 +835,7 @@ export function ProductDetails({ slug }) {
   const product = getProductBySlug(normalizedSlug, catalogProducts);
   const fallbackRecommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
   const [recommendations, setRecommendations] = useState(fallbackRecommendations);
+  const [runtimeModules, setRuntimeModules] = useState(null);
 
   useEffect(() => {
     setRecommendations(fallbackRecommendations);
@@ -842,25 +843,34 @@ export function ProductDetails({ slug }) {
     if (!product) return;
 
     let isMounted = true;
-    getProductRecommendationsAsync(product, catalogProducts).then((nextRecommendations) => {
-      if (isMounted && Array.isArray(nextRecommendations) && nextRecommendations.length) {
-        setRecommendations(nextRecommendations);
-      }
-    });
+    getProductRecommendationsAsync(product, catalogProducts)
+      .then((nextRecommendations) => {
+        if (isMounted && Array.isArray(nextRecommendations) && nextRecommendations.length) {
+          setRecommendations(nextRecommendations);
+        }
+      })
+      .catch((error) => {
+        console.error('[ProductDetails] recommendation runtime failed', error);
+      });
 
     return () => {
       isMounted = false;
     };
   }, [catalogProducts, fallbackRecommendations, product]);
   const [similarGroups, setSimilarGroups] = useState({});
-  const relationshipSections = useMemo(() => (product ? runtimeModules?.olfactiveRelationships?.generateOlfactiveRelationships?.(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
+  const relationshipSections = useMemo(() => {
+    if (!product) return [];
+    const sections = runtimeModules?.olfactiveRelationships?.generateOlfactiveRelationships?.(product, catalogProducts, { limit: 4 });
+    return Array.isArray(sections) ? sections : [];
+  }, [catalogProducts, product, runtimeModules]);
   const [experience, setExperience] = useState(null);
   const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
 
   useEffect(() => {
+    if (import.meta.env.DEV) console.info('[ProductDetails] mount', { slug: normalizedSlug });
     preloadSemanticRuntime();
-  }, []);
+  }, [normalizedSlug]);
 
   useEffect(() => {
     if (!product) {
@@ -874,15 +884,19 @@ export function ProductDetails({ slug }) {
     setSemanticRuntimeState('loading');
 
     loadProductExperienceRuntime()
-      .then(({ similarPerfumeEngine, perfumeExperience }) => {
+      .then(({ similarPerfumeEngine, perfumeExperience, olfactiveRelationships }) => {
         if (!isMounted) return;
-        setSimilarGroups(similarPerfumeEngine.getSimilarPerfumesForProduct(product, similarPerfumes));
-        setExperience(perfumeExperience.createPerfumeExperience(product));
+        setRuntimeModules({ olfactiveRelationships });
+        setSimilarGroups(similarPerfumeEngine?.getSimilarPerfumesForProduct?.(product, similarPerfumes) || {});
+        setExperience(perfumeExperience?.createPerfumeExperience?.(product) || null);
         setSemanticRuntimeState('ready');
+        if (import.meta.env.DEV) console.info('[ProductDetails] runtime loaded');
       })
       .catch((error) => {
         if (!isMounted) return;
         console.error('Falha ao montar runtime de experiência', error);
+        if (import.meta.env.DEV) console.info('[ProductDetails] runtime error', error?.message);
+        setRuntimeModules(null);
         setSimilarGroups({});
         setExperience(null);
         setSemanticRuntimeState('error');
@@ -953,6 +967,7 @@ export function ProductDetails({ slug }) {
     return () => observer.disconnect();
   }, [product]);
 
+  if (import.meta.env.DEV) console.info('[ProductDetails] produto', { slug: normalizedSlug, found: Boolean(product) });
   if (!product) {
     return <ProductNotFound />;
   }
