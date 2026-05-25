@@ -75,15 +75,15 @@ export function SemanticSearchLoading({ isActive, interpretedChips = [], classNa
 
   return (
     <div className={`overflow-hidden transition-all duration-500 motion-reduce:transition-opacity ${isVisible ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'} ${className}`}>
-      <div className="lazule-laz-card relative min-h-[220px] rounded-[1.7rem] border px-4 py-5 shadow-mineral sm:min-h-[250px] sm:px-6 sm:py-6">
+      <div className="lazule-laz-card relative min-h-[220px] rounded-[1.7rem] border px-4 py-5 shadow-mineral sm:min-h-[250px] sm:px-6 sm:py-6" data-testid="laz-mineral-loading">
         <div className="lazule-laz-ambient pointer-events-none absolute inset-0 rounded-[inherit]" />
 
         <div className="relative grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
-          <div className="lazule-thinking-core relative mx-auto h-32 w-32 shrink-0 sm:h-36 sm:w-36" aria-hidden="true">
+          <div className="lazule-thinking-core relative mx-auto h-[72px] w-[72px] shrink-0 sm:h-24 sm:w-24" aria-hidden="true">
             <div className="lazule-mineral-halo absolute inset-[-16%]" />
-            <div className="lazule-mineral-orbit lazule-mineral-orbit-outer" />
-            <div className="lazule-mineral-orbit lazule-mineral-orbit-inner" />
-            <div className="lazule-mineral-core absolute inset-0" />
+            <div className="lazule-mineral-orbit lazule-mineral-orbit-outer" data-testid="laz-orbit" />
+            <div className="lazule-mineral-orbit lazule-mineral-orbit-inner" data-testid="laz-orbit" />
+            <div className="lazule-mineral-core absolute inset-0" data-testid="laz-mineral-core" />
             <div className="lazule-mineral-vein lazule-mineral-vein-a" />
             <div className="lazule-mineral-vein lazule-mineral-vein-b" />
             <div className="lazule-mineral-vein lazule-mineral-vein-c" />
