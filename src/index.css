@@ -1870,3 +1870,120 @@ textarea {
     animation: none !important;
   }
 }
+
+@keyframes lazule-core-rotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.04);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes lazule-core-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0.4rem rgba(77, 138, 255, 0.28));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 1rem rgba(77, 138, 255, 0.38));
+  }
+}
+
+@keyframes lazule-text-emerge {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.5em;
+    transform: translateY(0.4rem);
+  }
+
+  100% {
+    opacity: 0.96;
+    letter-spacing: 0.34em;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lazule-chip-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.lazule-mineral-core {
+  clip-path: polygon(18% 8%, 68% 2%, 96% 34%, 83% 84%, 34% 98%, 4% 58%);
+  background:
+    radial-gradient(circle at 28% 25%, rgba(164, 207, 255, 0.42), transparent 46%),
+    linear-gradient(140deg, #173a8d 5%, #0f2458 48%, #092042 100%);
+  border: 1px solid rgba(200, 162, 77, 0.38);
+  box-shadow:
+    inset 0 0 1.6rem rgba(77, 138, 255, 0.24),
+    0 0.75rem 2.2rem rgba(9, 28, 66, 0.56);
+  animation: lazule-core-rotate 20s linear infinite, lazule-core-breathe 7.5s ease-in-out infinite;
+}
+
+.lazule-mineral-vein {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(200, 162, 77, 0.12), rgba(233, 205, 133, 0.7), rgba(200, 162, 77, 0.14));
+  box-shadow: 0 0 0.6rem rgba(200, 162, 77, 0.2);
+}
+
+.lazule-mineral-vein-a {
+  top: 34%;
+  left: 14%;
+  width: 62%;
+  height: 1.5px;
+  transform: rotate(-23deg);
+}
+
+.lazule-mineral-vein-b {
+  top: 56%;
+  left: 28%;
+  width: 50%;
+  height: 1.4px;
+  transform: rotate(17deg);
+}
+
+.lazule-mineral-vein-c {
+  top: 18%;
+  left: 42%;
+  width: 36%;
+  height: 1.25px;
+  transform: rotate(58deg);
+}
+
+.lazule-laz-mark {
+  opacity: 0;
+  text-shadow: 0 0 1rem rgba(190, 222, 255, 0.45);
+  animation: lazule-text-emerge 900ms cubic-bezier(0.22, 1, 0.36, 1) 220ms forwards;
+}
+
+.lazule-semantic-chip {
+  opacity: 0;
+  animation: lazule-chip-rise 620ms ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lazule-mineral-core,
+  .lazule-laz-mark,
+  .lazule-semantic-chip {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
