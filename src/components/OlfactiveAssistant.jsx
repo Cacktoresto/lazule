@@ -9,6 +9,7 @@ import { loadRecommendationKnowledgeBase } from '../data/referenceCatalog';
 import { trackEvent } from '../utils/analytics';
 import { getReferralContext } from '../utils/referral';
 import { ProductImageFallback } from './ProductCard';
+import { SemanticSearchLoading } from './SemanticSearchLoading';
 import {
   createOlfactiveAssistantAnalyticsPayload,
   getLivingSemanticSuggestions,
@@ -19,7 +20,6 @@ import {
 
 const QUICK_SUGGESTIONS = ['Explore sua assinatura', 'Descubra direções olfativas', 'Perfumes para presença refinada', 'Elegância com calor sutil'];
 const DEFAULT_PROMPT = 'Ex.: uma assinatura discreta, elegante e memorável para a noite';
-const LOADING_STEPS = ['Lendo sua atmosfera…', 'Selecionando caminhos olfativos…', 'Ajustando presença e textura…', 'Finalizando sua curadoria…'];
 const DISCOVERY_MODULES = ['Sua direção olfativa', 'Continuando sua curadoria'];
 const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
 
@@ -99,12 +99,10 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const [query, setQuery] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingStepIndex, setLoadingStepIndex] = useState(0);
   const [activeRefinements, setActiveRefinements] = useState([]);
   const [tasteSignals, setTasteSignals] = useState([]);
   const [wardrobeMemory, setWardrobeMemory] = useState({ entries: [], favorites: [], inspirations: [] });
   const timeoutRef = useRef(null);
-  const loadingIntervalRef = useRef(null);
 
   const initialExamples = useMemo(() => QUICK_SUGGESTIONS.slice(0, 4).join(' · '), []);
 
@@ -127,9 +125,6 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
       }
-      if (loadingIntervalRef.current) {
-        window.clearInterval(loadingIntervalRef.current);
-      }
     };
   }, [sourcePage]);
 
@@ -144,15 +139,6 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
     setQuery(safeQuery);
     setIsLoading(true);
-    setLoadingStepIndex(0);
-
-    if (loadingIntervalRef.current) {
-      window.clearInterval(loadingIntervalRef.current);
-    }
-
-    loadingIntervalRef.current = window.setInterval(() => {
-      setLoadingStepIndex((current) => (current + 1) % LOADING_STEPS.length);
-    }, 260);
 
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
@@ -184,9 +170,6 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
       }).finally(() => {
         setIsLoading(false);
       });
-      if (loadingIntervalRef.current) {
-        window.clearInterval(loadingIntervalRef.current);
-      }
     }, 680);
   }
 
@@ -285,11 +268,8 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
             ) : null}
 
             {isLoading ? (
-              <div className="flex min-h-[9.5rem] min-w-0 max-w-full items-center justify-center overflow-hidden text-center sm:min-h-[14rem]" role="status" aria-live="polite">
-                <div className="min-w-0 max-w-full">
-                  <span className="lazule-ai-orb mx-auto block h-16 w-16 rounded-full border border-lazule-gold/45 bg-lazule-gold/10 shadow-aureate" aria-hidden="true" />
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-lazule-gold sm:text-sm sm:tracking-[0.24em]">{LOADING_STEPS[loadingStepIndex]}</p><p className="mt-3 text-xs leading-5 text-slate-300">Ajustando presença, ocasião e assinatura para uma recomendação mais precisa.</p>
-                </div>
+              <div className="min-h-[9.5rem] min-w-0 max-w-full sm:min-h-[14rem]" role="status" aria-live="polite">
+                <SemanticSearchLoading isActive={isLoading} interpretedChips={livingSuggestions.slice(0, 3)} className="max-w-full" />
               </div>
             ) : null}
 
