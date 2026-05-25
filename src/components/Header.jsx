@@ -21,7 +21,7 @@ function NavigationLink({ href, children, className = '', ariaLabel }) {
 
 export function Header({ immersiveProduct = false }) {
   return (
-    <header className={`${immersiveProduct ? 'hidden lg:block' : ''} sticky top-0 z-40 border-b border-white/10 surface-lazule-glass shadow-mineral-soft backdrop-blur-2xl`}>
+    <header className={`${immersiveProduct ? 'hidden lg:block' : ''} lazule-cinematic-header sticky top-0 z-40 border-b border-white/10 surface-lazule-glass shadow-mineral-soft backdrop-blur-2xl`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-8 sm:py-4">
         <a
           href="/"

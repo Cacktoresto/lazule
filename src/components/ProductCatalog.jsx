@@ -61,6 +61,18 @@ function getInitialCatalogState() {
   };
 }
 
+
+function resolveSemanticMood(query) {
+  const normalized = query.toLowerCase();
+  if (!normalized) return 'default';
+  if (/\b(mar|ocean|praia|aquatic|marine)\b/i.test(normalized)) return 'marine';
+  if (/\b(banho|clean|fresh)\b|sab\w+o/i.test(normalized)) return 'clean';
+  if (/\b(balada|noite|party|club)\b/i.test(normalized)) return 'night';
+  if (/\b(couro|leather|oud|âmbar|ambar)\b/i.test(normalized)) return 'leather';
+  if (/\b(luxo|premium)\b|eleg\w+|sofistic/i.test(normalized)) return 'luxury';
+  return 'default';
+}
+
 function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
@@ -262,7 +274,7 @@ export function ProductCatalog() {
   }
 
   return (
-    <section id="catalogo" className="relative mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-20 lg:py-24">
+    <section id="catalogo" data-semantic-mood={resolveSemanticMood(searchTerm)} className="lazule-cinematic-section relative mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-20 lg:py-24">
       <div className="mb-7 grid gap-5 sm:mb-8 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
         <div className="max-w-3xl">
           <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold sm:mb-4 sm:text-xs sm:tracking-[0.38em]">
