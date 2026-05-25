@@ -7,14 +7,14 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
   }
 
   return (
-    <form className="w-full" role="search" aria-label="Refinar fragrâncias no catálogo" onSubmit={handleSubmit}>
+    <form className="lazule-search-journey w-full" role="search" aria-label="Refinar fragrâncias no catálogo" onSubmit={handleSubmit}>
       <label className="block w-full" htmlFor="catalog-search">
         <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#a9bbe0] sm:tracking-[0.24em]">
           Busca
         </span>
         <input
           id="catalog-search"
-          className="laz-breathe min-h-12 w-full rounded-2xl border-glass surface-lazule-glass px-4 py-3 text-[16px] text-[var(--laz-text-main)] outline-none ring-0 placeholder:text-[var(--laz-text-muted)] transition duration-300 hover:border-[#95b4ec66] focus-visible:border-[#8fb3ffcc] focus-visible:bg-[#122445d6] focus-visible:ring-2 focus-visible:ring-[#5a8eff8a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070d1d] sm:rounded-full sm:py-3.5 sm:text-base"
+          className="laz-breathe lazule-search-input min-h-12 w-full rounded-2xl border-glass surface-lazule-glass px-4 py-3 text-[16px] text-[var(--laz-text-main)] outline-none ring-0 placeholder:text-[var(--laz-text-muted)] transition duration-300 hover:border-[#95b4ec66] focus-visible:border-[#8fb3ffcc] focus-visible:bg-[#122445d6] focus-visible:ring-2 focus-visible:ring-[#5a8eff8a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070d1d] sm:rounded-full sm:py-3.5 sm:text-base"
           type="search"
           value={value}
           onChange={(event) => onChange(event.target.value)}

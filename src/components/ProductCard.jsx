@@ -64,7 +64,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
   const priceLabel = canDirectBuy(product) ? formatBRL(product.salePrice) : 'Sob consulta';
 
   return (
-    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem]">
+    <article className="lazule-product-card lazule-cinematic-card group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem]">
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
@@ -93,6 +93,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
             <ProductImageFallback label={product.image ? 'Imagem temporariamente indisponível' : 'Curadoria sob consulta'} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/80 via-transparent to-transparent" />
+          <div className="lazule-card-ambient pointer-events-none absolute inset-0" aria-hidden="true" />
           <span className="absolute left-3 top-3 rounded-full border border-[var(--laz-border-premium)] bg-lazule-night/58 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[#eedebd] backdrop-blur sm:left-4 sm:top-4 sm:px-3 sm:text-[0.65rem] sm:tracking-[0.16em]">
             {heroBadge}
           </span>

@@ -2,7 +2,7 @@ import { createWhatsAppLink } from '../utils/whatsapp';
 
 export function Footer() {
   return (
-    <footer id="atendimento" className="border-t border-white/10 surface-lazule-dark px-5 py-12 sm:px-8">
+    <footer id="atendimento" className="lazule-cinematic-footer border-t border-white/10 surface-lazule-dark px-5 py-12 sm:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.38em] text-lazule-mist">LAZULE</p>
