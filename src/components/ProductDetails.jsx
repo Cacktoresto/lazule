@@ -628,7 +628,7 @@ function RecommendationCard({ product, context = 'recommendations', explanation 
 function OlfactiveDiscoveryTerms({ product, runtimeModules }) {
   const terms = runtimeModules?.olfactiveRelationships?.getExplorableOlfactiveTerms?.(product, { limit: 9 });
 
-  if (!terms.length) {
+  if (!Array.isArray(terms) || !terms.length) {
     return null;
   }
 
@@ -863,6 +863,8 @@ export function ProductDetails({ slug }) {
     const sections = runtimeModules?.olfactiveRelationships?.generateOlfactiveRelationships?.(product, catalogProducts, { limit: 4 });
     return Array.isArray(sections) ? sections : [];
   }, [catalogProducts, product, runtimeModules]);
+
+  const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
   const [experience, setExperience] = useState(null);
   const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
@@ -1056,7 +1058,7 @@ export function ProductDetails({ slug }) {
         <OlfactiveDiscoveryTerms product={product} runtimeModules={runtimeModules} />
         <RelationshipBlocks sections={relationshipSections} currentProduct={product} experience={experience} />
         <SimilarPerfumeSections groups={similarGroups} />
-        <Recommendations products={recommendations} />
+        <Recommendations products={safeRecommendations} />
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
     </section>

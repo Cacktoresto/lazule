@@ -1,5 +1,11 @@
 const moduleCache = new Map();
 
+function unwrapModule(moduleNamespace) {
+  return moduleNamespace?.default && typeof moduleNamespace.default === 'object'
+    ? { ...moduleNamespace, ...moduleNamespace.default }
+    : moduleNamespace;
+}
+
 function loadCached(key, importer) {
   if (!moduleCache.has(key)) {
     moduleCache.set(key, importer().catch((error) => {
@@ -29,9 +35,9 @@ export function loadProductExperienceRuntime() {
     loadCached('olfactiveRelationships', () => import('./olfactiveRelationships.js')),
     loadCached('similarPerfumeEngine', () => import('./similarPerfumeEngine.js')),
   ]).then(([perfumeExperience, olfactiveRelationships, similarPerfumeEngine]) => ({
-    perfumeExperience,
-    olfactiveRelationships,
-    similarPerfumeEngine,
+    perfumeExperience: unwrapModule(perfumeExperience),
+    olfactiveRelationships: unwrapModule(olfactiveRelationships),
+    similarPerfumeEngine: unwrapModule(similarPerfumeEngine),
   }));
 }
 
