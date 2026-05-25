@@ -141,6 +141,7 @@ export function ProductCatalog() {
   const filteredProducts = useMemo(() => baseFilteredProducts.filter((product) => matchDiscoveryTags(product, activeDiscoveryChipIds)), [baseFilteredProducts, activeDiscoveryChipIds]);
 
   const visibleProducts = useMemo(() => filteredProducts.slice(0, visibleCount), [filteredProducts, visibleCount]);
+  const relatedRecommendations = useMemo(() => getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds }), [catalogProducts, filteredProducts, searchTerm, activeDiscoveryChipIds]);
   const heroRecommendation = relatedRecommendations[0] ?? filteredProducts[0] ?? null;
   const spotlightProducts = useMemo(() => {
     const source = [...relatedRecommendations, ...filteredProducts].filter(Boolean);
@@ -158,7 +159,6 @@ export function ProductCatalog() {
   const appliedFilterChips = useMemo(() => getAppliedFilterChips(filters, searchTerm), [filters, searchTerm]);
   const discoveryChips = useMemo(() => getDiscoveryChips(), []);
   const discoveryGroups = useMemo(() => buildDiscoveryGroups(catalogProducts, activeDiscoveryChipIds), [catalogProducts, activeDiscoveryChipIds]);
-  const relatedRecommendations = useMemo(() => getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds }), [catalogProducts, filteredProducts, searchTerm, activeDiscoveryChipIds]);
 
   const interpretedIntent = useMemo(() => interpretUserIntent(searchTerm), [searchTerm]);
   const semanticSignalChips = useMemo(() => {

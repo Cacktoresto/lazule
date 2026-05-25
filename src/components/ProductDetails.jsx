@@ -456,6 +456,10 @@ function trackExperienceEvent(eventName, experience, extra = {}, options) {
 }
 
 function PerfumeExperienceLayer({ product, experience, whatsAppLink }) {
+  if (!experience) {
+    return null;
+  }
+
   return (
     <section className="lazule-reveal mt-10 overflow-hidden rounded-[2.65rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.22),transparent_32rem),linear-gradient(145deg,rgba(10,20,42,0.94),rgba(4,8,18,0.88))] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
@@ -834,7 +838,18 @@ export function ProductDetails({ slug }) {
   const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
   const similarGroups = useMemo(() => (product ? getSimilarPerfumesForProduct(product, similarPerfumes) : {}), [product]);
   const relationshipSections = useMemo(() => (product ? generateOlfactiveRelationships(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
-  const experience = useMemo(() => (product ? createPerfumeExperience(product) : null), [product]);
+  const experience = useMemo(() => {
+    if (!product) {
+      return null;
+    }
+
+    try {
+      return createPerfumeExperience(product);
+    } catch (error) {
+      console.error('Falha ao montar perfume experience', error);
+      return null;
+    }
+  }, [product]);
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
 
   useEffect(() => {
@@ -907,6 +922,7 @@ export function ProductDetails({ slug }) {
   const whatsAppLink = createProductWhatsAppLink(product, { productUrl, referralContext });
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
+  const availability = product.availability || { label: 'Disponibilidade em curadoria', className: 'border-lazule-gold/30 text-lazule-gold' };
   const showGender = shouldShowGender(product.category, product.gender);
   const accordionItems = getAccordionItems(product, description, olfactoryReference);
 
@@ -937,7 +953,7 @@ export function ProductDetails({ slug }) {
               <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
               <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
             </div>
-            <span className={`rounded-full border px-3 py-1 text-[0.68rem] ${product.availability.className}`}>{product.availability.label}</span>
+            <span className={`rounded-full border px-3 py-1 text-[0.68rem] ${availability.className}`}>{availability.label}</span>
           </div>
 
           <ReferralCouponBadge coupon={referralContext.coupon} className="mt-5" />
@@ -961,7 +977,7 @@ export function ProductDetails({ slug }) {
             {statusMeta.ctaLabel}
           </a>
 
-          <p className="mt-4 text-sm leading-6 text-slate-600 lg:text-slate-300">{experience?.statusCta.supportingCopy}</p>
+          <p className="mt-4 text-sm leading-6 text-slate-600 lg:text-slate-300">{experience?.statusCta?.supportingCopy || 'Curadoria LAZULE com suporte consultivo para orientar compra e ocasião de uso.'}</p>
 
           <div className="mt-8 rounded-[2rem] border border-lazule-night/10 bg-white/45 px-5 lg:border-white/10 lg:bg-lazule-night/35">
             {accordionItems.map((item) => (
