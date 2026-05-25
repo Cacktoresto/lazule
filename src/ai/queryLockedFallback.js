@@ -46,33 +46,75 @@ export function calculateFallbackIntentMatch(candidate, intent = {}) {
   const negativePenalty = negativeConflicts.length * 0.24;
   const confidenceBoost = (intent.confidence ?? 0) * 0.12;
   const ambiguityPenalty = (intent.ambiguity ?? 0) * 0.08;
-  const fallbackScore = Math.max(0, positiveScore - negativePenalty + confidenceBoost - ambiguityPenalty);
+  const family = (intent.activatedFamilies ?? [])[0] ?? '';
+  const familyBonus = {
+    aquatic_marine: (matched) => (matched.includes('aquatic') || matched.includes('marine') || matched.includes('ozonic') || matched.includes('blue_fresh') ? 0.16 : 0),
+    clean_bath: (matched) => (matched.includes('post_bath') || matched.includes('soapy') || matched.includes('white_musk') ? 0.14 : 0),
+    nightlife_presence: (matched) => (matched.includes('high_projection') || matched.includes('loud_clubbing') || matched.includes('nightlife') ? 0.14 : 0),
+  };
+  const matchedPrimarySignals = positive.map((s) => s.signal || s);
+  const matchedSecondarySignals = secondary.map((s) => s.signal || s);
+  const matchedHintSignals = hints.map((s) => s.signal || s);
+  const familyBoost = familyBonus[family]?.(matchedPrimarySignals) ?? 0;
+  const fallbackScore = Math.max(0, positiveScore - negativePenalty + confidenceBoost - ambiguityPenalty + familyBoost);
+  const missingPrimarySignals = (intent.primarySignals ?? []).map((s) => s.signal || s).filter((signal) => !matchedPrimarySignals.includes(signal));
 
-  return { positive, secondary, hints, negativeConflicts, fallbackScore };
+  return {
+    positive,
+    secondary,
+    hints,
+    negativeConflicts,
+    fallbackScore,
+    matchedPrimarySignals,
+    matchedSecondarySignals,
+    matchedHintSignals,
+    missingPrimarySignals,
+  };
+}
+
+function resolveRelevanceTier(match = {}, score = 0) {
+  const negativeCount = match.negativeConflicts?.length ?? 0;
+  const primaryCount = match.matchedPrimarySignals?.length ?? 0;
+  const secondaryCount = match.matchedSecondarySignals?.length ?? 0;
+  const hintCount = match.matchedHintSignals?.length ?? 0;
+
+  if (negativeCount >= 2) return { relevanceTier: 'no_match', tierReason: 'Conflitos negativos fortes com a intenção da busca.' };
+  if (primaryCount >= 1 && score >= 0.34) return { relevanceTier: 'strong_match', tierReason: 'Mantém sinais primários da intenção original.' };
+  if ((secondaryCount >= 1 && score >= 0.2) || (hintCount >= 2 && score >= 0.2)) {
+    return { relevanceTier: 'adjacent_match', tierReason: 'Mantém sinais secundários/próximos da intenção, sem aderência total.' };
+  }
+  if (score >= 0.14) return { relevanceTier: 'weak_match', tierReason: 'Aderência baixa com poucos sinais úteis.' };
+  return { relevanceTier: 'no_match', tierReason: 'Sem aderência semântica suficiente para fallback confiável.' };
 }
 
 export function rankFallbackByQueryIntent(candidates = [], context = {}, options = {}) {
-  const minRelevance = options.minRelevance ?? 0.24;
+  const minRelevance = options.minRelevance ?? 0.18;
   const enriched = candidates.map((entry) => {
     const match = calculateFallbackIntentMatch(entry.product ?? entry, context);
     const diversityPenalty = (entry._clusterCount ?? 0) * 0.06;
     const score = Math.max(0, match.fallbackScore - diversityPenalty);
+    const { relevanceTier, tierReason } = resolveRelevanceTier(match, score);
     return {
       ...entry,
       fallbackScore: Number(score.toFixed(3)),
-      relevanceTier: score >= 0.58 ? 'high' : score >= 0.38 ? 'medium' : score >= minRelevance ? 'low' : 'discarded',
+      relevanceTier,
+      tierReason,
       trace: {
         query: context.query,
         activatedFamily: (context.activatedFamilies ?? [])[0] ?? 'unknown',
-        primaryMatches: match.positive.map((s) => s.signal || s),
-        secondaryMatches: match.secondary.map((s) => s.signal || s),
-        hintMatches: match.hints.map((s) => s.signal || s),
+        relevanceTier,
+        tierReason,
+        missingPrimarySignals: match.missingPrimarySignals,
+        matchedPrimarySignals: match.matchedPrimarySignals,
+        matchedSecondarySignals: match.matchedSecondarySignals,
+        matchedHintSignals: match.matchedHintSignals,
         negativeConflicts: match.negativeConflicts.map((s) => s.signal || s),
+        relaxedBecauseNoStrongMatch: false,
       },
     };
   }).sort((a, b) => b.fallbackScore - a.fallbackScore);
 
-  return enriched.filter((entry) => entry.fallbackScore >= minRelevance);
+  return enriched.filter((entry) => entry.fallbackScore >= minRelevance && ['strong_match', 'adjacent_match', 'weak_match'].includes(entry.relevanceTier));
 }
 
 export function buildQueryLockedFallback(candidates = [], context = {}, options = {}) {
@@ -84,14 +126,26 @@ export function buildQueryLockedFallback(candidates = [], context = {}, options 
     return { ...entry, _clusterCount: count };
   });
 
-  const ranked = rankFallbackByQueryIntent(seeded, context, options).map((entry) => ({
+  const rankedByTier = rankFallbackByQueryIntent(seeded, context, options);
+  const strongMatches = rankedByTier.filter((entry) => entry.relevanceTier === 'strong_match');
+  const adjacentMatches = rankedByTier.filter((entry) => entry.relevanceTier === 'adjacent_match');
+  const shouldRelaxToAdjacent = strongMatches.length === 0 && adjacentMatches.length > 0;
+  const visibleEntries = strongMatches.length > 0 ? strongMatches : adjacentMatches;
+
+  const ranked = visibleEntries.map((entry) => ({
     ...entry,
-    reason: FAMILY_REASONS[(context.activatedFamilies ?? [])[0]] ?? 'Entrou como alternativa por manter coerência semântica com sua busca.',
+    reason: entry.relevanceTier === 'adjacent_match'
+      ? 'Não encontramos uma assinatura exatamente marinha, mas estas opções seguem frescor limpo, clima quente e direção aquática próxima.'
+      : FAMILY_REASONS[(context.activatedFamilies ?? [])[0]] ?? 'Entrou como alternativa por manter coerência semântica com sua busca.',
+    trace: {
+      ...entry.trace,
+      relaxedBecauseNoStrongMatch: shouldRelaxToAdjacent,
+    },
   }));
 
   return {
     ranked,
-    discarded: seeded.length - ranked.length,
+    discarded: seeded.length - rankedByTier.length,
     honestEmptyState: ranked.length === 0,
   };
 }
