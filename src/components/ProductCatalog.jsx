@@ -293,7 +293,7 @@ export function ProductCatalog() {
               key={chip.id}
               type="button"
               onClick={() => toggleDiscoveryChip(chip.id)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${active ? 'border-lazule-gold/70 bg-lazule-gold/18 text-lazule-gold' : 'border-white/15 bg-white/[0.04] text-slate-300 hover:border-lazule-gold/40 hover:text-lazule-mist'}`}
+              className={`lazule-premium-button rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${active ? 'laz-pulse border-[var(--laz-border-premium)] bg-[#b7924924] text-[#f1e4c6]' : 'border-[var(--laz-border-mineral)] bg-[#0f1d38ad] text-[#cad8f2] hover:border-[#92afe57a] hover:text-lazule-mist'}`}
             >
               {chip.label}
             </button>
@@ -312,7 +312,7 @@ export function ProductCatalog() {
         <div className="min-w-0" ref={resultsRef} id="catalog-results">
           <div className="mb-6 grid gap-4">
             <SemanticSearchLoading isActive={isSemanticLoading} interpretedChips={semanticSignalChips} />
-            <div className="lazule-feedback-card flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-slate-300 sm:px-5">
+            <div className="lazule-feedback-card laz-reveal flex flex-col gap-3 rounded-[1.5rem] border border-[var(--laz-border-mineral)] bg-[#0e1b36c7] px-4 py-4 text-sm text-slate-300 shadow-mineral sm:px-5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
                   <strong className="text-lazule-mist">{filteredProducts.length}</strong> resultado(s) {searchTerm ? 'encontrado(s)' : 'curado(s)'}
@@ -355,12 +355,13 @@ export function ProductCatalog() {
           {discoveryGroups.length > 0 && (
             <div className="mb-7 grid gap-3 sm:grid-cols-2">
               {discoveryGroups.slice(0, 2).map((group) => (
-                <article key={group.id} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                <article key={group.id} className="lazule-surface-premium laz-converge relative overflow-hidden rounded-2xl border bg-[#0f1b35d4] p-4">
+                  <span className="lazule-ambient-layer" />
                   <p className="text-[0.62rem] uppercase tracking-[0.2em] text-lazule-gold">Curadoria contextual</p>
                   <h3 className="mt-2 font-display text-xl text-lazule-mist">{group.title}</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {group.products.slice(0, 3).map((product) => (
-                      <a key={product.id} href={product.productPath} className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:border-lazule-gold/45 hover:text-lazule-mist">{product.name}</a>
+                      <a key={product.id} href={product.productPath} className="rounded-full border border-[var(--laz-border-mineral)] bg-[#0c1730a3] px-3 py-1 text-xs text-slate-300 hover:border-[var(--laz-border-premium)] hover:text-lazule-mist">{product.name}</a>
                     ))}
                   </div>
                 </article>
@@ -380,7 +381,7 @@ export function ProductCatalog() {
                 <div className="mt-10 flex flex-col items-center gap-3 text-center">
                   <button
                     type="button"
-                    className="lazule-premium-button lazule-cta-shimmer group relative inline-flex min-h-12 w-full items-center justify-center overflow-hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-5 py-4 text-center text-sm font-semibold uppercase tracking-[0.14em] text-lazule-night shadow-aureate focus:outline-none focus:ring-2 focus:ring-lazule-gold focus:ring-offset-2 focus:ring-offset-lazule-night sm:w-auto sm:px-8 sm:tracking-[0.22em]"
+                    className="lazule-premium-button lazule-cta-shimmer group relative inline-flex min-h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[#2c58a8] bg-gradient-to-r from-[#17356a] via-[#214886] to-[#193b73] px-5 py-4 text-center text-sm font-semibold uppercase tracking-[0.14em] text-[#ecf2ff] shadow-mineral focus:outline-none focus:ring-2 focus:ring-[#5a8eff8a] focus:ring-offset-2 focus:ring-offset-lazule-night sm:w-auto sm:px-8 sm:tracking-[0.22em]"
                     onClick={loadMoreProducts}
                   >
                     <span className="relative">Carregar mais fragrâncias</span>
@@ -395,14 +396,14 @@ export function ProductCatalog() {
             </>
           ) : (
             <div className="space-y-4">
-              <div className="lazule-surface-premium rounded-[2rem] border border-lazule-gold/20 bg-white/[0.05] p-6 text-center shadow-mineral sm:p-10">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-lazule-gold sm:tracking-[0.35em]">Curadoria LAZULE</p>
+              <div className="lazule-surface-premium laz-converge rounded-[2rem] border bg-[#0d1a33d6] p-6 text-center sm:p-10">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-[#a9bbe0] sm:tracking-[0.35em]">Curadoria LAZULE</p>
               <h3 className="font-display text-3xl leading-tight text-lazule-mist">Ainda não encontramos o match ideal.</h3>
               <p className="mx-auto mt-4 max-w-2xl text-slate-300">
                 A curadoria LAZULE pode sugerir alternativas por vibe, DNA olfativo e ocasião em uma conversa rápida.
               </p>
               <a
-                className="lazule-premium-button lazule-cta-shimmer mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-center text-sm font-semibold text-lazule-night shadow-aureate sm:w-auto"
+                className="lazule-premium-button lazule-cta-shimmer mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#2c58a8] bg-gradient-to-r from-[#17356a] via-[#214886] to-[#193b73] px-6 py-3 text-center text-sm font-semibold text-[#ecf2ff] shadow-mineral sm:w-auto"
                 href={createWhatsAppLink('Olá! Quero uma curadoria personalizada da LAZULE FRAGRANCES.')}
                 target="_blank"
                 rel="noreferrer"
@@ -412,7 +413,7 @@ export function ProductCatalog() {
               </a>
               </div>
               {relatedRecommendations.length > 0 && (
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <div className="rounded-[1.5rem] border border-[var(--laz-border-mineral)] bg-[#0d1a32c8] p-4 sm:p-5">
                   <p className="text-[0.62rem] uppercase tracking-[0.2em] text-lazule-gold">Fallback inteligente</p>
                   <h4 className="mt-2 font-display text-2xl text-lazule-mist">Você também pode gostar</h4>
                   <p className="mt-2 text-sm text-slate-300">Selecionamos fragrâncias próximas da vibe buscada para manter sua descoberta fluida.</p>

@@ -25,10 +25,10 @@ const IMAGE_OPTIONS = [
 function SelectField({ id, label, value, onChange, options, helper }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold">{label}</span>
+      <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[#a9bbe0]">{label}</span>
       <select
         id={id}
-        className="min-h-11 w-full rounded-2xl border border-lazule-gold/15 bg-lazule-night/85 px-3.5 py-2.5 text-[16px] text-lazule-mist outline-none shadow-inner shadow-lazule-blue/10 transition duration-200 hover:border-lazule-gold/35 focus-visible:border-lazule-gold/75 focus-visible:bg-lazule-night focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-12 sm:px-4 sm:py-3 sm:text-sm"
+        className="min-h-11 w-full rounded-2xl border border-[var(--laz-border-mineral)] bg-[#0d1931de] px-3.5 py-2.5 text-[16px] text-lazule-mist outline-none shadow-inner shadow-lazule-blue/10 transition duration-200 hover:border-[#92afe57a] focus-visible:border-[#8fb3ffcc] focus-visible:bg-[#122445d9] focus-visible:ring-2 focus-visible:ring-[#5a8eff8a] focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-12 sm:px-4 sm:py-3 sm:text-sm"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
@@ -100,7 +100,7 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
       </div>
 
       <button
-        className="lazule-premium-button min-h-12 rounded-full border border-lazule-gold/40 bg-lazule-gold/5 px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:tracking-[0.18em]"
+        className="lazule-premium-button min-h-12 rounded-full border border-[var(--laz-border-mineral)] bg-[#102548bc] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#d4def4] transition hover:border-[var(--laz-border-premium)] hover:text-[#f1e7cf] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5a8eff94] focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:tracking-[0.18em]"
         type="button"
         onClick={onReset}
       >
@@ -114,7 +114,7 @@ export { ALL_VALUE, PRICE_RANGES };
 
 export function AdvancedFilters({ filters, options, onFilterChange, onReset }) {
   return (
-    <aside className="rounded-[1.55rem] border border-lazule-gold/15 bg-gradient-to-br from-white/[0.075] via-white/[0.045] to-lazule-blue/10 p-3.5 shadow-mineral backdrop-blur sm:rounded-[2rem] sm:p-5 lg:sticky lg:top-28 lg:p-6">
+    <aside className="lazule-surface-premium laz-reveal rounded-[1.55rem] border bg-gradient-to-br from-[#0e1a34d9] via-[#101f3bd1] to-[#16366a94] p-3.5 backdrop-blur sm:rounded-[2rem] sm:p-5 lg:sticky lg:top-28 lg:p-6">
       <div className="mb-5 hidden lg:block">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-lazule-gold">Filtros</p>
         <h3 className="mt-3 font-display text-3xl text-lazule-mist">Curadoria assistida</h3>

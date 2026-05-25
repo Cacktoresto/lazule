@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 :root {
+  --laz-bg-night: #070d1d;
+  --laz-bg-lapis: #10264f;
+  --laz-bg-mineral: #1d3d74;
+  --laz-glow-blue: rgba(74, 136, 255, 0.28);
+  --laz-gold-accent: #b79249;
+  --laz-gold-burnt: #8f6b2f;
+  --laz-text-main: #eef4ff;
+  --laz-text-muted: #9fb0cf;
+  --laz-border-mineral: rgba(150, 181, 243, 0.24);
+  --laz-border-premium: rgba(183, 146, 73, 0.34);
+  --laz-shadow-mineral: 0 24px 80px rgba(3, 10, 26, 0.5), 0 10px 30px rgba(25, 67, 138, 0.22);
   color: #f8fafc;
   background: #0f172a;
   font-synthesis: none;
@@ -93,6 +104,44 @@ body {
     color 220ms ease;
 }
 
+@keyframes laz-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 136, 255, 0.14); }
+  50% { box-shadow: 0 0 0 8px rgba(74, 136, 255, 0.04); }
+}
+@keyframes laz-pulse { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+@keyframes laz-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes laz-converge { 0% { opacity: 0; transform: scale(.98); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes laz-reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes laz-handoff { 0% { filter: saturate(.85);} 100% { filter: saturate(1);} }
+@keyframes laz-orbit { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+@keyframes laz-glow { 0%,100% { opacity: .32; } 50% { opacity: .55; } }
+
+.laz-breathe { animation: laz-breathe 4.2s ease-in-out infinite; }
+.laz-pulse { animation: laz-pulse 2.3s ease-in-out infinite; }
+.laz-float { animation: laz-float 6s ease-in-out infinite; }
+.laz-converge { animation: laz-converge .65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.laz-reveal { animation: laz-reveal .58s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.laz-handoff { animation: laz-handoff .5s ease both; }
+.laz-orbit { animation: laz-orbit 12s linear infinite; }
+.laz-glow { animation: laz-glow 3.6s ease-in-out infinite; }
+
+.lazule-ambient-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(74, 136, 255, 0.14), transparent 34%),
+    radial-gradient(circle at 88% 8%, rgba(183, 146, 73, 0.09), transparent 30%),
+    radial-gradient(circle at 50% 120%, rgba(20, 47, 90, 0.5), transparent 42%);
+  mix-blend-mode: screen;
+}
+
+.lazule-surface-premium {
+  border-color: var(--laz-border-mineral);
+  box-shadow: var(--laz-shadow-mineral);
+}
+
 .lazule-premium-button::after {
   position: absolute;
   inset: 0;
@@ -179,11 +228,27 @@ input {
 
 .lazule-product-card:hover {
   transform: translateY(-0.2rem);
-  border-color: rgba(200, 162, 77, 0.42);
+  border-color: var(--laz-border-premium);
   box-shadow:
     0 20px 56px rgba(15, 23, 42, 0.42),
     0 0 28px rgba(37, 99, 235, 0.09),
     0 0 0 1px rgba(200, 162, 77, 0.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .laz-breathe,
+  .laz-pulse,
+  .laz-float,
+  .laz-converge,
+  .laz-reveal,
+  .laz-handoff,
+  .laz-orbit,
+  .laz-glow,
+  .lazule-product-card,
+  .lazule-premium-button {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .lazule-product-card:hover::after {
