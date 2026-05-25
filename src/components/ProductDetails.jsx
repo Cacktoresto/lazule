@@ -860,27 +860,44 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   );
 }
 
-function ProductDetailsSafeShell({ product, whatsAppLink, referralContext }) {
+function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, experience }) {
   console.info('[ProductDetails] ProductDetailsSafeShell render', { hasProduct: Boolean(product) });
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
+  const chips = getVibeItems(product);
+  const signature = humanizeSignature(product.signature || product.olfactoryReference || 'Assinatura em curadoria');
+  const idealUse = experience?.idealUse?.headline || experience?.occasionNarrative || product.narrative || getProductEssence(product);
+  const performance = experience?.performance?.summary || 'Performance equilibrada com presença elegante e leitura premium.';
 
   return (
-    <div className="grid gap-0 lg:items-start">
+    <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6">
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-8 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:rounded-[2.4rem] lg:bg-white/[0.065] lg:p-8 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
-        <h1 className="mt-4 font-display text-4xl leading-[0.98] text-lazule-night sm:text-5xl lg:text-6xl lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
-        <div className="mt-7 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-5 lg:border-white/10">
+        <h1 className="mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
+        <div className="mt-5 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-4 lg:border-white/10">
           <div>
             <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
             <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           </div>
         </div>
+        <div className="mt-4 rounded-2xl border border-lazule-gold/30 bg-lazule-night/[0.035] p-4 lg:bg-white/[0.03]">
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
+          <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Performance: {performance}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {chips.slice(0, 4).map((chip) => (
+              <span key={chip} className="rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold">
+                {chip}
+              </span>
+            ))}
+          </div>
+        </div>
         <ManualReferralForm product={product} referralContext={referralContext} />
-        <a className="lazule-premium-button lazule-cta-shimmer mt-6 inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
+        <a className="lazule-premium-button lazule-cta-shimmer mt-5 inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
           {statusMeta.ctaLabel}
         </a>
       </article>
@@ -1138,27 +1155,8 @@ export function ProductDetails({ slug }) {
         </p>
       ) : null}
 
-      <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
-        <div>
-          <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
-        </div>
-
-        <div className="space-y-6 px-4 lg:px-0">
-          <div className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-mineral backdrop-blur sm:p-6">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold/90">Experiência semântica LAZ</p>
-            <p className="mt-2 text-sm text-slate-300">DNA olfativo, assinatura e contexto aparecem logo no topo para orientar sua decisão sem scroll longo.</p>
-          </div>
-          <ProductSectionErrorBoundary sectionName="experience_top">
-            <div data-testid="product-experience-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.035] p-3 shadow-mineral backdrop-blur sm:p-4">
-              <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
-            </div>
-          </ProductSectionErrorBoundary>
-          <ProductSectionErrorBoundary sectionName="vibe_top">
-            <div className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
-              <VibeSection product={product} />
-            </div>
-          </ProductSectionErrorBoundary>
-        </div>
+      <div>
+        <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} experience={experience} />
       </div>
 
       {console.info('[ProductDetails] semantic sections present in JSX', {
@@ -1170,6 +1168,16 @@ export function ProductDetails({ slug }) {
       }) || null}
 
       <div className="mt-8 space-y-6 px-4 lg:mt-12 lg:px-0">
+        <ProductSectionErrorBoundary sectionName="experience_top">
+          <div data-testid="product-experience-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.035] p-3 shadow-mineral backdrop-blur sm:p-4">
+            <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
+          </div>
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="vibe_top">
+          <div className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
+            <VibeSection product={product} />
+          </div>
+        </ProductSectionErrorBoundary>
         <ProductSectionErrorBoundary sectionName="discovery_terms">
           <div data-testid="product-discovery-terms-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
             <ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} />
