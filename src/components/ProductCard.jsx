@@ -64,7 +64,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
   const priceLabel = canDirectBuy(product) ? formatBRL(product.salePrice) : 'Sob consulta';
 
   return (
-    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] bg-[#0d1a33cf] shadow-mineral backdrop-blur sm:rounded-[1.8rem]">
+    <article className="lazule-product-card group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem]">
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
@@ -100,13 +100,13 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
 
         <div className="flex flex-1 flex-col px-3.5 py-3.5 sm:px-4 sm:py-4">
           <p className="line-clamp-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-[0.68rem] sm:tracking-[0.24em]"><HighlightText text={product.brand} query={highlightQuery} /></p>
-          <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-lazule-gold sm:text-[1.65rem]">
+          <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-white sm:text-[1.65rem]">
             <HighlightText text={product.name} query={highlightQuery} />
           </h3>
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-300">{product.narrative || product.description || 'Perfil olfativo em curadoria'}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {formatSemanticLabels((product.semanticFacets?.length ? product.semanticFacets : [product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)]), { limit: 3 }).map((label) => (
-              <span key={label} className="rounded-full border border-[var(--laz-border-mineral)] bg-[#0d1b34] px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-[#cfdbf2]">
+              <span key={label} className="rounded-full border border-[var(--laz-border-mineral)] surface-lazule-soft px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-[#cfdbf2]">
                 {label}
               </span>
             ))}

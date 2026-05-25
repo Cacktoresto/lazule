@@ -14,6 +14,20 @@
   --laz-border-mineral: rgba(150, 181, 243, 0.24);
   --laz-border-premium: rgba(183, 146, 73, 0.34);
   --laz-shadow-mineral: 0 24px 80px rgba(3, 10, 26, 0.5), 0 10px 30px rgba(25, 67, 138, 0.22);
+  --lapis-blue-principal: #2b5cb2;
+  --deep-navy: #070d1d;
+  --mineral-blue: #1a3669;
+  --soft-blue-glow: rgba(104, 157, 255, 0.3);
+  --slate-mineral: #22314a;
+  --off-white: #edf3ff;
+  --muted-mineral-text: #9cb0d1;
+  --burnt-gold-accent: #9b7a3f;
+  --shadow-mineral-soft: 0 18px 48px rgba(4, 12, 28, 0.42);
+  --shadow-mineral-deep: 0 36px 96px rgba(1, 8, 22, 0.62);
+  --shadow-laz-glow: 0 0 0 1px rgba(98, 145, 238, 0.2), 0 0 32px rgba(72, 122, 224, 0.22);
+  --border-mineral: 1px solid rgba(149, 183, 240, 0.24);
+  --border-laz-accent: 1px solid rgba(155, 122, 63, 0.45);
+  --border-glass: 1px solid rgba(214, 227, 255, 0.13);
   color: #f8fafc;
   background: #0f172a;
   font-synthesis: none;
@@ -2243,3 +2257,19 @@ textarea {
   }
   .lazule-curation-ritual .lazule-ai-concierge::before { opacity: 0.4; }
 }
+
+
+.surface-lazule-dark { background: linear-gradient(155deg, rgba(7,13,29,.95), rgba(10,20,44,.92)); }
+.surface-lazule-card { background: linear-gradient(155deg, rgba(14,28,56,.92), rgba(20,40,78,.84)); border: var(--border-mineral); box-shadow: var(--shadow-mineral-soft); }
+.surface-lazule-glass { background: linear-gradient(155deg, rgba(21,45,88,.54), rgba(8,17,38,.56)); border: var(--border-glass); backdrop-filter: blur(16px); }
+.surface-lazule-soft { background: linear-gradient(155deg, rgba(20,35,68,.56), rgba(15,29,56,.46)); border: var(--border-mineral); }
+.shadow-mineral-soft { box-shadow: var(--shadow-mineral-soft); }
+.shadow-mineral-deep { box-shadow: var(--shadow-mineral-deep); }
+.shadow-laz-glow { box-shadow: var(--shadow-laz-glow); }
+.border-mineral { border: var(--border-mineral); }
+.border-laz-accent { border: var(--border-laz-accent); }
+.border-glass { border: var(--border-glass); }
+.laz-hover-lift { transition: transform 260ms ease, box-shadow 280ms ease, border-color 260ms ease; }
+.laz-hover-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-mineral-deep); }
+.lazule-semantic-chip, .lazule-brand-pill { background: linear-gradient(145deg, rgba(22,44,84,.7), rgba(11,24,47,.78)); border-color: rgba(136,171,236,.34); color: var(--off-white); }
+.lazule-home-shell { background: radial-gradient(circle at 80% -10%, rgba(98,130,209,.14), transparent 36rem), radial-gradient(circle at 20% 120%, rgba(43,92,178,.2), transparent 34rem), #060c1a; }
