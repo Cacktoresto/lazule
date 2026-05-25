@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { interpretUserIntent } from '../ai/semanticQueryUnderstanding';
+import { loadSearchRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getAllProducts } from '../data/catalogRepository';
 import { getFeaturedCollections } from '../utils/catalog';
@@ -120,6 +120,8 @@ export function ProductCatalog() {
   const [shouldScrollToResults, setShouldScrollToResults] = useState(Boolean(new URLSearchParams(window.location.search).get('src')));
   const [activeDiscoveryChipIds, setActiveDiscoveryChipIds] = useState([]);
   const [isSemanticLoading, setIsSemanticLoading] = useState(false);
+  const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
+  const [interpretedIntent, setInterpretedIntent] = useState({ matchedSignals: [], semanticEntity: null });
   const resultsRef = useRef(null);
 
   const catalogProducts = useMemo(() => getAllProducts(), []);
@@ -160,13 +162,45 @@ export function ProductCatalog() {
   const discoveryChips = useMemo(() => getDiscoveryChips(), []);
   const discoveryGroups = useMemo(() => buildDiscoveryGroups(catalogProducts, activeDiscoveryChipIds), [catalogProducts, activeDiscoveryChipIds]);
 
-  const interpretedIntent = useMemo(() => interpretUserIntent(searchTerm), [searchTerm]);
   const semanticSignalChips = useMemo(() => {
     const topSignals = (interpretedIntent.matchedSignals ?? []).slice(0, 4).map((entry) => formatSemanticChip(entry.signal));
     const atmosphereChip = interpretedIntent.semanticEntity?.atmosphere ? formatSemanticChip(interpretedIntent.semanticEntity.atmosphere) : null;
     const climateChip = interpretedIntent.semanticEntity?.climate ? formatSemanticChip(interpretedIntent.semanticEntity.climate) : null;
     return [...new Set([...topSignals, atmosphereChip, climateChip].filter(Boolean))].slice(0, 4);
   }, [interpretedIntent]);
+
+  useEffect(() => {
+    preloadSemanticRuntime();
+  }, []);
+
+  useEffect(() => {
+    const normalizedTerm = searchTerm.trim();
+
+    if (!normalizedTerm) {
+      setInterpretedIntent({ matchedSignals: [], semanticEntity: null });
+      setSemanticRuntimeState('idle');
+      return;
+    }
+
+    let isMounted = true;
+    setSemanticRuntimeState('loading');
+
+    loadSearchRuntime()
+      .then(({ queryUnderstanding }) => {
+        if (!isMounted) return;
+        setInterpretedIntent(queryUnderstanding.interpretUserIntent(normalizedTerm));
+        setSemanticRuntimeState('ready');
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setInterpretedIntent({ matchedSignals: [], semanticEntity: null });
+        setSemanticRuntimeState('error');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [searchTerm]);
 
   function resetPagination() {
     setVisibleCount(PRODUCTS_PER_PAGE);
@@ -305,6 +339,14 @@ export function ProductCatalog() {
             onSubmit={handleApplySearch}
             onClear={clearSearch}
             hasSearch={Boolean(draftSearchTerm.trim() || searchTerm.trim())}
+            onFocus={() => {
+              if (semanticRuntimeState === 'idle') {
+                setSemanticRuntimeState('loading');
+              }
+              void loadSearchRuntime()
+                .then(() => setSemanticRuntimeState((state) => (state === 'loading' ? 'ready' : state)))
+                .catch(() => setSemanticRuntimeState('error'));
+            }}
           />
         </div>
       </div>
