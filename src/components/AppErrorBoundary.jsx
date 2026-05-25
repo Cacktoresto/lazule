@@ -11,7 +11,8 @@ export class AppErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('[ErrorBoundary] Falha em rota crítica', error, info);
+    console.error('[ErrorBoundary] Falha em rota crítica', error);
+    console.error('[ErrorBoundary] componentStack', info?.componentStack);
   }
 
   render() {
