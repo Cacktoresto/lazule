@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { interpretUserIntent } from '../ai/semanticQueryUnderstanding';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getAllProducts } from '../data/catalogRepository';
 import { getFeaturedCollections } from '../utils/catalog';
@@ -8,6 +9,7 @@ import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
 import { SearchBar } from './SearchBar';
 import { CatalogHighlights } from './CatalogHighlights';
+import { SemanticSearchLoading } from './SemanticSearchLoading';
 import { applyCatalogSeo } from '../utils/seo';
 import { buildDiscoveryGroups, getContextualRecommendations, getDiscoveryChips, matchDiscoveryTags } from '../utils/catalogDiscovery';
 
@@ -25,6 +27,29 @@ const DEFAULT_FILTERS = {
 const PRODUCTS_PER_PAGE = 24;
 
 const CATALOG_QUERY_PARAMS = ['tipo', 'categoria', 'category'];
+
+function formatSemanticChip(value) {
+  const labels = {
+    aquatic: 'Marinho',
+    marine: 'Marinho',
+    fresh: 'Frescor',
+    hot_weather: 'Clima quente',
+    summer: 'Verão',
+    clean_luxury: 'Clean',
+    post_bath: 'Pós-banho',
+    nightlife: 'Balada',
+    clean: 'Clean',
+    elegant: 'Elegante',
+    woody_executive: 'Sofisticado',
+  };
+
+  const mapped = (labels[value] ?? value).replace(/_/g, ' ');
+  return mapped
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 function getInitialCatalogState() {
   const params = new URLSearchParams(window.location.search);
@@ -82,6 +107,7 @@ export function ProductCatalog() {
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
   const [shouldScrollToResults, setShouldScrollToResults] = useState(Boolean(new URLSearchParams(window.location.search).get('src')));
   const [activeDiscoveryChipIds, setActiveDiscoveryChipIds] = useState([]);
+  const [isSemanticLoading, setIsSemanticLoading] = useState(false);
   const resultsRef = useRef(null);
 
   const catalogProducts = useMemo(() => getAllProducts(), []);
@@ -109,6 +135,14 @@ export function ProductCatalog() {
   const discoveryChips = useMemo(() => getDiscoveryChips(), []);
   const discoveryGroups = useMemo(() => buildDiscoveryGroups(catalogProducts, activeDiscoveryChipIds), [catalogProducts, activeDiscoveryChipIds]);
   const relatedRecommendations = useMemo(() => getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds }), [catalogProducts, filteredProducts, searchTerm, activeDiscoveryChipIds]);
+
+  const interpretedIntent = useMemo(() => interpretUserIntent(searchTerm), [searchTerm]);
+  const semanticSignalChips = useMemo(() => {
+    const topSignals = (interpretedIntent.matchedSignals ?? []).slice(0, 4).map((entry) => formatSemanticChip(entry.signal));
+    const atmosphereChip = interpretedIntent.semanticEntity?.atmosphere ? formatSemanticChip(interpretedIntent.semanticEntity.atmosphere) : null;
+    const climateChip = interpretedIntent.semanticEntity?.climate ? formatSemanticChip(interpretedIntent.semanticEntity.climate) : null;
+    return [...new Set([...topSignals, atmosphereChip, climateChip].filter(Boolean))].slice(0, 4);
+  }, [interpretedIntent]);
 
   function resetPagination() {
     setVisibleCount(PRODUCTS_PER_PAGE);
@@ -177,6 +211,31 @@ export function ProductCatalog() {
 
     return () => window.clearTimeout(timeoutId);
   }, [draftSearchTerm]);
+
+
+  useEffect(() => {
+    const hasSemanticContext = Boolean(searchTerm.trim() || activeDiscoveryChipIds.length);
+    if (!hasSemanticContext) {
+      setIsSemanticLoading(false);
+      return undefined;
+    }
+
+    const startedAt = Date.now();
+    setIsSemanticLoading(true);
+
+    const completionId = window.setTimeout(() => {
+      const elapsed = Date.now() - startedAt;
+      const remaining = Math.max(0, 900 - elapsed);
+      window.setTimeout(() => setIsSemanticLoading(false), remaining);
+    }, 320);
+
+    const safetyId = window.setTimeout(() => setIsSemanticLoading(false), 5000);
+
+    return () => {
+      window.clearTimeout(completionId);
+      window.clearTimeout(safetyId);
+    };
+  }, [searchTerm, filters, activeDiscoveryChipIds]);
 
   useEffect(() => {
     if (!shouldScrollToResults || !resultsRef.current) return;
@@ -252,6 +311,7 @@ export function ProductCatalog() {
 
         <div className="min-w-0" ref={resultsRef} id="catalog-results">
           <div className="mb-6 grid gap-4">
+            <SemanticSearchLoading isActive={isSemanticLoading} interpretedChips={semanticSignalChips} />
             <div className="lazule-feedback-card flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-slate-300 sm:px-5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
