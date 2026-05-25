@@ -156,10 +156,11 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
     setResultsReady(false);
     setCanRevealResults(false);
     setIsLazVisible(true);
-    setLoaderPhase('processing');
+    setLoaderPhase('converging');
     setIsSearchProcessing(true);
 
     timeoutRef.current = window.setTimeout(() => {
+      setLoaderPhase('processing');
       loadRecommendationKnowledgeBase(products).then((knowledgeBase) => nextResult(knowledgeBase)).catch(() => nextResult(products)).finally(() => {
         if (handoffRef.current.seq !== nextSeq) return;
         const now = Date.now();
@@ -246,7 +247,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   }, [result]);
 
   return (
-    <section className={`${className} lazule-ai-section`} aria-labelledby="olfactive-assistant-title">
+    <section className={`${className} lazule-ai-section ${isLazVisible ? `lazule-curation-ritual lazule-phase-${loaderPhase}` : ""}`} aria-labelledby="olfactive-assistant-title">
       <div className="lazule-ai-concierge lazule-surface-premium relative min-w-0 overflow-hidden rounded-[1.55rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_18%_0%,rgba(200,162,77,0.13),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.94),rgba(30,58,138,0.38)_48%,rgba(5,8,22,0.95))] p-3.5 shadow-[0_30px_110px_rgba(2,6,23,0.32)] backdrop-blur-xl min-[390px]:rounded-[1.85rem] min-[390px]:p-4 sm:rounded-[2.7rem] sm:p-7 lg:p-9">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.055),transparent)] opacity-40" />
         <div className="lazule-ai-orb absolute -right-16 -top-16 h-36 w-36 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 opacity-35 blur-[0.2px] sm:-right-14 sm:-top-14 sm:h-44 sm:w-44 sm:opacity-60" aria-hidden="true" />
@@ -260,7 +261,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               {DISCOVERY_MODULES.map((label) => <span key={label} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.67rem] font-semibold uppercase tracking-[0.14em] text-slate-200">{label}</span>)}
             </div>
 
-            <form className="lazule-ai-form mt-4 min-w-0 space-y-3.5 sm:mt-5" onSubmit={handleSubmit}>
+            <form className={`lazule-ai-form mt-4 min-w-0 space-y-3.5 sm:mt-5 ${isLazVisible ? "lazule-query-converging" : ""}`} onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="olfactive-query">Descreva o perfume ideal</label>
               <textarea
                 id="olfactive-query"
@@ -271,7 +272,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                 onChange={(event) => setQuery(event.target.value)}
               />
 
-              <div className="lazule-ai-chips flex min-w-0 max-w-full flex-wrap gap-1.5 pb-1 sm:gap-2" aria-label="Sugestões rápidas">
+              <div className={`lazule-ai-chips flex min-w-0 max-w-full flex-wrap gap-1.5 pb-1 sm:gap-2 ${isLazVisible ? "lazule-chips-absorbing" : ""}`} aria-label="Sugestões rápidas">
                 {(query.trim() ? livingSuggestions.slice(0, 3) : QUICK_SUGGESTIONS.slice(0, 3)).map((suggestion) => (
                   <button
                     key={suggestion}
@@ -314,7 +315,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
             {isLazVisible ? (
               <div className="min-h-[9.5rem] min-w-0 max-w-full sm:min-h-[14rem]" role="status" aria-live="polite">
-                <SemanticSearchLoading isActive={isLazVisible} isVisible={isLazVisible} phase={loaderPhase} fadeDurationMs={LOADER_FADE_MS} interpretedChips={livingSuggestions.slice(0, 3)} className="max-w-full" />
+                <SemanticSearchLoading isActive={isLazVisible} isVisible={isLazVisible} phase={loaderPhase} fadeDurationMs={LOADER_FADE_MS} interpretedChips={livingSuggestions.slice(0, 3)} query={query} className="max-w-full" />
               </div>
             ) : null}
 
