@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createSemanticExplanation, getSemanticAnalyticsTags, interpretSemanticIntent, resetSemanticSessionProfile, scoreSemanticMatch } from '../src/ai/semanticOlfactiveSearch.js';
+import { rankSemanticWithEmbeddings } from '../src/ai/semanticOlfactiveSearch.js';
 
 const marineProduct = { name: 'Ocean Executive', description: 'marine aquatic salty fresh clean luxo discreto para escritorio', accords: ['marine', 'aquatic'], vibeTags: ['clean', 'airy'], weatherTags: ['hot'], occasions: ['office'] };
 const sweetNightProduct = { name: 'Amber Night', description: 'vanilla amber warm spicy sedutor sofisticado noite', accords: ['amber', 'vanilla'], vibeTags: ['sensual', 'night'], weatherTags: ['cold'], occasions: ['night'] };
@@ -39,4 +40,11 @@ test('semantic engine never returns empty atmospheric recommendation state', () 
   const tags = getSemanticAnalyticsTags(interpreted);
   assert.ok(explanation.length > 25);
   assert.ok(tags.length > 0);
+});
+
+test('hybrid semantic rank exposes audit trace', () => {
+  const ranking = rankSemanticWithEmbeddings('perfume elegante moderno', [marineProduct, sweetNightProduct]);
+  assert.ok(ranking.ranked[0].trace);
+  assert.ok(typeof ranking.ranked[0].trace.lexicalScore === 'number');
+  assert.ok(Array.isArray(ranking.ranked[0].trace.reasons));
 });

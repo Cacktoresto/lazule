@@ -1,8 +1,8 @@
 import { createProductSlug } from '../utils/productRouting.js';
 import { normalizeSearchText } from '../utils/search.js';
 import { SEMANTIC_VOCABULARY } from '../data/generated/semanticVocabulary.js';
-import { OLFATIVE_EMBEDDING_DOCUMENTS } from '../data/generated/olfactiveEmbeddingDocuments.js';
 import { OLFATIVE_EMBEDDING_INDEX } from '../data/generated/olfactiveEmbeddingIndex.js';
+import { OLFATIVE_EMBEDDING_DOCUMENTS } from '../data/generated/olfactiveEmbeddingDocuments.js';
 
 const WEIGHT_MAP = Object.freeze({ accords: 3.2, olfactiveFamily: 2.6, vibe: 2.2, mood: 2, occasion: 1.8, weather: 1.5, notes: 1.2, editorial: 0.7 });
 const MAX_EXPANSIONS_PER_TOKEN = 8;
@@ -25,6 +25,10 @@ function buildWeightedSections(product = {}) {
     notes: compactTokens(asArray(product.notes), { limit: 16 }),
     editorial: compactTokens([product.description, product.aiSummary, product.olfactoryReference], { limit: 20 }),
   };
+}
+
+export function buildSemanticSearchVector(embeddingText = '', sectionWeight = 1) {
+  return vectorizeTokens(tokenizeForVector(embeddingText), sectionWeight);
 }
 
 
@@ -73,6 +77,10 @@ function cosineLikeSimilarity(a = {}, b = {}) {
   return Number((dot / (magA * magB)).toFixed(6));
 }
 
+export function calculateEmbeddingSimilarity(a = {}, b = {}) {
+  return cosineLikeSimilarity(a, b);
+}
+
 export function buildProductEmbeddingInput(product = {}) {
   const slug = product.productSlug ?? createProductSlug(product.name ?? product.id ?? '');
   const sections = buildWeightedSections(product);
@@ -88,6 +96,27 @@ export function buildProductEmbeddingInput(product = {}) {
   return { slug, embeddingText, searchableSignals, confidence, visibility };
 }
 
+export function buildSemanticSearchDocument(product = {}) {
+  const dna = [
+    ...asArray(product.accords),
+    ...asArray(product.vibeTags),
+    ...asArray(product.occasions),
+    ...asArray(product.weatherTags),
+    ...asArray(product.signatures),
+    ...asArray(product.personalities),
+    ...asArray(product.semanticClusters),
+    ...asArray(product.narratives),
+    ...asArray(product.atmosphere),
+    ...asArray(product.contextualRelationships),
+  ].filter(Boolean).join(', ');
+  return normalizeSearchText([
+    product.olfactoryReference,
+    product.vibe,
+    product.description,
+    dna,
+  ].filter(Boolean).join('. '));
+}
+
 export function buildQueryEmbeddingInput(queryIntent = {}) {
   const rawQuery = queryIntent.query ?? queryIntent.rawQuery ?? '';
   const interpreted = queryIntent.interpreted ?? queryIntent;
@@ -101,13 +130,25 @@ export function buildQueryEmbeddingInput(queryIntent = {}) {
   return { rawQuery, embeddingText, tokens: unique([...baseTokens, ...inferred]), expandedSynonyms, continuityProfile: interpreted.semanticSessionProfile ?? null };
 }
 
+export function generateSemanticEmbedding(text = '', options = {}) {
+  if (!text?.trim()) return { vector: {}, provider: 'local-deterministic', dimensions: 0, fallback: true };
+  const vector = buildSemanticSearchVector(text, options.weight ?? 1);
+  return { vector, provider: options.provider ?? 'local-deterministic', dimensions: Object.keys(vector).length, fallback: false };
+}
+
+export function generateQueryEmbedding(queryIntent = {}) {
+  const input = buildQueryEmbeddingInput(queryIntent);
+  const result = generateSemanticEmbedding(input.embeddingText, { weight: 1.2 });
+  return { ...result, input };
+}
+
 export function rankByEmbeddingSimilarity(queryIntent, products = [], options = {}) {
   const queryDoc = buildQueryEmbeddingInput(queryIntent);
-  const queryVector = mergeVectors(vectorizeTokens(tokenizeForVector(queryDoc.embeddingText), 1.2), vectorizeTokens(queryDoc.expandedSynonyms, 0.9));
+  const queryVector = mergeVectors(buildSemanticSearchVector(queryDoc.embeddingText, 1.2), vectorizeTokens(queryDoc.expandedSynonyms, 0.9));
   const productDocs = products.map((product) => ({ product, embedding: buildProductEmbeddingInput(product) }));
   const ranked = productDocs.map(({ product, embedding }) => {
-    const productVector = options.precomputedVectors?.[embedding.slug] ?? vectorizeTokens(tokenizeForVector(embedding.embeddingText), 1);
-    const embeddingScore = cosineLikeSimilarity(queryVector, productVector);
+    const productVector = options.precomputedVectors?.[embedding.slug] ?? buildSemanticSearchVector(embedding.embeddingText, 1);
+    const embeddingScore = calculateEmbeddingSimilarity(queryVector, productVector);
     return { product, embedding, embeddingScore, matchedTokens: Object.keys(productVector).filter((token) => queryVector[token]).slice(0, 12) };
   }).sort((a, b) => b.embeddingScore - a.embeddingScore);
   return { queryDoc, ranked };

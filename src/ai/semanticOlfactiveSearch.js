@@ -1,7 +1,13 @@
 import { SEMANTIC_PHRASES, SEMANTIC_VOCABULARY } from '../data/generated/semanticVocabulary.js';
 import { normalizeSearchText } from '../utils/search.js';
 import { generatePerfumeDNA } from './perfumeDNA.js';
-import { rankByEmbeddingSimilarity, optionallyLoadPrecomputedEmbeddings } from './olfactiveEmbeddingAdapter.js';
+import {
+  buildSemanticSearchDocument,
+  calculateEmbeddingSimilarity,
+  generateQueryEmbedding,
+  rankByEmbeddingSimilarity,
+  optionallyLoadPrecomputedEmbeddings,
+} from './olfactiveEmbeddingAdapter.js';
 import { buildQueryUnderstandingExplainability, interpretUserIntent } from './semanticQueryUnderstanding.js';
 
 const SCORE_WEIGHTS = { accords: 0.33, vibes: 0.2, occasions: 0.13, weather: 0.08, families: 0.1, luxurySignature: 0.1, confidence: 0.06 };
@@ -129,11 +135,23 @@ export function resetSemanticSessionProfile() { semanticSessionProfile = { token
 export const semanticLayeringHooks = { toBlendVector: (product) => generatePerfumeDNA(product) };
 
 
-const HYBRID_WEIGHTS = { semantic: 0.45, embedding: 0.35, availabilityConfidence: 0.1, diversityCommercial: 0.1 };
+export const HYBRID_WEIGHTS = Object.freeze({
+  lexicalSimilarity: 0.12,
+  semanticFacets: 0.3,
+  signatures: 0.08,
+  accords: 0.08,
+  atmosphere: 0.08,
+  usageContext: 0.07,
+  relationshipConfidence: 0.07,
+  embeddingSimilarity: 0.12,
+  confidenceAdjustment: 0.05,
+  availabilityConfidence: 0.03,
+});
 
 export function rankSemanticWithEmbeddings(query = '', products = [], options = {}) {
   const interpretedIntent = interpretSemanticIntent(query, { updateSession: options.updateSession });
   const precomputed = optionallyLoadPrecomputedEmbeddings();
+  const queryEmbedding = generateQueryEmbedding({ query, interpreted: interpretedIntent });
   const semanticScored = products.map((product) => ({
     product,
     semantic: scoreSemanticMatch(product, interpretedIntent),
@@ -148,8 +166,43 @@ export function rankSemanticWithEmbeddings(query = '', products = [], options = 
     const diversityCommercial = Math.max(0.45, (entry.product.featured ? 0.8 : 0.6) - index * 0.002);
     const highDeterministic = (entry.semantic.score >= 0.62);
     const embeddingInfluence = highDeterministic ? emb.embeddingScore * 0.55 : emb.embeddingScore;
-    const finalScore = Number((entry.semantic.score * HYBRID_WEIGHTS.semantic + embeddingInfluence * HYBRID_WEIGHTS.embedding + availabilityConfidence * HYBRID_WEIGHTS.availabilityConfidence + diversityCommercial * HYBRID_WEIGHTS.diversityCommercial).toFixed(4));
-    return { ...entry, embeddingScore: emb.embeddingScore, matchedTokens: emb.matchedTokens, finalScore };
+    const semanticDocument = buildSemanticSearchDocument(entry.product);
+    const lexicalScore = overlapScore(tokenize(query), semanticDocument);
+    const queryIntentScore = interpretedIntent.intentConfidence ?? interpretedIntent.confidenceScore ?? 0.5;
+    const semanticRelationshipScore = Math.min(1, (entry.semantic.breakdown.vibes + entry.semantic.breakdown.families + entry.semantic.breakdown.occasions) / 3);
+    const confidenceAdjustment = Math.max(0, 1 - interpretedIntent.ambiguityScore * 0.45);
+    const fallbackEmbeddingScore = calculateEmbeddingSimilarity(queryEmbedding.vector, precomputed.vectors?.[slug] ?? {});
+    const embeddingScore = emb.embeddingScore || fallbackEmbeddingScore || 0;
+    const driftPenalty = embeddingScore > 0.82 && entry.semantic.score < 0.38 ? 0.22 : 0;
+    const finalScore = Number(Math.max(0, (
+      lexicalScore * HYBRID_WEIGHTS.lexicalSimilarity
+      + entry.semantic.score * HYBRID_WEIGHTS.semanticFacets
+      + entry.semantic.breakdown.accords * HYBRID_WEIGHTS.accords
+      + entry.semantic.breakdown.luxurySignature * HYBRID_WEIGHTS.signatures
+      + entry.semantic.breakdown.vibes * HYBRID_WEIGHTS.atmosphere
+      + entry.semantic.breakdown.weather * HYBRID_WEIGHTS.usageContext
+      + semanticRelationshipScore * HYBRID_WEIGHTS.relationshipConfidence
+      + embeddingScore * HYBRID_WEIGHTS.embeddingSimilarity
+      + confidenceAdjustment * HYBRID_WEIGHTS.confidenceAdjustment
+      + availabilityConfidence * HYBRID_WEIGHTS.availabilityConfidence
+      - driftPenalty
+      + diversityCommercial * 0.03
+    )).toFixed(4));
+    const trace = {
+      lexicalScore: Number(lexicalScore.toFixed(4)),
+      queryIntentScore: Number(queryIntentScore.toFixed(4)),
+      embeddingScore: Number(embeddingScore.toFixed(4)),
+      semanticRelationshipScore: Number(semanticRelationshipScore.toFixed(4)),
+      confidenceAdjustment: Number(confidenceAdjustment.toFixed(4)),
+      finalScore,
+      reasons: [
+        entry.semantic.breakdown.accords > 0.45 ? 'match_accords' : null,
+        entry.semantic.breakdown.vibes > 0.45 ? 'match_atmosphere' : null,
+        embeddingScore > 0.3 ? 'semantic_proximity' : null,
+        driftPenalty ? 'drift_penalty_applied' : null,
+      ].filter(Boolean),
+    };
+    return { ...entry, embeddingScore, matchedTokens: emb.matchedTokens, finalScore, trace };
   }).sort((a, b) => b.finalScore - a.finalScore);
 
   const debug = {
@@ -161,6 +214,7 @@ export function rankSemanticWithEmbeddings(query = '', products = [], options = 
       semanticScore: item.semantic.score,
       embeddingScore: item.embeddingScore,
       finalScore: item.finalScore,
+      trace: item.trace,
       matchedTokens: item.matchedTokens,
       expandedSynonyms: embeddingRank.queryDoc.expandedSynonyms,
     })),
