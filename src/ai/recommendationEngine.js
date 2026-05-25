@@ -8,6 +8,8 @@ import {
   getDominantDNA,
 } from './perfumeDNA.js';
 import { buildSemanticRelationships } from './semanticIntelligenceLayer.js';
+import { buildQueryLockedFallback } from './queryLockedFallback.js';
+import { interpretUserIntent } from './semanticQueryUnderstanding.js';
 
 const DEFAULT_LIMIT = 6;
 const DIVERSITY_BRAND_PENALTY = 0.045;
@@ -119,16 +121,33 @@ export const heuristicRecommendationEngine = {
       .sort((a, b) => b.score - a.score || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'));
     const diversified = applyDiversity(scored).sort((a, b) => b.score - a.score || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'));
     const fallbackUsed = diversified.length < Math.min(3, safeCatalog.length, limit);
-    const ranked = (fallbackUsed ? applyDiversity(safeCatalog.map((product, index) => ({
-      ...scorePerfumeForQuery(product, { ...analysis, query: 'elegante presente versatil', normalizedQuery: 'elegante presente versatil', queryDNA: generateQueryDNA('elegante presente versatil') }),
-      score: scorePopularity(product) + (product.featured ? 0.18 : 0.08) + Math.max(0, 0.05 - index * 0.001),
-    }))) : diversified)
-      .sort((a, b) => b.score - a.score || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'))
+    let ranked = diversified;
+
+    if (fallbackUsed) {
+      const interpreted = interpretUserIntent(analysis.query);
+      const context = {
+        query: analysis.query,
+        semanticEntity: interpreted.semanticEntity,
+        intentTypes: interpreted.intentTypes,
+        primarySignals: interpreted.matchedSignals.filter((s) => s.strength === 'primary'),
+        secondarySignals: interpreted.matchedSignals.filter((s) => s.strength === 'secondary'),
+        hintSignals: interpreted.matchedSignals.filter((s) => s.strength === 'hint'),
+        negativeSignals: interpreted.matchedSignals.filter((s) => s.strength === 'negative'),
+        confidence: interpreted.confidence,
+        ambiguity: interpreted.ambiguity,
+        activatedFamilies: interpreted.activatedFamilies,
+      };
+      const locked = buildQueryLockedFallback(safeCatalog.map((product) => scorePerfumeForQuery(product, analysis)), context, { minRelevance: 0.24 });
+      ranked = locked.ranked.length ? locked.ranked : [];
+    }
+
+    ranked = ranked
+      .sort((a, b) => b.score - a.score || b.fallbackScore - a.fallbackScore || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'))
       .slice(0, limit);
 
     return ranked.map((entry) => ({
       ...entry,
-      reason: generateRecommendationReason(entry.product, {
+      reason: entry.reason ?? generateRecommendationReason(entry.product, {
         queryDNA: analysis.queryDNA,
         perfumeDNA: entry.perfumeDNA,
         matchedIntents: entry.matchedIntents,
