@@ -141,6 +141,18 @@ export function ProductCatalog() {
   const filteredProducts = useMemo(() => baseFilteredProducts.filter((product) => matchDiscoveryTags(product, activeDiscoveryChipIds)), [baseFilteredProducts, activeDiscoveryChipIds]);
 
   const visibleProducts = useMemo(() => filteredProducts.slice(0, visibleCount), [filteredProducts, visibleCount]);
+  const heroRecommendation = relatedRecommendations[0] ?? filteredProducts[0] ?? null;
+  const spotlightProducts = useMemo(() => {
+    const source = [...relatedRecommendations, ...filteredProducts].filter(Boolean);
+    const deduped = [];
+    const seen = new Set();
+    source.forEach((product) => {
+      if (!product || seen.has(product.id) || (heroRecommendation && product.id === heroRecommendation.id)) return;
+      seen.add(product.id);
+      deduped.push(product);
+    });
+    return deduped.slice(0, 4);
+  }, [filteredProducts, heroRecommendation, relatedRecommendations]);
   const hasMoreProducts = visibleProducts.length < filteredProducts.length;
   const remainingProducts = filteredProducts.length - visibleProducts.length;
   const appliedFilterChips = useMemo(() => getAppliedFilterChips(filters, searchTerm), [filters, searchTerm]);
@@ -365,7 +377,7 @@ export function ProductCatalog() {
 
 
           {discoveryGroups.length > 0 && (
-            <div className="mb-7 grid gap-3 sm:grid-cols-2">
+            <div className="lazule-editorial-flow lazule-flow-bridge mb-8 grid gap-4 sm:grid-cols-2">
               {discoveryGroups.slice(0, 2).map((group) => (
                 <article key={group.id} className="lazule-surface-premium laz-converge relative overflow-hidden rounded-2xl border bg-[#0f1b35d4] p-4">
                   <span className="lazule-ambient-layer" />
@@ -383,9 +395,42 @@ export function ProductCatalog() {
 
           {filteredProducts.length > 0 ? (
             <>
-              <div className="grid gap-4 min-[520px]:grid-cols-2 md:gap-5 xl:grid-cols-3">
-                {visibleProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} analyticsSection="catalog_grid" highlightQuery={searchTerm} />
+              {heroRecommendation && (
+                <article className="lazule-editorial-flow lazule-hero-block relative mb-8 overflow-hidden rounded-[1.9rem] border border-[var(--laz-border-mineral)] p-5 sm:p-6">
+                  <span className="pointer-events-none absolute inset-0 lazule-hero-aura" />
+                  <div className="relative z-[1] mb-4 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold">Vitrine sensorial</span>
+                    <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[0.62rem] uppercase tracking-[0.16em] text-slate-300">{searchTerm ? `Curadoria para “${searchTerm}”` : 'Curadoria viva LAZULE'}</span>
+                  </div>
+                  <div className="relative z-[1] grid gap-4 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
+                    <div>
+                      <h3 className="font-display text-3xl leading-tight text-lazule-mist sm:text-4xl">{heroRecommendation.name}</h3>
+                      <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">{heroRecommendation.narrative || heroRecommendation.description || 'Destaque contextual recomendado pela inteligência olfativa LAZULE.'}</p>
+                    </div>
+                    <ProductCard product={heroRecommendation} analyticsSection="catalog_hero" highlightQuery={searchTerm} variant="hero" />
+                  </div>
+                </article>
+              )}
+
+              {spotlightProducts.length > 0 && (
+                <section className="lazule-editorial-flow lazule-flow-bridge mb-8">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h4 className="font-display text-2xl text-lazule-mist">Streaming de descoberta</h4>
+                    <p className="text-[0.62rem] uppercase tracking-[0.2em] text-slate-400">handoff contextual</p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {spotlightProducts.map((product, index) => (
+                      <ProductCard key={product.id} product={product} analyticsSection="catalog_spotlight" highlightQuery={searchTerm} variant={index % 3 === 0 ? 'featured' : 'default'} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <div className="lazule-organic-grid grid gap-4 min-[520px]:grid-cols-2 md:gap-5 xl:grid-cols-6">
+                {visibleProducts.map((product, index) => (
+                  <div key={product.id} className={index % 7 === 0 ? 'xl:col-span-3' : index % 5 === 0 ? 'xl:col-span-3' : 'xl:col-span-2'}>
+                    <ProductCard product={product} analyticsSection="catalog_grid" highlightQuery={searchTerm} variant={index % 7 === 0 ? 'featured' : 'default'} />
+                  </div>
                 ))}
               </div>
 

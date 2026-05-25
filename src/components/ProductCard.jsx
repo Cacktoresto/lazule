@@ -54,7 +54,7 @@ function HighlightText({ text, query }) {
   );
 }
 
-export function ProductCard({ product, analyticsSection = 'catalog_grid', highlightQuery = '' }) {
+export function ProductCard({ product, analyticsSection = 'catalog_grid', highlightQuery = '', variant = 'default' }) {
   const [isImageLoading, setIsImageLoading] = useState(Boolean(product.image));
   const [hasImageFailed, setHasImageFailed] = useState(false);
   const productPath = createProductPath(product);
@@ -63,14 +63,17 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
   const heroBadge = product.featured && canDirectBuy(product) ? 'Destaque' : commercialMeta.badge || availability.label;
   const priceLabel = canDirectBuy(product) ? formatBRL(product.salePrice) : 'Sob consulta';
 
+  const isHero = variant === 'hero';
+  const isFeatured = variant === 'featured';
+
   return (
-    <article className="lazule-product-card lazule-cinematic-card group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem]">
+    <article className={`lazule-product-card lazule-cinematic-card lazule-card-${variant} group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem] ${isHero ? 'md:min-h-[30rem]' : ''}`}>
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
         onClick={() => trackProductSelect(product, { source_page: analyticsSection, section: analyticsSection, interaction_type: 'card' })}
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue">
+        <div className={`relative overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue ${isHero ? 'aspect-[16/10] sm:aspect-[16/9]' : isFeatured ? 'aspect-[5/6]' : 'aspect-[4/5]'}`}>
           {product.image && !hasImageFailed ? (
             <>
               {isImageLoading && <ProductImageSkeleton />}
@@ -99,9 +102,9 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col px-3.5 py-3.5 sm:px-4 sm:py-4">
+        <div className={`flex flex-1 flex-col ${isHero ? 'px-4 py-4 sm:px-5 sm:py-5' : 'px-3.5 py-3.5 sm:px-4 sm:py-4'}`}>
           <p className="line-clamp-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-[0.68rem] sm:tracking-[0.24em]"><HighlightText text={product.brand} query={highlightQuery} /></p>
-          <h3 className="mt-2 line-clamp-2 font-display text-[clamp(1.32rem,7vw,1.62rem)] leading-[0.98] text-lazule-mist transition group-hover:text-white sm:text-[1.65rem]">
+          <h3 className={`mt-2 line-clamp-2 font-display leading-[0.98] text-lazule-mist transition group-hover:text-white ${isHero ? 'text-[clamp(1.5rem,5vw,2rem)] sm:text-[2rem]' : 'text-[clamp(1.32rem,7vw,1.62rem)] sm:text-[1.65rem]'}`}>
             <HighlightText text={product.name} query={highlightQuery} />
           </h3>
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-300">{product.narrative || product.description || 'Perfil olfativo em curadoria'}</p>
