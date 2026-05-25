@@ -10,6 +10,7 @@ import { ProductDetails } from './components/ProductDetails';
 import { ProductNotFound } from './components/ProductNotFound';
 import { ProductSuggestion } from './components/ProductSuggestion';
 import { WhatsAppButton } from './components/WhatsAppButton';
+import { AppErrorBoundary } from './components/AppErrorBoundary';
 import { AuthProvider } from './auth/AuthProvider';
 import { RequireAdmin } from './auth/RequireAdmin';
 import { RequireInfluencerOrAdmin } from './auth/RequireInfluencerOrAdmin';
@@ -339,11 +340,15 @@ function App() {
               </Suspense>
             </RequireAdmin>
           ) : isProductRoute ? (
-            <ProductDetails slug={route.productSlug} />
+            <AppErrorBoundary>
+              <ProductDetails slug={route.productSlug} />
+            </AppErrorBoundary>
           ) : isBrandRoute ? (
             <BrandPage slug={route.brandSlug} />
           ) : isCatalogRoute ? (
-            <ProductCatalog key={route.search} />
+            <AppErrorBoundary>
+              <ProductCatalog key={route.search} />
+            </AppErrorBoundary>
           ) : isFaqRoute ? (
             <FAQ />
           ) : isProductNotFoundRoute ? (
