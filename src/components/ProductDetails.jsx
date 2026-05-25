@@ -866,9 +866,9 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext }) {
   const statusMeta = getCommercialStatusMeta(product);
 
   return (
-    <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
+    <div className="grid gap-0 lg:items-start">
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-0 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-4 rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:mt-8 lg:rounded-[3rem] lg:bg-white/[0.065] lg:p-10 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
@@ -1138,7 +1138,28 @@ export function ProductDetails({ slug }) {
         </p>
       ) : null}
 
-      <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
+      <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:gap-10">
+        <div>
+          <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
+        </div>
+
+        <div className="space-y-6 px-4 lg:px-0">
+          <div className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-mineral backdrop-blur sm:p-6">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold/90">Experiência semântica LAZ</p>
+            <p className="mt-2 text-sm text-slate-300">DNA olfativo, assinatura e contexto aparecem logo no topo para orientar sua decisão sem scroll longo.</p>
+          </div>
+          <ProductSectionErrorBoundary sectionName="experience_top">
+            <div data-testid="product-experience-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.035] p-3 shadow-mineral backdrop-blur sm:p-4">
+              <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
+            </div>
+          </ProductSectionErrorBoundary>
+          <ProductSectionErrorBoundary sectionName="vibe_top">
+            <div className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
+              <VibeSection product={product} />
+            </div>
+          </ProductSectionErrorBoundary>
+        </div>
+      </div>
 
       {console.info('[ProductDetails] semantic sections present in JSX', {
         experience: true,
@@ -1148,9 +1169,24 @@ export function ProductDetails({ slug }) {
         recommendations: true,
       }) || null}
 
-      <div className="px-4 lg:px-0">
-        <ProductSectionErrorBoundary sectionName="experience">
-          <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
+      <div className="mt-8 space-y-6 px-4 lg:mt-12 lg:px-0">
+        <ProductSectionErrorBoundary sectionName="discovery_terms">
+          <div data-testid="product-discovery-terms-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
+            <ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} />
+          </div>
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="relationships">
+          <div data-testid="product-relationships-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
+            <ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} />
+          </div>
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="recommendations">
+          <div data-testid="product-recommendations-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
+            <ProductRecommendationsSection products={safeRecommendations} />
+          </div>
+        </ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="similar">
+          <SimilarPerfumeSections groups={similarGroups} />
         </ProductSectionErrorBoundary>
         {semanticRuntimeState === 'ready' && !experience ? (
           <SemanticEditorialFallback
@@ -1158,21 +1194,6 @@ export function ProductDetails({ slug }) {
             copy="A assinatura olfativa detalhada deste perfume está sendo consolidada. Enquanto isso, mantemos a leitura premium de marca, categoria e contexto para orientar sua escolha."
           />
         ) : null}
-        <ProductSectionErrorBoundary sectionName="vibe">
-          <VibeSection product={product} />
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="discovery_terms">
-          <ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} />
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="relationships">
-          <ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} />
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="similar">
-          <SimilarPerfumeSections groups={similarGroups} />
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="recommendations">
-          <ProductRecommendationsSection products={safeRecommendations} />
-        </ProductSectionErrorBoundary>
         {semanticRuntimeState === 'ready' && !safeRecommendations.length ? (
           <SemanticEditorialFallback
             title="Sugestões em curadoria ativa"
