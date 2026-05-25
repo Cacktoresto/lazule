@@ -2,7 +2,7 @@ import { createWhatsAppLink } from '../utils/whatsapp';
 
 export function Footer() {
   return (
-    <footer id="atendimento" className="border-t border-white/10 bg-lazule-night px-5 py-12 sm:px-8">
+    <footer id="atendimento" className="border-t border-white/10 surface-lazule-dark px-5 py-12 sm:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.38em] text-lazule-mist">LAZULE</p>
@@ -12,7 +12,7 @@ export function Footer() {
           </p>
         </div>
         <a
-          className="lazule-premium-button inline-flex w-fit rounded-full border border-lazule-gold/40 px-6 py-3 text-sm font-semibold text-lazule-gold hover:bg-lazule-gold hover:text-lazule-night"
+          className="lazule-premium-button inline-flex w-fit rounded-full border-laz-accent surface-lazule-card px-6 py-3 text-sm font-semibold text-lazule-mist hover:text-white laz-hover-lift"
           href={createWhatsAppLink('Olá! Preciso de atendimento da LAZULE FRAGRANCES.')}
           target="_blank"
           rel="noreferrer"

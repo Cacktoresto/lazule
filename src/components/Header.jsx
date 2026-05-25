@@ -10,7 +10,7 @@ const navigationItems = [
 function NavigationLink({ href, children, className = '', ariaLabel }) {
   return (
     <a
-      className={`rounded-full px-3 py-2.5 transition duration-200 hover:bg-white/5 hover:text-lazule-gold active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night ${className}`}
+      className={`rounded-full px-3 py-2.5 transition duration-200 hover:bg-lazule-blue/10 hover:text-lazule-mist active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night ${className}`}
       href={href}
       aria-label={ariaLabel}
     >
@@ -21,7 +21,7 @@ function NavigationLink({ href, children, className = '', ariaLabel }) {
 
 export function Header({ immersiveProduct = false }) {
   return (
-    <header className={`${immersiveProduct ? 'hidden lg:block' : ''} sticky top-0 z-40 border-b border-white/10 bg-lazule-night/85 backdrop-blur-xl`}>
+    <header className={`${immersiveProduct ? 'hidden lg:block' : ''} sticky top-0 z-40 border-b border-white/10 surface-lazule-glass shadow-mineral-soft backdrop-blur-2xl`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-8 sm:py-4">
         <a
           href="/"
@@ -55,7 +55,7 @@ export function Header({ immersiveProduct = false }) {
         </nav>
 
         <a
-          className="lazule-premium-button lazule-cta-shimmer hidden rounded-full border border-lazule-gold/40 bg-lazule-gold px-5 py-2.5 text-sm font-semibold text-lazule-night shadow-aureate lg:inline-flex"
+          className="lazule-premium-button lazule-cta-shimmer hidden rounded-full border border-lazule-gold/40 surface-lazule-card border-laz-accent px-5 py-2.5 text-sm font-semibold text-lazule-mist shadow-laz-glow hover:text-white lg:inline-flex"
           href={createWhatsAppLink('Olá! Quero conhecer o catálogo da LAZULE FRAGRANCES.')}
           target="_blank"
           rel="noreferrer"
@@ -70,7 +70,7 @@ export function Header({ immersiveProduct = false }) {
             key={item.href}
             href={item.href}
             ariaLabel={item.ariaLabel}
-            className={`shrink-0 border border-white/10 bg-white/[0.04] text-center ${
+            className={`shrink-0 border-glass surface-lazule-soft text-center ${
               item.variant === 'partner' ? 'border-lazule-gold/20 bg-lazule-gold/[0.035] text-slate-400' : ''
             }`}
           >
