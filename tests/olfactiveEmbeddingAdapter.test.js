@@ -33,6 +33,15 @@ test('same query returns same ranking', () => {
 test('metaphor query creates semantic expansion', () => {
   const queryDoc = buildQueryEmbeddingInput({ query: 'cheiro de oceano', accords: ['marine'] });
   assert.ok(queryDoc.expandedSynonyms.includes('aquatic'));
+  assert.ok(queryDoc.embeddingText.includes('maresia') || queryDoc.embeddingText.includes('sal'));
+});
+
+test('abstract human queries keep dense contextual embedding terms', () => {
+  const queries = ['perfume de homem rico', 'perfume azul', 'perfume confortável', 'perfume para calor', 'perfume de balada'];
+  queries.forEach((query) => {
+    const queryDoc = buildQueryEmbeddingInput({ query });
+    assert.ok(queryDoc.embeddingText.split(' ').length >= 6);
+  });
 });
 
 test('hybrid score respects deterministic intent anti-drift', () => {

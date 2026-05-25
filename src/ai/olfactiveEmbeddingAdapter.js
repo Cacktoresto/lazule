@@ -1,6 +1,6 @@
 import { createProductSlug } from '../utils/productRouting.js';
 import { normalizeSearchText } from '../utils/search.js';
-import { SEMANTIC_VOCABULARY } from '../data/generated/semanticVocabulary.js';
+import { SEMANTIC_ATMOSPHERE_GRAPH, SEMANTIC_HUMAN_TERMS, SEMANTIC_PHRASES, SEMANTIC_VOCABULARY } from '../data/generated/semanticVocabulary.js';
 import { OLFATIVE_EMBEDDING_INDEX } from '../data/generated/olfactiveEmbeddingIndex.js';
 import { OLFATIVE_EMBEDDING_DOCUMENTS } from '../data/generated/olfactiveEmbeddingDocuments.js';
 
@@ -48,10 +48,29 @@ function expandSynonyms(tokens = []) {
     const semanticTokens = unique([
       ...(semantic.accords ?? []), ...(semantic.vibes ?? []), ...(semantic.moods ?? []),
       ...(semantic.occasions ?? []), ...(semantic.weather ?? []), ...(semantic.families ?? []),
+      ...(semantic.negatives ?? []), ...(Object.values(semantic.intensity ?? {}).flat()),
     ]).slice(0, MAX_EXPANSIONS_PER_TOKEN);
     expanded.push(...semanticTokens.map((value) => normalizeSearchText(value)));
   });
   return unique(expanded);
+}
+
+function expandAtmosphereGraph(tokens = [], hops = 2) {
+  const visited = new Set();
+  let frontier = tokens.map((token) => ({ token, hop: 0 }));
+  const expansions = [];
+  while (frontier.length) {
+    const node = frontier.shift();
+    if (node.hop >= hops || visited.has(node.token)) continue;
+    visited.add(node.token);
+    const edges = SEMANTIC_ATMOSPHERE_GRAPH[node.token] ?? [];
+    edges.forEach((edge) => {
+      const normalized = normalizeSearchText(edge.to);
+      expansions.push(normalized);
+      frontier.push({ token: edge.to, hop: node.hop + 1 });
+    });
+  }
+  return unique(expansions);
 }
 
 export function vectorizeTokens(tokens = [], sectionWeight = 1) {
@@ -113,6 +132,13 @@ export function buildSemanticSearchDocument(product = {}) {
     product.olfactoryReference,
     product.vibe,
     product.description,
+    product.atmosphericDescription,
+    product.socialContext,
+    product.perceivedSensation,
+    product.signatureEnergy,
+    product.olfactiveBehavior,
+    product.sensoryMetaphors,
+    product.humanMemoryContext,
     dna,
   ].filter(Boolean).join('. '));
 }
@@ -125,8 +151,13 @@ export function buildQueryEmbeddingInput(queryIntent = {}) {
     interpreted.accords, interpreted.vibes, interpreted.moods, interpreted.occasions,
     interpreted.weather, interpreted.families, interpreted.semanticSessionProfile?.tokens,
   ], { limit: 32 });
-  const expandedSynonyms = expandSynonyms(baseTokens);
-  const embeddingText = unique([...baseTokens, ...inferred, ...expandedSynonyms]).join(' ');
+  const phraseExpansions = Object.entries(SEMANTIC_PHRASES)
+    .filter(([phrase]) => normalizeSearchText(rawQuery).includes(phrase))
+    .flatMap(([, values]) => values);
+  const expandedSynonyms = expandSynonyms([...baseTokens, ...phraseExpansions]);
+  const graphExpansions = expandAtmosphereGraph(unique([...baseTokens, ...phraseExpansions]));
+  const humanContextTerms = SEMANTIC_HUMAN_TERMS.filter((term) => normalizeSearchText(rawQuery).includes(term)).slice(0, 8);
+  const embeddingText = unique([...baseTokens, ...inferred, ...phraseExpansions, ...expandedSynonyms, ...graphExpansions, ...humanContextTerms]).join(' ');
   return { rawQuery, embeddingText, tokens: unique([...baseTokens, ...inferred]), expandedSynonyms, continuityProfile: interpreted.semanticSessionProfile ?? null };
 }
 
