@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
-import { getProductRecommendations } from '../utils/catalog';
+import { getProductRecommendations, getProductRecommendationsAsync } from '../utils/catalog';
 import { similarPerfumes } from '../data/generated/similarPerfumes.js';
 import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
@@ -10,7 +10,6 @@ import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus
 import { applyManualReferralCode, getReferralChangeEventName, getReferralContext, removeReferralField } from '../utils/referral';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
-import { generateOlfactiveRelationships, getExplorableOlfactiveTerms } from '../ai/olfactiveRelationships';
 import { loadProductExperienceRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
 
 function normalizeProductClassifier(value) {
@@ -626,8 +625,8 @@ function RecommendationCard({ product, context = 'recommendations', explanation 
 }
 
 
-function OlfactiveDiscoveryTerms({ product }) {
-  const terms = getExplorableOlfactiveTerms(product, { limit: 9 });
+function OlfactiveDiscoveryTerms({ product, runtimeModules }) {
+  const terms = runtimeModules?.olfactiveRelationships?.getExplorableOlfactiveTerms?.(product, { limit: 9 });
 
   if (!terms.length) {
     return null;
@@ -834,9 +833,27 @@ export function ProductDetails({ slug }) {
   const catalogProducts = useMemo(() => getAllProducts(), []);
   const normalizedSlug = createProductSlug(slug);
   const product = getProductBySlug(normalizedSlug, catalogProducts);
-  const recommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
+  const fallbackRecommendations = useMemo(() => (product ? getProductRecommendations(product, catalogProducts) : []), [catalogProducts, product]);
+  const [recommendations, setRecommendations] = useState(fallbackRecommendations);
+
+  useEffect(() => {
+    setRecommendations(fallbackRecommendations);
+
+    if (!product) return;
+
+    let isMounted = true;
+    getProductRecommendationsAsync(product, catalogProducts).then((nextRecommendations) => {
+      if (isMounted && Array.isArray(nextRecommendations) && nextRecommendations.length) {
+        setRecommendations(nextRecommendations);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [catalogProducts, fallbackRecommendations, product]);
   const [similarGroups, setSimilarGroups] = useState({});
-  const relationshipSections = useMemo(() => (product ? generateOlfactiveRelationships(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
+  const relationshipSections = useMemo(() => (product ? runtimeModules?.olfactiveRelationships?.generateOlfactiveRelationships?.(product, catalogProducts, { limit: 4 }) : []), [catalogProducts, product]);
   const [experience, setExperience] = useState(null);
   const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
   const [referralContext, setReferralContext] = useState(() => getReferralContext());
@@ -1021,7 +1038,7 @@ export function ProductDetails({ slug }) {
       <div className="px-4 lg:px-0">
         <PerfumeExperienceLayer product={product} experience={experience} whatsAppLink={whatsAppLink} />
         <VibeSection product={product} />
-        <OlfactiveDiscoveryTerms product={product} />
+        <OlfactiveDiscoveryTerms product={product} runtimeModules={runtimeModules} />
         <RelationshipBlocks sections={relationshipSections} currentProduct={product} experience={experience} />
         <SimilarPerfumeSections groups={similarGroups} />
         <Recommendations products={recommendations} />

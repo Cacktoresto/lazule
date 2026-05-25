@@ -1,6 +1,5 @@
 import { getAllProducts, getAllProductsAsync } from '../data/catalogRepository.js';
 import { getLocalCatalogProducts } from '../data/localCatalogAdapter.js';
-import { getRelatedProducts } from '../ai/recommendationEngine.js';
 import { normalizeSearchText } from './search.js';
 import { createBrandSlug, createProductSlug } from './productRouting.js';
 
@@ -526,9 +525,26 @@ function addRecommendationProducts(recommendations, candidates, currentProduct, 
   }
 }
 
+
+async function loadRecommendationEngine() {
+  const module = await import('../ai/recommendationEngine.js');
+  return module.getRelatedProducts;
+}
+
+function getRelatedProductsFallback(currentProduct, allProducts = [], { limit = 8 } = {}) {
+  const targetCount = Math.max(0, Math.min(limit, allProducts.length - 1));
+  if (!targetCount) return [];
+  const scoredItems = allProducts
+    .filter((candidate) => !isSameProduct(currentProduct, candidate))
+    .map((candidate) => ({ product: candidate, score: getRecommendationScore(currentProduct, candidate) }))
+    .sort(sortRecommendationItems);
+
+  return scoredItems.slice(0, targetCount).map((item) => item.product);
+}
+
 export function getProductRecommendations(currentProduct, allProducts = getCatalogProducts(), { min = 4, max = 8, engine = 'dna' } = {}) {
   if (engine === 'dna') {
-    const relatedProducts = getRelatedProducts(currentProduct, allProducts, { limit: max });
+    const relatedProducts = getRelatedProductsFallback(currentProduct, allProducts, { limit: max });
     const enoughRelatedProducts = relatedProducts.length >= Math.min(min, Math.max(0, allProducts.length - 1));
     const currentGenderForDNA = currentProduct.normalizedGender;
     const hasOppositeGender = relatedProducts.some((product) => isOppositeGender(currentGenderForDNA, product.normalizedGender));
@@ -816,4 +832,21 @@ export function getBrandBySlug(slug, allProducts = getCatalogProducts()) {
   const brandName = brandProducts[0]?.brand ?? '';
 
   return brandProducts.length > 0 ? { slug: normalizedSlug, name: brandName, products: brandProducts } : null;
+}
+
+
+export async function getProductRecommendationsAsync(currentProduct, allProducts = getCatalogProducts(), options = {}) {
+  const recommendations = getProductRecommendations(currentProduct, allProducts, options);
+
+  if ((options.engine ?? 'dna') !== 'dna') {
+    return recommendations;
+  }
+
+  try {
+    const getRelatedProducts = await loadRecommendationEngine();
+    const relatedProducts = getRelatedProducts(currentProduct, allProducts, { limit: options.max ?? 8 });
+    return relatedProducts.length ? relatedProducts : recommendations;
+  } catch {
+    return recommendations;
+  }
 }
