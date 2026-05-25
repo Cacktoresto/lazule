@@ -515,7 +515,7 @@ input {
 }
 
 .lazule-product-hero-frame {
-  min-height: clamp(31.5rem, 78svh, 40.5rem);
+  min-height: clamp(18rem, 50svh, 27rem);
   isolation: isolate;
 }
 
@@ -565,8 +565,8 @@ input {
 }
 
 .lazule-product-info-card {
-  margin-top: clamp(-1.2rem, -4vw, -0.75rem);
-  padding: 1.7rem 1.35rem 1.35rem;
+  margin-top: 0;
+  padding: 1.35rem 1.15rem 1.15rem;
 }
 
 @supports not (height: 1svh) {
@@ -577,24 +577,24 @@ input {
 
 @media (min-width: 640px) {
   .lazule-product-hero-frame {
-    min-height: 35rem;
+    min-height: 22rem;
   }
 
   .lazule-product-info-card {
-    margin-top: -1.35rem;
-    padding: 1.9rem 1.8rem 1.8rem;
+    margin-top: 0;
+    padding: 1.5rem 1.5rem 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .lazule-product-hero-frame {
-    min-height: 42rem;
+    min-height: 25rem;
   }
 }
 
 @media (max-width: 639px) and (max-height: 740px) {
   .lazule-product-hero-frame {
-    min-height: clamp(29rem, 84svh, 34rem);
+    min-height: clamp(17rem, 48svh, 22rem);
   }
 
   .lazule-product-hero .lazule-product-bottle {
@@ -610,14 +610,14 @@ input {
   }
 
   .lazule-product-info-card {
-    margin-top: -1rem;
-    padding-top: 2.125rem;
+    margin-top: 0;
+    padding-top: 1.5rem;
   }
 }
 
 @media (max-width: 380px) {
   .lazule-product-hero-frame {
-    min-height: clamp(28.5rem, 82svh, 32rem);
+    min-height: clamp(16rem, 46svh, 21rem);
   }
 
   .lazule-product-hero .lazule-product-bottle {
@@ -627,7 +627,7 @@ input {
   }
 
   .lazule-product-info-card {
-    margin-top: -0.75rem;
+    margin-top: 0;
   }
 }
 
@@ -672,8 +672,8 @@ input {
 .lazule-product-bottle {
   top: 50.5%;
   z-index: 1;
-  width: min(86%, 25rem);
-  height: 72%;
+  width: min(74%, 16rem);
+  height: 62%;
   transform: translate3d(-50%, -50%, 0) scale(var(--bottle-scale, 1));
   filter: drop-shadow(0 2.3rem 3.6rem rgba(2, 6, 23, 0.50)) drop-shadow(0 0.85rem 1.3rem rgba(200, 162, 77, 0.09));
   animation:
@@ -684,13 +684,13 @@ input {
 
 .lazule-product-bottle--hero {
   top: 49.5%;
-  height: 74%;
+  height: 64%;
 }
 
 .lazule-product-bottle--mood,
 .lazule-product-bottle--detail {
   top: 49%;
-  height: 75%;
+  height: 66%;
 }
 
 .lazule-product-hero:active .lazule-product-bottle {
