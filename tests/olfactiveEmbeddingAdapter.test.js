@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildProductEmbeddingInput, buildQueryEmbeddingInput, rankByEmbeddingSimilarity, vectorizeTokens } from '../src/ai/olfactiveEmbeddingAdapter.js';
+import {
+  buildProductEmbeddingInput,
+  buildQueryEmbeddingInput,
+  buildSemanticSearchDocument,
+  calculateEmbeddingSimilarity,
+  generateQueryEmbedding,
+  generateSemanticEmbedding,
+  rankByEmbeddingSimilarity,
+  vectorizeTokens,
+} from '../src/ai/olfactiveEmbeddingAdapter.js';
 import { rankSemanticWithEmbeddings } from '../src/ai/semanticOlfactiveSearch.js';
 import { products } from '../src/data/products.js';
 
@@ -43,4 +52,17 @@ test('embedding documents avoid private supplier fields and public visibility', 
 test('only catalog-visible products should be recommended in embedding artifacts', () => {
   const doc = buildProductEmbeddingInput({ ...sample, catalogVisibility: 'reference', available: false });
   assert.ok(['reference', 'on_request', 'catalog'].includes(doc.visibility));
+});
+
+test('semantic search document is indexable and non-empty', () => {
+  const doc = buildSemanticSearchDocument({ ...sample, signatures: ['clean_luxury'], atmosphere: ['executive fresh'] });
+  assert.ok(doc.includes('clean_luxury') || doc.includes('clean luxury'));
+});
+
+test('embedding adapter exposes local fallback API', () => {
+  const emb = generateSemanticEmbedding('executive clean woody');
+  const queryEmb = generateQueryEmbedding({ query: 'perfume executivo limpo', accords: ['woody'] });
+  assert.ok(emb.dimensions > 0);
+  assert.ok(queryEmb.input.tokens.length > 0);
+  assert.ok(calculateEmbeddingSimilarity(emb.vector, queryEmb.vector) >= 0);
 });
