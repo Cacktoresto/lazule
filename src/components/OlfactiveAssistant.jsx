@@ -22,6 +22,11 @@ const QUICK_SUGGESTIONS = ['Explore sua assinatura', 'Descubra direções olfati
 const DEFAULT_PROMPT = 'Ex.: uma assinatura discreta, elegante e memorável para a noite';
 const DISCOVERY_MODULES = ['Sua direção olfativa', 'Continuando sua curadoria'];
 const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
+const MIN_VISIBLE_DESKTOP_MS = 3200;
+const MIN_VISIBLE_MOBILE_MS = 2600;
+const MAX_HANDOFF_WAIT_MS = 5000;
+const FINAL_PULSE_MS = 340;
+const LOADER_FADE_MS = 420;
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
@@ -98,11 +103,17 @@ function AssistantResultCard({ recommendation, result, sourcePage }) {
 export function OlfactiveAssistant({ products = [], sourcePage = 'home', className = 'mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-10' }) {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [pendingResult, setPendingResult] = useState(null);
+  const [isSearchProcessing, setIsSearchProcessing] = useState(false);
+  const [isLazVisible, setIsLazVisible] = useState(false);
+  const [resultsReady, setResultsReady] = useState(false);
+  const [canRevealResults, setCanRevealResults] = useState(false);
+  const [loaderPhase, setLoaderPhase] = useState('idle');
   const [activeRefinements, setActiveRefinements] = useState([]);
   const [tasteSignals, setTasteSignals] = useState([]);
   const [wardrobeMemory, setWardrobeMemory] = useState({ entries: [], favorites: [], inspirations: [] });
   const timeoutRef = useRef(null);
+  const handoffRef = useRef({ seq: 0, startedAt: 0, minVisibleMs: MIN_VISIBLE_DESKTOP_MS, timers: [] });
 
   const initialExamples = useMemo(() => QUICK_SUGGESTIONS.slice(0, 4).join(' · '), []);
 
@@ -125,8 +136,52 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
       }
+      handoffRef.current.timers.forEach((timerId) => window.clearTimeout(timerId));
     };
   }, [sourcePage]);
+
+  function resetHandoffTimers() {
+    handoffRef.current.timers.forEach((timerId) => window.clearTimeout(timerId));
+    handoffRef.current.timers = [];
+  }
+
+  function startLazSession(nextResult) {
+    const nextSeq = handoffRef.current.seq + 1;
+    const minVisibleMs = window.matchMedia('(max-width: 767px)').matches ? MIN_VISIBLE_MOBILE_MS : MIN_VISIBLE_DESKTOP_MS;
+    handoffRef.current = { ...handoffRef.current, seq: nextSeq, startedAt: Date.now(), minVisibleMs };
+    resetHandoffTimers();
+
+    setPendingResult(null);
+    setResult(null);
+    setResultsReady(false);
+    setCanRevealResults(false);
+    setIsLazVisible(true);
+    setLoaderPhase('processing');
+    setIsSearchProcessing(true);
+
+    timeoutRef.current = window.setTimeout(() => {
+      loadRecommendationKnowledgeBase(products).then((knowledgeBase) => nextResult(knowledgeBase)).catch(() => nextResult(products)).finally(() => {
+        if (handoffRef.current.seq !== nextSeq) return;
+        const now = Date.now();
+        const elapsed = now - handoffRef.current.startedAt;
+        const waitForMin = Math.max(0, handoffRef.current.minVisibleMs - elapsed);
+        const waitForSafety = Math.max(0, MAX_HANDOFF_WAIT_MS - elapsed);
+        const waitMs = Math.min(waitForMin, waitForSafety);
+        const finalizeId = window.setTimeout(() => {
+          if (handoffRef.current.seq !== nextSeq) return;
+          setLoaderPhase('finalizing');
+          const fadeId = window.setTimeout(() => {
+            if (handoffRef.current.seq !== nextSeq) return;
+            setIsLazVisible(false);
+            setCanRevealResults(true);
+            setIsSearchProcessing(false);
+          }, FINAL_PULSE_MS + LOADER_FADE_MS);
+          handoffRef.current.timers.push(fadeId);
+        }, waitMs);
+        handoffRef.current.timers.push(finalizeId);
+      });
+    }, 680);
+  }
 
   function runAssistant(nextQuery = query) {
     const safeQuery = sanitizeOlfactiveQuery(nextQuery);
@@ -138,16 +193,15 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
     }
 
     setQuery(safeQuery);
-    setIsLoading(true);
 
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
     }
 
-    timeoutRef.current = window.setTimeout(() => {
-      loadRecommendationKnowledgeBase(products).then((knowledgeBase) => {
+    startLazSession((knowledgeBase) => {
         const nextResult = getOlfactiveRecommendations(safeQuery, knowledgeBase, { limit: 6, tasteSignals, collectionEntries: wardrobeMemory.entries });
-        setResult(nextResult);
+        setPendingResult(nextResult);
+        setResultsReady(true);
         const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
         const nextSignals = [...tasteSignals, signal].slice(-36);
         setTasteSignals(nextSignals);
@@ -156,21 +210,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
           query: safeQuery,
           sourcePage,
         }));
-      }).catch(() => {
-        const nextResult = getOlfactiveRecommendations(safeQuery, products, { limit: 6, tasteSignals, collectionEntries: wardrobeMemory.entries });
-        setResult(nextResult);
-        const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
-        const nextSignals = [...tasteSignals, signal].slice(-36);
-        setTasteSignals(nextSignals);
-        window.localStorage.setItem(TASTE_MEMORY_STORAGE_KEY, JSON.stringify({ events: nextSignals }));
-        trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
-          query: safeQuery,
-          sourcePage,
-        }));
-      }).finally(() => {
-        setIsLoading(false);
       });
-    }, 680);
   }
 
   function handleSubmit(event) {
@@ -194,6 +234,11 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
   const hasRecommendations = recommendations.length > 0;
   const livingSuggestions = useMemo(() => getLivingSemanticSuggestions(query, result).slice(0, 6), [query, result]);
   const onboardingSuggestions = useMemo(() => getLivingSemanticSuggestions('', null).slice(0, 3), []);
+
+  useEffect(() => {
+    if (!canRevealResults || !resultsReady || !pendingResult) return;
+    setResult(pendingResult);
+  }, [canRevealResults, pendingResult, resultsReady]);
 
   useEffect(() => {
     if (!result) return;
@@ -248,15 +293,15 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               <button
                 type="submit"
                 className="lazule-ai-cta lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 w-full min-w-0 max-w-full items-center justify-center rounded-full bg-lazule-gold px-4 py-3 text-center text-[0.82rem] font-semibold uppercase leading-tight tracking-[0.1em] text-lazule-night shadow-aureate transition disabled:cursor-not-allowed disabled:opacity-70 min-[390px]:px-5 min-[390px]:text-sm min-[390px]:tracking-[0.12em] sm:w-auto sm:px-6 sm:tracking-[0.18em]"
-                disabled={isLoading}
+                disabled={isSearchProcessing}
               >
-                <span className="relative z-10 min-w-0 max-w-full whitespace-normal break-words">{isLoading ? 'Interpretando atmosfera…' : 'Receber curadoria'}</span>
+                <span className="relative z-10 min-w-0 max-w-full whitespace-normal break-words">{isSearchProcessing ? 'Interpretando atmosfera…' : 'Receber curadoria'}</span>
               </button>
             </form>
           </div>
 
           <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.3rem] border border-white/10 bg-white/[0.04] p-3.5 sm:rounded-[1.9rem] sm:p-6" aria-live="polite">
-            {!result && !isLoading ? (
+            {!result && !isLazVisible ? (
               <div className="min-w-0 max-w-full overflow-hidden flex min-h-[9.5rem] flex-col justify-center text-center sm:min-h-[14rem] sm:text-left">
                 <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Descubra sua assinatura</p>
                 <h3 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">Como você quer ser percebido hoje?</h3>
@@ -267,13 +312,13 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               </div>
             ) : null}
 
-            {isLoading ? (
+            {isLazVisible ? (
               <div className="min-h-[9.5rem] min-w-0 max-w-full sm:min-h-[14rem]" role="status" aria-live="polite">
-                <SemanticSearchLoading isActive={isLoading} interpretedChips={livingSuggestions.slice(0, 3)} className="max-w-full" />
+                <SemanticSearchLoading isActive={isLazVisible} isVisible={isLazVisible} phase={loaderPhase} fadeDurationMs={LOADER_FADE_MS} interpretedChips={livingSuggestions.slice(0, 3)} className="max-w-full" />
               </div>
             ) : null}
 
-            {result && !isLoading ? (
+            {result && canRevealResults ? (
               <div className="lazule-result-reveal min-w-0 max-w-full overflow-hidden">
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between" style={{ '--result-delay': '0ms' }}>
                   <div>
