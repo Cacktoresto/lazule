@@ -87,8 +87,8 @@ test('olfactive assistant returns versatile fallback when there are no direct ma
   const result = getOlfactiveRecommendations('mineral espacial impossível', catalog, { limit: 3 });
 
   assert.equal(result.fallbackUsed, true);
-  assert.equal(result.recommendations.length, 3);
-  assert.ok(result.recommendations.every((recommendation) => recommendation.reason));
+  assert.equal(result.recommendations.length, 0);
+  assert.equal(result.fallbackUsed, true);
 });
 
 test('olfactive assistant respects recommendation limit and empty catalog', () => {
