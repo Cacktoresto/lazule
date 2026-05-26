@@ -63,6 +63,24 @@ function scoreIntentCompatibility(product, intents = []) {
   return Math.min(0.28, intents.reduce((score, intent) => (boosts[intent]?.some((term) => text.includes(normalizeSearchText(term))) ? score + 0.09 : score), 0));
 }
 
+
+function scoreMomentAlignment(product, momentContext = {}) {
+  if (!momentContext || !momentContext.period) return 0;
+  const text = getProductText(product);
+  const periodBoosts = {
+    madrugada: ['noturno', 'intenso', 'profundo', 'ambar'],
+    manha: ['limpo', 'fresco', 'mineral', 'elegante'],
+    noite: ['sofisticado', 'denso', 'intenso', 'amadeirado'],
+  };
+  const rhythmBoosts = {
+    contemplative: ['sofisticado', 'elegante', 'silencioso'],
+    exploratory: ['contrast', 'ousado', 'experimental', 'descoberta'],
+  };
+  const periodScore = (periodBoosts[momentContext.period] ?? []).some((term) => text.includes(normalizeSearchText(term))) ? 0.06 : 0;
+  const rhythmScore = (rhythmBoosts[momentContext.rhythm] ?? []).some((term) => text.includes(normalizeSearchText(term))) ? 0.045 : 0;
+  return periodScore + rhythmScore;
+}
+
 function scorePopularity(product) {
   let score = 0;
   if (product.featured) score += 0.035;
@@ -94,13 +112,14 @@ export function scorePerfumeForQuery(product, analysis = {}) {
   const referenceBoost = scoreReferenceBoost(product, analysis.referenceTerms);
   const intentBoost = scoreIntentCompatibility(product, analysis.detectedIntents);
   const popularityBoost = scorePopularity(product);
-  const score = dnaSimilarity * 0.68 + keywordRelevance + referenceBoost + intentBoost + popularityBoost;
+  const momentBoost = scoreMomentAlignment(product, analysis.momentContext);
+  const score = dnaSimilarity * 0.68 + keywordRelevance + referenceBoost + intentBoost + popularityBoost + momentBoost;
   const matchedIntents = unique([
     ...(analysis.detectedIntents ?? []),
     ...getDominantDNA(perfumeDNA, { threshold: 0.5, limit: 3 }).map(({ dimension }) => dimension),
   ]);
 
-  return { product, perfumeDNA, queryDNA, dnaSimilarity, keywordRelevance, referenceBoost, popularityBoost, score, matchedIntents };
+  return { product, perfumeDNA, queryDNA, dnaSimilarity, keywordRelevance, referenceBoost, popularityBoost, momentBoost, score, matchedIntents };
 }
 
 export const heuristicRecommendationEngine = {
