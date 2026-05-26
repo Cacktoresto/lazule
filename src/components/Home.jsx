@@ -8,6 +8,8 @@ import { getFeaturedCollections } from '../utils/catalog';
 import { createBrandPath } from '../utils/productRouting';
 import { applyHomeSeo } from '../utils/seo';
 import { trackBrandClick, trackCategoryClick, trackEvent, trackProductSelect } from '../utils/analytics';
+import { loadTasteMemoryStore } from '../utils/tasteMemoryStore';
+import { buildUserAtmosphereProfile } from '../ai/userAtmosphereProfile';
 
 const discoveryPaths = [
   {
@@ -104,7 +106,7 @@ function SectionHeading({ eyebrow, title, actionHref, actionLabel = 'Ver tudo' }
   );
 }
 
-function UnifiedDiscovery({ brands, curatedProducts }) {
+function UnifiedDiscovery({ brands, curatedProducts, discoveryItems }) {
   const spotlightProducts = curatedProducts.slice(0, 3);
 
   return (
@@ -126,7 +128,7 @@ function UnifiedDiscovery({ brands, curatedProducts }) {
 
         <div className="relative grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible lg:pb-0">
-            {discoveryPaths.map((path, index) => (
+            {discoveryItems.map((path, index) => (
               <a
                 key={path.title}
                 className={`lazule-discovery-card lazule-touch-card lazule-reveal-item relative flex min-h-32 w-[min(78vw,15rem)] shrink-0 snap-start scroll-ml-3 flex-col justify-between overflow-hidden rounded-[1.35rem] border border-white/10 bg-gradient-to-br ${path.gradient} p-4 transition focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night sm:min-h-40 sm:w-auto sm:min-w-[16rem] sm:rounded-[1.65rem] sm:p-5`}
@@ -221,28 +223,43 @@ export function Home() {
     applyHomeSeo();
   }, []);
 
-  const { collections, heroProduct, brands, products } = useMemo(() => {
+  const [atmosphereProfile, setAtmosphereProfile] = useState(() => buildUserAtmosphereProfile(null));
+
+  useEffect(() => {
+    const store = loadTasteMemoryStore(window.localStorage);
+    setAtmosphereProfile(buildUserAtmosphereProfile(store.profile));
+  }, []);
+
+  const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
     const products = getAllProducts();
     const featuredCollections = getFeaturedCollections(products);
     const [firstHeroProduct] = featuredCollections.weeklySelection.length ? featuredCollections.weeklySelection : products;
     const availableBrandSet = new Set(products.map((product) => product.brand));
     const visibleBrands = curatedBrands.filter((brand) => availableBrandSet.has(brand));
 
+    const prioritizeDense = atmosphereProfile.density === 'dense';
+    const sortedDiscovery = [...discoveryPaths].sort((a, b) => {
+      const aDense = /intensidade|noite|rastro|potentes/i.test(`${a.meta} ${a.title}`);
+      const bDense = /intensidade|noite|rastro|potentes/i.test(`${b.meta} ${b.title}`);
+      return prioritizeDense ? Number(bDense) - Number(aDense) : Number(aDense) - Number(bDense);
+    });
     return {
       collections: featuredCollections,
       heroProduct: firstHeroProduct,
       brands: visibleBrands.length ? visibleBrands : [...availableBrandSet].slice(0, 8),
       products,
+      discoveryItems: sortedDiscovery,
     };
-  }, []);
+  }, [atmosphereProfile.density]);
 
   return (
-    <div className="lazule-home-shell overflow-x-clip">
+    <div className="lazule-home-shell overflow-x-clip" data-home-mood={atmosphereProfile.homeMood} style={{ '--lazule-memory-depth': atmosphereProfile.depthAlpha }}>
       <section id="top" className="lazule-hero lazule-cinematic-hero relative overflow-hidden bg-lazule-depth">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(248,250,252,0.10),transparent_22%),linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.9)_100%)]" />
         <div className="pointer-events-none absolute inset-x-[10%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/35 to-transparent opacity-70" />
         <div className="lazule-mobile-container relative mx-auto grid min-h-[min(640px,70svh)] max-w-7xl content-end gap-4 px-3 pb-6 pt-5 min-[390px]:px-4 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
           <div className="lazule-hero-copy relative z-10 max-w-xl pb-1">
+            <p className="mb-2 text-[0.58rem] font-medium uppercase tracking-[0.28em] text-slate-300/70">{atmosphereProfile.narrative}</p>
             <p className="mb-4 text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold sm:mb-5 sm:text-[0.68rem] sm:tracking-[0.46em]">LAZULE FRAGRANCES</p>
             <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,13.5vw,3.55rem)] leading-[0.86] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-8xl">Perfume com percepção.</h1>
             <p className="mt-4 max-w-[32rem] text-[0.92rem] leading-6 text-slate-200/85 sm:mt-6 sm:text-lg">
@@ -289,7 +306,7 @@ export function Home() {
 
       <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
 
-      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} />
+      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} />
 
       <main className="mx-auto max-w-7xl px-3 pb-14 min-[390px]:px-4 sm:px-8 lg:pb-28">
         <ProductRail eyebrow="Mais desejados" title="Ícones em rotação" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />

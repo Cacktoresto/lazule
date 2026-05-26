@@ -41,7 +41,7 @@ export function interpretSemanticIntent(query = '', options = {}) {
 
   const queryUnderstanding = interpretUserIntent(query);
   interpretation.accords.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.weight >= 0.7).map((signal) => signal.signal));
-  interpretation.vibes.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.weight >= 0.55 && signal.weight < 0.7).map((signal) => signal.signal));
+  interpretation.vibes.push(...queryUnderstanding.matchedSignals.filter((signal) => (signal.weight >= 0.55 && signal.weight < 0.7) || signal.signal === 'executive').map((signal) => signal.signal));
   interpretation.occasions.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.signal.includes('office') || signal.signal.includes('night')).map((signal) => signal.signal));
   interpretation.weather.push(...queryUnderstanding.matchedSignals.filter((signal) => signal.signal.includes('summer') || signal.signal.includes('weather')).map((signal) => signal.signal));
 
