@@ -116,6 +116,53 @@ function getMoodAtmosphereProfile(product = {}) {
   return 'signature';
 }
 
+
+function buildSemanticAtmosphere(product = {}) {
+  const pool = normalizeProductClassifier([
+    product.name,
+    product.olfactoryReference,
+    product.signature,
+    product.category,
+    product.gender,
+    product.personality,
+    product.usageContext,
+    ...(Array.isArray(product.vibe) ? product.vibe : []),
+    ...(Array.isArray(product.vibes) ? product.vibes : []),
+    ...(Array.isArray(product.accords) ? product.accords : []),
+  ].filter(Boolean).join(' '));
+
+  const flags = {
+    marine: /(marine|aquatic|ocean|salin|sea|blue)/.test(pool),
+    amber: /(amber|oriental|resin|oud|gold|warm|gourmand|vanilla)/.test(pool),
+    smoky: /(smoky|dark|night|incense|charcoal|couro|leather)/.test(pool),
+    clean: /(clean|fresh|white|mineral|executive|office|crisp|citr)/.test(pool),
+    floral: /(floral|rose|jasmine|luminous|petal)/.test(pool),
+  };
+
+  let profile = 'signature';
+  if (flags.marine && flags.clean) profile = 'mineral-aquatic';
+  else if (flags.amber && flags.smoky) profile = 'amber-nocturne';
+  else if (flags.amber) profile = 'amber-oriental';
+  else if (flags.smoky) profile = 'smoky-dark';
+  else if (flags.clean) profile = 'luxury-clean';
+  else if (flags.floral) profile = 'floral-luminous';
+
+  return { profile, flags };
+}
+
+function getInterpretiveLens(product = {}, experience = {}) {
+  const pool = normalizeProductClassifier([product.signature, product.olfactoryReference, product.name, product.category].filter(Boolean).join(' '));
+  if (/(aquatic|marine|blue|fresh)/.test(pool)) return { dna: 'mineral aquatic', aura: 'frescor sofisticado', rhythm: 'abertura luminosa', setting: 'pós-praia luxury' };
+  if (/(amber|oud|gold|oriental|resin)/.test(pool)) return { dna: 'velvet amber', aura: 'rastro opulento', rhythm: 'evolução quente', setting: 'evento elegante' };
+  if (/(smoky|night|leather|dark|intense)/.test(pool)) return { dna: 'smoky elegant', aura: 'energia noturna', rhythm: 'fundo envolvente', setting: 'encontro noturno' };
+  if (/(clean|executive|office|white)/.test(pool)) return { dna: 'clean luxury', aura: 'presença silenciosa', rhythm: 'linear', setting: 'escritório premium' };
+  return {
+    dna: experience?.signature?.headline || 'fresh executive',
+    aura: 'magnetismo elegante',
+    rhythm: 'suave persistente',
+    setting: 'rotina sofisticada',
+  };
+}
 function createEditorialGallery(product) {
   const slides = [
     {
@@ -642,7 +689,7 @@ function VibeSection({ product }) {
 function RecommendationCard({ product, context = 'recommendations', explanation, index = 0 }) {
   return (
     <a
-      className="lazule-product-card lazule-reveal-item group flex min-h-[19.5rem] w-[82vw] max-w-[20.5rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/12 bg-white/[0.07] shadow-mineral backdrop-blur transition md:w-[20rem]"
+      className="lazule-product-card lazule-reveal-item group flex min-h-[19.5rem] w-[82vw] max-w-[20.5rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/12 bg-white/[0.08] shadow-mineral backdrop-blur transition duration-500 md:w-[20rem]"
       href={createProductPath(product)}
       style={{ '--item-delay': `${120 + (index * 85)}ms` }}
       onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: context })}
@@ -650,7 +697,7 @@ function RecommendationCard({ product, context = 'recommendations', explanation,
       <div className="relative h-48 overflow-hidden bg-lazule-depth">
         {product.image ? (
           <img
-            className="absolute inset-0 h-full w-full object-contain object-center p-4 opacity-95 transition duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-contain object-center p-4 opacity-95 transition duration-700 group-hover:scale-[1.04]"
             src={product.image}
             alt={`Perfume ${product.name}`}
             loading="lazy"
@@ -659,7 +706,8 @@ function RecommendationCard({ product, context = 'recommendations', explanation,
         ) : (
           <ProductImageFallback />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lazule-night/68 via-lazule-night/16 to-transparent" />
+        <div className="absolute inset-x-[12%] top-3 h-8 rounded-full bg-white/25 blur-xl opacity-55" aria-hidden="true" />
       </div>
       <div className="flex flex-1 flex-col justify-between p-5">
         <div>
@@ -721,6 +769,10 @@ function RelationshipBlocks({ sections, currentProduct, experience }) {
   if (!sections.length) {
     return null;
   }
+
+  const atmosphere = buildSemanticAtmosphere(currentProduct || {});
+  const editorialTitles = { 'mineral-aquatic': 'Ecos da assinatura', 'amber-oriental': 'Leituras mais densas', 'amber-nocturne': 'Rastros em continuidade', 'smoky-dark': 'Presenças paralelas', 'luxury-clean': 'Mesmo eixo sensorial', 'floral-luminous': 'Interpretações correlatas', signature: 'Continuidade sensorial' };
+  const editorialSubtitle = atmosphere.profile === 'smoky-dark' ? 'Perfumes que conversam com a mesma presença.' : atmosphere.profile === 'amber-oriental' ? 'Leituras próximas da assinatura interpretada pela LAZ.' : 'Seleção guiada por vibe, DNA olfativo, performance e ocasião.';
 
   return (
     <section className="lazule-reveal lazule-recommendation-atmosphere mt-12 rounded-[2.6rem] border border-white/10 bg-white/[0.03] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-16 lg:p-8">
@@ -821,20 +873,24 @@ function SimilarPerfumeSections({ groups = {} }) {
   );
 }
 
-function Recommendations({ products }) {
+function Recommendations({ products, currentProduct }) {
   if (!products.length) {
     return null;
   }
+
+  const atmosphere = buildSemanticAtmosphere(currentProduct || {});
+  const editorialTitles = { 'mineral-aquatic': 'Ecos da assinatura', 'amber-oriental': 'Leituras mais densas', 'amber-nocturne': 'Rastros em continuidade', 'smoky-dark': 'Presenças paralelas', 'luxury-clean': 'Mesmo eixo sensorial', 'floral-luminous': 'Interpretações correlatas', signature: 'Continuidade sensorial' };
+  const editorialSubtitle = atmosphere.profile === 'smoky-dark' ? 'Perfumes que conversam com a mesma presença.' : atmosphere.profile === 'amber-oriental' ? 'Leituras próximas da assinatura interpretada pela LAZ.' : 'Seleção guiada por vibe, DNA olfativo, performance e ocasião.';
 
   return (
     <section className="lazule-reveal lazule-recommendation-atmosphere mt-12 rounded-[2.6rem] border border-white/10 bg-white/[0.03] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-16 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Descoberta emocional</p>
-          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Continuidade sensorial</h2>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">{editorialTitles[atmosphere.profile] || editorialTitles.signature}</h2>
         </div>
         <p className="max-w-xl text-sm leading-6 text-slate-300">
-          Seleção guiada por vibe, DNA olfativo, performance e ocasião — como uma conversa de boutique.
+          {editorialSubtitle}
         </p>
       </div>
       <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para ver mais</span></div>
@@ -890,12 +946,14 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const statusMeta = getCommercialStatusMeta(product);
   const chips = getVibeItems(product);
   const moodProfile = getMoodAtmosphereProfile(product);
+  const atmosphere = buildSemanticAtmosphere(product);
+  const lens = getInterpretiveLens(product, experience || {});
   const signature = humanizeSignature(product.signature || product.olfactoryReference || 'Assinatura em curadoria');
   const idealUse = experience?.idealUse?.headline || experience?.occasionNarrative || product.narrative || getProductEssence(product);
   const performance = experience?.performance?.summary || 'Performance equilibrada com presença elegante e leitura premium.';
 
   return (
-    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile}`} data-mood={moodProfile}>
+    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile}>
       <span className="lazule-depth-layer lazule-depth-layer-3" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-fog" aria-hidden="true" />
@@ -905,7 +963,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           {product.brand}
         </a>
         <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
-        <div className="mt-5 flex items-end justify-between gap-5 border-y border-lazule-night/20 py-4 lg:border-white/14">
+        <div className="mt-5 flex items-end justify-between gap-5 py-4">
           <div>
             <span className="text-[0.65rem] uppercase tracking-[0.25em] text-lazule-royal/90 lg:text-lazule-gold">Preço</span>
             <strong className="mt-1 block text-3xl font-semibold text-[#081937] drop-shadow-[0_2px_10px_rgba(226,198,126,0.25)] lg:text-[#f7f3e5]">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
@@ -914,7 +972,9 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
         <div className="lazule-live-interpretation lazule-text-reveal mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">DNA: {lens.dna} · Aura: {lens.aura}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Ritmo: {lens.rhythm} · Ambiente ideal: {lens.setting}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Performance: {performance}</p>
           <div className="mt-3 space-y-2" aria-hidden="true">
             {['intensidade', 'projeção', 'assinatura'].map((label, index) => (
@@ -949,10 +1009,10 @@ function ProductExperienceSection({ product, experience, whatsAppLink }) {
   return <PerfumeExperienceLayer product={product} experience={experience} whatsAppLink={whatsAppLink} />;
 }
 
-function ProductRecommendationsSection({ products }) {
+function ProductRecommendationsSection({ products, currentProduct }) {
   console.info('[ProductDetails] ProductRecommendationsSection render', { count: Array.isArray(products) ? products.length : 0 });
   if (!Array.isArray(products) || !products.length) return null;
-  return <Recommendations products={products} />;
+  return <Recommendations products={products} currentProduct={currentProduct} />;
 }
 
 function ProductRelationshipsSection({ sections, currentProduct, experience }) {
@@ -1249,7 +1309,7 @@ export function ProductDetails({ slug }) {
         {getVibeItems(product).length ? <ProductSectionErrorBoundary sectionName="vibe_top"><VibeSection product={product} /></ProductSectionErrorBoundary> : null}
         {discoveryTermsCount ? <ProductSectionErrorBoundary sectionName="discovery_terms"><ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} /></ProductSectionErrorBoundary> : null}
         {relationshipSectionsCount ? <ProductSectionErrorBoundary sectionName="relationships"><ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} /></ProductSectionErrorBoundary> : null}
-        {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} /></ProductSectionErrorBoundary> : null}
+        {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} currentProduct={product} /></ProductSectionErrorBoundary> : null}
         {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
         {semanticRuntimeState === 'ready' && !experience ? (
           <SemanticEditorialFallback
