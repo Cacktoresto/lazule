@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createHumanPerfumeReading, resolveSocialImpression } from '../src/ai/humanPerfumeReadingEngine.js';
+import {
+  createDivisiveFragranceResolver,
+  createEditorialContrastEngine,
+  createFragrancePersonalityEngine,
+  createHumanPerfumeReading,
+  resolveSocialImpression,
+} from '../src/ai/humanPerfumeReadingEngine.js';
 
 test('createHumanPerfumeReading returns humanized sections and contextual layers', () => {
   const reading = createHumanPerfumeReading({
@@ -13,6 +19,8 @@ test('createHumanPerfumeReading returns humanized sections and contextual layers
   assert.ok(reading.behavior.includes('pele') || reading.behavior.includes('aproxima'));
   assert.equal(reading.atmosphericContext.period, 'noite');
   assert.ok(reading.discoveryTags.includes('lobby de hotel'));
+  assert.equal(reading.divisiveProfile.divisive, true);
+  assert.match(reading.contextualWarnings[0], /escritório|ambiente aberto/);
 });
 
 test('resolveSocialImpression shifts tone for fresh profile', () => {
@@ -22,4 +30,21 @@ test('resolveSocialImpression shifts tone for fresh profile', () => {
   });
 
   assert.match(impression, /organizada|limpa|segura/);
+});
+
+test('editorial contrast and personality engines create nuanced non-generic output', () => {
+  const product = {
+    name: 'Urban Fresh Signature',
+    accords: ['fresh', 'citrus', 'clean'],
+    vibes: ['day', 'office'],
+  };
+
+  const contrast = createEditorialContrastEngine(product);
+  const personality = createFragrancePersonalityEngine(product);
+  const divisive = createDivisiveFragranceResolver(product);
+
+  assert.equal(contrast.saturationRisk, 'baixo-médio');
+  assert.match(contrast.limitations[0], /noite fria|discreto/);
+  assert.match(personality.energy, /clean|focada/);
+  assert.equal(divisive.divisive, false);
 });
