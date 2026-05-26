@@ -5,6 +5,7 @@ import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus
 import { trackProductSelect } from '../utils/analytics';
 import { createProductPath } from '../utils/productRouting';
 import { formatSemanticLabels } from '../utils/semanticPresentation';
+import { createHumanContextNarrative } from '../ai/editorialIntelligenceSystem';
 
 export function ProductImageFallback({ label = 'Imagem em curadoria' } = {}) {
   return (
@@ -65,6 +66,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
 
   const isHero = variant === 'hero';
   const isFeatured = variant === 'featured';
+  const humanNarrative = product.narrative || createHumanContextNarrative(product, { seed: product.name?.length || 0 });
 
   return (
     <article className={`lazule-product-card lazule-cinematic-card lazule-card-${variant} group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem] ${isHero ? 'md:min-h-[30rem]' : ''}`}>
@@ -107,7 +109,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
           <h3 className={`mt-2 line-clamp-2 font-display leading-[0.98] text-lazule-mist transition group-hover:text-white ${isHero ? 'text-[clamp(1.5rem,5vw,2rem)] sm:text-[2rem]' : 'text-[clamp(1.32rem,7vw,1.62rem)] sm:text-[1.65rem]'}`}>
             <HighlightText text={product.name} query={highlightQuery} />
           </h3>
-          <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-300">{product.narrative || product.description || 'Perfil olfativo em curadoria'}</p>
+          <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-300">{humanNarrative || product.description || 'Perfil olfativo em curadoria'}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {formatSemanticLabels((product.semanticFacets?.length ? product.semanticFacets : [product.catalogType, product.family, ...(product.vibeTags || []).slice(0, 1)]), { limit: 3 }).map((label) => (
               <span key={label} className="rounded-full border border-[var(--laz-border-mineral)] surface-lazule-soft px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.14em] text-[#cfdbf2]">

@@ -15,6 +15,7 @@ import { resolveEmotionalRhythm, resolveAdaptiveMotionIntensity } from '../ai/em
 import { resolvePresenceTimeline } from '../ai/presenceTimelineEngine';
 import { buildPresenceCompanionLayer } from '../ai/presenceCompanionLayer';
 import { resolveAdaptiveMomentHome, resolveAtmosphericReunionSequence } from '../ai/adaptiveAtmosphericHome';
+import { applyEditorialAntiRepetition } from '../ai/editorialIntelligenceSystem';
 
 const discoveryPaths = [
   {
@@ -111,6 +112,16 @@ function SectionHeading({ eyebrow, title, actionHref, actionLabel = 'Ver tudo' }
   );
 }
 
+
+function buildHomeEditorialPulse(atmosphereProfile = {}, sensoryPresence = {}) {
+  const lines = [
+    sensoryPresence?.adaptiveHome?.headline,
+    sensoryPresence?.reunion?.headline,
+    atmosphereProfile?.density === 'dense' ? 'Hoje o clima pede projeção mais próxima e textura densa.' : 'Hoje o clima favorece perfumes mais respiráveis e com saída limpa.',
+    atmosphereProfile?.motionCadence === 'dynamic' ? 'Seu padrão recente está mais exploratório, com alternância entre dia e noite.' : 'Seu padrão recente está estável e consistente, com escolhas mais cirúrgicas.',
+  ].filter(Boolean);
+  return applyEditorialAntiRepetition(lines);
+}
 function UnifiedDiscovery({ brands, curatedProducts, discoveryItems }) {
   const spotlightProducts = curatedProducts.slice(0, 3);
 
@@ -245,6 +256,8 @@ export function Home() {
     return { moment, rhythm, timeline, companion, adaptiveHome, reunion, motionIntensity: resolveAdaptiveMotionIntensity(rhythm, window.matchMedia('(prefers-reduced-motion: reduce)').matches) };
   }, [atmosphereProfile]);
 
+  const editorialPulse = useMemo(() => buildHomeEditorialPulse(atmosphereProfile, sensoryPresence), [atmosphereProfile, sensoryPresence]);
+
   const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
     const products = getAllProducts();
     const featuredCollections = getFeaturedCollections(products);
@@ -318,6 +331,20 @@ export function Home() {
           <ProductNavigationSearch className="lazule-home-search" compact />
         </div>
       </div>
+
+      {editorialPulse.length ? (
+        <section className="mx-auto max-w-7xl px-3 py-5 min-[390px]:px-4 sm:px-8 sm:py-6">
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:rounded-[1.8rem] sm:p-6">
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Leitura editorial de hoje</p>
+            <div className="mt-3 grid gap-2">
+              {editorialPulse.map((line) => (
+                <p key={line} className="text-sm leading-6 text-slate-300">{line}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
 
       <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
 
