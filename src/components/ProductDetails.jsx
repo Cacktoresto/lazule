@@ -828,7 +828,7 @@ function Recommendations({ products }) {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Descoberta emocional</p>
-          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Na mesma atmosfera</h2>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Continuidade sensorial</h2>
         </div>
         <p className="max-w-xl text-sm leading-6 text-slate-300">
           Seleção guiada por vibe, DNA olfativo, performance e ocasião — como uma conversa de boutique.
@@ -891,22 +891,23 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const performance = experience?.performance?.summary || 'Performance equilibrada com presença elegante e leitura premium.';
 
   return (
-    <div className={`lazule-editorial-stage grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile}`} data-mood={moodProfile}>
+    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile}`} data-mood={moodProfile}>
       <span className="lazule-depth-layer lazule-depth-layer-3" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
+      <span className="lazule-depth-layer lazule-depth-layer-fog" aria-hidden="true" />
       <DetailImage product={product} />
       <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.94] text-lazule-night shadow-mineral backdrop-blur lg:-ml-6 lg:mt-10 lg:rounded-[2.6rem] lg:bg-white/[0.06] lg:p-8 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
-        <h1 className="mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
+        <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
         <div className="mt-5 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-4 lg:border-white/10">
           <div>
             <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
             <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           </div>
         </div>
-        <div className="lazule-live-interpretation mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
+        <div className="lazule-live-interpretation lazule-text-reveal mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
           <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
@@ -1164,6 +1165,19 @@ export function ProductDetails({ slug }) {
       window.removeEventListener('scroll', onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
+  }, [product]);
+
+  useEffect(() => {
+    const stage = document.querySelector('.lazule-editorial-stage');
+    if (!stage || !product) return;
+    const nextMood = getMoodAtmosphereProfile(product);
+    const previousMood = stage.getAttribute('data-mood');
+    if (previousMood && previousMood !== nextMood) {
+      stage.setAttribute('data-prev-mood', previousMood);
+      const timeoutId = window.setTimeout(() => stage.removeAttribute('data-prev-mood'), 1400);
+      return () => window.clearTimeout(timeoutId);
+    }
+    return undefined;
   }, [product]);
   console.info('[ProductDetails] render guard check', { slug: normalizedSlug, found: Boolean(product), semanticRuntimeState, hasRuntimeModules: Boolean(runtimeModules), hasExperience: Boolean(experience) });
   const similarGroupsCount = Object.values(similarGroups || {}).reduce((total, group) => total + (Array.isArray(group) ? group.length : 0), 0);
