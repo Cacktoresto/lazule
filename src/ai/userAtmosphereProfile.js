@@ -14,6 +14,9 @@ export function buildUserAtmosphereProfile(memoryProfile = null) {
   if (!topTags.length) {
     return {
       density: 'balanced',
+      topAtmospheres: ['mineral_aquatic'],
+      primaryFamily: 'mineral',
+      motionCadence: 'serena',
       narrative: 'Descoberta editorial equilibrada.',
       homeMood: 'editorial-balanced',
       cadence: 'calm',
@@ -28,6 +31,9 @@ export function buildUserAtmosphereProfile(memoryProfile = null) {
 
   return {
     density: dense ? 'dense' : 'airy',
+    topAtmospheres: topTags.slice(0, 4).map((item) => item.tag),
+    primaryFamily: leadingTag.includes('amber') ? 'amber' : leadingTag.includes('dark') ? 'smoky' : leadingTag.includes('fresh') ? 'fresh' : 'mineral',
+    motionCadence: dense ? 'respiração profunda' : 'respiração aberta',
     narrative: dense
       ? 'Atmosfera mais profunda, com presença silenciosa e magnetismo elegante.'
       : 'Atmosfera mais fria e arejada, com luxo limpo e leitura minimalista.',

@@ -1,7 +1,12 @@
 import { useMemo } from 'react';
-import { loadTasteMemoryStore } from '../utils/tasteMemoryStore.js';
+import { loadSensoryWishlist, loadTasteMemoryStore } from '../utils/tasteMemoryStore.js';
 import { buildUserAtmosphereProfile } from '../ai/userAtmosphereProfile.js';
 import { deriveLivingPresence } from '../ai/presenceEditorialEngine.js';
+import { buildRevisitNarrative } from '../ai/revisitNarrativeEngine.js';
+import { deriveIdentityRecommendations } from '../ai/identityRecommendationLayer.js';
+import { buildIdentityDiscoveryStream } from '../ai/identityDiscoveryStream.js';
+import { buildLivingMemoryTimeline } from '../ai/livingMemoryTimelineEngine.js';
+import { describePresenceConfirmation } from '../ai/sensoryWishlistEngine.js';
 
 const auraLexicon = {
   mineral: ['silenciosa', 'luminosa', 'precisa'],
@@ -30,8 +35,18 @@ export function AdaptiveIdentityLanding({ identityMemory }) {
   const memory = useMemo(() => loadTasteMemoryStore(), []);
   const profile = useMemo(() => buildUserAtmosphereProfile(memory.profile), [memory.profile]);
   const livingPresence = useMemo(() => deriveLivingPresence(profile), [profile]);
+  const wishlist = useMemo(() => loadSensoryWishlist(), []);
+  const revisitNarrative = useMemo(() => buildRevisitNarrative(memory.events), [memory.events]);
+  const discoveryStream = useMemo(() => buildIdentityDiscoveryStream({ profile, sensoryWishlist: wishlist.presences, revisitNarrative }), [profile, wishlist.presences, revisitNarrative]);
+  const recommendations = useMemo(() => deriveIdentityRecommendations({
+    phase: livingPresence.phase,
+    dominantSignature: signature,
+    sensoryWishlist: wishlist.presences,
+    revisitNarrative,
+    emotionalConstellations: profile.topAtmospheres,
+  }), [livingPresence.phase, signature, wishlist.presences, revisitNarrative, profile.topAtmospheres]);
+  const memoryTimeline = useMemo(() => buildLivingMemoryTimeline({ events: memory.events, revisitNarrative, discoveryStream }), [memory.events, revisitNarrative, discoveryStream]);
 
-  const signature = inferDominantSignature(profile);
   const constellation = buildConstellation(memory.events);
 
   const auraHints = [
@@ -104,6 +119,42 @@ export function AdaptiveIdentityLanding({ identityMemory }) {
                   <p className="text-sm text-white">{entry.title}</p>
                   <p className="mt-1 text-xs uppercase tracking-[0.2em] text-lazule-gold/70">{entry.atmosphere}</p>
                   <p className="mt-2 text-xs text-lazule-mist/70">{entry.note}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Curadoria futura</p>
+              <p className="mt-2 text-sm text-lazule-mist/80">{wishlist.presences[0] ? describePresenceConfirmation(wishlist.presences[0]) : 'Atmosferas desejadas começam a compor sua próxima assinatura.'}</p>
+              <ul className="mt-3 space-y-2 text-xs text-lazule-mist/70">
+                {wishlist.presences.slice(-3).reverse().map((presence) => (
+                  <li key={`${presence.perfumeSlug}-${presence.timestamp}`}>• {presence.perfumeName || presence.perfumeSlug} · {presence.atmosphere}</li>
+                ))}
+              </ul>
+            </article>
+            <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Adaptive identity recommendations</p>
+              <p className="mt-2 text-sm text-lazule-mist/80">{recommendations.continuityNarratives[0]}</p>
+              <p className="mt-2 text-xs text-lazule-mist/65">{revisitNarrative.narrative}</p>
+            </article>
+          </div>
+
+          <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
+            <p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Identity discovery stream</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {discoveryStream.map((line) => <p key={line} className="text-sm text-lazule-mist/80">{line}</p>)}
+            </div>
+          </article>
+
+          <article className="rounded-2xl border border-lazule-gold/20 bg-black/20 p-5">
+            <p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Living memory timeline</p>
+            <div className="mt-3 space-y-2">
+              {memoryTimeline.map((fragment) => (
+                <div key={fragment.id} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <p className="text-sm text-white">{fragment.title}</p>
+                  <p className="text-xs text-lazule-mist/70">{fragment.note}</p>
                 </div>
               ))}
             </div>
