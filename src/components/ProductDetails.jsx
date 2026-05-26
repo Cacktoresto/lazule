@@ -722,7 +722,7 @@ function RelationshipBlocks({ sections, currentProduct, experience }) {
   }
 
   return (
-    <section className="lazule-reveal mt-10 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
+    <section className="lazule-reveal lazule-recommendation-atmosphere mt-12 rounded-[2.6rem] border border-white/10 bg-white/[0.03] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-16 lg:p-8">
       <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Relações olfativas</p>
@@ -824,11 +824,11 @@ function Recommendations({ products }) {
   }
 
   return (
-    <section className="lazule-reveal mt-10 rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-14 lg:p-8">
+    <section className="lazule-reveal lazule-recommendation-atmosphere mt-12 rounded-[2.6rem] border border-white/10 bg-white/[0.03] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-16 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Descoberta emocional</p>
-          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Você também pode gostar</h2>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Na mesma atmosfera</h2>
         </div>
         <p className="max-w-xl text-sm leading-6 text-slate-300">
           Seleção guiada por vibe, DNA olfativo, performance e ocasião — como uma conversa de boutique.
@@ -891,9 +891,11 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const performance = experience?.performance?.summary || 'Performance equilibrada com presença elegante e leitura premium.';
 
   return (
-    <div className={`grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6 lazule-mood-surface lazule-mood-${moodProfile}`}>
+    <div className={`lazule-editorial-stage grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile}`} data-mood={moodProfile}>
+      <span className="lazule-depth-layer lazule-depth-layer-3" aria-hidden="true" />
+      <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.965] text-lazule-night shadow-mineral backdrop-blur lg:rounded-[2.4rem] lg:bg-white/[0.065] lg:p-8 lg:text-lazule-mist">
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.94] text-lazule-night shadow-mineral backdrop-blur lg:-ml-6 lg:mt-10 lg:rounded-[2.6rem] lg:bg-white/[0.06] lg:p-8 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
@@ -904,7 +906,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           </div>
         </div>
-        <div className="lazule-live-interpretation mt-4 rounded-2xl border border-lazule-gold/30 bg-lazule-night/[0.035] p-4 lg:bg-white/[0.03]">
+        <div className="lazule-live-interpretation mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
           <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
@@ -913,7 +915,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             {['intensidade', 'projeção', 'assinatura'].map((label, index) => (
               <div key={label} className="lazule-olfactive-row" style={{ '--item-delay': `${index * 120}ms` }}>
                 <span className="text-[0.58rem] uppercase tracking-[0.16em] text-slate-500 lg:text-slate-400">{label}</span>
-                <span className="lazule-olfactive-bar" />
+                <span className="lazule-olfactive-bar" style={{ '--dna-width': `${[84,72,91][index]}%` }} />
               </div>
             ))}
           </div>
@@ -1135,6 +1137,34 @@ export function ProductDetails({ slug }) {
     return () => observer.disconnect();
   }, [product]);
 
+
+  useEffect(() => {
+    const stage = document.querySelector('.lazule-editorial-stage');
+
+    if (!stage || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return undefined;
+    }
+
+    let frame = 0;
+    const updateStageOffset = () => {
+      frame = 0;
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const shift = Math.min(26, Math.max(-10, (window.scrollY / viewportHeight) * 18));
+      stage.style.setProperty('--scroll-shift', `${shift.toFixed(2)}px`);
+    };
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateStageOffset);
+    };
+
+    updateStageOffset();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [product]);
   console.info('[ProductDetails] render guard check', { slug: normalizedSlug, found: Boolean(product), semanticRuntimeState, hasRuntimeModules: Boolean(runtimeModules), hasExperience: Boolean(experience) });
   const similarGroupsCount = Object.values(similarGroups || {}).reduce((total, group) => total + (Array.isArray(group) ? group.length : 0), 0);
   const relationshipSectionsCount = Array.isArray(relationshipSections)
