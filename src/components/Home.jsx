@@ -10,6 +10,11 @@ import { applyHomeSeo } from '../utils/seo';
 import { trackBrandClick, trackCategoryClick, trackEvent, trackProductSelect } from '../utils/analytics';
 import { loadTasteMemoryStore } from '../utils/tasteMemoryStore';
 import { buildUserAtmosphereProfile } from '../ai/userAtmosphereProfile';
+import { resolveOlfactiveMoment } from '../ai/olfactiveMomentEngine';
+import { resolveEmotionalRhythm, resolveAdaptiveMotionIntensity } from '../ai/emotionalRhythmEngine';
+import { resolvePresenceTimeline } from '../ai/presenceTimelineEngine';
+import { buildPresenceCompanionLayer } from '../ai/presenceCompanionLayer';
+import { resolveAdaptiveMomentHome, resolveAtmosphericReunionSequence } from '../ai/adaptiveAtmosphericHome';
 
 const discoveryPaths = [
   {
@@ -230,6 +235,16 @@ export function Home() {
     setAtmosphereProfile(buildUserAtmosphereProfile(store.profile));
   }, []);
 
+  const sensoryPresence = useMemo(() => {
+    const moment = resolveOlfactiveMoment({ recentDensity: atmosphereProfile.density, olfactivePhase: atmosphereProfile.phase, sessionDepth: atmosphereProfile.depthAlpha });
+    const rhythm = resolveEmotionalRhythm({ sessionDepth: atmosphereProfile.depthAlpha, recurrenceScore: atmosphereProfile.recurrenceScore, navigationPattern: atmosphereProfile.motionCadence === 'dynamic' ? 'exploratory' : 'balanced' });
+    const timeline = resolvePresenceTimeline(atmosphereProfile);
+    const companion = buildPresenceCompanionLayer({ moment, rhythm, timeline });
+    const adaptiveHome = resolveAdaptiveMomentHome({ moment, rhythm, profile: atmosphereProfile, isMobile: window.matchMedia('(max-width: 768px)').matches, prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches });
+    const reunion = resolveAtmosphericReunionSequence({ companionNarrative: companion.narrative, rhythm });
+    return { moment, rhythm, timeline, companion, adaptiveHome, reunion, motionIntensity: resolveAdaptiveMotionIntensity(rhythm, window.matchMedia('(prefers-reduced-motion: reduce)').matches) };
+  }, [atmosphereProfile]);
+
   const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
     const products = getAllProducts();
     const featuredCollections = getFeaturedCollections(products);
@@ -253,13 +268,13 @@ export function Home() {
   }, [atmosphereProfile.density]);
 
   return (
-    <div className="lazule-home-shell overflow-x-clip" data-home-mood={atmosphereProfile.homeMood} style={{ '--lazule-memory-depth': atmosphereProfile.depthAlpha }}>
+    <div className="lazule-home-shell overflow-x-clip" data-home-mood={sensoryPresence.adaptiveHome.heroMood} data-motion-intensity={sensoryPresence.motionIntensity} style={{ '--lazule-memory-depth': atmosphereProfile.depthAlpha }}>
       <section id="top" className="lazule-hero lazule-cinematic-hero relative overflow-hidden bg-lazule-depth">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(248,250,252,0.10),transparent_22%),linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.9)_100%)]" />
         <div className="pointer-events-none absolute inset-x-[10%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/35 to-transparent opacity-70" />
         <div className="lazule-mobile-container relative mx-auto grid min-h-[min(640px,70svh)] max-w-7xl content-end gap-4 px-3 pb-6 pt-5 min-[390px]:px-4 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
           <div className="lazule-hero-copy relative z-10 max-w-xl pb-1">
-            <p className="mb-2 text-[0.58rem] font-medium uppercase tracking-[0.28em] text-slate-300/70">{atmosphereProfile.narrative}</p>
+            <p className="mb-2 text-[0.58rem] font-medium uppercase tracking-[0.28em] text-slate-300/70">{sensoryPresence.reunion.microFragment}</p>
             <p className="mb-4 text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold sm:mb-5 sm:text-[0.68rem] sm:tracking-[0.46em]">LAZULE FRAGRANCES</p>
             <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,13.5vw,3.55rem)] leading-[0.86] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-8xl">Perfume com percepção.</h1>
             <p className="mt-4 max-w-[32rem] text-[0.92rem] leading-6 text-slate-200/85 sm:mt-6 sm:text-lg">
