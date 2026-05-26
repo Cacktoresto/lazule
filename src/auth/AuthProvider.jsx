@@ -3,6 +3,8 @@ import { supabaseAuthClient } from '../services/supabaseAuthClient.js';
 import { canAccessAdmin, getUserRole, isAdminRole, isInfluencerRole } from './roles.js';
 import { AuthContext } from './useAuth.js';
 import { buildIdentityPreview, loadOlfactiveSession, saveOlfactiveSession } from './olfactiveSessionStore.js';
+import { diagnoseSignupFlow } from './signupDiagnostics.js';
+import { getSupabaseAuthConfig } from '../services/supabaseAuthClient.js';
 
 async function loadProfileForSession(session) {
   if (!session || !supabaseAuthClient.isConfigured || typeof supabaseAuthClient.selectProfile !== 'function') {
@@ -18,6 +20,7 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [identityMemory, setIdentityMemory] = useState(() => loadOlfactiveSession());
+  const [signupDiagnostics, setSignupDiagnostics] = useState(null);
 
   const hydrateSession = useCallback(async (nextSession) => {
     setSession(nextSession || null);
@@ -94,22 +97,51 @@ export function AuthProvider({ children }) {
   const signUpWithEmailPassword = useCallback(async (email, password, metadata = {}) => {
     setIsLoading(true);
     setAuthError(null);
-    const { data, error } = await supabaseAuthClient.auth.signUp({
+
+    const minimalMetadata = {
+      ...(metadata?.name ? { name: metadata.name } : {}),
+      ...(metadata?.display_name ? { display_name: metadata.display_name } : {}),
+    };
+
+    const requestPayload = {
+      email,
+      password: Boolean(password) ? '[redacted]' : '',
+      metadataSent: minimalMetadata,
+      metadataDeferred: metadata,
+    };
+
+    const response = await supabaseAuthClient.auth.signUp({
       email,
       password,
       options: {
-        data: metadata,
+        data: minimalMetadata,
       },
     });
 
-    if (error) {
-      setAuthError(error);
+    const diagnostic = diagnoseSignupFlow({
+      provider: supabaseAuthClient,
+      env: getSupabaseAuthConfig(),
+      request: requestPayload,
+      response,
+      error: response.error,
+      phase: 'auth_signup',
+    });
+    setSignupDiagnostics(diagnostic);
+
+    if (response.error) {
+      setAuthError(response.error);
       setIsLoading(false);
-      return { session: null, error };
+      return { session: null, error: response.error, diagnostics: diagnostic };
     }
 
-    await hydrateSession(data.session);
-    return { session: data.session, error: null };
+    await hydrateSession(response.data.session);
+    return {
+      session: response.data.session,
+      user: response.data.user || null,
+      emailConfirmationRequired: Boolean(response.data.user && !response.data.session),
+      error: null,
+      diagnostics: diagnostic,
+    };
   }, [hydrateSession]);
 
   const requestPasswordRecovery = useCallback(async (email) => {
@@ -159,8 +191,9 @@ export function AuthProvider({ children }) {
       signOut,
       refreshSession,
       identityMemory,
+      signupDiagnostics,
     };
-  }, [authError, identityMemory, isLoading, profile, refreshSession, requestPasswordRecovery, session, signInWithEmailPassword, signOut, signUpWithEmailPassword]);
+  }, [authError, identityMemory, isLoading, profile, refreshSession, requestPasswordRecovery, session, signInWithEmailPassword, signOut, signUpWithEmailPassword, signupDiagnostics]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
