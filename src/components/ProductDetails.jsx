@@ -915,7 +915,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             {['intensidade', 'projeção', 'assinatura'].map((label, index) => (
               <div key={label} className="lazule-olfactive-row" style={{ '--item-delay': `${index * 120}ms` }}>
                 <span className="text-[0.58rem] uppercase tracking-[0.16em] text-slate-500 lg:text-slate-400">{label}</span>
-                <span className="lazule-olfactive-bar" style={{ '--dna-width': `${[84,72,91][index]}%` }} />
+                <span className="lazule-olfactive-bar" style={{ '--bar-value': `${[84,72,91][index]}%` }} />
               </div>
             ))}
           </div>
