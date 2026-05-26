@@ -1,8 +1,10 @@
 import { buildPersonalOlfactiveProfile, normalizeMemorySignal, updateTasteMemoryStore } from '../ai/tasteMemoryEngine.js';
+import { addAtmospherePresence, createSensoryWishlistEngine } from '../ai/sensoryWishlistEngine.js';
 
 export const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v2';
 const LEGACY_TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
 const MAX_EVENTS = 48;
+export const SENSORY_WISHLIST_STORAGE_KEY = 'lazule_sensory_wishlist_v1';
 
 function parse(raw) {
   if (!raw) return null;
@@ -33,5 +35,17 @@ export function persistTasteMemoryStore(store, storage = globalThis?.localStorag
 export function appendTasteMemorySignal(previousStore = {}, signal = {}, storage = globalThis?.localStorage) {
   const next = updateTasteMemoryStore(previousStore, signal);
   persistTasteMemoryStore(next, storage);
+  return next;
+}
+
+export function loadSensoryWishlist(storage = globalThis?.localStorage) {
+  if (!storage) return createSensoryWishlistEngine();
+  const raw = parse(storage.getItem(SENSORY_WISHLIST_STORAGE_KEY));
+  return createSensoryWishlistEngine(raw || {});
+}
+
+export function appendSensoryWishlistPresence(previousStore = {}, payload = {}, storage = globalThis?.localStorage) {
+  const next = addAtmospherePresence(previousStore, payload);
+  if (storage) storage.setItem(SENSORY_WISHLIST_STORAGE_KEY, JSON.stringify(next));
   return next;
 }
