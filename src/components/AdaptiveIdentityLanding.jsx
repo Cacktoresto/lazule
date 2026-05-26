@@ -35,6 +35,7 @@ export function AdaptiveIdentityLanding({ identityMemory }) {
   const memory = useMemo(() => loadTasteMemoryStore(), []);
   const profile = useMemo(() => buildUserAtmosphereProfile(memory.profile), [memory.profile]);
   const livingPresence = useMemo(() => deriveLivingPresence(profile), [profile]);
+  const signature = useMemo(() => inferDominantSignature(profile), [profile]);
   const wishlist = useMemo(() => loadSensoryWishlist(), []);
   const revisitNarrative = useMemo(() => buildRevisitNarrative(memory.events), [memory.events]);
   const discoveryStream = useMemo(() => buildIdentityDiscoveryStream({ profile, sensoryWishlist: wishlist.presences, revisitNarrative }), [profile, wishlist.presences, revisitNarrative]);
