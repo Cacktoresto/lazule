@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseAuthClient } from '../services/supabaseAuthClient.js';
-import { canAccessAdmin, getProfileRole, isInfluencerRole } from './roles.js';
+import { canAccessAdmin, getUserRole, isAdminRole, isInfluencerRole } from './roles.js';
 import { AuthContext } from './useAuth.js';
 import { buildIdentityPreview, loadOlfactiveSession, saveOlfactiveSession } from './olfactiveSessionStore.js';
 
@@ -139,7 +139,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(() => {
-    const role = getProfileRole(profile);
+    const role = getUserRole(session, profile);
 
     return {
       user: session?.user || null,
@@ -151,7 +151,7 @@ export function AuthProvider({ children }) {
       isAuthAvailable: Boolean(supabaseAuthClient.isConfigured),
       isLoading,
       isAuthenticated: Boolean(session?.user),
-      isAdmin: canAccessAdmin(profile),
+      isAdmin: canAccessAdmin(profile) || isAdminRole(role),
       isInfluencer: profile?.is_active !== false && isInfluencerRole(role),
       signInWithEmailPassword,
       signUpWithEmailPassword,

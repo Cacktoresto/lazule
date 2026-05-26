@@ -19,6 +19,11 @@ export function getProfileRole(profile) {
   return normalizeRole(profile?.role) || '';
 }
 
+export function getUserRole(session, profile) {
+  const metadataRole = normalizeRole(session?.user?.user_metadata?.role || session?.user?.app_metadata?.role);
+  return getProfileRole(profile) || metadataRole || '';
+}
+
 export function isActiveProfile(profile) {
   return profile?.is_active !== false;
 }
