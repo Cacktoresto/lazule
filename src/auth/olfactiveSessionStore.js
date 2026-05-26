@@ -27,11 +27,17 @@ export function saveOlfactiveSession(session, storage = globalThis?.localStorage
 export function buildIdentityPreview(user, profile) {
   const fallbackLabel = user?.email ? user.email.split('@')[0] : 'presença anônima';
 
+  const metadata = user?.user_metadata || {};
+
   return {
     id: user?.id || 'guest',
-    label: profile?.display_name || profile?.name || fallbackLabel,
-    aura: profile?.olfactive_aura || 'luxo silencioso mineral',
-    dominant_context: profile?.dominant_context || 'curadoria intimista',
+    label: profile?.display_name || profile?.name || metadata.display_name || fallbackLabel,
+    aura: profile?.olfactive_aura || metadata.inferred_signature || 'luxo silencioso mineral',
+    dominant_context: profile?.dominant_context || metadata.initial_context || 'curadoria intimista',
+    initial_atmosphere: metadata.initial_atmosphere || null,
+    first_vibe: metadata.first_vibe || null,
+    olfactive_memory_initial: metadata.olfactive_memory_initial || null,
+    seeded_at: metadata.seeded_at || null,
     updated_at: new Date().toISOString(),
   };
 }
