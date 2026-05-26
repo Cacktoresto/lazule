@@ -619,14 +619,15 @@ function PerformancePanel({ performance }) {
 
 function VibeSection({ product }) {
   const vibeItems = getVibeItems(product);
+  if (!vibeItems.length) return null;
 
   return (
-    <section className="lazule-reveal mt-10 rounded-[2.4rem] border border-lazule-gold/15 bg-white/[0.045] p-6 shadow-mineral backdrop-blur sm:p-8 lg:mt-14">
+    <section className="lazule-reveal mt-8 rounded-[2.1rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5 lg:mt-10">
       <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Vibe</p>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {vibeItems.map((item, index) => (
           <div
-            className="lazule-touch-card lazule-reveal-item rounded-full border border-white/10 bg-lazule-night/35 px-4 py-3 text-sm text-lazule-mist"
+            className="lazule-touch-card lazule-reveal-item rounded-full border border-white/10 bg-lazule-night/35 px-3.5 py-2.5 text-sm text-lazule-mist"
             key={item}
             style={{ '--item-delay': `${index * 55}ms` }}
           >
@@ -641,15 +642,15 @@ function VibeSection({ product }) {
 function RecommendationCard({ product, context = 'recommendations', explanation, index = 0 }) {
   return (
     <a
-      className="lazule-product-card lazule-reveal-item group flex min-h-[19rem] w-[78vw] max-w-[19rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] shadow-mineral backdrop-blur transition md:w-[20rem]"
+      className="lazule-product-card lazule-reveal-item group flex min-h-[19.5rem] w-[82vw] max-w-[20.5rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] border border-white/12 bg-white/[0.07] shadow-mineral backdrop-blur transition md:w-[20rem]"
       href={createProductPath(product)}
       style={{ '--item-delay': `${120 + (index * 85)}ms` }}
       onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: context })}
     >
-      <div className="relative min-h-44 overflow-hidden bg-lazule-depth">
+      <div className="relative h-48 overflow-hidden bg-lazule-depth">
         {product.image ? (
           <img
-            className="absolute inset-0 h-full w-full object-contain p-5 opacity-90 transition duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-contain object-center p-4 opacity-95 transition duration-500 group-hover:scale-105"
             src={product.image}
             alt={`Perfume ${product.name}`}
             loading="lazy"
@@ -663,13 +664,13 @@ function RecommendationCard({ product, context = 'recommendations', explanation,
       <div className="flex flex-1 flex-col justify-between p-5">
         <div>
           <p className="text-[0.65rem] uppercase tracking-[0.26em] text-lazule-gold">{product.brand}</p>
-          <h3 className="mt-2 line-clamp-2 font-display text-2xl leading-tight text-lazule-mist group-hover:text-lazule-gold">
+          <h3 className="mt-2 line-clamp-2 font-display text-[1.65rem] leading-tight text-lazule-mist group-hover:text-lazule-gold">
             {getProductDisplayName(product)}
           </h3>
-          <p className="mt-3 line-clamp-1 text-xs text-slate-400">DNA: {humanizeSignature(product.signature || product.olfactoryReference || 'Perfil olfativo em curadoria')}</p>
+          <p className="mt-2 line-clamp-1 text-xs text-slate-300">DNA: {humanizeSignature(product.signature || product.olfactoryReference || 'Perfil olfativo em curadoria')}</p>
           <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-300">{explanation || product.semanticReasons?.[0] || product.narrative || 'Conexão por assinatura olfativa e contexto de uso.'}</p>
         </div>
-        <strong className="mt-5 text-base text-lazule-mist">{canDirectBuy(product) ? formatBRL(product.salePrice) : getCommercialStatusMeta(product).badge}</strong>
+        <strong className="mt-4 inline-flex w-fit rounded-full border border-lazule-gold/30 bg-lazule-gold/12 px-3 py-1.5 text-base font-semibold text-[#f8f3df]">{canDirectBuy(product) ? formatBRL(product.salePrice) : getCommercialStatusMeta(product).badge}</strong>
       </div>
     </a>
   );
@@ -684,7 +685,7 @@ function OlfactiveDiscoveryTerms({ product, runtimeModules }) {
   }
 
   return (
-    <section className="lazule-reveal mt-10 rounded-[2.4rem] border border-lazule-gold/15 bg-white/[0.045] p-6 shadow-mineral backdrop-blur sm:p-8 lg:mt-14">
+    <section className="lazule-reveal mt-8 rounded-[2.1rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5 lg:mt-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Mapa olfativo</p>
@@ -743,7 +744,8 @@ function RelationshipBlocks({ sections, currentProduct, experience }) {
               <h3 className="font-display text-2xl text-lazule-mist">{section.title}</h3>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-300">{section.subtitle}</p>
             </div>
-            <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
+            <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para ver mais</span></div>
+      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-2">
               {section.items.map((item) => (
                 <div key={`${section.id}-${item.product.id ?? item.product.productSlug}`} onClick={() => {
                   trackExperienceEvent('related_signature_click', experience, {
@@ -807,7 +809,8 @@ function SimilarPerfumeSections({ groups = {} }) {
       {!isVisible ? <div className="h-24 animate-pulse rounded-2xl bg-white/5" /> : sections.map((section) => (
         <div key={section.key} className="mb-8 last:mb-0">
           <h3 className="mb-4 font-display text-2xl text-lazule-mist">{section.title}</h3>
-          <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
+          <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para ver mais</span></div>
+      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-2">
             {(groups[section.key] || []).map((item) => (
               <RecommendationCard key={item.slug} product={item} context={section.key} explanation={item.explanation} />
             ))}
@@ -834,7 +837,8 @@ function Recommendations({ products }) {
           Seleção guiada por vibe, DNA olfativo, performance e ocasião — como uma conversa de boutique.
         </p>
       </div>
-      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
+      <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para ver mais</span></div>
+      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-2">
         {products.map((product, index) => (
           <RecommendationCard key={product.id} product={product} index={index} />
         ))}
@@ -901,10 +905,10 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           {product.brand}
         </a>
         <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
-        <div className="mt-5 flex items-end justify-between gap-5 border-y border-lazule-night/10 py-4 lg:border-white/10">
+        <div className="mt-5 flex items-end justify-between gap-5 border-y border-lazule-night/20 py-4 lg:border-white/14">
           <div>
-            <span className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">Preço</span>
-            <strong className="mt-1 block text-3xl text-lazule-night lg:text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
+            <span className="text-[0.65rem] uppercase tracking-[0.25em] text-lazule-royal/90 lg:text-lazule-gold">Preço</span>
+            <strong className="mt-1 block text-3xl font-semibold text-[#081937] drop-shadow-[0_2px_10px_rgba(226,198,126,0.25)] lg:text-[#f7f3e5]">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           </div>
         </div>
         <div className="lazule-live-interpretation lazule-text-reveal mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
@@ -1241,34 +1245,12 @@ export function ProductDetails({ slug }) {
       }) || null}
 
       <div className="mt-8 space-y-6 px-4 lg:mt-12 lg:px-0">
-        <ProductSectionErrorBoundary sectionName="experience_top">
-          <div data-testid="product-experience-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.035] p-3 shadow-mineral backdrop-blur sm:p-4">
-            <ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} />
-          </div>
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="vibe_top">
-          <div className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
-            <VibeSection product={product} />
-          </div>
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="discovery_terms">
-          <div data-testid="product-discovery-terms-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
-            <ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} />
-          </div>
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="relationships">
-          <div data-testid="product-relationships-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
-            <ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} />
-          </div>
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="recommendations">
-          <div data-testid="product-recommendations-section" className="lazule-reveal rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-mineral backdrop-blur sm:p-6">
-            <ProductRecommendationsSection products={safeRecommendations} />
-          </div>
-        </ProductSectionErrorBoundary>
-        <ProductSectionErrorBoundary sectionName="similar">
-          <SimilarPerfumeSections groups={similarGroups} />
-        </ProductSectionErrorBoundary>
+        {experience ? <ProductSectionErrorBoundary sectionName="experience_top"><ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} /></ProductSectionErrorBoundary> : null}
+        {getVibeItems(product).length ? <ProductSectionErrorBoundary sectionName="vibe_top"><VibeSection product={product} /></ProductSectionErrorBoundary> : null}
+        {discoveryTermsCount ? <ProductSectionErrorBoundary sectionName="discovery_terms"><ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} /></ProductSectionErrorBoundary> : null}
+        {relationshipSectionsCount ? <ProductSectionErrorBoundary sectionName="relationships"><ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} /></ProductSectionErrorBoundary> : null}
+        {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} /></ProductSectionErrorBoundary> : null}
+        {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
         {semanticRuntimeState === 'ready' && !experience ? (
           <SemanticEditorialFallback
             title="DNA em atualização editorial"
