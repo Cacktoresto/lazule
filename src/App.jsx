@@ -17,6 +17,7 @@ import { RequireInfluencerOrAdmin } from './auth/RequireInfluencerOrAdmin';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { InfluencerDashboard } from './pages/influencer/InfluencerDashboard';
 import { InfluencerInvite } from './pages/influencer/InfluencerInvite';
+import { OlfactiveIdentityPortal } from './pages/OlfactiveIdentityPortal';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
@@ -25,7 +26,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -143,6 +144,7 @@ function App() {
   const isBrandRoute = route.pathname.startsWith('/marca/');
   const isCatalogRoute = route.pathname === '/catalogo';
   const isFaqRoute = route.pathname === '/faq';
+  const isIdentityRoute = route.pathname === '/identidade';
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
@@ -244,6 +246,8 @@ function App() {
       routeName = 'catalog';
     } else if (isFaqRoute) {
       routeName = 'faq';
+    } else if (isIdentityRoute) {
+      routeName = 'olfactive_identity';
     } else if (isProductNotFoundRoute) {
       routeName = 'product_not_found';
     } else if (isProductSuggestionRoute) {
@@ -253,7 +257,7 @@ function App() {
     if (!isProtectedDashboardRoute && !isInfluencerInviteRoute && !isPromoReferralRouteActive && !isAdminLoginRoute && !isInfluencerLoginRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -351,6 +355,8 @@ function App() {
             </AppErrorBoundary>
           ) : isFaqRoute ? (
             <FAQ />
+          ) : isIdentityRoute ? (
+            <OlfactiveIdentityPortal />
           ) : isProductNotFoundRoute ? (
             <ProductNotFound key={route.search} />
           ) : isProductSuggestionRoute ? (
