@@ -9,6 +9,7 @@ import { loadRecommendationKnowledgeBase } from '../data/referenceCatalog';
 import { trackEvent } from '../utils/analytics';
 import { getReferralContext } from '../utils/referral';
 import { ProductImageFallback } from './ProductCard';
+import { appendTasteMemorySignal, loadTasteMemoryStore } from '../utils/tasteMemoryStore';
 import { SemanticSearchLoading } from './SemanticSearchLoading';
 import {
   createOlfactiveAssistantAnalyticsPayload,
@@ -21,12 +22,12 @@ import {
 const QUICK_SUGGESTIONS = ['Explore sua assinatura', 'Descubra direções olfativas', 'Perfumes para presença refinada', 'Elegância com calor sutil'];
 const DEFAULT_PROMPT = 'Ex.: uma assinatura discreta, elegante e memorável para a noite';
 const DISCOVERY_MODULES = ['Sua direção olfativa', 'Continuando sua curadoria'];
-const TASTE_MEMORY_STORAGE_KEY = 'lazule_taste_memory_v1';
 const MIN_VISIBLE_DESKTOP_MS = 3200;
 const MIN_VISIBLE_MOBILE_MS = 2600;
 const MAX_HANDOFF_WAIT_MS = 5000;
 const FINAL_PULSE_MS = 340;
 const LOADER_FADE_MS = 420;
+const LOADING_RITUAL_COPY = ['Lendo sua atmosfera…', 'Finalizando sua curadoria…'];
 
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
@@ -119,13 +120,8 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(TASTE_MEMORY_STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : null;
-      if (Array.isArray(parsed?.events)) setTasteSignals(parsed.events.slice(-36));
-    } catch {
-      setTasteSignals([]);
-    }
+    const tasteMemory = loadTasteMemoryStore(window.localStorage);
+    setTasteSignals(tasteMemory.events);
     setWardrobeMemory(loadWardrobeMemory(window.localStorage));
   }, []);
 
@@ -204,9 +200,8 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
         setPendingResult(nextResult);
         setResultsReady(true);
         const signal = { source: 'semantic_search', query: safeQuery, intents: nextResult.detectedIntents, chips: nextResult.memoryAwareChips, ts: Date.now() };
-        const nextSignals = [...tasteSignals, signal].slice(-36);
-        setTasteSignals(nextSignals);
-        window.localStorage.setItem(TASTE_MEMORY_STORAGE_KEY, JSON.stringify({ events: nextSignals }));
+        const nextStore = appendTasteMemorySignal({ events: tasteSignals }, signal, window.localStorage);
+        setTasteSignals(nextStore.events);
         trackEvent('ai_assistant_query', createOlfactiveAssistantAnalyticsPayload(nextResult, {
           query: safeQuery,
           sourcePage,
@@ -315,7 +310,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
             {isLazVisible ? (
               <div className="min-h-[9.5rem] min-w-0 max-w-full sm:min-h-[14rem]" role="status" aria-live="polite">
-                <SemanticSearchLoading isActive={isLazVisible} isVisible={isLazVisible} phase={loaderPhase} fadeDurationMs={LOADER_FADE_MS} interpretedChips={livingSuggestions.slice(0, 3)} query={query} className="max-w-full" />
+                <SemanticSearchLoading isActive={isLazVisible} isVisible={isLazVisible} phase={loaderPhase} fadeDurationMs={LOADER_FADE_MS} interpretedChips={livingSuggestions.slice(0, 3)} query={query} loadingCopy={LOADING_RITUAL_COPY} className="max-w-full" />
               </div>
             ) : null}
 

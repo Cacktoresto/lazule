@@ -78,7 +78,7 @@ const SENSORY_FAMILIES = {
     negative: signalWeights(['soft_projection'], -0.22, 'nightlife_presence'),
   },
   luxury_status: {
-    terms: ['rico', 'caro', 'chique', 'sofisticado', 'premium', 'homem_rico', 'mulher_poderosa', 'hotel_caro', 'loja_chique'],
+    terms: ['rico', 'caro', 'chique', 'patrao', 'patrão', 'sofisticado', 'premium', 'homem_rico', 'mulher_poderosa', 'hotel_caro', 'loja_chique'],
     intentType: 'atmospheric_contextual',
     primary: signalWeights(['clean_luxury', 'woody_executive', 'elegant', 'executive'], 0.9, 'luxury_status'),
     secondary: signalWeights(['amber', 'musk', 'upscale_social', 'moderate_projection'], 0.55, 'luxury_status'),
