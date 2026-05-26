@@ -4,6 +4,7 @@ const navigationItems = [
   { href: '/', label: 'Início' },
   { href: '/catalogo', label: 'Catálogo' },
   { href: '/faq', label: 'Como funciona' },
+  { href: '/identidade', label: 'Sua assinatura' },
   { href: '/influencer/login', label: 'Área do parceiro', ariaLabel: 'Acessar Área do parceiro', variant: 'partner' },
 ];
 

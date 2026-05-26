@@ -83,6 +83,9 @@ function createUnavailableAuthClient(reason) {
       async refreshSession() {
         return { data: { session: null, user: null }, error: unavailableError };
       },
+      async resetPasswordForEmail() {
+        return { data: null, error: unavailableError };
+      },
     },
   };
 }
@@ -101,6 +104,7 @@ class LazuleSupabaseAuthClient {
       signUp: this.signUp.bind(this),
       signOut: this.signOut.bind(this),
       refreshSession: this.refreshSession.bind(this),
+      resetPasswordForEmail: this.resetPasswordForEmail.bind(this),
     };
   }
 
@@ -296,6 +300,20 @@ class LazuleSupabaseAuthClient {
     return { error: null };
   }
 
+
+
+  async resetPasswordForEmail(email) {
+    try {
+      await this.request('/auth/v1/recover', {
+        method: 'POST',
+        body: { email },
+      });
+
+      return { data: { email }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
   async rpc(functionName, { session, body } = {}) {
     try {
       const response = await fetch(`${this.url}/rest/v1/rpc/${encodeURIComponent(functionName)}`, {
