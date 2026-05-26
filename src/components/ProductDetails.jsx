@@ -19,6 +19,7 @@ import {
   trackPresenceEvent,
   updateMemoryWeights,
 } from '../ai/presenceAwarenessEngine';
+import { createHumanPerfumeReading } from '../ai/humanPerfumeReadingEngine';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -166,19 +167,6 @@ function resolveEditorialCadence({ moodProfile, atmosphereProfile, contentScore 
   return { compactness: cadence >= 2 ? 'dense' : cadence <= -2 ? 'airy' : 'balanced', cadence };
 }
 
-function getInterpretiveLens(product = {}, experience = {}) {
-  const pool = normalizeProductClassifier([product.signature, product.olfactoryReference, product.name, product.category].filter(Boolean).join(' '));
-  if (/(aquatic|marine|blue|fresh)/.test(pool)) return { dna: 'mineral aquatic', aura: 'frescor sofisticado', rhythm: 'abertura luminosa', setting: 'pós-praia luxury' };
-  if (/(amber|oud|gold|oriental|resin)/.test(pool)) return { dna: 'velvet amber', aura: 'rastro opulento', rhythm: 'evolução quente', setting: 'evento elegante' };
-  if (/(smoky|night|leather|dark|intense)/.test(pool)) return { dna: 'smoky elegant', aura: 'energia noturna', rhythm: 'fundo envolvente', setting: 'encontro noturno' };
-  if (/(clean|executive|office|white)/.test(pool)) return { dna: 'clean luxury', aura: 'presença silenciosa', rhythm: 'linear', setting: 'escritório premium' };
-  return {
-    dna: experience?.signature?.headline || 'fresh executive',
-    aura: 'magnetismo elegante',
-    rhythm: 'suave persistente',
-    setting: 'rotina sofisticada',
-  };
-}
 function createEditorialGallery(product) {
   const slides = [
     {
@@ -966,10 +954,8 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const chips = getVibeItems(product);
   const moodProfile = getMoodAtmosphereProfile(product);
   const atmosphere = buildSemanticAtmosphere(product);
-  const lens = getInterpretiveLens(product, experience || {});
+  const humanReading = createHumanPerfumeReading(product);
   const signature = humanizeSignature(product.signature || product.olfactoryReference || 'Assinatura em curadoria');
-  const idealUse = experience?.idealUse?.headline || experience?.occasionNarrative || product.narrative || getProductEssence(product);
-  const performance = experience?.performance?.summary || 'Performance equilibrada com presença elegante e leitura premium.';
   const contentScore = [
     Boolean(product?.description),
     Boolean(product?.narrative),
@@ -1015,10 +1001,13 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
         <div className="lazule-live-interpretation lazule-text-reveal mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">DNA: {lens.dna} · Aura: {lens.aura}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Ritmo: {lens.rhythm} · Ambiente ideal: {lens.setting}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Performance: {performance}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.firstImpression}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.behavior}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.context}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Leitura social: {humanReading.socialImpression}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Personalidade: {humanReading.personality}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Ocasião humana: {humanReading.humanOccasion}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Leitura editorial: {humanReading.commentary[0]}</p>
           <p className="mt-2 text-xs uppercase tracking-[0.2em] text-lazule-royal/80 lg:text-lazule-gold/80">Presença da sessão · {sessionAtmosphere.profile}</p>
           <div className="mt-2 space-y-1.5">
             {storyFragments.map((fragment) => (
@@ -1034,7 +1023,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             ))}
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {chips.slice(0, 4).map((chip, index) => (
+            {[...chips, ...humanReading.discoveryTags].slice(0, 6).map((chip, index) => (
               <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold" style={{ '--item-delay': `${120 + index * 90}ms` }}>
                 {chip}
               </span>
