@@ -1,6 +1,6 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useAuth } from '../auth/useAuth.js';
-import { loadTasteMemoryStore } from '../utils/tasteMemoryStore.js';
+import { AdaptiveIdentityLanding } from '../components/AdaptiveIdentityLanding.jsx';
 
 const SignUpRitualModal = lazy(() => import('../components/auth/SignUpRitualModal.jsx').then((module) => ({ default: module.SignUpRitualModal })));
 
@@ -55,14 +55,11 @@ export function OlfactiveIdentityPortal() {
     authError,
     isLoading,
     isAuthAvailable,
-    signOut,
   } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState({ tone: 'default', text: 'Entre para continuar sua assinatura sensorial.' });
   const [showRitual, setShowRitual] = useState(false);
-
-  const memory = useMemo(() => loadTasteMemoryStore(), []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -92,16 +89,7 @@ export function OlfactiveIdentityPortal() {
         <p className="mt-4 max-w-3xl text-lazule-mist/75">A LAZULE preserva sua memória olfativa com continuidade real: acesso, persistência e curadoria em camadas sutis.</p>
 
         {isAuthenticated ? (
-          <div className="mt-10 rounded-2xl border border-lazule-gold/25 bg-black/20 p-6 text-lazule-mist/85">
-            <p className="text-xs uppercase tracking-[0.28em] text-lazule-gold/75">Continuidade sensorial</p>
-            <h2 className="mt-3 text-2xl text-white">Bem-vindo de volta.</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed">Sua atmosfera recente continua orbitando <strong>{identityMemory?.aura || 'frescor mineral'}</strong> e <strong>{identityMemory?.dominant_context || 'luxo silencioso'}</strong>.</p>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4"><p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Assinatura dominante</p><p className="mt-2 text-sm text-white">{identityMemory?.aura || 'em formação contínua'}</p></div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4"><p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Perfumes revisitados</p><p className="mt-2 text-sm text-white">{memory.events.length} registros sensoriais</p></div>
-            </div>
-            <button onClick={signOut} className="mt-6 rounded-xl border border-white/25 bg-white/5 px-4 py-2 text-sm text-white/90">Encerrar sessão</button>
-          </div>
+          <AdaptiveIdentityLanding identityMemory={identityMemory} />
         ) : (
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             <form onSubmit={handleLogin} className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-6">
