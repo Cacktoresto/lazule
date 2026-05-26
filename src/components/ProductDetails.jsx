@@ -12,6 +12,13 @@ import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
 import { loadProductExperienceRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
 import { humanizeSignature as importedHumanizeSignature } from '../utils/semanticPresentation';
+import {
+  createStoryFragments,
+  resolvePresenceProfile,
+  resolveSessionAtmosphere,
+  trackPresenceEvent,
+  updateMemoryWeights,
+} from '../ai/presenceAwarenessEngine';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -974,6 +981,19 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
     Boolean((product?.vibes || product?.vibe || []).length),
   ].filter(Boolean).length;
   const cadence = resolveEditorialCadence({ moodProfile, atmosphereProfile: atmosphere.profile, contentScore, chipCount: chips.length });
+  const [presenceProfile, setPresenceProfile] = useState(() => resolvePresenceProfile());
+  const [memoryStore, setMemoryStore] = useState({ entries: {} });
+
+  useEffect(() => {
+    if (!product?.productSlug) return;
+    const nextSession = trackPresenceEvent({ type: 'product_view', productSlug: product.productSlug });
+    setPresenceProfile(resolvePresenceProfile(nextSession));
+    setMemoryStore(updateMemoryWeights({ productSlug: product.productSlug, viewed: true }));
+  }, [product?.productSlug]);
+
+  const memoryEntry = memoryStore.entries?.[product?.productSlug] || {};
+  const sessionAtmosphere = resolveSessionAtmosphere({ product, presence: presenceProfile, memory: memoryStore });
+  const storyFragments = createStoryFragments({ product, presence: presenceProfile, atmosphere: sessionAtmosphere, memoryEntry });
 
   return (
     <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
@@ -999,6 +1019,12 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Ritmo: {lens.rhythm} · Ambiente ideal: {lens.setting}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Uso ideal: {idealUse}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Performance: {performance}</p>
+          <p className="mt-2 text-xs uppercase tracking-[0.2em] text-lazule-royal/80 lg:text-lazule-gold/80">Presença da sessão · {sessionAtmosphere.profile}</p>
+          <div className="mt-2 space-y-1.5">
+            {storyFragments.map((fragment) => (
+              <p key={fragment} className="text-sm leading-6 text-slate-700 lg:text-slate-300">{fragment}</p>
+            ))}
+          </div>
           <div className="mt-3 space-y-2" aria-hidden="true">
             {['intensidade', 'projeção', 'assinatura'].map((label, index) => (
               <div key={label} className="lazule-olfactive-row" style={{ '--item-delay': `${index * 120}ms` }}>
