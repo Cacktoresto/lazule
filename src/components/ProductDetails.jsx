@@ -680,12 +680,12 @@ function VibeSection({ product }) {
   if (!vibeItems.length) return null;
 
   return (
-    <section className="lazule-reveal mt-8 rounded-[2.1rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5 lg:mt-10">
+    <section className="lazule-reveal mt-6 rounded-[1.8rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5 lg:mt-8">
       <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Vibe</p>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-3 flex flex-wrap gap-2">
         {vibeItems.map((item, index) => (
           <div
-            className="lazule-touch-card lazule-reveal-item rounded-full border border-white/10 bg-lazule-night/35 px-3.5 py-2.5 text-sm text-lazule-mist"
+            className="lazule-touch-card lazule-reveal-item rounded-full border border-white/10 bg-lazule-night/35 px-3 py-1.5 text-xs text-lazule-mist"
             key={item}
             style={{ '--item-delay': `${index * 55}ms` }}
           >
@@ -907,8 +907,8 @@ function Recommendations({ products, currentProduct }) {
           {editorialSubtitle}
         </p>
       </div>
-      <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para ver mais</span></div>
-      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-2">
+      <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para descobrir</span></div>
+      <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pr-2">
         {products.map((product, index) => (
           <RecommendationCard key={product.id} product={product} index={index} moodProfile={moodProfile} atmosphereProfile={atmosphere.profile} />
         ))}
@@ -918,16 +918,24 @@ function Recommendations({ products, currentProduct }) {
 }
 
 function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
+  const [showBar, setShowBar] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowBar(window.scrollY > 560);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const disabled = !whatsAppLink;
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
   const appliedCode = getAppliedReferralLabel(referralContext);
 
   return (
-    <div className="lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-lazule-night/90 px-4 pb-[calc(env(safe-area-inset-bottom)+0.9rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl lg:hidden" role="region" aria-label="Compra rápida pelo WhatsApp">
-      <div className="mx-auto flex max-w-md items-center gap-3">
+    <div className={`lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-slate-950/72 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl transition duration-500 ${showBar ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'}`} role="region" aria-label="Compra rápida">
+      <div className="mx-auto flex max-w-5xl items-center gap-3">
+        {product.image ? <img src={product.image} alt={product.name} className="hidden h-12 w-12 rounded-xl border border-white/10 object-contain bg-black/20 p-1 sm:block" loading="lazy" /> : null}
         <div className="min-w-0 flex-1">
-          <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Preço LAZULE</p>
+          <p className="truncate text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">{getProductDisplayName(product)}</p>
           <strong className="block truncate text-lg text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           {appliedCode ? (
             <p className="mt-1 truncate text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold/85">
@@ -936,16 +944,16 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
           ) : null}
         </div>
         <button
-          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-lazule-gold"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold"
           onClick={() => {
             addToLuxurySelection(product);
             window.location.href = '/selecao';
           }}
         >
-          Adicionar à sua seleção
+          Adicionar à seleção
         </button>
         <a
-          className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+          className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-xs font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
           href={whatsAppLink || '#'}
           aria-disabled={disabled}
           aria-label={`${directBuy ? 'Comprar' : 'Consultar'} ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
@@ -956,7 +964,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
             trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'sticky_cta' });
           }}
         >
-          {directBuy ? 'WhatsApp' : statusMeta.shortCtaLabel}
+          {directBuy ? 'Comprar agora' : statusMeta.shortCtaLabel}
         </a>
       </div>
     </div>
@@ -1001,7 +1009,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const editorialOpinion = createEditorialOpinion(product);
 
   return (
-    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
+    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-6 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
       <span className="lazule-depth-layer lazule-depth-layer-3" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-fog" aria-hidden="true" />
@@ -1011,25 +1019,33 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           {product.brand}
         </a>
         <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
-        <div className="mt-5 flex items-end justify-between gap-5 py-4">
+        <div className="mt-4 flex items-end justify-between gap-5 py-2">
           <div>
             <span className="text-[0.65rem] uppercase tracking-[0.25em] text-lazule-royal/90 lg:text-lazule-gold">Preço</span>
             <strong className="mt-1 block text-3xl font-semibold text-[#081937] drop-shadow-[0_2px_10px_rgba(226,198,126,0.25)] lg:text-[#f7f3e5]">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
+            <p className="mt-1 text-xs text-slate-600 lg:text-slate-300">até 6x sem juros · disponibilidade imediata</p>
           </div>
         </div>
-        <div className="lazule-live-interpretation lazule-text-reveal mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
+        <div className="lazule-live-interpretation lazule-text-reveal mt-4 rounded-[1.2rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">{tasteEvolution?.narrative || 'Esse perfume conversa com a direção recente da sua assinatura.'}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{identityTensionState?.identityTension?.narrative || 'Seu gosto recente mantém contraste entre conforto e presença.'}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.firstImpression}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.behavior}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.context}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Leitura social: {humanReading.socialImpression}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Personalidade: {humanReading.personality}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Ocasião humana: {humanReading.humanOccasion}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Leitura editorial: {humanReading.commentary[0]}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Opinião LAZULE: {editorialOpinion}</p>
+          <div className="mt-2 grid gap-2 text-sm leading-5 text-slate-700 lg:text-slate-300">
+            <p><strong>Energia:</strong> {humanReading.firstImpression}</p>
+            <p><strong>Funciona melhor:</strong> {presenceReading.whenItWorksBest?.[0] || humanReading.context}</p>
+            <p><strong>Pode cansar:</strong> {presenceReading.whenItCanFail?.[0] || humanReading.behavior}</p>
+          </div>
+          <details className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-lazule-gold">Ler interpretação completa</summary>
+            <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700 lg:text-slate-300">
+              <p>{tasteEvolution?.narrative || 'Esse perfume conversa com a direção recente da sua assinatura.'}</p>
+              <p>{identityTensionState?.identityTension?.narrative || 'Seu gosto recente mantém contraste entre conforto e presença.'}</p>
+              <p>Leitura social: {humanReading.socialImpression}</p>
+              <p>Personalidade: {humanReading.personality}</p>
+              <p>Ocasião humana: {humanReading.humanOccasion}</p>
+              <p>Leitura editorial: {humanReading.commentary[0]}</p>
+              <p>Opinião LAZULE: {editorialOpinion}</p>
+            </div>
+          </details>
           <p className="mt-2 text-xs uppercase tracking-[0.2em] text-lazule-royal/80 lg:text-lazule-gold/80">Presença da sessão · {sessionAtmosphere.profile}</p>
           <div className="mt-2 space-y-1.5">
             {storyFragments.map((fragment) => (
@@ -1063,9 +1079,18 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           </div>
         </div>
         <ManualReferralForm product={product} referralContext={referralContext} />
-        <a className="lazule-premium-button lazule-cta-shimmer lazule-cta-glass mt-5 inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-4 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
-          {statusMeta.ctaLabel}
-        </a>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
+            onClick={() => addToLuxurySelection(product)}
+          >
+            Adicionar à seleção
+          </button>
+          <a className="lazule-premium-button lazule-cta-shimmer lazule-cta-glass inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
+            Comprar agora
+          </a>
+        </div>
       </article>
     </div>
   );
