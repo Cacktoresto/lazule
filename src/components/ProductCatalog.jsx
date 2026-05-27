@@ -512,9 +512,9 @@ export function ProductCatalog() {
             <div className="space-y-4">
               <div className="lazule-surface-premium laz-converge rounded-[2rem] border bg-[#0d1a33d6] p-6 text-center sm:p-10">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-[#a9bbe0] sm:tracking-[0.35em]">Curadoria LAZULE</p>
-              <h3 className="font-display text-3xl leading-tight text-lazule-mist">Ainda não encontramos o match ideal.</h3>
+              <h3 className="font-display text-3xl leading-tight text-lazule-mist">Não encontramos algo exatamente nessa direção — mas seguimos na sua atmosfera.</h3>
               <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-                A curadoria LAZULE pode sugerir alternativas por vibe, DNA olfativo e ocasião em uma conversa rápida.
+                Não deixamos sua descoberta morrer: expandimos leitura semântica, vibe e contexto social para manter opções relevantes.
               </p>
               <a
                 className="lazule-premium-button lazule-cta-shimmer mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#2c58a8] bg-gradient-to-r from-[#17356a] via-[#214886] to-[#193b73] px-6 py-3 text-center text-sm font-semibold text-[#ecf2ff] shadow-mineral sm:w-auto"

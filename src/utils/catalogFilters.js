@@ -95,6 +95,14 @@ const CONTRATYPE_TERMS = ['contratipo', 'contra tipo'];
 const ARABIC_TERMS = ['arabe', 'arabes', 'oriental arabe'];
 const NICHE_TERMS = ['nicho'];
 const OTHER_TERMS = ['kit', 'outro', 'outros', 'presente'];
+const TYPE_SYNONYMS = {
+  arabe: 'Árabe',
+  arabic: 'Árabe',
+  arabian: 'Árabe',
+  middleeastern: 'Árabe',
+  niche: 'Nicho',
+  designer: 'Importado',
+};
 
 function containsAnyTerm(text, terms) {
   return terms.some((term) => text.includes(term));
@@ -102,6 +110,8 @@ function containsAnyTerm(text, terms) {
 
 export function normalizeCatalogType(value) {
   const normalizedValue = normalizeSearchText(value);
+  const canonicalAlias = TYPE_SYNONYMS[normalizedValue.replace(/\s+/g, '')] ?? TYPE_SYNONYMS[normalizedValue];
+  if (canonicalAlias) return canonicalAlias;
   const catalogType = CATALOG_TYPE_OPTIONS.find((option) => normalizeSearchText(option) === normalizedValue);
 
   return catalogType ?? value;
@@ -209,6 +219,42 @@ export function matchesCatalogFilters(product, filters, searchTerm = '') {
   );
 }
 
+function getSoftMatchScore(product, filters, searchTerm = '') {
+  const normalizedSearch = normalizeSearchText(searchTerm);
+  const priceRange = getPriceRange(filters.priceRange);
+  const availabilityKey = product.availability?.key;
+  const productPrice = Number(product.salePrice ?? product.price ?? 0);
+  const productType = normalizeCatalogType(product.catalogType ?? inferCatalogType(product));
+  const selectedCategory = normalizeCatalogType(filters.category);
+
+  const strict = {
+    search: matchesSmartSearch(product, normalizedSearch),
+    category: selectedCategory === ALL_FILTER_VALUE || productType === selectedCategory,
+    gender: filters.gender === ALL_FILTER_VALUE || product.gender === filters.gender,
+    brand: filters.brand === ALL_FILTER_VALUE || product.brand === filters.brand,
+    price: productPrice >= priceRange.min && productPrice <= priceRange.max,
+    image:
+      filters.imageMode === 'all' ||
+      (filters.imageMode === 'with' && Boolean(product.image)) ||
+      (filters.imageMode === 'without' && !product.image),
+    availableOnly: !filters.availableOnly || isAvailableForImmediateFilter(product),
+    availabilityStatus: (filters.availabilityStatus ?? 'all') === 'all' || availabilityKey === filters.availabilityStatus,
+  };
+
+  const strictPass = Object.values(strict).every(Boolean);
+  const positiveSignals = Object.values(strict).filter(Boolean).length;
+  const score = positiveSignals / Object.keys(strict).length;
+  return { strict, strictPass, score };
+}
+
+export function getCatalogSearchReliabilityDiagnostics(products, filters, searchTerm = '') {
+  return products.map((product) => {
+    const reliability = getSoftMatchScore(product, filters, searchTerm);
+    const droppedBy = Object.entries(reliability.strict).filter(([, matched]) => !matched).map(([key]) => key);
+    return { product, ...reliability, droppedBy };
+  });
+}
+
 export function sortCatalogProducts(productsToSort, sortBy) {
   const sortedProducts = [...productsToSort];
 
@@ -232,8 +278,41 @@ export function sortCatalogProducts(productsToSort, sortBy) {
 }
 
 export function filterAndSortCatalogProducts(products, filters, searchTerm) {
-  return sortCatalogProducts(
-    products.filter((product) => matchesCatalogFilters(product, filters, searchTerm)),
-    filters.sortBy,
-  );
+  const diagnostics = getCatalogSearchReliabilityDiagnostics(products, filters, searchTerm);
+  const strictMatches = diagnostics.filter((entry) => entry.strictPass);
+  if (strictMatches.length >= 6) {
+    return sortCatalogProducts(strictMatches.map((entry) => entry.product), filters.sortBy);
+  }
+
+  const relaxationThresholds = [0.82, 0.72, 0.62, 0.52, 0.42];
+  let selectedLevel = 0;
+  let selected = [];
+
+  relaxationThresholds.some((threshold, index) => {
+    const candidates = diagnostics.filter((entry) => entry.score >= threshold);
+    if (candidates.length >= 6 || index === relaxationThresholds.length - 1) {
+      selectedLevel = index + 1;
+      selected = candidates;
+      return true;
+    }
+    return false;
+  });
+
+  if (import.meta?.env?.DEV) {
+    const dropped = diagnostics
+      .filter((entry) => !entry.strictPass)
+      .slice(0, 15)
+      .map((entry) => ({ product: entry.product.productSlug ?? entry.product.name, droppedBy: entry.droppedBy, score: Number(entry.score.toFixed(3)) }));
+    console.info('[CatalogSearchObservability]', {
+      query: searchTerm,
+      filters,
+      strictMatches: strictMatches.length,
+      fallbackApplied: selectedLevel > 0,
+      relaxationLevel: selectedLevel,
+      fallbackCandidates: selected.length,
+      droppedProducts: dropped,
+    });
+  }
+
+  return sortCatalogProducts(selected.map((entry) => entry.product), filters.sortBy);
 }
