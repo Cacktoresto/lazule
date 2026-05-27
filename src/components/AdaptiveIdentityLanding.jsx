@@ -8,6 +8,7 @@ import { buildIdentityDiscoveryStream } from '../ai/identityDiscoveryStream.js';
 import { buildLivingMemoryTimeline } from '../ai/livingMemoryTimelineEngine.js';
 import { describePresenceConfirmation } from '../ai/sensoryWishlistEngine.js';
 import { deriveTasteEvolution } from '../ai/tasteEvolutionEngine.js';
+import { deriveIdentityTension } from '../ai/identityTensionEngine.js';
 
 const auraLexicon = {
   mineral: ['silenciosa', 'luminosa', 'precisa'],
@@ -49,6 +50,7 @@ export function AdaptiveIdentityLanding({ identityMemory }) {
   }), [livingPresence.phase, signature, wishlist.presences, revisitNarrative, profile.topAtmospheres]);
   const memoryTimeline = useMemo(() => buildLivingMemoryTimeline({ events: memory.events, revisitNarrative, discoveryStream }), [memory.events, revisitNarrative, discoveryStream]);
   const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile, events: memory.events, wishlist: wishlist.presences }), [profile, memory.events, wishlist.presences]);
+  const identityTensionState = useMemo(() => deriveIdentityTension({ profile, events: memory.events, wishlist: wishlist.presences }), [profile, memory.events, wishlist.presences]);
 
   const constellation = buildConstellation(memory.events);
 
@@ -116,6 +118,7 @@ export function AdaptiveIdentityLanding({ identityMemory }) {
           <article className="rounded-2xl border border-lazule-gold/20 bg-black/20 p-5">
             <p className="text-xs uppercase tracking-[0.25em] text-lazule-gold/70">Evolução da sua assinatura</p>
             <p className="mt-2 text-sm text-lazule-mist/80">{tasteEvolution.narrative}</p>
+            <p className="mt-2 text-sm text-lazule-mist/80">{identityTensionState.identityTension.narrative}</p>
             <div className="mt-3 grid gap-2 text-xs text-lazule-mist/70 sm:grid-cols-2">
               <p>Em crescimento: {tasteEvolution.growingAtmospheres.join(', ') || 'em formação'}</p>
               <p>Em redução: {tasteEvolution.fadingAtmospheres.join(', ') || 'sem redução dominante'}</p>
