@@ -64,6 +64,18 @@ function getResultNarrative(result, hasRecommendations, query) {
   };
 }
 
+function humanizeUiCopy(value = '') {
+  return String(value)
+    .replaceAll('_', ' ')
+    .replace(/\bvanilla\b/gi, 'baunilha')
+    .replace(/\bamber\b/gi, 'âmbar')
+    .replace(/\bmoderate projection\b/gi, 'projeção moderada')
+    .replace(/\bclean luxury\b/gi, 'limpeza cara')
+    .replace(/\bintimate signature\b/gi, 'assinatura próxima da pele')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function AssistantResultCard({ recommendation, result, sourcePage, compact = false }) {
   const { product, reason } = recommendation;
   const productPath = createProductPath(product);
@@ -102,7 +114,7 @@ function AssistantResultCard({ recommendation, result, sourcePage, compact = fal
         <div className="min-w-0">
           <p className="line-clamp-1 text-[0.62rem] tracking-[0.18em] text-lazule-gold/75">{product.brand}</p>
           <h3 className="line-clamp-1 font-display text-[1.01rem] leading-tight text-lazule-mist">{product.name}</h3>
-          <p className="mt-1 line-clamp-2 text-[0.72rem] leading-5 text-slate-300/90">{reason}</p>
+          <p className="mt-1 line-clamp-2 text-[0.72rem] leading-5 text-slate-300/90">{humanizeUiCopy(reason)}</p>
         </div>
         <a className="inline-flex min-h-8 items-center rounded-full border border-lazule-gold/18 px-2.5 py-1 text-[0.62rem] tracking-[0.06em] text-lazule-gold/90 transition hover:border-lazule-gold/40 hover:bg-lazule-gold/12" href={directBuy ? productPath : whatsappLink} target={directBuy ? undefined : '_blank'} rel={directBuy ? undefined : 'noreferrer'} onClick={() => trackResultClick(directBuy ? 'product' : 'whatsapp')}>
           Ver
@@ -112,7 +124,7 @@ function AssistantResultCard({ recommendation, result, sourcePage, compact = fal
   }
 
   return (
-    <article className="lazule-ai-card lazule-surface-premium grid gap-5 overflow-hidden rounded-[1.4rem] border border-white/6 bg-lazule-night/42 p-4 shadow-[0_14px_34px_rgba(2,6,23,0.18)] sm:grid-cols-[minmax(7.2rem,8.2rem)_1fr] sm:items-center sm:p-[1.25rem] lg:grid-cols-[8.6rem_1fr]">
+    <article className="lazule-ai-card lazule-surface-premium grid gap-4 overflow-hidden rounded-[1.25rem] border border-white/8 bg-lazule-night/40 p-4 sm:grid-cols-[8rem_1fr] sm:items-center sm:p-5 lg:grid-cols-[9rem_1fr]">
       <a
         className="relative aspect-[3/4] max-h-[9.3rem] overflow-hidden rounded-[0.9rem] bg-lazule-depth/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/60 sm:max-h-[9.6rem]"
         href={directBuy ? productPath : whatsappLink}
@@ -134,11 +146,11 @@ function AssistantResultCard({ recommendation, result, sourcePage, compact = fal
           <h3 className="line-clamp-2 font-display text-[1.35rem] leading-[0.96] tracking-[-0.02em] text-lazule-mist transition hover:text-lazule-gold/90 sm:text-[1.85rem]">{product.name}</h3>
         </a>
         <strong className="mt-2 block text-[0.86rem] font-medium text-lazule-gold/88 sm:text-[0.93rem]">{directBuy ? formatBRL(product.salePrice) : statusMeta.badge}</strong>
-        <p className="mt-3 line-clamp-4 max-w-2xl text-[0.93rem] leading-7 text-slate-200/92">{reason}</p>
-        <p className="mt-2.5 text-[0.84rem] leading-6 text-slate-400/90">Presença limpa e segura, com construção silenciosa e assinatura sofisticada.</p>
+        <p className="mt-2 line-clamp-3 max-w-3xl text-[0.92rem] leading-6 text-slate-200/92">{humanizeUiCopy(reason)}</p>
+        <p className="mt-2 text-[0.84rem] leading-6 text-slate-400/90">Vai bem quando você quer presença sem parecer que tentou demais.</p>
         <div className="mt-5 flex flex-wrap gap-2">
           <a
-            className="lazule-premium-button inline-flex min-h-10 items-center rounded-full border border-lazule-gold/20 bg-lazule-gold/[0.03] px-4 py-2 text-[0.68rem] uppercase tracking-[0.14em] text-lazule-gold/90 transition hover:border-lazule-gold/45 hover:bg-lazule-gold/12 hover:text-lazule-gold"
+            className="lazule-premium-button inline-flex min-h-9 items-center rounded-full border border-lazule-gold/22 bg-lazule-gold/[0.03] px-3.5 py-1.5 text-[0.63rem] uppercase tracking-[0.12em] text-lazule-gold/90 transition hover:border-lazule-gold/40 hover:bg-lazule-gold/10 hover:text-lazule-gold"
             href={directBuy ? productPath : whatsappLink}
             target={directBuy ? undefined : '_blank'}
             rel={directBuy ? undefined : 'noreferrer'}
@@ -297,7 +309,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
       <div className="lazule-ai-concierge lazule-surface-premium relative min-w-0 overflow-hidden rounded-[1.6rem] border border-white/7 bg-[linear-gradient(128deg,rgba(10,16,30,0.94),rgba(11,21,43,0.88)_48%,rgba(6,10,22,0.96))] p-4 shadow-[0_16px_44px_rgba(2,6,23,0.16)] min-[390px]:p-4.5 sm:rounded-[2.2rem] sm:p-7 lg:p-8">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.055),transparent)] opacity-20" />
         <div className="lazule-ai-orb absolute -right-20 -top-20 h-24 w-24 rounded-full border border-lazule-gold/8 bg-lazule-gold/5 opacity-15 blur-[0.35px] sm:h-28 sm:w-28 sm:opacity-20" aria-hidden="true" />
-        <div className="relative grid min-w-0 gap-6 sm:gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
+        <div className="relative grid min-w-0 gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
           <div className="min-w-0">
             <p className="text-[0.6rem] tracking-[0.28em] text-lazule-gold/75 sm:text-[0.64rem]">Concierge olfativo</p>
             <h2 id="olfactive-assistant-title" className="mt-3 max-w-[12ch] font-display text-[clamp(1.95rem,9.5vw,2.45rem)] leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:mt-4 sm:max-w-[10ch] sm:text-5xl">Curadoria com presença.</h2>
@@ -347,7 +359,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
             </form>
           </div>
 
-          <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.35rem] border border-white/7 bg-white/[0.02] p-4 sm:rounded-[1.95rem] sm:p-7" aria-live="polite">
+          <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.35rem] border border-white/8 bg-white/[0.02] p-4 sm:rounded-[1.95rem] sm:p-6" aria-live="polite">
             {!result && !isLazVisible ? (
               <div className="min-w-0 max-w-full overflow-hidden flex min-h-[9.5rem] flex-col justify-center text-center sm:min-h-[14rem] sm:text-left">
                 <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Curadoria em contexto</p>
@@ -365,20 +377,26 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
               </div>
             ) : null}
 
-            {result && canRevealResults ? (
-              <div className="lazule-result-reveal min-w-0 max-w-full overflow-hidden">
+            {result && canRevealResults ? null : null}
+          </div>
+        </div>
+
+        {result && canRevealResults ? (
+          <div className="lazule-result-reveal mt-7 min-w-0 max-w-full overflow-hidden">
                 {(() => {
                   const narrative = getResultNarrative(result, hasRecommendations, query);
                   const actionSuggestions = narrative.state === 'clear' ? activeRefinements : (narrative.chips.length ? narrative.chips : activeRefinements);
                   return (
                     <>
-                      <div className="mb-4 rounded-[1.35rem] border border-white/7 bg-white/[0.02] px-3.5 py-3.5 sm:px-[1.125rem]">
-                        <p className="text-[0.64rem] font-semibold tracking-[0.16em] text-lazule-gold/90">Leitura da busca</p>
-                        <h3 className="mt-2 font-display text-[clamp(1.45rem,6.5vw,2rem)] leading-tight tracking-[-0.02em] text-lazule-mist">{narrative.title}</h3>
-                        <p className="mt-3 text-sm leading-6 text-slate-300">{narrative.body}</p>
+                      <div className="grid gap-5 rounded-[1.25rem] border border-white/8 bg-white/[0.015] px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                        <div>
+                          <p className="text-[0.64rem] font-semibold tracking-[0.16em] text-lazule-gold/90">LAZ interpretou</p>
+                          <h3 className="mt-2 font-display text-[clamp(1.3rem,4.2vw,1.8rem)] leading-tight tracking-[-0.02em] text-lazule-mist">{humanizeUiCopy(narrative.title)}</h3>
+                          <p className="mt-2 text-sm leading-6 text-slate-300">{humanizeUiCopy(narrative.body)}</p>
+                        </div>
                         {!!actionSuggestions.length && (
-                          <div className="mt-3.5 flex flex-wrap gap-2">
-                            {actionSuggestions.slice(0, 3).map((chip) => <span key={`result-chip-${chip}`} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[0.72rem] text-slate-200">{chip}</span>)}
+                          <div className="flex flex-wrap content-start gap-2">
+                            {actionSuggestions.slice(0, 3).map((chip) => <span key={`result-chip-${chip}`} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[0.72rem] text-slate-200">{humanizeUiCopy(chip)}</span>)}
                           </div>
                         )}
                         {!!activeRefinements.length && (
@@ -389,12 +407,12 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                       </div>
 
                       {!!recommendations.length && (
-                        <div className="space-y-[1.125rem] sm:space-y-[1.375rem]">
+                        <div className="mt-4 space-y-4 sm:space-y-5">
                           <AssistantResultCard recommendation={recommendations[0]} result={result} sourcePage={sourcePage} />
                           {recommendations.length > 1 && (
                             <div>
-                              <p className="mb-3 text-[0.74rem] tracking-[0.08em] text-slate-400">Outras direções possíveis</p>
-                              <div className="lazule-ai-results lazule-horizontal-rail lazule-rail-fade flex min-w-0 max-w-full snap-x snap-mandatory gap-3.5 overflow-x-auto pb-2.5" style={{ '--result-delay': '140ms' }}>
+                              <p className="mb-2 text-[0.73rem] tracking-[0.08em] text-slate-400">Outras direções possíveis</p>
+                              <div className="lazule-ai-results lazule-horizontal-rail lazule-rail-fade flex min-w-0 max-w-full snap-x snap-mandatory gap-3 overflow-x-auto pb-2" style={{ '--result-delay': '140ms' }}>
                                 {recommendations.slice(1, 4).map((recommendation) => (
                                   <AssistantResultCard
                                     key={recommendation.product.id ?? recommendation.product.productSlug ?? recommendation.product.name}
@@ -408,14 +426,12 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                             </div>
                           )}
                         </div>
-                      )}
+                      )} 
                     </>
                   );
                 })()}
-              </div>
-            ) : null}
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );
