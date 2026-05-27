@@ -18,7 +18,9 @@ import { AdminLogin } from './pages/admin/AdminLogin';
 import { InfluencerDashboard } from './pages/influencer/InfluencerDashboard';
 import { InfluencerInvite } from './pages/influencer/InfluencerInvite';
 import { OlfactiveIdentityPortal } from './pages/OlfactiveIdentityPortal';
-import { CheckoutExperiencePage } from './pages/commerce/CheckoutExperiencePage';
+import { CheckoutPage } from './pages/commerce/CheckoutPage';
+import { CartPage } from './pages/commerce/CartPage';
+import { CheckoutResultPage } from './pages/commerce/CheckoutResultPage';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
@@ -27,7 +29,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -146,7 +148,11 @@ function App() {
   const isCatalogRoute = route.pathname === '/catalogo';
   const isFaqRoute = route.pathname === '/faq';
   const isIdentityRoute = route.pathname === '/identidade';
-  const isCheckoutExperienceRoute = route.pathname === '/selecao';
+  const isCheckoutExperienceRoute = route.pathname === '/selecao' || route.pathname === '/checkout';
+  const isCartRoute = route.pathname === '/carrinho';
+  const isCheckoutSuccessRoute = route.pathname === '/checkout/success';
+  const isCheckoutPendingRoute = route.pathname === '/checkout/pending';
+  const isCheckoutFailureRoute = route.pathname === '/checkout/failure';
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
@@ -252,6 +258,8 @@ function App() {
       routeName = 'olfactive_identity';
     } else if (isCheckoutExperienceRoute) {
       routeName = 'checkout_experience';
+    } else if (isCartRoute) {
+      routeName = 'cart';
     } else if (isProductNotFoundRoute) {
       routeName = 'product_not_found';
     } else if (isProductSuggestionRoute) {
@@ -362,7 +370,15 @@ function App() {
           ) : isIdentityRoute ? (
             <OlfactiveIdentityPortal />
           ) : isCheckoutExperienceRoute ? (
-            <CheckoutExperiencePage />
+            <CheckoutPage />
+          ) : isCartRoute ? (
+            <CartPage />
+          ) : isCheckoutSuccessRoute ? (
+            <CheckoutResultPage mode='success' />
+          ) : isCheckoutPendingRoute ? (
+            <CheckoutResultPage mode='pending' />
+          ) : isCheckoutFailureRoute ? (
+            <CheckoutResultPage mode='failure' />
           ) : isProductNotFoundRoute ? (
             <ProductNotFound key={route.search} />
           ) : isProductSuggestionRoute ? (
