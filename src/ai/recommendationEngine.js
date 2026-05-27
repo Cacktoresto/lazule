@@ -10,6 +10,7 @@ import {
 import { buildSemanticRelationships } from './semanticIntelligenceLayer.js';
 import { buildQueryLockedFallback } from './queryLockedFallback.js';
 import { interpretUserIntent } from './semanticQueryUnderstanding.js';
+import { rankWithHumanDiscoveryIntelligence } from './humanDiscoveryRankingEngine.js';
 
 const DEFAULT_LIMIT = 6;
 const DIVERSITY_BRAND_PENALTY = 0.045;
@@ -160,7 +161,20 @@ export const heuristicRecommendationEngine = {
       ranked = locked.ranked.length ? locked.ranked : [];
     }
 
-    ranked = ranked
+    const humanRanked = rankWithHumanDiscoveryIntelligence(ranked, {
+      query: analysis.query,
+      context: {
+        period: analysis.momentContext?.period,
+        mood: analysis.momentContext?.rhythm,
+        weather: analysis.environment?.weather,
+        occasion: analysis.detectedIntents?.[0],
+      },
+      userProfile: options.userProfile,
+      memory: options.memory,
+      devLogs: options.devLogs,
+    });
+
+    ranked = humanRanked
       .sort((a, b) => b.score - a.score || b.fallbackScore - a.fallbackScore || String(a.product.name).localeCompare(String(b.product.name), 'pt-BR'))
       .slice(0, limit);
 
