@@ -1705,6 +1705,40 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.lazule-ai-form .lazule-ai-textarea,
+.lazule-ai-form input.lazule-ai-textarea,
+.lazule-ai-form textarea.lazule-ai-textarea {
+  background: linear-gradient(145deg, rgba(9, 17, 36, 0.94), rgba(14, 28, 56, 0.84)) !important;
+  color: #eaf1ff !important;
+  border: 1px solid rgba(126, 159, 220, 0.38) !important;
+  -webkit-text-fill-color: #eaf1ff !important;
+}
+
+.lazule-ai-form .lazule-ai-textarea::placeholder {
+  color: rgba(149, 169, 205, 0.82) !important;
+}
+
+.lazule-ai-form .lazule-ai-textarea:focus,
+.lazule-ai-form .lazule-ai-textarea:focus-visible {
+  border-color: rgba(124, 165, 244, 0.7) !important;
+  box-shadow: 0 0 0 1px rgba(113, 154, 239, 0.62), 0 0 22px rgba(68, 112, 200, 0.32) !important;
+}
+
+.lazule-ai-form .lazule-ai-textarea:disabled {
+  opacity: 0.66;
+  cursor: not-allowed;
+  background: linear-gradient(145deg, rgba(8, 14, 31, 0.72), rgba(10, 20, 42, 0.7)) !important;
+  color: rgba(196, 211, 238, 0.72) !important;
+}
+
+.lazule-ai-form .lazule-ai-textarea:-webkit-autofill,
+.lazule-ai-form .lazule-ai-textarea:-webkit-autofill:hover,
+.lazule-ai-form .lazule-ai-textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: #eaf1ff !important;
+  -webkit-box-shadow: 0 0 0 1000px #0c1933 inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 .lazule-home-shell .lazule-ai-chips {
   overflow-x: clip;
   overflow-wrap: anywhere;
