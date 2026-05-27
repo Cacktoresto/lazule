@@ -23,6 +23,9 @@ import { createHumanPerfumeReading } from '../ai/humanPerfumeReadingEngine';
 import { loadTasteMemoryStore } from '../utils/tasteMemoryStore';
 import { deriveTasteEvolution } from '../ai/tasteEvolutionEngine';
 import { deriveIdentityTension } from '../ai/identityTensionEngine.js';
+import { buildHumanPresenceReading } from '../ai/humanPresenceWritingEngine.js';
+import { createHumanObservationFragments } from '../ai/humanObservationFragmentsEngine.js';
+import { createEditorialOpinion } from '../ai/editorialOpinionEngine.js';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -983,6 +986,9 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const memoryEntry = memoryStore.entries?.[product?.productSlug] || {};
   const sessionAtmosphere = resolveSessionAtmosphere({ product, presence: presenceProfile, memory: memoryStore });
   const storyFragments = createStoryFragments({ product, presence: presenceProfile, atmosphere: sessionAtmosphere, memoryEntry });
+  const presenceReading = buildHumanPresenceReading(product);
+  const observationFragments = createHumanObservationFragments({ profile: presenceProfile, context: 'pdp' });
+  const editorialOpinion = createEditorialOpinion(product);
 
   return (
     <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
@@ -1013,6 +1019,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Personalidade: {humanReading.personality}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Ocasião humana: {humanReading.humanOccasion}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Leitura editorial: {humanReading.commentary[0]}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">Opinião LAZULE: {editorialOpinion}</p>
           <p className="mt-2 text-xs uppercase tracking-[0.2em] text-lazule-royal/80 lg:text-lazule-gold/80">Presença da sessão · {sessionAtmosphere.profile}</p>
           <div className="mt-2 space-y-1.5">
             {storyFragments.map((fragment) => (
@@ -1033,6 +1040,16 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
                 {chip}
               </span>
             ))}
+          </div>
+          <div className="mt-5 grid gap-3 rounded-2xl border border-lazule-gold/20 bg-white/[0.04] p-4 text-sm leading-6 text-slate-700 lg:text-slate-300">
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Quando funciona melhor:</strong> {presenceReading.whenItWorksBest.join(' ')}</p>
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Quando pode falhar:</strong> {presenceReading.whenItCanFail.join(' ')}</p>
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Leitura social:</strong> {presenceReading.socialReading}</p>
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Quem costuma usar:</strong> {presenceReading.whoUsuallyWearsThis.join(', ')}.</p>
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Percepção térmica:</strong> {presenceReading.temperaturePerception}</p>
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Distância de presença:</strong> {presenceReading.presenceDistance}</p>
+            <p><strong className="text-lazule-night lg:text-lazule-mist">Fadiga/saturação:</strong> {presenceReading.fatigueSaturation}</p>
+            {observationFragments.map((fragment) => <p key={fragment}>• {fragment}</p>)}
           </div>
         </div>
         <ManualReferralForm product={product} referralContext={referralContext} />

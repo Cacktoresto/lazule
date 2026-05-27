@@ -17,6 +17,7 @@ import { buildPresenceCompanionLayer } from '../ai/presenceCompanionLayer';
 import { resolveAdaptiveMomentHome, resolveAtmosphericReunionSequence } from '../ai/adaptiveAtmosphericHome';
 import { applyEditorialAntiRepetition } from '../ai/editorialIntelligenceSystem';
 import { deriveTasteEvolution } from '../ai/tasteEvolutionEngine';
+import { createHumanObservationFragments } from '../ai/humanObservationFragmentsEngine';
 
 const discoveryPaths = [
   {
@@ -258,6 +259,7 @@ export function Home() {
   }, [atmosphereProfile]);
 
   const editorialPulse = useMemo(() => buildHomeEditorialPulse(atmosphereProfile, sensoryPresence), [atmosphereProfile, sensoryPresence]);
+  const observationFragments = useMemo(() => createHumanObservationFragments({ profile: atmosphereProfile, context: 'home' }), [atmosphereProfile]);
   const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile: atmosphereProfile, events: [], wishlist: [] }), [atmosphereProfile]);
 
   const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
@@ -351,6 +353,16 @@ export function Home() {
       <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
 
       <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} tasteNarrative={tasteEvolution.narrative} />
+      <section className="mx-auto max-w-7xl px-3 pb-2 min-[390px]:px-4 sm:px-8">
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:rounded-[1.8rem] sm:p-6">
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Observações em tempo real</p>
+          <div className="mt-3 grid gap-2">
+            {observationFragments.map((line) => (
+              <p key={line} className="text-sm leading-6 text-slate-300">{line}</p>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <main className="mx-auto max-w-7xl px-3 pb-14 min-[390px]:px-4 sm:px-8 lg:pb-28">
         <ProductRail eyebrow="Mais desejados" title="Ícones em rotação" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />
