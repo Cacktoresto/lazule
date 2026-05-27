@@ -332,11 +332,11 @@ function App() {
 
   return (
     <AuthProvider>
-      <div className="relative min-h-screen overflow-x-clip bg-lazule-night text-lazule-mist">
+      <div className="relative flex min-h-screen flex-col overflow-x-clip bg-lazule-night text-lazule-mist">
       <MineralBackground />
-      <div className="relative z-10">
+      <div className="relative z-10 flex min-h-screen flex-col">
         <Header immersiveProduct={isProductRoute} />
-        <main key={`${route.pathname}${route.search}`} className="lazule-route-shell">
+        <main key={`${route.pathname}${route.search}`} className="lazule-route-shell flex-1">
           {isPromoReferralRouteActive ? (
             <PromoReferralLanding route={route} />
           ) : isAdminLoginRoute ? (

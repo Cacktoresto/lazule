@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { formatBRL } from '../../utils/currency';
 import { checkoutCopy } from '../../commerce/checkout/checkoutCopy';
 import { useLuxuryCart } from '../../commerce/checkout/useLuxuryCart';
@@ -37,21 +37,80 @@ export function CheckoutPage() {
     bricksBuilder.create('wallet', 'mp-wallet-brick', { initialization: { preferenceId } });
   }, [preferenceId]);
 
-  return <section className='mx-auto max-w-6xl px-4 py-10 text-lazule-mist sm:px-6'>
-    <div className='grid gap-8 lg:grid-cols-[1.1fr_1fr]'>
-      <article>
+  const hasItems = items.length > 0;
+
+  const renderState = useMemo(() => {
+    if (!hasItems) {
+      return {
+        title: 'Sua seleção ainda está vazia',
+        description: 'Retorne ao catálogo e adicione peças para concluir com segurança.',
+      };
+    }
+
+    if (status === 'loading') {
+      return {
+        title: 'Preparando pagamento seguro',
+        description: 'Estamos conectando sua seleção ao ambiente protegido do Mercado Pago.',
+      };
+    }
+
+    if (status === 'error') {
+      return {
+        title: 'Não foi possível carregar agora',
+        description: 'Atualize em alguns segundos para retomar a finalização da sua seleção.',
+      };
+    }
+
+    return {
+      title: 'Seu pedido está quase completo',
+      description: 'Essa seleção mantém a direção construída na sua curadoria.',
+    };
+  }, [hasItems, status]);
+
+  return <section className='mx-auto w-full max-w-[1180px] px-4 py-10 text-lazule-mist sm:px-6 lg:px-8'>
+    <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10'>
+      <article className='min-w-0 space-y-5'>
         <p className='text-xs uppercase tracking-[0.28em] text-lazule-gold/75'>{checkoutCopy.finalizing}</p>
-        <h1 className='mt-3 text-4xl text-white'>{checkoutCopy.headline}</h1>
-        <p className='mt-4 text-lazule-mist/75'>{checkoutCopy.reinforcement}</p>
-        <p className='mt-2 text-sm text-lazule-mist/65'>{checkoutCopy.cadence}</p>
+        <h1 className='text-3xl font-semibold leading-tight text-white sm:text-4xl'>{checkoutCopy.headline}</h1>
+        <p className='max-w-2xl text-lazule-mist/75'>{checkoutCopy.reinforcement}</p>
+        <p className='text-sm text-lazule-mist/65'>{checkoutCopy.cadence}</p>
+        <div className='rounded-3xl border border-white/10 bg-slate-950/45 p-5'>
+          <p className='text-base text-white'>{renderState.title}</p>
+          <p className='mt-2 text-sm text-lazule-mist/70'>{renderState.description}</p>
+          <p className='mt-3 text-xs text-lazule-mist/55'>Presença limpa, consistente e pronta para entrar na rotina.</p>
+        </div>
       </article>
-      <article className='rounded-3xl border border-white/10 bg-slate-950/65 p-6'>
-        <ul className='space-y-3'>{items.map((item)=><li key={item.id} className='flex justify-between text-sm'><span>{item.quantity}x {item.name}</span><span>{formatBRL(item.price*item.quantity)}</span></li>)}</ul>
-        <p className='mt-5 border-t border-white/10 pt-4 text-2xl text-white'>{formatBRL(total)}</p>
-        {status === 'loading' && <p className='mt-4 text-sm text-lazule-mist/70'>Preparando ambiente de pagamento…</p>}
-        {status === 'error' && <p className='mt-4 text-sm text-red-300'>Não foi possível iniciar agora. Tente novamente em instantes.</p>}
-        <div id='mp-wallet-brick' ref={brickRef} className='mt-5 min-h-12'/>
+
+      <article className='lg:sticky lg:top-[120px] lg:self-start'>
+        <div className='rounded-[2rem] border border-white/10 bg-slate-950/70 p-5 backdrop-blur-md sm:p-6'>
+          <p className='text-xs uppercase tracking-[0.24em] text-lazule-gold/80'>Resumo do pedido</p>
+          {hasItems ? <ul className='mt-5 space-y-3'>
+            {items.map((item)=><CheckoutCartItem key={item.id} item={item} />)}
+          </ul> : <div className='mt-5 rounded-2xl border border-dashed border-white/15 p-4 text-sm text-lazule-mist/70'>Seu carrinho está vazio no momento.</div>}
+          <p className='mt-5 border-t border-white/10 pt-4 text-2xl text-white'>{formatBRL(total)}</p>
+          <button className='mt-5 w-full rounded-full border border-lazule-gold/40 bg-lazule-gold/15 px-5 py-3 text-sm font-medium text-lazule-gold'>Finalizar seleção</button>
+          <p className='mt-2 text-center text-xs text-lazule-mist/60'>Pagamento protegido via Mercado Pago</p>
+          {status === 'loading' && <p className='mt-4 text-sm text-lazule-mist/70'>Preparando ambiente de pagamento…</p>}
+          {status === 'error' && <p className='mt-4 text-sm text-red-300'>Não foi possível iniciar agora. Tente novamente em instantes.</p>}
+          <div id='mp-wallet-brick' ref={brickRef} className='mt-5 min-h-12'/>
+        </div>
       </article>
     </div>
   </section>;
 }
+
+const CheckoutCartItem = memo(function CheckoutCartItem({ item }) {
+  const shortLine = item.description || item.category || 'Seleção exclusiva';
+
+  return <li className='grid grid-cols-[56px_1fr_auto] items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.02] p-3'>
+    <div className='h-14 w-14 overflow-hidden rounded-xl border border-white/10 bg-slate-900/80'>
+      {item.image ? <img src={item.image} alt={item.name} className='h-full w-full object-cover' loading='lazy' /> : <div className='flex h-full w-full items-center justify-center text-xs text-lazule-mist/40'>LAZ</div>}
+    </div>
+    <div className='min-w-0'>
+      <p className='truncate text-sm text-white'>{item.name}</p>
+      <p className='truncate text-xs text-lazule-mist/60'>{shortLine}</p>
+      <p className='mt-1 text-xs text-lazule-mist/65'>Qtd. {item.quantity}</p>
+    </div>
+    <p className='text-sm text-white'>{formatBRL(item.price * item.quantity)}</p>
+  </li>;
+});
