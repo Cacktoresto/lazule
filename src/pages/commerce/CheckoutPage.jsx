@@ -1,71 +1,50 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { formatBRL } from '../../utils/currency';
 import { checkoutCopy } from '../../commerce/checkout/checkoutCopy';
 import { useLuxuryCart } from '../../commerce/checkout/useLuxuryCart';
+import { createCheckoutPreference } from '../../commerce/payment/mercadoPagoCheckoutClient';
+
+const DEV = import.meta.env.DEV;
 
 export function CheckoutPage() {
   const { items, total } = useLuxuryCart();
-  const [preferenceId, setPreferenceId] = useState('');
-  const [status, setStatus] = useState('idle');
-  const brickRef = useRef(null);
-  const payload = useMemo(() => ({ items }), [items]);
-
-  useEffect(() => {
-    if (!items.length) return;
-    let cancelled = false;
-    async function createPreference() {
-      setStatus('loading');
-      try {
-        const response = await fetch('/api/payments/create-preference', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-        const data = await response.json();
-        if (!cancelled) {
-          setPreferenceId(data.preferenceId || '');
-          setStatus('ready');
-        }
-      } catch {
-        if (!cancelled) setStatus('error');
-      }
-    }
-    createPreference();
-    return () => { cancelled = true; };
-  }, [payload, items.length]);
-
-  useEffect(() => {
-    if (!preferenceId || !window.MercadoPago || !brickRef.current) return;
-    const mp = new window.MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, { locale: 'pt-BR' });
-    const bricksBuilder = mp.bricks();
-    bricksBuilder.create('wallet', 'mp-wallet-brick', { initialization: { preferenceId } });
-  }, [preferenceId]);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const hasItems = items.length > 0;
 
   const renderState = useMemo(() => {
-    if (!hasItems) {
-      return {
-        title: 'Sua seleção ainda está vazia',
-        description: 'Retorne ao catálogo e adicione peças para concluir com segurança.',
-      };
-    }
+    if (!hasItems) return { title: 'Sua seleção ainda está vazia', description: 'Retorne ao catálogo e adicione peças para concluir com segurança.' };
+    if (isSubmitting) return { title: 'Preparando sua seleção...', description: 'Estamos iniciando seu checkout protegido com Mercado Pago.' };
+    if (submitError) return { title: 'Não conseguimos iniciar agora', description: submitError };
+    return { title: 'Seu pedido está quase completo', description: 'Essa seleção mantém a direção construída na sua curadoria.' };
+  }, [hasItems, isSubmitting, submitError]);
 
-    if (status === 'loading') {
-      return {
-        title: 'Preparando pagamento seguro',
-        description: 'Estamos conectando sua seleção ao ambiente protegido do Mercado Pago.',
-      };
+  async function handleFinalizeSelection() {
+    if (!hasItems || isSubmitting) return;
+    setIsSubmitting(true);
+    setSubmitError('');
+    try {
+      if (DEV) console.info('[Checkout] creating preference');
+      const response = await createCheckoutPreference({ items, source: 'lazule_checkout' });
+      if (DEV) console.info('[Checkout] preference created', { orderId: response.orderId, preferenceId: response.preferenceId });
+      const isTestToken = import.meta.env.VITE_MP_PUBLIC_KEY?.startsWith('TEST-');
+      const paymentUrl = isTestToken
+        ? (response.sandboxInitPoint || response.initPoint)
+        : (response.initPoint || response.sandboxInitPoint);
+      if (!paymentUrl) {
+        if (DEV) console.error('[Checkout] missing payment URL', response);
+        setSubmitError('Não conseguimos iniciar o pagamento agora. Tente novamente em instantes.');
+        return;
+      }
+      if (DEV) console.info('[Checkout] redirecting to Mercado Pago', { paymentUrl });
+      window.location.assign(paymentUrl);
+    } catch (error) {
+      if (DEV) console.error('[Checkout] create preference failed', error);
+      setSubmitError('Não conseguimos iniciar o pagamento agora. Tente novamente em instantes.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (status === 'error') {
-      return {
-        title: 'Não foi possível carregar agora',
-        description: 'Atualize em alguns segundos para retomar a finalização da sua seleção.',
-      };
-    }
-
-    return {
-      title: 'Seu pedido está quase completo',
-      description: 'Essa seleção mantém a direção construída na sua curadoria.',
-    };
-  }, [hasItems, status]);
+  }
 
   return <section className='mx-auto w-full max-w-[1180px] px-4 py-10 text-lazule-mist sm:px-6 lg:px-8'>
     <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10'>
@@ -77,22 +56,17 @@ export function CheckoutPage() {
         <div className='rounded-3xl border border-white/10 bg-slate-950/45 p-5'>
           <p className='text-base text-white'>{renderState.title}</p>
           <p className='mt-2 text-sm text-lazule-mist/70'>{renderState.description}</p>
-          <p className='mt-3 text-xs text-lazule-mist/55'>Presença limpa, consistente e pronta para entrar na rotina.</p>
         </div>
       </article>
 
       <article className='lg:sticky lg:top-[120px] lg:self-start'>
         <div className='rounded-[2rem] border border-white/10 bg-slate-950/70 p-5 backdrop-blur-md sm:p-6'>
           <p className='text-xs uppercase tracking-[0.24em] text-lazule-gold/80'>Resumo do pedido</p>
-          {hasItems ? <ul className='mt-5 space-y-3'>
-            {items.map((item)=><CheckoutCartItem key={item.id} item={item} />)}
-          </ul> : <div className='mt-5 rounded-2xl border border-dashed border-white/15 p-4 text-sm text-lazule-mist/70'>Seu carrinho está vazio no momento.</div>}
+          {hasItems ? <ul className='mt-5 space-y-3'>{items.map((item)=><CheckoutCartItem key={item.id} item={item} />)}</ul> : <div className='mt-5 rounded-2xl border border-dashed border-white/15 p-4 text-sm text-lazule-mist/70'>Seu carrinho está vazio no momento.</div>}
           <p className='mt-5 border-t border-white/10 pt-4 text-2xl text-white'>{formatBRL(total)}</p>
-          <button className='mt-5 w-full rounded-full border border-lazule-gold/40 bg-lazule-gold/15 px-5 py-3 text-sm font-medium text-lazule-gold'>Finalizar seleção</button>
+          <button onClick={handleFinalizeSelection} disabled={!hasItems || isSubmitting} className='mt-5 w-full rounded-full border border-lazule-gold/40 bg-lazule-gold/15 px-5 py-3 text-sm font-medium text-lazule-gold disabled:cursor-not-allowed disabled:opacity-55'>{isSubmitting ? 'Preparando pagamento...' : 'Finalizar seleção'}</button>
           <p className='mt-2 text-center text-xs text-lazule-mist/60'>Pagamento protegido via Mercado Pago</p>
-          {status === 'loading' && <p className='mt-4 text-sm text-lazule-mist/70'>Preparando ambiente de pagamento…</p>}
-          {status === 'error' && <p className='mt-4 text-sm text-red-300'>Não foi possível iniciar agora. Tente novamente em instantes.</p>}
-          <div id='mp-wallet-brick' ref={brickRef} className='mt-5 min-h-12'/>
+          {submitError && <p className='mt-4 text-sm text-red-300'>Não conseguimos iniciar agora</p>}
         </div>
       </article>
     </div>
