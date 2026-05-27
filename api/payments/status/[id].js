@@ -5,5 +5,5 @@ export default async function handler(req, res) {
   const id = req.query.id;
   const order = state.orders.get(id);
   if (!order) return res.status(404).json({ error: 'not_found' });
-  return res.status(200).json({ order });
+  return res.status(200).json({ orderId: order.id, status: order.status, order });
 }
