@@ -20,6 +20,8 @@ import {
   updateMemoryWeights,
 } from '../ai/presenceAwarenessEngine';
 import { createHumanPerfumeReading } from '../ai/humanPerfumeReadingEngine';
+import { loadTasteMemoryStore } from '../utils/tasteMemoryStore';
+import { deriveTasteEvolution } from '../ai/tasteEvolutionEngine';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -947,7 +949,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   );
 }
 
-function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, experience }) {
+function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, experience, tasteEvolution }) {
   console.info('[ProductDetails] ProductDetailsSafeShell render', { hasProduct: Boolean(product) });
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
@@ -1001,6 +1003,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
         <div className="lazule-live-interpretation lazule-text-reveal mt-5 rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">{tasteEvolution?.narrative || 'Esse perfume conversa com a direção recente da sua assinatura.'}</p>
           <p className="mt-2 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.firstImpression}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.behavior}</p>
           <p className="mt-1 text-sm leading-6 text-slate-700 lg:text-slate-300">{humanReading.context}</p>
@@ -1116,6 +1119,8 @@ export function ProductDetails({ slug }) {
   }, [catalogProducts, product, runtimeModules]);
 
   const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
+  const tasteStore = useMemo(() => loadTasteMemoryStore(window.localStorage), []);
+  const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile: tasteStore.profile || {}, events: tasteStore.events || [], wishlist: [] }), [tasteStore]);
   const semanticRecommendationsCount = safeRecommendations.length;
   const [experience, setExperience] = useState(null);
   const [semanticRuntimeState, setSemanticRuntimeState] = useState('idle');
@@ -1331,7 +1336,7 @@ export function ProductDetails({ slug }) {
       ) : null}
 
       <div>
-        <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} experience={experience} />
+        <ProductDetailsSafeShell product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} experience={experience} tasteEvolution={tasteEvolution} />
       </div>
 
       {console.info('[ProductDetails] semantic sections present in JSX', {

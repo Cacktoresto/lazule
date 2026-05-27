@@ -16,6 +16,7 @@ import { resolvePresenceTimeline } from '../ai/presenceTimelineEngine';
 import { buildPresenceCompanionLayer } from '../ai/presenceCompanionLayer';
 import { resolveAdaptiveMomentHome, resolveAtmosphericReunionSequence } from '../ai/adaptiveAtmosphericHome';
 import { applyEditorialAntiRepetition } from '../ai/editorialIntelligenceSystem';
+import { deriveTasteEvolution } from '../ai/tasteEvolutionEngine';
 
 const discoveryPaths = [
   {
@@ -122,7 +123,7 @@ function buildHomeEditorialPulse(atmosphereProfile = {}, sensoryPresence = {}) {
   ].filter(Boolean);
   return applyEditorialAntiRepetition(lines);
 }
-function UnifiedDiscovery({ brands, curatedProducts, discoveryItems }) {
+function UnifiedDiscovery({ brands, curatedProducts, discoveryItems, tasteNarrative }) {
   const spotlightProducts = curatedProducts.slice(0, 3);
 
   return (
@@ -134,7 +135,7 @@ function UnifiedDiscovery({ brands, curatedProducts, discoveryItems }) {
             <p className="text-[0.64rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold/90">Descoberta LAZULE</p>
             <h2 className="mt-2 max-w-[12ch] font-display text-[clamp(2rem,10vw,2.45rem)] leading-[0.95] text-lazule-mist sm:max-w-none sm:text-4xl">Escolha como explorar.</h2>
             <p className="mt-3 text-sm leading-6 text-slate-300 sm:max-w-xl">
-              Navegue por desejo, ocasião e assinatura com ritmo editorial e sem ruído.
+              {tasteNarrative}
             </p>
           </div>
           <a className="lazule-inline-link self-start rounded-full px-1 py-2 text-sm font-semibold text-lazule-gold sm:self-auto" href="/catalogo">
@@ -257,6 +258,7 @@ export function Home() {
   }, [atmosphereProfile]);
 
   const editorialPulse = useMemo(() => buildHomeEditorialPulse(atmosphereProfile, sensoryPresence), [atmosphereProfile, sensoryPresence]);
+  const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile: atmosphereProfile, events: [], wishlist: [] }), [atmosphereProfile]);
 
   const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
     const products = getAllProducts();
@@ -348,7 +350,7 @@ export function Home() {
 
       <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
 
-      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} />
+      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} tasteNarrative={tasteEvolution.narrative} />
 
       <main className="mx-auto max-w-7xl px-3 pb-14 min-[390px]:px-4 sm:px-8 lg:pb-28">
         <ProductRail eyebrow="Mais desejados" title="Ícones em rotação" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />
