@@ -31,6 +31,7 @@ export function CheckoutPage() {
       const paymentUrl = isTestToken
         ? (response.sandboxInitPoint || response.initPoint)
         : (response.initPoint || response.sandboxInitPoint);
+      if (DEV) console.info('[Checkout] payment URL received', { paymentUrl, isTestToken });
       if (!paymentUrl) {
         if (DEV) console.error('[Checkout] missing payment URL', response);
         setSubmitError('Não conseguimos iniciar o pagamento agora. Tente novamente em instantes.');
@@ -39,7 +40,7 @@ export function CheckoutPage() {
       if (DEV) console.info('[Checkout] redirecting to Mercado Pago', { paymentUrl });
       window.location.assign(paymentUrl);
     } catch (error) {
-      if (DEV) console.error('[Checkout] create preference failed', error);
+      if (DEV) console.error('[Checkout] create preference failed', { error, response: error?.data });
       setSubmitError('Não conseguimos iniciar o pagamento agora. Tente novamente em instantes.');
     } finally {
       setIsSubmitting(false);
