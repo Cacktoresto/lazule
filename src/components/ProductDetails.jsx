@@ -5,6 +5,7 @@ import { getProductRecommendations, getProductRecommendationsAsync } from '../ut
 import { similarPerfumes } from '../data/generated/similarPerfumes.js';
 import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
+import { addToLuxurySelection } from '../commerce/cart/luxuryCartState';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
 import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus';
 import { applyManualReferralCode, getReferralChangeEventName, getReferralContext, removeReferralField } from '../utils/referral';
@@ -934,6 +935,15 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
             </p>
           ) : null}
         </div>
+        <button
+          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-lazule-gold"
+          onClick={() => {
+            addToLuxurySelection(product);
+            window.location.href = '/selecao';
+          }}
+        >
+          Adicionar à sua seleção
+        </button>
         <a
           className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-bold text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
           href={whatsAppLink || '#'}
