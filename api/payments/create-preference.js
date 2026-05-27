@@ -25,6 +25,15 @@ function normalizeItem(item) {
 }
 
 export default async function handler(req, res) {
+  console.log("=== CREATE PREFERENCE START ===");
+
+console.log("ENV DEBUG", {
+  nodeEnv: process.env.NODE_ENV,
+  vercelEnv: process.env.VERCEL_ENV,
+  hasToken: Boolean(process.env.MP_ACCESS_TOKEN),
+  tokenPrefix: process.env.MP_ACCESS_TOKEN?.slice(0, 20),
+});
+console.log("REQUEST BODY", req.body);
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   try {
     if (DEV) console.info('[MP] create preference requested');
@@ -105,12 +114,19 @@ export default async function handler(req, res) {
       status: 'awaiting_payment',
     });
   } catch (error) {
-    if (DEV) console.error('[MP] create preference error', { status: error.status, message: error.message, details: error.data });
-    return res.status(error.status || 500).json({
-      error: true,
-      code: error.code || 'create_preference_failed',
-      message: error.message || 'Falha ao criar preferência de pagamento',
-      details: error.data || null,
-    });
-  }
+  console.error("CREATE PREFERENCE ERROR");
+  console.error(error);
+  console.error(error?.stack);
+
+  if (DEV) console.error('[MP] create preference error', {
+    status: error.status,
+    message: error.message,
+  });
+
+  return res.status(error.status || 500).json({
+    error: true,
+    code: error.code || 'create_preference_failed',
+    message: error.message || 'Falha ao criar preferência de pagamento',
+    details: error.data || null,
+  });
 }

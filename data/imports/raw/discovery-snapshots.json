@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-19T08:55:19.762Z",
+  "generatedAt": "2026-05-19T18:06:49.488Z",
   "internalOnly": true,
   "summary": {
     "seeds": 1,
@@ -22,7 +22,7 @@
         "confidence": "medium",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:17.005Z"
+        "discoveredAt": "2026-05-19T18:06:46.734Z"
       },
       "validation": {
         "ok": false,
@@ -42,7 +42,7 @@
         "confidence": "medium",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:17.256Z"
+        "discoveredAt": "2026-05-19T18:06:46.984Z"
       },
       "validation": {
         "ok": false,
@@ -62,7 +62,7 @@
         "confidence": "low",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:17.507Z"
+        "discoveredAt": "2026-05-19T18:06:47.235Z"
       },
       "validation": {
         "ok": false,
@@ -82,7 +82,7 @@
         "confidence": "medium",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:17.758Z"
+        "discoveredAt": "2026-05-19T18:06:47.485Z"
       },
       "validation": {
         "ok": false,
@@ -102,7 +102,7 @@
         "confidence": "medium",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:18.008Z"
+        "discoveredAt": "2026-05-19T18:06:47.736Z"
       },
       "validation": {
         "ok": false,
@@ -122,7 +122,7 @@
         "confidence": "low",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:18.259Z"
+        "discoveredAt": "2026-05-19T18:06:47.986Z"
       },
       "validation": {
         "ok": false,
@@ -142,7 +142,7 @@
         "confidence": "medium",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:18.509Z"
+        "discoveredAt": "2026-05-19T18:06:48.237Z"
       },
       "validation": {
         "ok": false,
@@ -162,7 +162,7 @@
         "confidence": "medium",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:18.760Z"
+        "discoveredAt": "2026-05-19T18:06:48.487Z"
       },
       "validation": {
         "ok": false,
@@ -182,7 +182,7 @@
         "confidence": "low",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:19.010Z"
+        "discoveredAt": "2026-05-19T18:06:48.738Z"
       },
       "validation": {
         "ok": false,
@@ -202,7 +202,7 @@
         "confidence": "low",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:19.261Z"
+        "discoveredAt": "2026-05-19T18:06:48.988Z"
       },
       "validation": {
         "ok": false,
@@ -222,7 +222,7 @@
         "confidence": "low",
         "status": "candidate_only",
         "curationState": "needs_review",
-        "discoveredAt": "2026-05-19T08:55:19.511Z"
+        "discoveredAt": "2026-05-19T18:06:49.239Z"
       },
       "validation": {
         "ok": false,
@@ -244,7 +244,7 @@
       "confidence": "medium",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:17.005Z",
+      "discoveredAt": "2026-05-19T18:06:46.734Z",
       "reason": "HTTP 403"
     },
     {
@@ -258,7 +258,7 @@
       "confidence": "medium",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:17.256Z",
+      "discoveredAt": "2026-05-19T18:06:46.984Z",
       "reason": "HTTP 403"
     },
     {
@@ -272,7 +272,7 @@
       "confidence": "low",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:17.507Z",
+      "discoveredAt": "2026-05-19T18:06:47.235Z",
       "reason": "HTTP 403"
     },
     {
@@ -286,7 +286,7 @@
       "confidence": "medium",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:17.758Z",
+      "discoveredAt": "2026-05-19T18:06:47.485Z",
       "reason": "HTTP 403"
     },
     {
@@ -300,7 +300,7 @@
       "confidence": "medium",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:18.008Z",
+      "discoveredAt": "2026-05-19T18:06:47.736Z",
       "reason": "HTTP 403"
     },
     {
@@ -314,7 +314,7 @@
       "confidence": "low",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:18.259Z",
+      "discoveredAt": "2026-05-19T18:06:47.986Z",
       "reason": "HTTP 403"
     },
     {
@@ -328,7 +328,7 @@
       "confidence": "medium",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:18.509Z",
+      "discoveredAt": "2026-05-19T18:06:48.237Z",
       "reason": "HTTP 403"
     },
     {
@@ -342,7 +342,7 @@
       "confidence": "medium",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:18.760Z",
+      "discoveredAt": "2026-05-19T18:06:48.487Z",
       "reason": "HTTP 403"
     },
     {
@@ -356,7 +356,7 @@
       "confidence": "low",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:19.010Z",
+      "discoveredAt": "2026-05-19T18:06:48.738Z",
       "reason": "HTTP 403"
     },
     {
@@ -370,7 +370,7 @@
       "confidence": "low",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:19.261Z",
+      "discoveredAt": "2026-05-19T18:06:48.988Z",
       "reason": "HTTP 403"
     },
     {
@@ -384,7 +384,7 @@
       "confidence": "low",
       "status": "candidate_only",
       "curationState": "needs_review",
-      "discoveredAt": "2026-05-19T08:55:19.511Z",
+      "discoveredAt": "2026-05-19T18:06:49.239Z",
       "reason": "HTTP 403"
     }
   ],
