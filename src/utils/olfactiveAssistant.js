@@ -387,5 +387,7 @@ export function getLivingSemanticSuggestions(query = '', result = null) {
 export function getSemanticRefinementPaths(result = {}) {
   const fromIntents = (result.detectedIntents ?? []).flatMap((intent) => INTENT_REFINEMENTS[intent] ?? []);
   const fromThemes = (result.semanticIntent?.themes ?? []).flatMap((theme) => INTENT_REFINEMENTS[theme] ?? []);
-  return consolidateSemanticDirections([...fromIntents, ...fromThemes, 'mais sofisticado', 'aura elegante'], { limit: 4 });
+  const baseDirections = [...fromIntents, ...fromThemes];
+  const defaults = baseDirections.length ? ['aura elegante'] : [];
+  return consolidateSemanticDirections([...baseDirections, ...defaults], { limit: 4 });
 }

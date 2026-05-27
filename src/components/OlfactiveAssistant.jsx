@@ -29,6 +29,41 @@ const FINAL_PULSE_MS = 340;
 const LOADER_FADE_MS = 420;
 const LOADING_RITUAL_COPY = ['Lendo sua atmosfera…', 'Finalizando sua curadoria…'];
 
+
+function getResultNarrative(result, hasRecommendations, query) {
+  const safeQuery = String(query || '').trim();
+  const quotedQuery = safeQuery ? `“${safeQuery}”` : 'essa busca';
+  const isAmbiguous = result.fallbackUsed && (result.detectedIntents?.length ?? 0) === 0;
+
+  if (isAmbiguous) {
+    return {
+      state: 'ambiguous',
+      title: 'Essa busca não aponta diretamente para perfume.',
+      body: `${quotedQuery} não é uma direção olfativa direta, mas pode indicar vontade de algo doce, macio e confortável.`,
+      cta: 'Ver caminhos próximos',
+      chips: ['gourmand', 'doce confortável', 'baunilha cremosa'],
+    };
+  }
+
+  if (!hasRecommendations || result.fallbackUsed) {
+    return {
+      state: 'partial',
+      title: 'Não encontrei exatamente isso, mas há caminhos próximos.',
+      body: 'Entendi mais como uma busca por sensação: menos impacto, mais conforto e uso fácil no dia a dia.',
+      cta: 'Explorar essa direção',
+      chips: (result.memoryAwareChips ?? []).slice(0, 3),
+    };
+  }
+
+  return {
+    state: 'clear',
+    title: 'Encontrei uma direção clara para sua busca.',
+    body: result.recommendations?.[0]?.reason ?? 'A leitura aponta para uma assinatura coerente com sua intenção.',
+    cta: 'Ver perfumes sugeridos',
+    chips: (result.memoryAwareChips ?? []).slice(0, 3),
+  };
+}
+
 function AssistantResultCard({ recommendation, result, sourcePage }) {
   const { product, reason } = recommendation;
   const productPath = createProductPath(product);
@@ -316,68 +351,28 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
             {result && canRevealResults ? (
               <div className="lazule-result-reveal min-w-0 max-w-full overflow-hidden">
-                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between" style={{ '--result-delay': '0ms' }}>
-                  <div>
-                    <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Resultado</p>
-                    <h3 className="mt-2 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">{hasRecommendations ? 'Sua curadoria de assinatura' : 'Curadoria em ajuste'}</h3>
-                  </div>
-                  {result.detectedIntents?.length ? (
-                    <div className="flex flex-wrap gap-2">
-                      {result.detectedIntents.slice(0, 1).map((intent) => (
-                        <span key={intent} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">{intent}</span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
+                {(() => {
+                  const narrative = getResultNarrative(result, hasRecommendations, query);
+                  const actionSuggestions = narrative.state === 'clear' ? activeRefinements : (narrative.chips.length ? narrative.chips : activeRefinements);
+                  return (
+                    <>
+                      <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-4 sm:px-5">
+                        <p className="text-[0.64rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold/90">LAZ interpretou</p>
+                        <h3 className="mt-2 font-display text-[clamp(1.45rem,6.5vw,2rem)] leading-tight tracking-[-0.02em] text-lazule-mist">{narrative.title}</h3>
+                        <p className="mt-3 text-sm leading-6 text-slate-300">{narrative.body}</p>
+                        {!!actionSuggestions.length && (
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {actionSuggestions.slice(0, 3).map((chip) => <span key={`result-chip-${chip}`} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[0.72rem] text-slate-200">{chip}</span>)}
+                          </div>
+                        )}
+                        {!!activeRefinements.length && (
+                          <button type="button" onClick={() => handleSuggestionClick(activeRefinements[0])} className="mt-4 inline-flex items-center rounded-full border border-lazule-gold/30 px-3.5 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night">
+                            {narrative.cta}
+                          </button>
+                        )}
+                      </div>
 
-                <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-slate-200 transition-all duration-500">
-                  <p className="text-lazule-gold leading-relaxed">{result.recommendations?.[0]?.reason ?? 'Sua direção olfativa sugere elegância com presença discreta e assinatura refinada.'}</p>
-                  <p className="mt-2 text-xs text-slate-300">Curadoria viva, com continuidade entre suas buscas.</p>
-                </div>
-
-
-                {result.personalProfile?.memory?.profileNotes?.length ? (
-                  <div className="mb-4 rounded-2xl border border-lazule-gold/20 bg-white/[0.03] px-4 py-3 text-sm text-slate-200">
-                    <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">{result.personalProfile.signatureTitle}</p>
-                    <p className="mt-2 text-slate-200">{result.personalProfile.memory.profileNotes[0]}.</p>
-                    <p className="mt-1 text-xs text-slate-400">{result.personalProfile.journeyNarrative}</p>
-                  </div>
-                ) : null}
-
-                {result.memoryAwareChips?.length ? (
-                  <div className="mb-4">
-                    <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Continuando sua curadoria</p>
-                    <div className="flex flex-wrap gap-2">
-                      {result.memoryAwareChips.slice(0, 2).map((chip) => <span key={`mem-${chip}`} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1 text-xs text-lazule-gold/90">{chip}</span>)}
-                    </div>
-                  </div>
-                ) : null}
-
-                {result.discoveryConversion ? (
-                  <div className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
-                    <p className="font-semibold text-lazule-gold">{result.discoveryConversion.title}</p>
-                    <p className="mt-1">{result.discoveryConversion.message}</p>
-                  </div>
-                ) : result.fallbackUsed ? (
-                  <p className="mb-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 px-4 py-3 text-sm leading-6 text-slate-200">
-                    Não encontramos uma assinatura exatamente nessa direção, mas essas curadorias conversam com a presença que você procura.
-                  </p>
-                ) : null}
-
-                {!!activeRefinements.length && (
-                  <div className="mb-4">
-                    <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-lazule-gold/90">Na mesma direção olfativa</p>
-                    <div className="flex flex-wrap gap-2">
-                      {activeRefinements.map((chip) => (
-                        <button key={chip} type="button" onClick={() => handleSuggestionClick(chip)} className="rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3 py-1.5 text-xs text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night">{chip}</button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-
-
-                <div className="lazule-ai-results lazule-horizontal-rail lazule-rail-fade flex min-w-0 max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible" style={{ '--result-delay': '90ms' }}>
+                      <div className="lazule-ai-results lazule-horizontal-rail lazule-rail-fade flex min-w-0 max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible" style={{ '--result-delay': '90ms' }}>
                   {recommendations.map((recommendation) => (
                     <AssistantResultCard
                       key={recommendation.product.id ?? recommendation.product.productSlug ?? recommendation.product.name}
@@ -386,7 +381,10 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
                       sourcePage={sourcePage}
                     />
                   ))}
-                </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             ) : null}
           </div>
