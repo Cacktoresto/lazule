@@ -1,10 +1,16 @@
 import state from './_store.js';
 import { appendOrderEvent } from '../../src/commerce/orders/orderEventEngine.js';
 import { buildCheckoutSession, markCheckoutSessionStatus, upsertCheckoutSession } from '../../src/commerce/checkout/checkoutSessionEngine.js';
-import { createIdempotencyKey, hasProcessedEvent, markProcessedEvent } from '../../src/commerce/payments/idempotencyEngine.js';
+import { createIdempotencyKey, markProcessedEvent } from '../../src/commerce/payments/idempotencyEngine.js';
 import { createCommerceTrace } from '../../src/commerce/observability/commerceTrace.js';
+import { createCommerceRepository } from '../../src/commerce/db/commerceRepository.js';
+import { reserveInventory } from '../../src/commerce/inventory/inventoryEngine.js';
+import { enqueueJob } from '../../src/commerce/jobs/jobQueue.js';
 
 const DEV = process.env.NODE_ENV !== 'production';
+const MAX_QUANTITY = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 20;
 
 function resolveBaseUrl(req) {
   return process.env.SITE_URL || req.headers.origin || 'https://lazule.store';
@@ -18,6 +24,24 @@ function resolveWebhookUrl() {
 
 function isProductionRuntime() {
   return process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production';
+}
+
+function clientKey(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'anonymous';
+}
+
+function enforceRateLimit(req, store) {
+  const key = `create_preference:${clientKey(req)}`;
+  const now = Date.now();
+  const current = store.rateLimits.get(key) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  const next = now > current.resetAt ? { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS } : { ...current, count: current.count + 1 };
+  store.rateLimits.set(key, next);
+  return next.count <= RATE_LIMIT_MAX;
+}
+
+function cartFingerprint(items, customer = {}) {
+  const normalized = items.map((item) => `${item.id}:${item.quantity}:${item.unit_price}`).sort().join('|');
+  return `${normalized}:${customer.email || ''}`;
 }
 
 function normalizeItem(item) {
@@ -44,14 +68,12 @@ function findReusableCheckoutSession(checkoutSessionId) {
 }
 
 export default async function handler(req, res) {
-  console.log('CREATE PREFERENCE HANDLER ENTERED');
-
-export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
 
     const { products } = await import('../../src/data/products.js');
     const { createPreference } = await import('../../src/server/payments/mercadoPagoApi.js');
+    const repository = createCommerceRepository({ store: state });
 
     if (!enforceRateLimit(req, state)) return res.status(429).json({ error: 'rate_limited' });
     if (DEV) console.info('[MP] create preference requested', { hasToken: Boolean(process.env.MP_ACCESS_TOKEN), vercelEnv: process.env.VERCEL_ENV });
@@ -86,17 +108,16 @@ export default async function handler(req, res) {
     }).map(normalizeItem).filter(Boolean);
 
     if (!validated.length || validated.length !== incomingItems.length) return res.status(400).json({ error: 'invalid_cart' });
-    if (DEV) console.info('[MP] validated cart items', { count: validated.length });
 
     const fingerprint = cartFingerprint(validated, body.customer || {});
     const existingOrderId = state.checkoutFingerprints.get(fingerprint);
-    const existingOrder = existingOrderId ? state.orders.get(existingOrderId) : null;
+    const existingOrder = existingOrderId ? await repository.getOrder(existingOrderId) : null;
     if (existingOrder && existingOrder.status === 'awaiting_payment' && Date.now() - new Date(existingOrder.createdAt).getTime() < 10 * 60_000) {
       return res.status(200).json({
         orderId: existingOrder.id,
         preferenceId: existingOrder.mpPreferenceId,
-        init_point: existingOrder.initPoint,
-        sandbox_init_point: existingOrder.sandboxInitPoint,
+        init_point: existingOrder.checkout?.initPoint || null,
+        sandbox_init_point: existingOrder.checkout?.sandboxInitPoint || null,
         status: existingOrder.status,
         deduped: true,
       });
@@ -108,18 +129,13 @@ export default async function handler(req, res) {
     const orderId = createOrderId();
     const baseUrl = resolveBaseUrl(req).replace(/\/$/, '');
     const webhookUrl = resolveWebhookUrl();
-    const trace = createCommerceTrace({ operation: 'create_preference', orderId, checkoutSessionId: body.checkoutSessionId, source: body.source || 'lazule_checkout' });
+    const trace = createCommerceTrace({ operation: 'checkout_create_preference', orderId, checkoutSessionId: body.checkoutSessionId, source: body.source || 'lazule_checkout' });
 
-    const rawCheckoutSession = buildCheckoutSession({
-      cartSnapshot: validated,
-      customerContext: body.customer || null,
-      orderId,
-      status: 'active',
-    });
-    const checkoutSession = upsertCheckoutSession(state, markCheckoutSessionStatus({
-      ...rawCheckoutSession,
-      id: body.checkoutSessionId || rawCheckoutSession.id,
-    }, 'active'));
+    await reserveInventory(repository, validated, { orderId });
+
+    const rawCheckoutSession = buildCheckoutSession({ cartSnapshot: validated, customerContext: body.customer || null, orderId, status: 'active' });
+    const checkoutSession = upsertCheckoutSession(state, markCheckoutSessionStatus({ ...rawCheckoutSession, id: body.checkoutSessionId || rawCheckoutSession.id }, 'active'));
+    await repository.saveCheckoutSession(checkoutSession);
 
     const cleanMetadata = Object.fromEntries(Object.entries({
       orderId,
@@ -146,12 +162,8 @@ export default async function handler(req, res) {
     };
 
     const mpPreference = await createPreference(preferencePayload);
-    if (DEV) console.info('[MP] preference created', { preferenceId: mpPreference.id, orderId });
-
-    const updatedSession = upsertCheckoutSession(state, markCheckoutSessionStatus(checkoutSession, 'awaiting_payment', {
-      preferenceId: mpPreference.id,
-      orderId,
-    }));
+    const updatedSession = upsertCheckoutSession(state, markCheckoutSessionStatus(checkoutSession, 'awaiting_payment', { preferenceId: mpPreference.id, orderId }));
+    await repository.saveCheckoutSession(updatedSession);
 
     let order = {
       id: orderId,
@@ -160,18 +172,14 @@ export default async function handler(req, res) {
       subtotal,
       discount,
       total,
+      currency: 'BRL',
       coupon: body.coupon || null,
       customer: body.customer || null,
       mpPreferenceId: mpPreference.id,
       mpPaymentId: null,
       externalReference: orderId,
       checkoutSessionId: updatedSession.id,
-      checkout: {
-        sessionId: updatedSession.id,
-        recoveryToken: updatedSession.recoveryToken,
-        initPoint: mpPreference.init_point || null,
-        sandboxInitPoint: mpPreference.sandbox_init_point || null,
-      },
+      checkout: { sessionId: updatedSession.id, recoveryToken: updatedSession.recoveryToken, initPoint: mpPreference.init_point || null, sandboxInitPoint: mpPreference.sandbox_init_point || null },
       payment: { id: null, status: 'awaiting_payment', rawStatus: null, lastSyncedAt: null },
       consistency: { technicalState: 'syncing', stale: false, lastReconciledAt: null, conflicted: false },
       processing: { locked: false, lockedAt: null, lockOwner: null },
@@ -183,27 +191,18 @@ export default async function handler(req, res) {
 
     order = appendOrderEvent(order, { type: 'order_created', source: 'create_preference', payload: { total, itemCount: validated.length } });
     order = appendOrderEvent(order, { type: 'checkout_started', source: 'create_preference', payload: { checkoutSessionId: updatedSession.id } });
+    order = appendOrderEvent(order, { type: 'inventory_reserved', source: 'create_preference', payload: { itemCount: validated.length } });
     order = appendOrderEvent(order, { type: 'preference_created', source: 'create_preference', payload: { preferenceId: mpPreference.id } });
-    state.orders.set(orderId, order);
+    await repository.saveOrder(order);
+    state.checkoutFingerprints.set(fingerprint, orderId);
     markProcessedEvent(state, createIdempotencyKey({ orderId, paymentId: mpPreference.id, eventType: 'preference_created', source: 'create_preference' }));
+    await enqueueJob(repository, { type: 'detect_abandoned_checkout', orderId, payload: { orderId, checkoutSessionId: updatedSession.id }, source: 'create_preference' });
+    await repository.trackAnalyticsEvent({ event_type: 'checkout_preference_created', order_id: orderId, checkout_session_id: updatedSession.id, payload_json: { total, itemCount: validated.length }, source: 'create_preference', created_at: new Date().toISOString() });
     trace.log('info', 'preference created', { preferenceId: mpPreference.id, checkoutSessionId: updatedSession.id });
 
-    return res.status(200).json({
-      orderId,
-      checkoutSessionId: updatedSession.id,
-      recoveryToken: updatedSession.recoveryToken,
-      preferenceId: mpPreference.id,
-      init_point: mpPreference.init_point,
-      sandbox_init_point: mpPreference.sandbox_init_point,
-      status: 'awaiting_payment',
-    });
+    return res.status(200).json({ orderId, checkoutSessionId: updatedSession.id, recoveryToken: updatedSession.recoveryToken, preferenceId: mpPreference.id, init_point: mpPreference.init_point, sandbox_init_point: mpPreference.sandbox_init_point, status: 'awaiting_payment' });
   } catch (error) {
     console.error('CREATE PREFERENCE ERROR', { message: error?.message, stack: DEV ? error?.stack : undefined });
-    return res.status(500).json({
-      error: true,
-      code: 'function_crash',
-      message: isProductionRuntime() ? 'Não conseguimos iniciar o pagamento agora.' : (error?.message || String(error)),
-      ...(isProductionRuntime() ? {} : { stack: error?.stack }),
-    });
+    return res.status(500).json({ error: true, code: 'function_crash', message: isProductionRuntime() ? 'Não conseguimos iniciar o pagamento agora.' : (error?.message || String(error)), ...(isProductionRuntime() ? {} : { stack: error?.stack }) });
   }
 }

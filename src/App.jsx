@@ -15,6 +15,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import { RequireAdmin } from './auth/RequireAdmin';
 import { RequireInfluencerOrAdmin } from './auth/RequireInfluencerOrAdmin';
 import { AdminLogin } from './pages/admin/AdminLogin';
+import { AdminOrdersPanel } from './pages/admin/AdminOrdersPanel';
 import { InfluencerDashboard } from './pages/influencer/InfluencerDashboard';
 import { InfluencerInvite } from './pages/influencer/InfluencerInvite';
 import { OlfactiveIdentityPortal } from './pages/OlfactiveIdentityPortal';
@@ -30,7 +31,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/pedido\/[^/]+\/?|\/minha-selecao\/[^/]+\/?|\/checkout\/recuperar\/[^/]+\/?|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/pedido\/[^/]+\/?|\/minha-selecao\/[^/]+\/?|\/checkout\/recuperar\/[^/]+\/?|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login|pedidos|produtos|estoque|clientes|webhooks|jobs)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -159,6 +160,7 @@ function App() {
   const isProductNotFoundRoute = route.pathname === '/produto-nao-encontrado';
   const isProductSuggestionRoute = route.pathname === '/produto-sugerido';
   const isAnalyticsDashboardRoute = route.pathname === '/admin/analytics';
+  const isAdminOrdersRoute = ['/admin/pedidos', '/admin/produtos', '/admin/estoque', '/admin/clientes', '/admin/webhooks', '/admin/jobs'].includes(route.pathname);
   const isAdminLoginRoute = route.pathname === '/admin/login';
   const isInfluencerLoginRoute = route.pathname === '/influencer/login';
   const isInfluencerDashboardRoute = route.pathname === '/influencer';
@@ -254,6 +256,8 @@ function App() {
       routeName = 'promo_referral';
     } else if (isAnalyticsDashboardRoute) {
       routeName = 'admin_analytics';
+    } else if (isAdminOrdersRoute) {
+      routeName = 'admin_operations';
     } else if (isInfluencerDashboardRoute) {
       routeName = 'influencer_dashboard';
     } else if (isInfluencerInviteRoute) {
@@ -281,7 +285,7 @@ function App() {
     if (!isProtectedDashboardRoute && !isInfluencerInviteRoute && !isPromoReferralRouteActive && !isAdminLoginRoute && !isInfluencerLoginRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isOrderDetailRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAdminOrdersRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isOrderDetailRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -366,6 +370,10 @@ function App() {
               <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-lazule-mist/70" role="status" aria-live="polite">Refinando inteligência LAZULE…</div>}>
                 <AnalyticsDashboard />
               </Suspense>
+            </RequireAdmin>
+          ) : isAdminOrdersRoute ? (
+            <RequireAdmin>
+              <AdminOrdersPanel />
             </RequireAdmin>
           ) : isProductRoute ? (
             <AppErrorBoundary>

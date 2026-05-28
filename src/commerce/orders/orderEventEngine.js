@@ -12,12 +12,21 @@ const EVENT_TYPES = new Set([
   'webhook_received',
   'webhook_duplicate_ignored',
   'status_reconciled',
+  'reconciliation_started',
+  'reconciliation_fixed_state',
+  'order_preparing',
+  'order_shipped',
+  'order_delivered',
   'recovery_started',
   'checkout_abandoned',
   'manual_review_required',
   'order_locked',
   'order_lock_released',
   'payment_retry_started',
+  'inventory_reserved',
+  'inventory_released',
+  'inventory_committed',
+  'job_enqueued',
 ]);
 
 function stableStringify(value) {
@@ -63,6 +72,14 @@ export function appendOrderEvent(order, eventInput) {
     events: [...events, event],
     updatedAt: event.timestamp,
   };
+}
+
+export async function persistOrderEvents(repository, order) {
+  if (!repository?.appendOrderEvent || !order?.id) return order;
+  for (const event of order.events || []) {
+    await repository.appendOrderEvent(order.id, event);
+  }
+  return order;
 }
 
 export function hasEventFingerprint(order, fingerprint) {

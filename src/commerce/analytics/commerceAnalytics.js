@@ -62,6 +62,16 @@ export function trackCommerceEvent(name, payload = {}, adapter) {
       w.localStorage.setItem(KEY, JSON.stringify(next));
     }
     if (adapter?.track) adapter.track(event);
+    if (adapter?.trackPersistent) adapter.trackPersistent({
+      event_type: name,
+      user_id: event.userId,
+      session_id: event.sessionId,
+      product_ids: event.productIds,
+      source: event.source,
+      route: event.route,
+      payload_json: event.metadata,
+      created_at: event.timestamp,
+    });
     else if (typeof console !== 'undefined' && (typeof import.meta === 'undefined' || import.meta.env?.DEV)) console.info('[CommerceAnalytics]', event);
     return event;
   } catch (error) {
