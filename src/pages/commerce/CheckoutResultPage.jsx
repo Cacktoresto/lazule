@@ -1,46 +1,49 @@
 import { useEffect, useMemo, useState } from 'react';
-
-const content = {
-  success: ['Sua seleção foi confirmada.', 'Agora essa atmosfera passa a fazer parte da sua presença.'],
-  pending: ['Aguardando confirmação da atmosfera.', 'Assim que o processamento finalizar, sua direção estará ativa.'],
-  failure: ['Não conseguimos concluir essa direção agora.', 'Você pode revisar o método e tentar novamente com tranquilidade.'],
-};
+import { trackCommerceEvent } from '../../commerce/analytics/commerceAnalytics';
+import { CheckoutResultExperience } from '../../components/commerce/CheckoutResultExperience';
+import { resolveCheckoutResultVariant } from '../../commerce/checkout/checkoutResultResolver';
 
 export function CheckoutResultPage({ mode = 'pending' }) {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const orderId = params.get('order_id') || '';
-  const [status, setStatus] = useState('loading');
+  const orderId = params.get('order_id') || params.get('external_reference') || '';
+  const paymentId = params.get('payment_id') || params.get('collection_id') || '';
+  const urlStatus = params.get('status') || '';
+  const [result, setResult] = useState({ status: 'loading', order: null, view: null, pix: null });
 
   useEffect(() => {
     let cancelled = false;
+    let timer;
+    let attempts = 0;
+
     async function loadStatus() {
       if (!orderId) {
-        setStatus('idle');
+        setResult({ status: 'unknown', order: null, view: null, pix: null });
         return;
       }
+      attempts += 1;
       try {
         const response = await fetch(`/api/payments/status/${encodeURIComponent(orderId)}`);
         if (!response.ok) throw new Error('status_unavailable');
         const data = await response.json();
-        if (!cancelled) setStatus(data.status || 'pending');
+        if (cancelled) return;
+        const order = data.order || null;
+        const status = data.status || order?.status || 'awaiting_payment';
+        setResult({ status, order, view: data.view || order?.statusView || null, pix: order?.pix || order?.payment?.pix || null });
+        trackCommerceEvent('order_status_viewed', { productIds: order?.items?.map((item) => item.id) || [], total: order?.total, metadata: { orderId, paymentId, status, urlStatus } });
+        if (['awaiting_payment', 'pending_payment', 'processing_payment'].includes(status) && attempts < 3) {
+          timer = window.setTimeout(loadStatus, 2000);
+        }
       } catch {
-        if (!cancelled) setStatus('pending');
+        if (cancelled) return;
+        setResult((current) => ({ ...current, status: attempts < 3 ? 'loading' : 'unknown' }));
+        if (attempts < 3) timer = window.setTimeout(loadStatus, 2000);
       }
     }
+
     loadStatus();
-    return () => { cancelled = true; };
-  }, [orderId]);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [orderId, paymentId, urlStatus]);
 
-  const fallbackMode = mode === 'success' ? 'success' : (mode === 'failure' ? 'failure' : 'pending');
-  const pageMode = status === 'loading' ? 'pending' : (status === 'paid' ? 'success' : fallbackMode);
-  const [title, body] = content[pageMode] || content.pending;
-
-  return <section className='mx-auto flex min-h-[60vh] max-w-4xl items-center px-6 py-20'>
-    <article className='w-full rounded-[2rem] border border-white/10 bg-slate-950/70 p-8 text-center'>
-      <p className='text-xs uppercase tracking-[0.25em] text-lazule-gold/70'>Finalização</p>
-      <h1 className='mt-4 text-4xl text-white'>{title}</h1>
-      <p className='mx-auto mt-4 max-w-2xl text-lazule-mist/75'>{status === 'loading' ? 'Confirmando sua seleção...' : body}</p>
-      <a href='/catalogo' className='mt-8 inline-block rounded-full border border-lazule-gold/40 px-6 py-3 text-lazule-gold'>Voltar ao catálogo</a>
-    </article>
-  </section>;
+  const variant = resolveCheckoutResultVariant(result.status, mode);
+  return <CheckoutResultExperience variant={variant} order={result.order} view={result.view} pix={result.pix} orderId={orderId} />;
 }
