@@ -1,10 +1,10 @@
-import state from './_store.js';
-import { getPayment } from '../../src/server/payments/mercadoPagoApi.js';
-import { reconcilePaymentState } from '../../src/commerce/orders/orderSourceOfTruth.js';
-import { appendOrderEvent } from '../../src/commerce/orders/orderEventEngine.js';
-import { guardIdempotentProcessing } from '../../src/commerce/payments/idempotencyEngine.js';
-import { acquireOrderLock, releaseOrderLock } from '../../src/commerce/orders/orderLockingEngine.js';
-import { createCommerceTrace } from '../../src/commerce/observability/commerceTrace.js';
+const state = require('./_store.js');
+const { getPayment } = require('../../src/server/payments/mercadoPagoApi.js');
+const { reconcilePaymentState } = require('../../src/server/commerce/orderSourceOfTruth.js');
+const { appendOrderEvent } = require('../../src/server/commerce/orderEventEngine.js');
+const { guardIdempotentProcessing } = require('../../src/server/commerce/idempotencyEngine.js');
+const { acquireOrderLock, releaseOrderLock } = require('../../src/server/commerce/orderLockingEngine.js');
+const { createCommerceTrace } = require('../../src/server/commerce/commerceTrace.js');
 
 const DEV = process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'production';
 const SUPPORTED_ACTIONS = new Set(['payment.created', 'payment.updated', 'payment.approved', 'payment.rejected', 'payment.cancelled', 'payment.refunded']);
@@ -13,11 +13,16 @@ function extractPaymentId(req, payload) {
   return payload?.data?.id || payload?.id || req.query?.['data.id'] || req.query?.id || req.query?.payment_id;
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   try {
     if (DEV) console.info('[MP] webhook received');
     const payload = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    const action = payload.action || payload.type || null;
+    if (action && !SUPPORTED_ACTIONS.has(action) && !String(action).startsWith('payment.')) {
+      return res.status(200).json({ ok: true, ignored: 'unsupported_action' });
+    }
+
     const paymentId = extractPaymentId(req, payload);
     if (!paymentId) return res.status(200).json({ ok: true, ignored: 'missing_payment_id' });
 
@@ -65,7 +70,7 @@ export default async function handler(req, res) {
       type: 'webhook_received',
       source: 'mercado_pago_webhook',
       paymentId: payment.id || paymentId,
-      payload: { mpStatus: payment.status, action: payload.action || payload.type || null },
+      payload: { mpStatus: payment.status, action },
     });
     nextOrder = reconcilePaymentState(nextOrder, { ...payment, id: payment.id || paymentId, source: 'mercado_pago_webhook' });
     nextOrder = releaseOrderLock(nextOrder, 'mercado_pago_webhook');
@@ -78,3 +83,5 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 }
+
+module.exports = handler;

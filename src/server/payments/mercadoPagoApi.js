@@ -74,10 +74,12 @@ async function mpRequest(path, options = {}) {
   throw lastError || new Error('mercado_pago_request_failed');
 }
 
-export function createPreference(payload) {
+function createPreference(payload) {
   return mpRequest('/checkout/preferences', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export function getPayment(paymentId) {
+function getPayment(paymentId) {
   return mpRequest(`/v1/payments/${encodeURIComponent(paymentId)}`, { method: 'GET' });
 }
+
+module.exports = { createPreference, getPayment };

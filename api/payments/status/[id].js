@@ -1,9 +1,9 @@
-import state from '../_store.js';
-import { getPayment } from '../../../src/server/payments/mercadoPagoApi.js';
-import { getOrderState, resolveCanonicalPaymentState } from '../../../src/commerce/orders/orderSourceOfTruth.js';
-import { reconcileOrderPayment } from '../../../src/commerce/payments/paymentReconciliationEngine.js';
+const state = require('../_store.js');
+const { getPayment } = require('../../../src/server/payments/mercadoPagoApi.js');
+const { getOrderState, resolveCanonicalPaymentState } = require('../../../src/server/commerce/orderSourceOfTruth.js');
+const { reconcileOrderPayment } = require('../../../src/server/commerce/paymentReconciliationEngine.js');
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
   const id = req.query.id;
   const shouldReconcile = req.query.reconcile === '1' || req.query.reconcile === 'true';
@@ -24,3 +24,5 @@ export default async function handler(req, res) {
     order,
   });
 }
+
+module.exports = handler;

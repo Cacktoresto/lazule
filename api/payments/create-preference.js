@@ -1,10 +1,15 @@
-import state from './_store.js';
-import { appendOrderEvent } from '../../src/commerce/orders/orderEventEngine.js';
-import { buildCheckoutSession, markCheckoutSessionStatus, upsertCheckoutSession } from '../../src/commerce/checkout/checkoutSessionEngine.js';
-import { createIdempotencyKey, hasProcessedEvent, markProcessedEvent } from '../../src/commerce/payments/idempotencyEngine.js';
-import { createCommerceTrace } from '../../src/commerce/observability/commerceTrace.js';
+const state = require('./_store.js');
+const { loadProducts } = require('../../src/server/catalog/productsCatalog.js');
+const { createPreference } = require('../../src/server/payments/mercadoPagoApi.js');
+const { appendOrderEvent } = require('../../src/server/commerce/orderEventEngine.js');
+const { buildCheckoutSession, markCheckoutSessionStatus, upsertCheckoutSession } = require('../../src/server/commerce/checkoutSessionEngine.js');
+const { createIdempotencyKey, markProcessedEvent } = require('../../src/server/commerce/idempotencyEngine.js');
+const { createCommerceTrace } = require('../../src/server/commerce/commerceTrace.js');
 
 const DEV = process.env.NODE_ENV !== 'production';
+const MAX_QUANTITY = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 30;
 
 function resolveBaseUrl(req) {
   return process.env.SITE_URL || req.headers.origin || 'https://lazule.store';
@@ -43,20 +48,47 @@ function findReusableCheckoutSession(checkoutSessionId) {
   return { session, order };
 }
 
-export default async function handler(req, res) {
-  console.log('CREATE PREFERENCE HANDLER ENTERED');
+function getClientKey(req) {
+  return String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+}
 
-export default async function handler(req, res) {
+function enforceRateLimit(req, store) {
+  const key = getClientKey(req);
+  const now = Date.now();
+  const current = store.rateLimits.get(key) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  if (current.resetAt <= now) {
+    store.rateLimits.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) return false;
+  current.count += 1;
+  store.rateLimits.set(key, current);
+  return true;
+}
+
+function stableStringify(value) {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`;
+}
+
+function cartFingerprint(items, customer) {
+  return stableStringify({
+    items: items.map((item) => ({ id: item.id, quantity: item.quantity, unit_price: item.unit_price })).sort((a, b) => String(a.id).localeCompare(String(b.id))),
+    customer: customer ? { email: customer.email || null, doc: customer.identification?.number || null } : null,
+  });
+}
+
+async function handler(req, res) {
+  console.log('CREATE PREFERENCE HANDLER ENTERED');
   try {
     if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
-
-    const { products } = await import('../../src/data/products.js');
-    const { createPreference } = await import('../../src/server/payments/mercadoPagoApi.js');
 
     if (!enforceRateLimit(req, state)) return res.status(429).json({ error: 'rate_limited' });
     if (DEV) console.info('[MP] create preference requested', { hasToken: Boolean(process.env.MP_ACCESS_TOKEN), vercelEnv: process.env.VERCEL_ENV });
     if (!process.env.MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN missing');
 
+    const products = loadProducts();
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const incomingItems = Array.isArray(body.items) ? body.items : [];
     if (!incomingItems.length) return res.status(400).json({ error: 'empty_cart' });
@@ -95,8 +127,8 @@ export default async function handler(req, res) {
       return res.status(200).json({
         orderId: existingOrder.id,
         preferenceId: existingOrder.mpPreferenceId,
-        init_point: existingOrder.initPoint,
-        sandbox_init_point: existingOrder.sandboxInitPoint,
+        init_point: existingOrder.checkout?.initPoint || existingOrder.initPoint || null,
+        sandbox_init_point: existingOrder.checkout?.sandboxInitPoint || existingOrder.sandboxInitPoint || null,
         status: existingOrder.status,
         deduped: true,
       });
@@ -125,7 +157,7 @@ export default async function handler(req, res) {
       orderId,
       checkoutSessionId: checkoutSession.id,
       recoveryToken: checkoutSession.recoveryToken,
-      productIds: validated.map((v) => v.id),
+      productIds: validated.map((v) => v.id).join(','),
       source: body.source || 'lazule_checkout',
       coupon: body.coupon || null,
       identityContext: body.identityContext ? JSON.stringify(body.identityContext).slice(0, 500) : null,
@@ -185,6 +217,7 @@ export default async function handler(req, res) {
     order = appendOrderEvent(order, { type: 'checkout_started', source: 'create_preference', payload: { checkoutSessionId: updatedSession.id } });
     order = appendOrderEvent(order, { type: 'preference_created', source: 'create_preference', payload: { preferenceId: mpPreference.id } });
     state.orders.set(orderId, order);
+    state.checkoutFingerprints.set(fingerprint, orderId);
     markProcessedEvent(state, createIdempotencyKey({ orderId, paymentId: mpPreference.id, eventType: 'preference_created', source: 'create_preference' }));
     trace.log('info', 'preference created', { preferenceId: mpPreference.id, checkoutSessionId: updatedSession.id });
 
@@ -207,3 +240,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+module.exports = handler;
