@@ -1,4 +1,5 @@
 {
+  {
   "headers": [
     {
       "source": "/promo/(.*)",
@@ -19,7 +20,14 @@
       ]
     }
   ],
+  "crons": [
+    {
+      "path": "/api/jobs/reconcile-payments",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
+}
 }
