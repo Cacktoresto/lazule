@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "test": "npm run test:utils",
     "dev": "vite",
     "build": "vite build && node scripts/generateSeoAssets.js dist",
     "preview": "vite preview",
