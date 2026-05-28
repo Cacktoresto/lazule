@@ -16,12 +16,16 @@ function resolveWebhookUrl() {
   return `${base.replace(/\/$/, '')}/api/payments/webhook`;
 }
 
+function isProductionRuntime() {
+  return process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production';
+}
+
 function normalizeItem(item) {
   const unitPrice = Number(item?.unit_price);
   const quantity = Number(item?.quantity);
   const title = typeof item?.title === 'string' ? item.title.trim() : '';
   if (!Number.isFinite(unitPrice) || unitPrice <= 0) return null;
-  if (!Number.isInteger(quantity) || quantity <= 0) return null;
+  if (!Number.isInteger(quantity) || quantity <= 0 || quantity > MAX_QUANTITY) return null;
   if (!title) return null;
   return { ...item, unit_price: unitPrice, quantity, title, currency_id: 'BRL' };
 }
@@ -42,27 +46,21 @@ function findReusableCheckoutSession(checkoutSessionId) {
 export default async function handler(req, res) {
   console.log('CREATE PREFERENCE HANDLER ENTERED');
 
+export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
 
     const { products } = await import('../../src/data/products.js');
     const { createPreference } = await import('../../src/server/payments/mercadoPagoApi.js');
 
-    console.log('ENV DEBUG', {
-      nodeEnv: process.env.NODE_ENV,
-      vercelEnv: process.env.VERCEL_ENV,
-      hasToken: Boolean(process.env.MP_ACCESS_TOKEN),
-      tokenPrefix: process.env.MP_ACCESS_TOKEN?.slice(0, 20),
-    });
-    console.log('REQUEST BODY', req.body);
-
-    if (DEV) console.info('[MP] create preference requested');
+    if (!enforceRateLimit(req, state)) return res.status(429).json({ error: 'rate_limited' });
+    if (DEV) console.info('[MP] create preference requested', { hasToken: Boolean(process.env.MP_ACCESS_TOKEN), vercelEnv: process.env.VERCEL_ENV });
     if (!process.env.MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN missing');
-    if (DEV) console.info('[MP] create-preference route entered? yes');
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const incomingItems = Array.isArray(body.items) ? body.items : [];
     if (!incomingItems.length) return res.status(400).json({ error: 'empty_cart' });
+    if (incomingItems.some((item) => Number(item?.quantity) > MAX_QUANTITY || Number(item?.quantity) <= 0)) return res.status(400).json({ error: 'invalid_quantity' });
 
     const reusable = findReusableCheckoutSession(body.checkoutSessionId);
     if (reusable?.order?.mpPreferenceId) {
@@ -83,15 +81,29 @@ export default async function handler(req, res) {
     const validated = incomingItems.map((item) => {
       const source = products.find((p) => p.id === item.id && p.available);
       if (!source) return null;
-      const quantity = Math.max(1, Math.min(20, Number(item.quantity) || 1));
-      return { id: source.id, title: source.name, quantity, currency_id: 'BRL', unit_price: Number(source.salePrice) };
+      const quantity = Math.floor(Number(item.quantity) || 1);
+      return { id: source.id, title: source.name, quantity, currency_id: 'BRL', unit_price: Number(source.salePrice), image: source.image };
     }).map(normalizeItem).filter(Boolean);
 
-    if (!validated.length) return res.status(400).json({ error: 'invalid_cart' });
-    if (DEV) console.info('[MP] validated cart items', { count: validated.length, items: validated });
+    if (!validated.length || validated.length !== incomingItems.length) return res.status(400).json({ error: 'invalid_cart' });
+    if (DEV) console.info('[MP] validated cart items', { count: validated.length });
+
+    const fingerprint = cartFingerprint(validated, body.customer || {});
+    const existingOrderId = state.checkoutFingerprints.get(fingerprint);
+    const existingOrder = existingOrderId ? state.orders.get(existingOrderId) : null;
+    if (existingOrder && existingOrder.status === 'awaiting_payment' && Date.now() - new Date(existingOrder.createdAt).getTime() < 10 * 60_000) {
+      return res.status(200).json({
+        orderId: existingOrder.id,
+        preferenceId: existingOrder.mpPreferenceId,
+        init_point: existingOrder.initPoint,
+        sandbox_init_point: existingOrder.sandboxInitPoint,
+        status: existingOrder.status,
+        deduped: true,
+      });
+    }
 
     const subtotal = validated.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
-    const discount = 0; // TODO: apply real coupon rules from Supabase promotion table.
+    const discount = 0;
     const total = Math.max(0, subtotal - discount);
     const orderId = createOrderId();
     const baseUrl = resolveBaseUrl(req).replace(/\/$/, '');
@@ -120,7 +132,7 @@ export default async function handler(req, res) {
     }).filter(([, value]) => value !== null && value !== undefined && value !== ''));
 
     const preferencePayload = {
-      items: validated,
+      items: validated.map(({ image, ...item }) => item),
       payer: body.customer || undefined,
       back_urls: {
         success: `${baseUrl}/checkout/success?order_id=${orderId}`,
@@ -133,13 +145,8 @@ export default async function handler(req, res) {
       ...(webhookUrl ? { notification_url: webhookUrl } : {}),
     };
 
-    if (!Array.isArray(preferencePayload.items) || !preferencePayload.items.length) {
-      return res.status(400).json({ error: true, code: 'invalid_items', message: 'Cart items are required', details: { items: preferencePayload.items } });
-    }
-    if (DEV) console.info('[MP] final payload sent to Mercado Pago', preferencePayload);
-
     const mpPreference = await createPreference(preferencePayload);
-    if (DEV) console.info('[MP] preference created', { preferenceId: mpPreference.id });
+    if (DEV) console.info('[MP] preference created', { preferenceId: mpPreference.id, orderId });
 
     const updatedSession = upsertCheckoutSession(state, markCheckoutSessionStatus(checkoutSession, 'awaiting_payment', {
       preferenceId: mpPreference.id,
@@ -154,6 +161,7 @@ export default async function handler(req, res) {
       discount,
       total,
       coupon: body.coupon || null,
+      customer: body.customer || null,
       mpPreferenceId: mpPreference.id,
       mpPaymentId: null,
       externalReference: orderId,
@@ -190,14 +198,12 @@ export default async function handler(req, res) {
       status: 'awaiting_payment',
     });
   } catch (error) {
-    console.error('CREATE PREFERENCE ERROR', error);
-    console.error(error?.stack);
-
+    console.error('CREATE PREFERENCE ERROR', { message: error?.message, stack: DEV ? error?.stack : undefined });
     return res.status(500).json({
       error: true,
       code: 'function_crash',
-      message: error?.message || String(error),
-      stack: error?.stack,
+      message: isProductionRuntime() ? 'Não conseguimos iniciar o pagamento agora.' : (error?.message || String(error)),
+      ...(isProductionRuntime() ? {} : { stack: error?.stack }),
     });
   }
 }

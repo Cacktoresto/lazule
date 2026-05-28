@@ -6,7 +6,8 @@ import { guardIdempotentProcessing } from '../../src/commerce/payments/idempoten
 import { acquireOrderLock, releaseOrderLock } from '../../src/commerce/orders/orderLockingEngine.js';
 import { createCommerceTrace } from '../../src/commerce/observability/commerceTrace.js';
 
-const DEV = process.env.NODE_ENV !== 'production';
+const DEV = process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'production';
+const SUPPORTED_ACTIONS = new Set(['payment.created', 'payment.updated', 'payment.approved', 'payment.rejected', 'payment.cancelled', 'payment.refunded']);
 
 function extractPaymentId(req, payload) {
   return payload?.data?.id || payload?.id || req.query?.['data.id'] || req.query?.id || req.query?.payment_id;

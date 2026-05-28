@@ -1,8 +1,11 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { formatBRL } from '../../utils/currency';
 import { checkoutCopy } from '../../commerce/checkout/checkoutCopy';
 import { useLuxuryCart } from '../../commerce/checkout/useLuxuryCart';
 import { createCheckoutPreference } from '../../commerce/payment/mercadoPagoCheckoutClient';
+import { trackCommerceEvent } from '../../commerce/analytics/commerceAnalytics';
+import { markCheckoutStarted, markPreferenceCreated, recoverAbandonedCheckout } from '../../commerce/checkout/checkoutAbandonmentEngine';
+import { restoreLuxurySelection } from '../../commerce/cart/luxuryCartState';
 
 const DEV = import.meta.env.DEV;
 
@@ -11,6 +14,22 @@ export function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const hasItems = items.length > 0;
+
+  useEffect(() => {
+    const recoverId = new URLSearchParams(window.location.search).get('recover');
+    if (recoverId) {
+      const recovered = recoverAbandonedCheckout(recoverId);
+      if (recovered?.items?.length) restoreLuxurySelection(recovered.items);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasItems) return undefined;
+    const session = markCheckoutStarted({ items, total, source: 'checkout_page' });
+    return () => {
+      window.setTimeout(() => {}, 0);
+    };
+  }, [hasItems, items, total]);
 
   const renderState = useMemo(() => {
     if (!hasItems) return { title: 'Sua seleção ainda está vazia', description: 'Retorne ao catálogo e adicione peças para concluir com segurança.' };
@@ -27,6 +46,7 @@ export function CheckoutPage() {
       if (DEV) console.info('[Checkout] creating preference');
       const response = await createCheckoutPreference({ items, source: 'lazule_checkout' });
       if (DEV) console.info('[Checkout] preference created', { orderId: response.orderId, preferenceId: response.preferenceId });
+      const activeSession = markPreferenceCreated({ preferenceId: response.preferenceId, orderId: response.orderId, items, total });
       const isTestToken = import.meta.env.VITE_MP_PUBLIC_KEY?.startsWith('TEST-');
       const paymentUrl = isTestToken
         ? (response.sandboxInitPoint || response.initPoint)
@@ -37,6 +57,7 @@ export function CheckoutPage() {
         setSubmitError('Não conseguimos iniciar o pagamento agora. Tente novamente em instantes.');
         return;
       }
+      trackCommerceEvent('checkout_redirected', { sessionId: activeSession.sessionId, productIds: items.map((item) => item.id), total, metadata: { orderId: response.orderId } });
       if (DEV) console.info('[Checkout] redirecting to Mercado Pago', { paymentUrl });
       window.location.assign(paymentUrl);
     } catch (error) {
@@ -67,6 +88,7 @@ export function CheckoutPage() {
           <p className='mt-5 border-t border-white/10 pt-4 text-2xl text-white'>{formatBRL(total)}</p>
           <button onClick={handleFinalizeSelection} disabled={!hasItems || isSubmitting} className='mt-5 w-full rounded-full border border-lazule-gold/40 bg-lazule-gold/15 px-5 py-3 text-sm font-medium text-lazule-gold disabled:cursor-not-allowed disabled:opacity-55'>{isSubmitting ? 'Preparando pagamento...' : 'Finalizar seleção'}</button>
           <p className='mt-2 text-center text-xs text-lazule-mist/60'>Pagamento protegido via Mercado Pago</p>
+          {new URLSearchParams(window.location.search).get('recover') && <p className='mt-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 p-3 text-sm text-lazule-gold'>Sua seleção ainda está aqui. Você pode continuar de onde parou.</p>}
           {submitError && <p className='mt-4 text-sm text-red-300'>Não conseguimos iniciar agora</p>}
         </div>
       </article>

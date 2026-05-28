@@ -21,6 +21,7 @@ import { OlfactiveIdentityPortal } from './pages/OlfactiveIdentityPortal';
 import { CheckoutPage } from './pages/commerce/CheckoutPage';
 import { CartPage } from './pages/commerce/CartPage';
 import { CheckoutResultPage } from './pages/commerce/CheckoutResultPage';
+import { OrderDetailPage } from './pages/commerce/OrderDetailPage';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
@@ -29,7 +30,7 @@ import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRout
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/pedido\/[^/]+\/?|\/minha-selecao\/[^/]+\/?|\/checkout\/recuperar\/[^/]+\/?|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -148,7 +149,9 @@ function App() {
   const isCatalogRoute = route.pathname === '/catalogo';
   const isFaqRoute = route.pathname === '/faq';
   const isIdentityRoute = route.pathname === '/identidade';
-  const isCheckoutExperienceRoute = route.pathname === '/selecao' || route.pathname === '/checkout';
+  const isCheckoutRecoveryRoute = route.pathname.startsWith('/checkout/recuperar/');
+  const isOrderDetailRoute = route.pathname.startsWith('/pedido/') || route.pathname.startsWith('/minha-selecao/');
+  const isCheckoutExperienceRoute = route.pathname === '/selecao' || route.pathname === '/checkout' || isCheckoutRecoveryRoute;
   const isCartRoute = route.pathname === '/carrinho';
   const isCheckoutSuccessRoute = route.pathname === '/checkout/success';
   const isCheckoutPendingRoute = route.pathname === '/checkout/pending';
@@ -161,6 +164,13 @@ function App() {
   const isInfluencerDashboardRoute = route.pathname === '/influencer';
   const isInfluencerInviteRoute = route.pathname.startsWith('/influencer/invite/');
   const influencerInviteToken = isInfluencerInviteRoute ? route.pathname.split('/').filter(Boolean).at(-1) : '';
+  const orderDetailId = isOrderDetailRoute ? route.pathname.split('/').filter(Boolean).at(-1) : '';
+  if (isCheckoutRecoveryRoute && !route.search.includes('recover=')) {
+    const recoveryId = route.pathname.split('/').filter(Boolean).at(-1);
+    window.history.replaceState(null, '', `/checkout?recover=${encodeURIComponent(recoveryId)}`);
+    route.pathname = '/checkout';
+    route.search = `?recover=${encodeURIComponent(recoveryId)}`;
+  }
   const isAdminRoute = route.pathname.startsWith('/admin/');
   const isProtectedDashboardRoute = isAdminRoute || isInfluencerDashboardRoute;
   const isPromoReferralRouteActive = isPromoReferralRoute(route.pathname);
@@ -256,6 +266,8 @@ function App() {
       routeName = 'faq';
     } else if (isIdentityRoute) {
       routeName = 'olfactive_identity';
+    } else if (isOrderDetailRoute) {
+      routeName = 'order_detail';
     } else if (isCheckoutExperienceRoute) {
       routeName = 'checkout_experience';
     } else if (isCartRoute) {
@@ -269,7 +281,7 @@ function App() {
     if (!isProtectedDashboardRoute && !isInfluencerInviteRoute && !isPromoReferralRouteActive && !isAdminLoginRoute && !isInfluencerLoginRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isOrderDetailRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -369,6 +381,8 @@ function App() {
             <FAQ />
           ) : isIdentityRoute ? (
             <OlfactiveIdentityPortal />
+          ) : isOrderDetailRoute ? (
+            <OrderDetailPage orderId={orderDetailId} />
           ) : isCheckoutExperienceRoute ? (
             <CheckoutPage />
           ) : isCartRoute ? (

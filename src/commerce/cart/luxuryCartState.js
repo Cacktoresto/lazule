@@ -71,3 +71,17 @@ export function removeFromLuxurySelection(productId) {
 export function clearLuxurySelection() {
   writeSelection([]);
 }
+
+export function restoreLuxurySelection(items = []) {
+  const normalized = (Array.isArray(items) ? items : []).map((item) => ({
+    id: item.id,
+    name: item.name || item.title,
+    brand: item.brand || '',
+    image: item.image || '',
+    price: item.price || item.unit_price || 0,
+    quantity: Math.max(1, Number(item.quantity) || 1),
+    editorialPhrase: item.editorialPhrase || item.description || 'Guardamos sua seleção por aqui. Se ainda fizer sentido, você pode continuar.',
+  })).filter((item) => item.id);
+  writeSelection(normalized);
+  return normalized;
+}
