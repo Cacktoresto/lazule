@@ -1,7 +1,3 @@
-import { products } from '../../src/data/products.js';
-import state from './_store.js';
-import { createPreference } from '../../src/server/payments/mercadoPagoApi.js';
-
 const DEV = process.env.NODE_ENV !== 'production';
 
 function resolveBaseUrl(req) {
@@ -25,20 +21,27 @@ function normalizeItem(item) {
 }
 
 export default async function handler(req, res) {
-  console.log("=== CREATE PREFERENCE START ===");
+  console.log('CREATE PREFERENCE HANDLER ENTERED');
 
-console.log("ENV DEBUG", {
-  nodeEnv: process.env.NODE_ENV,
-  vercelEnv: process.env.VERCEL_ENV,
-  hasToken: Boolean(process.env.MP_ACCESS_TOKEN),
-  tokenPrefix: process.env.MP_ACCESS_TOKEN?.slice(0, 20),
-});
-console.log("REQUEST BODY", req.body);
-  if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   try {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
+
+    const { products } = await import('../../src/data/products.js');
+    const { default: state } = await import('./_store.js');
+    const { createPreference } = await import('../../src/server/payments/mercadoPagoApi.js');
+
+    console.log('ENV DEBUG', {
+      nodeEnv: process.env.NODE_ENV,
+      vercelEnv: process.env.VERCEL_ENV,
+      hasToken: Boolean(process.env.MP_ACCESS_TOKEN),
+      tokenPrefix: process.env.MP_ACCESS_TOKEN?.slice(0, 20),
+    });
+    console.log('REQUEST BODY', req.body);
+
     if (DEV) console.info('[MP] create preference requested');
     if (!process.env.MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN missing');
     if (DEV) console.info('[MP] create-preference route entered? yes');
+
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const incomingItems = Array.isArray(body.items) ? body.items : [];
     if (!incomingItems.length) return res.status(400).json({ error: 'empty_cart' });
@@ -114,19 +117,14 @@ console.log("REQUEST BODY", req.body);
       status: 'awaiting_payment',
     });
   } catch (error) {
-  console.error("CREATE PREFERENCE ERROR");
-  console.error(error);
-  console.error(error?.stack);
+    console.error('CREATE PREFERENCE ERROR', error);
+    console.error(error?.stack);
 
-  if (DEV) console.error('[MP] create preference error', {
-    status: error.status,
-    message: error.message,
-  });
-
-  return res.status(error.status || 500).json({
-    error: true,
-    code: error.code || 'create_preference_failed',
-    message: error.message || 'Falha ao criar preferência de pagamento',
-    details: error.data || null,
-  });
+    return res.status(500).json({
+      error: true,
+      code: 'function_crash',
+      message: error?.message || String(error),
+      stack: error?.stack,
+    });
+  }
 }
