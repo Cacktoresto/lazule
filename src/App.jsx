@@ -27,6 +27,7 @@ import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
 import { captureReferralParams } from './utils/referral';
 import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRoutes';
+import { resolveCartUiRendering } from './commerce/checkout/cartUiRouting';
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
@@ -171,6 +172,7 @@ function App() {
     route.pathname = '/checkout';
     route.search = `?recover=${encodeURIComponent(recoveryId)}`;
   }
+  const cartUiRendering = resolveCartUiRendering(route.pathname);
   const isAdminRoute = route.pathname.startsWith('/admin/');
   const isProtectedDashboardRoute = isAdminRoute || isInfluencerDashboardRoute;
   const isPromoReferralRouteActive = isPromoReferralRoute(route.pathname);
@@ -347,7 +349,7 @@ function App() {
       <div className="relative flex min-h-screen flex-col overflow-x-clip bg-lazule-night text-lazule-mist">
       <MineralBackground />
       <div className="relative z-10 flex min-h-screen flex-col">
-        <Header immersiveProduct={isProductRoute} />
+        <Header immersiveProduct={isProductRoute} suppressCartUi={!cartUiRendering.renderCartDrawer} />
         <main key={`${route.pathname}${route.search}`} className="lazule-route-shell flex-1">
           {isPromoReferralRouteActive ? (
             <PromoReferralLanding route={route} />
