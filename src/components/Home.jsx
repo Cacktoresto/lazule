@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ProductNavigationSearch } from './ProductNavigationSearch';
 import { OlfactiveAssistant } from './OlfactiveAssistant';
-import { ProductCard } from './ProductCard';
+import { ProductCard, ProductImageFallback } from './ProductCard';
 import { CatalogHighlights } from './CatalogHighlights';
 import { getAllProducts } from '../data/catalogRepository';
 import { excludeInternalTestProducts } from '../domain/internalTestProduct';
@@ -115,6 +115,35 @@ function SectionHeading({ eyebrow, title, actionHref, actionLabel = 'Ver tudo' }
   );
 }
 
+
+
+function getHeroBadge(product) {
+  const rawType = String(product?.catalogType || product?.type || product?.category || '').toLowerCase();
+
+  if (rawType.includes('nicho')) return 'Niche';
+  if (rawType.includes('árabe') || rawType.includes('arabe')) return 'Árabe';
+  if (rawType.includes('designer') || rawType.includes('import')) return 'Designer';
+
+  return 'Curadoria';
+}
+
+function getHeroFamily(product) {
+  const labels = [product?.family, ...(product?.semanticFacets || []), ...(product?.vibeTags || [])]
+    .filter(Boolean)
+    .map((label) => String(label).trim())
+    .filter(Boolean);
+  const uniqueLabels = [...new Set(labels)];
+
+  return uniqueLabels.slice(0, 2).join(' • ') || 'Ambarado • Amadeirado';
+}
+
+function getLuxuryDescriptor(product) {
+  if (product?.narrative) return product.narrative;
+  if (product?.editorialPhrase) return product.editorialPhrase;
+  if (product?.description) return product.description;
+
+  return 'Presença silenciosa e sofisticada para uma assinatura olfativa memorável.';
+}
 
 function buildHomeEditorialPulse(atmosphereProfile = {}, sensoryPresence = {}) {
   const lines = [
@@ -287,45 +316,62 @@ export function Home() {
 
   return (
     <div className="lazule-home-shell overflow-x-clip" data-home-mood={sensoryPresence.adaptiveHome.heroMood} data-motion-intensity={sensoryPresence.motionIntensity} style={{ '--lazule-memory-depth': atmosphereProfile.depthAlpha }}>
-      <section id="top" className="lazule-hero lazule-cinematic-hero relative overflow-hidden bg-lazule-depth">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(248,250,252,0.10),transparent_22%),linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.9)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-[10%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/35 to-transparent opacity-70" />
-        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(640px,70svh)] max-w-7xl content-end gap-4 px-3 pb-6 pt-5 min-[390px]:px-4 sm:min-h-[82svh] sm:px-8 sm:pb-12 sm:pt-20 md:grid-cols-[0.95fr_1.05fr] md:items-end md:py-24">
-          <div className="lazule-hero-copy relative z-10 max-w-xl pb-1">
-            <p className="mb-2 text-[0.58rem] font-medium uppercase tracking-[0.28em] text-slate-300/70">{sensoryPresence.reunion.microFragment}</p>
-            <p className="mb-4 text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold sm:mb-5 sm:text-[0.68rem] sm:tracking-[0.46em]">LAZULE FRAGRANCES</p>
-            <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,13.5vw,3.55rem)] leading-[0.86] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-8xl">Perfume com percepção.</h1>
-            <p className="mt-4 max-w-[32rem] text-[0.92rem] leading-6 text-slate-200/85 sm:mt-6 sm:text-lg">
-              Uma curadoria digital calma para encontrar fragrâncias por atmosfera, ocasião e presença.
+      <section id="top" className="lazule-hero lazule-cinematic-hero lazule-luxury-hero relative overflow-hidden bg-lazule-depth">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(200,162,77,0.14),transparent_24%),radial-gradient(circle_at_80%_4%,rgba(43,92,178,0.18),transparent_30%),linear-gradient(180deg,rgba(3,7,18,0.22)_0%,rgba(5,8,22,0.92)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-[8%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/30 to-transparent opacity-70" />
+        <div className="pointer-events-none absolute right-[8%] top-[18%] hidden h-72 w-72 rounded-full bg-lazule-gold/10 blur-3xl lg:block" />
+        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(760px,82svh)] max-w-7xl content-end gap-10 px-4 pb-10 pt-8 min-[390px]:px-5 sm:min-h-[86svh] sm:px-8 sm:pb-16 sm:pt-24 md:grid-cols-[0.9fr_1.1fr] md:items-center md:py-28 lg:gap-16 lg:py-32">
+          <div className="lazule-hero-copy relative z-10 max-w-2xl pb-1">
+            <p className="mb-3 text-[0.62rem] font-medium uppercase tracking-[0.32em] text-slate-300/70">{sensoryPresence.reunion.microFragment}</p>
+            <p className="mb-5 text-[0.64rem] font-semibold uppercase tracking-[0.4em] text-lazule-gold sm:text-[0.7rem] sm:tracking-[0.5em]">LAZULE FRAGRANCES</p>
+            <h1 className="max-w-[11ch] font-display text-[clamp(3rem,13vw,4.35rem)] leading-[0.86] tracking-[-0.06em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-[6.3rem]">Perfume com percepção.</h1>
+            <p className="mt-6 max-w-[36rem] text-base leading-7 text-slate-200/82 sm:mt-8 sm:text-xl sm:leading-9">
+              Uma curadoria olfativa calma, precisa e editorial — fragrâncias escolhidas por atmosfera, ocasião e presença.
             </p>
-            <a
-              className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-lazule-gold px-6 text-center text-sm font-semibold uppercase tracking-[0.15em] text-lazule-night shadow-aureate min-[390px]:w-auto sm:mt-8 sm:px-7 sm:tracking-[0.18em]"
-              href="/catalogo"
-              onClick={() => trackEvent('hero_cta_click', { source_page: 'home', cta_location: 'hero_primary' })}
-            >
-              <span className="relative z-10">Entrar na curadoria</span>
-            </a>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a
+                className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-7 text-center text-sm font-semibold uppercase tracking-[0.16em] text-lazule-night shadow-aureate min-[390px]:w-auto sm:px-8 sm:tracking-[0.2em]"
+                href="/catalogo"
+                onClick={() => trackEvent('hero_cta_click', { source_page: 'home', cta_location: 'hero_primary' })}
+              >
+                <span className="relative z-10">Entrar na curadoria</span>
+              </a>
+              <a className="lazule-inline-link inline-flex min-h-12 items-center justify-center rounded-full px-5 text-sm font-semibold text-lazule-gold" href="#assistente">
+                Consultar concierge
+              </a>
+            </div>
           </div>
 
           <a
-            className="lazule-hero-product lazule-surface-premium group relative mx-auto block aspect-[4/5] w-full max-w-[min(16.5rem,84vw)] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.052] shadow-mineral backdrop-blur-xl sm:max-w-[25rem] sm:rounded-[2.8rem] md:mr-0"
+            className="lazule-hero-product lazule-featured-fragrance group relative mx-auto block w-full max-w-[min(24rem,88vw)] overflow-hidden rounded-[2.35rem] border border-white/10 bg-white/[0.045] p-3 shadow-mineral backdrop-blur-xl sm:max-w-[31rem] sm:rounded-[3rem] sm:p-4 md:mr-0"
             href={heroProduct ? `/catalogo?busca=${encodeURIComponent(heroProduct.name)}` : '/catalogo'}
-            aria-label="Abrir destaque LAZULE"
+            aria-label="Abrir curadoria em destaque LAZULE"
             onClick={() => heroProduct && trackProductSelect(heroProduct, { source_page: 'home_hero_product', section: 'home_hero_product', interaction_type: 'hero_product' })}
           >
-            {heroProduct?.image ? (
-              <img
-                className="absolute inset-0 h-full w-full object-cover opacity-85 transition duration-700 group-hover:scale-105 group-active:scale-[1.025]"
-                src={heroProduct.image}
-                alt={`Perfume ${heroProduct.name}`}
-                loading="eager"
-                decoding="async"
-              />
-            ) : null}
-            <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/20 to-transparent" />
-            <div className="absolute inset-x-3 bottom-3 rounded-[1.2rem] border border-white/10 bg-lazule-night/70 p-3 backdrop-blur-xl sm:inset-x-5 sm:bottom-5 sm:rounded-[1.8rem] sm:p-5">
-              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-lazule-gold">Destaque</p>
-              <p className="mt-2 line-clamp-1 font-display text-[1.35rem] leading-none text-lazule-mist sm:text-2xl">{heroProduct?.name ?? 'Curadoria LAZULE'}</p>
+            <div className="pointer-events-none absolute -right-16 -top-12 h-44 w-44 rounded-full bg-lazule-gold/18 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 left-4 h-64 w-64 rounded-full bg-lazule-blue/18 blur-3xl" />
+            <div className="relative overflow-hidden rounded-[1.9rem] border border-white/10 bg-[linear-gradient(145deg,rgba(7,13,29,0.74),rgba(16,38,79,0.54))] p-4 sm:rounded-[2.45rem] sm:p-6">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold">Curadoria em destaque</p>
+                <span className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#eedebd]">{getHeroBadge(heroProduct)}</span>
+              </div>
+              <div className="lazule-featured-image-frame relative aspect-[4/5] overflow-hidden rounded-[1.55rem] border border-white/10 bg-lazule-night/70 sm:rounded-[2rem]">
+                {heroProduct?.image ? (
+                  <img
+                    className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-[1.035] group-active:scale-[1.015]"
+                    src={heroProduct.image}
+                    alt={`Perfume ${heroProduct.name}`}
+                    loading="eager"
+                    decoding="async"
+                  />
+                ) : <ProductImageFallback label="Curadoria LAZULE" />}
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,8,22,0.05)_0%,rgba(5,8,22,0.28)_52%,rgba(5,8,22,0.78)_100%)]" />
+              </div>
+              <div className="relative mt-6">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-slate-300/70">{getHeroFamily(heroProduct)}</p>
+                <h2 className="mt-2 line-clamp-2 font-display text-[clamp(2rem,7vw,3.15rem)] leading-[0.88] tracking-[-0.04em] text-lazule-mist">{heroProduct?.name ?? 'Curadoria LAZULE'}</h2>
+                <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-200/74 sm:text-base">{getLuxuryDescriptor(heroProduct)}</p>
+              </div>
             </div>
           </a>
         </div>
@@ -351,7 +397,9 @@ export function Home() {
       ) : null}
 
 
-      <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
+      <div id="assistente">
+        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
+      </div>
 
       <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} tasteNarrative={tasteEvolution.narrative} />
       <section className="mx-auto max-w-7xl px-3 pb-2 min-[390px]:px-4 sm:px-8">

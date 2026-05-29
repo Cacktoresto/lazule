@@ -2686,3 +2686,144 @@ textarea {
   .lazule-recommendation-card { backdrop-filter: blur(8px); }
   .lazule-depth-layer-6 { display: none; }
 }
+
+/* Phase 10 — LAZULE Luxury UX Refinement */
+:root {
+  --laz-space-1: 0.5rem;
+  --laz-space-2: 0.75rem;
+  --laz-space-3: 1rem;
+  --laz-space-4: 1.5rem;
+  --laz-space-5: 2rem;
+  --laz-space-6: 3rem;
+  --laz-space-7: 4rem;
+  --laz-space-8: 6rem;
+  --laz-shadow-editorial: 0 44px 120px rgba(1, 6, 18, 0.62), 0 18px 54px rgba(14, 35, 77, 0.26);
+  --laz-shadow-aureate-soft: 0 18px 50px rgba(183, 146, 73, 0.12);
+}
+
+body {
+  background:
+    radial-gradient(circle at 16% 12%, rgba(29, 61, 116, 0.16), transparent 34rem),
+    radial-gradient(circle at 84% 8%, rgba(183, 146, 73, 0.07), transparent 28rem),
+    linear-gradient(180deg, #040814 0%, #080f21 48%, #050816 100%);
+}
+
+.lazule-header {
+  box-shadow: 0 18px 60px rgba(1, 6, 18, 0.28), inset 0 -1px 0 rgba(200, 162, 77, 0.035);
+}
+
+.lazule-luxury-hero {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(183, 146, 73, 0.12), transparent 27rem),
+    radial-gradient(circle at 80% 6%, rgba(30, 58, 138, 0.18), transparent 32rem),
+    linear-gradient(135deg, #030712 0%, #071126 44%, #050816 100%);
+}
+
+.lazule-luxury-hero .lazule-mobile-container {
+  gap: clamp(2.5rem, 7vw, 5rem);
+}
+
+.lazule-luxury-hero .lazule-hero-copy h1 {
+  text-wrap: balance;
+  text-shadow: 0 28px 70px rgba(1, 6, 18, 0.5);
+}
+
+.lazule-featured-fragrance {
+  box-shadow: var(--laz-shadow-editorial), inset 0 1px 0 rgba(248, 250, 252, 0.06);
+}
+
+.lazule-featured-fragrance::before {
+  background:
+    linear-gradient(130deg, rgba(248, 250, 252, 0.16), transparent 26%, rgba(200, 162, 77, 0.12) 72%, transparent),
+    radial-gradient(circle at 74% 8%, rgba(200, 162, 77, 0.12), transparent 26%);
+  opacity: 0.48;
+}
+
+.lazule-featured-image-frame {
+  box-shadow:
+    inset 0 1px 0 rgba(248, 250, 252, 0.08),
+    inset 0 -44px 72px rgba(3, 7, 18, 0.34),
+    0 28px 70px rgba(1, 6, 18, 0.34),
+    0 0 0 1px rgba(200, 162, 77, 0.045);
+}
+
+.lazule-featured-image-frame::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  content: '';
+  background:
+    linear-gradient(115deg, transparent 0 34%, rgba(255,255,255,0.13) 45%, transparent 54%),
+    radial-gradient(circle at 50% 112%, rgba(200, 162, 77, 0.18), transparent 34%);
+  mix-blend-mode: screen;
+  opacity: 0.34;
+  transition: opacity 500ms ease;
+}
+
+.lazule-featured-fragrance:hover .lazule-featured-image-frame::before {
+  opacity: 0.48;
+}
+
+.lazule-surface-premium,
+.surface-lazule-card,
+.lazule-product-card,
+.lazule-ai-card {
+  border-radius: clamp(1.45rem, 2vw, 1.9rem);
+}
+
+.surface-lazule-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015) 42%, rgba(200, 162, 77, 0.032)),
+    rgba(5, 10, 25, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 250, 252, 0.055),
+    0 24px 76px rgba(1, 6, 18, 0.34);
+}
+
+.lazule-product-card img,
+.lazule-ai-card img,
+.lazule-featured-image-frame img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.lazule-product-card:hover {
+  transform: translateY(-0.16rem);
+  box-shadow:
+    0 28px 80px rgba(1, 6, 18, 0.46),
+    0 0 0 1px rgba(200, 162, 77, 0.11);
+}
+
+.lazule-product-card h3,
+.lazule-ai-card h3 {
+  letter-spacing: -0.025em;
+}
+
+@media (max-width: 640px) {
+  .lazule-luxury-hero .lazule-mobile-container {
+    min-height: auto;
+    padding-top: max(2rem, env(safe-area-inset-top));
+    padding-bottom: 2.5rem;
+  }
+
+  .lazule-luxury-hero .lazule-hero-copy h1 {
+    max-width: 10.5ch;
+    font-size: clamp(3rem, 15vw, 4rem);
+  }
+
+  .lazule-featured-fragrance {
+    max-width: min(23rem, 92vw) !important;
+    border-radius: 2rem !important;
+  }
+
+  .lazule-featured-fragrance .lazule-featured-image-frame {
+    aspect-ratio: 5 / 6;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .lazule-featured-fragrance:hover .lazule-featured-image-frame::before {
+    opacity: 0.34;
+  }
+}

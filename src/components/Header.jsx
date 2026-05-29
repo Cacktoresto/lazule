@@ -5,21 +5,27 @@ import { useLuxuryCart } from '../commerce/checkout/useLuxuryCart';
 
 const navigationItems = [
   { href: '/', label: 'Início' },
-  { href: '/catalogo', label: 'Catálogo' },
-  { href: '/faq', label: 'Como funciona' },
-  { href: '/identidade', label: 'Sua assinatura' },
+  { href: '/catalogo', label: 'Curadoria' },
+  { href: '/faq', label: 'Ritual' },
+  { href: '/identidade', label: 'Assinatura olfativa' },
   { href: '/carrinho', label: 'Seleção' },
 ];
 
 export function Header({ immersiveProduct = false, suppressCartUi = false }) {
-  return <header className={`${immersiveProduct ? 'hidden lg:block' : ''} sticky top-0 z-40 border-b border-white/10 surface-lazule-glass backdrop-blur-2xl`}>
-    <div className='mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8'>
-      <a href='/' className='text-sm uppercase tracking-[0.3em] text-lazule-gold'>Lazule Fragrances</a>
-      <nav className='hidden items-center gap-2 text-sm text-slate-300 md:flex'>
-        {navigationItems.map((item)=><a key={item.href} href={item.href} className='rounded-full px-3 py-2 hover:bg-lazule-blue/10'>{item.label}</a>)}
+  return <header className={`${immersiveProduct ? 'hidden lg:block' : ''} lazule-header sticky top-0 z-40 border-b border-white/[0.075] bg-[rgba(5,10,25,0.82)] backdrop-blur-2xl`}>
+    <div className='mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-8 lg:py-4'>
+      <a href='/' className='group inline-flex items-center gap-3 text-lazule-gold' aria-label='LAZULE Fragrances — início'>
+        <span className='grid h-9 w-9 place-items-center rounded-full border border-lazule-gold/30 bg-lazule-gold/10 font-display text-lg leading-none shadow-[0_12px_30px_rgba(200,162,77,0.08)] transition group-hover:border-lazule-gold/50'>L</span>
+        <span className='leading-none'>
+          <span className='block text-[0.72rem] font-semibold uppercase tracking-[0.34em]'>Lazule</span>
+          <span className='mt-1 hidden text-[0.58rem] uppercase tracking-[0.3em] text-slate-300/62 sm:block'>Fragrance Intelligence</span>
+        </span>
+      </a>
+      <nav className='hidden items-center gap-1 rounded-full border border-white/[0.07] bg-white/[0.035] p-1 text-sm text-slate-300 md:flex'>
+        {navigationItems.map((item)=><a key={item.href} href={item.href} className='rounded-full px-3.5 py-2 text-[0.82rem] transition hover:bg-lazule-gold/10 hover:text-lazule-gold focus-visible:ring-2 focus-visible:ring-lazule-gold/60'>{item.label}</a>)}
       </nav>
       <div className='flex items-center gap-2'>
-        <a className='hidden rounded-full border border-lazule-gold/40 px-5 py-2.5 text-sm text-lazule-mist lg:inline-flex' href={createWhatsAppLink('Olá! Quero conhecer o catálogo da LAZULE FRAGRANCES.')} target='_blank' rel='noreferrer'>Falar no WhatsApp</a>
+        <a className='lazule-premium-button hidden rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-5 py-2.5 text-sm font-semibold text-lazule-mist transition hover:border-lazule-gold/50 hover:text-lazule-gold lg:inline-flex' href={createWhatsAppLink('Olá! Quero uma curadoria olfativa da LAZULE FRAGRANCES.')} target='_blank' rel='noreferrer'>Concierge</a>
         {!suppressCartUi && <CartEntryPoint />}
       </div>
     </div>
@@ -31,7 +37,7 @@ function CartEntryPoint() {
   const { items, total, quantity } = useLuxuryCart();
 
   return <>
-    <button onClick={() => setCartOpen(true)} className='rounded-full border border-lazule-gold/30 px-3 py-2 text-xs text-lazule-gold'>Seleção ({quantity})</button>
+    <button onClick={() => setCartOpen(true)} className='min-h-10 rounded-full border border-lazule-gold/30 bg-lazule-night/45 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-lazule-gold transition hover:border-lazule-gold/55 hover:bg-lazule-gold/10'>Seleção ({quantity})</button>
     <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} items={items} total={total} />
   </>;
 }
