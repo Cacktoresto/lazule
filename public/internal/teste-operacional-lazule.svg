@@ -1,0 +1,13 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Teste Operacional LAZULE</title>
+  <desc id="desc">Placeholder azul escuro para produto interno de teste operacional em produção.</desc>
+  <rect width="1200" height="1200" fill="#071326"/>
+  <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 420) rotate(90) scale(520)">
+    <stop stop-color="#1E3A8A" stop-opacity="0.62"/>
+    <stop offset="1" stop-color="#071326" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1200" height="1200" fill="url(#glow)"/>
+  <rect x="112" y="112" width="976" height="976" rx="56" stroke="#D6B46A" stroke-opacity="0.42" stroke-width="3"/>
+  <text x="600" y="570" text-anchor="middle" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="78" font-weight="800" letter-spacing="8">TESTE OPERACIONAL</text>
+  <text x="600" y="665" text-anchor="middle" fill="#D6B46A" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="500" letter-spacing="3">Ambiente de Produção</text>
+</svg>

@@ -11,6 +11,7 @@ import { buildSemanticRelationships } from './semanticIntelligenceLayer.js';
 import { buildQueryLockedFallback } from './queryLockedFallback.js';
 import { interpretUserIntent } from './semanticQueryUnderstanding.js';
 import { rankWithHumanDiscoveryIntelligence } from './humanDiscoveryRankingEngine.js';
+import { excludeInternalTestProducts, isInternalTestProduct } from '../domain/internalTestProduct.js';
 
 const DEFAULT_LIMIT = 6;
 const DIVERSITY_BRAND_PENALTY = 0.045;
@@ -127,7 +128,7 @@ export const heuristicRecommendationEngine = {
   id: 'heuristic-dna-v1',
   search(query, products = [], options = {}) {
     const limit = Math.min(Math.max(Number(options.limit) || DEFAULT_LIMIT, 1), DEFAULT_LIMIT);
-    const safeCatalog = Array.isArray(products) ? products.filter(Boolean) : [];
+    const safeCatalog = excludeInternalTestProducts(Array.isArray(products) ? products.filter(Boolean) : []);
     const analysis = {
       ...options.analysis,
       query,
@@ -217,10 +218,11 @@ function isOppositeGenderValue(currentGender, candidateGender) {
 }
 
 export function getRelatedProducts(currentProduct, allProducts = [], { limit = 8 } = {}) {
-  if (!currentProduct || !Array.isArray(allProducts)) return [];
+  if (!currentProduct || !Array.isArray(allProducts) || isInternalTestProduct(currentProduct)) return [];
+  allProducts = excludeInternalTestProducts(allProducts);
   const currentGender = getGender(currentProduct);
   const candidates = allProducts.filter((candidate) => {
-    if (!candidate || isSameProduct(currentProduct, candidate)) return false;
+    if (!candidate || isInternalTestProduct(candidate) || isSameProduct(currentProduct, candidate)) return false;
     const sameGenderCount = allProducts.filter((p) => p && !isSameProduct(currentProduct, p) && getGender(p) === currentGender).length;
     return !(sameGenderCount >= 4 && isOppositeGenderValue(currentGender, getGender(candidate)));
   });

@@ -3,6 +3,7 @@ import { fetchSupabaseCatalogProducts } from './supabaseCatalogAdapter.js';
 import { CATALOG_SOURCE_SUPABASE, getCatalogSource } from './catalogSourceConfig.js';
 import { ALL_FILTER_VALUE, filterAndSortCatalogProducts } from '../utils/catalogFilters.js';
 import { createBrandSlug, createProductSlug, getProductSlugFromPath } from '../utils/productRouting.js';
+import { excludeInternalTestProducts } from '../domain/internalTestProduct.js';
 
 export const DEFAULT_CATALOG_FILTERS = {
   category: ALL_FILTER_VALUE,
@@ -106,7 +107,7 @@ export function getProductBySlug(slug, allProducts = getAllProducts()) {
 
 export function getProductsByBrand(brandOrSlug, allProducts = getAllProducts()) {
   const normalizedSlug = createBrandSlug(brandOrSlug);
-  return allProducts.filter((product) => product.brandSlug === normalizedSlug);
+  return excludeInternalTestProducts(allProducts).filter((product) => product.brandSlug === normalizedSlug);
 }
 
 export function getBrandBySlug(slug, allProducts = getAllProducts()) {
@@ -118,11 +119,11 @@ export function getBrandBySlug(slug, allProducts = getAllProducts()) {
 }
 
 export function searchProducts(searchTerm, allProducts = getAllProducts(), filters = {}) {
-  return filterAndSortCatalogProducts(allProducts, { ...DEFAULT_CATALOG_FILTERS, ...filters }, searchTerm);
+  return filterAndSortCatalogProducts(excludeInternalTestProducts(allProducts), { ...DEFAULT_CATALOG_FILTERS, ...filters }, searchTerm);
 }
 
 export function getFeaturedProducts(allProducts = getAllProducts(), limit = 12) {
-  return allProducts.filter((product) => product.featured).slice(0, limit);
+  return excludeInternalTestProducts(allProducts).filter((product) => product.featured).slice(0, limit);
 }
 
 export default {

@@ -1,3 +1,4 @@
+import { isInternalTestProduct } from '../domain/internalTestProduct.js';
 import { normalizeSearchText } from '../utils/search.js';
 
 const DEFAULT_WEIGHTS = Object.freeze({
@@ -132,7 +133,7 @@ export function rankWithHumanDiscoveryIntelligence(candidates = [], options = {}
   const context = options.context ?? {};
   const memory = options.memory ?? {};
 
-  const ranked = candidates.map((entry) => {
+  const ranked = candidates.filter((entry) => !isInternalTestProduct(entry.product ?? entry)).map((entry) => {
     const product = entry.product ?? entry;
     const text = normalizeSearchText([
       product.name, product.brand, product.description, product.searchIndex, product.notes, product.vibe,

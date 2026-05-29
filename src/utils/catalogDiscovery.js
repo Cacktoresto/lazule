@@ -1,4 +1,5 @@
 import { buildSemanticRelationships } from '../ai/semanticIntelligenceLayer.js';
+import { excludeInternalTestProducts, isInternalTestProduct } from '../domain/internalTestProduct.js';
 const DISCOVERY_CHIPS = [
   { id: 'amadeirado', label: 'Amadeirado', terms: ['amadeirado', 'woody', 'wood'], occasion: ['noite'], intensity: ['forte'] },
   { id: 'doce', label: 'Doce', terms: ['doce', 'adocicado', 'baunilha', 'vanilla'], weather: ['inverno'] },
@@ -45,6 +46,7 @@ export function getDiscoveryChips() {
 }
 
 export function matchDiscoveryTags(product, activeChipIds = []) {
+  if (isInternalTestProduct(product)) return false;
   if (!activeChipIds.length) return true;
   const text = productText(product);
   const activeChips = DISCOVERY_CHIPS.filter((chip) => activeChipIds.includes(chip.id));
@@ -60,7 +62,7 @@ export function classifyDiscoveryVibe(product) {
 }
 
 export function buildDiscoveryGroups(products = [], activeChipIds = []) {
-  const pool = products.filter((product) => matchDiscoveryTags(product, activeChipIds));
+  const pool = excludeInternalTestProducts(products).filter((product) => matchDiscoveryTags(product, activeChipIds));
   const groups = [
     { id: 'arabes', title: 'Perfumes árabes mais procurados', chips: ['arabe', 'luxuoso'] },
     { id: 'noite', title: 'Perfumes intensos para noite', chips: ['noite', 'forte'] },
@@ -78,7 +80,9 @@ export function buildDiscoveryGroups(products = [], activeChipIds = []) {
 
 export function getContextualRecommendations({ catalogProducts = [], filteredProducts = [], searchTerm = '', activeChipIds = [] }) {
   const normalizedSearch = normalize(searchTerm);
-  const basePool = filteredProducts.length > 0 ? filteredProducts : catalogProducts.filter((product) => matchDiscoveryTags(product, activeChipIds));
+  const publicFilteredProducts = excludeInternalTestProducts(filteredProducts);
+  const publicCatalogProducts = excludeInternalTestProducts(catalogProducts);
+  const basePool = publicFilteredProducts.length > 0 ? publicFilteredProducts : publicCatalogProducts.filter((product) => matchDiscoveryTags(product, activeChipIds));
 
   const scored = basePool
     .map((product) => {

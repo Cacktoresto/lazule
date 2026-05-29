@@ -1,3 +1,5 @@
+import { isInternalTestProduct } from '../domain/internalTestProduct.js';
+
 export const COMMERCIAL_STATUS = Object.freeze({
   IN_STOCK: 'in_stock',
   ON_REQUEST: 'on_request',
@@ -88,6 +90,7 @@ export function canDirectBuy(product = {}) {
 }
 
 export function shouldExposeInMainCatalog(product = {}) {
+  if (isInternalTestProduct(product)) return false;
   const status = getCommercialStatus(product);
   return ![COMMERCIAL_STATUS.REFERENCE_ONLY, COMMERCIAL_STATUS.SEMANTIC_ONLY].includes(status);
 }

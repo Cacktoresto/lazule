@@ -1,8 +1,8 @@
 const PUBLIC_PRODUCT_FIELDS = [
-  'id','name','brand','category','gender','salePrice','image','badges','description','olfactoryReference',
+  'id','slug','sku','name','brand','category','type','gender','salePrice','stock','stockActive','image','badges','description','olfactoryReference',
   'available','featured','status','commercialStatus','concentration','notes','accords','family','similarTo','inspirations',
   'vibeTags','occasionTags','weatherTags','performanceLabel','projectionLabel','popularityTier','description_editorial',
-  'ai_summary','dna_vector','dominantDNA','recommendationHints','catalogVisibility',
+  'ai_summary','dna_vector','dominantDNA','recommendationHints','catalogVisibility','isInternalTestProduct',
   'olfactiveProfile','narrative','signature','personality','occasion','temperature','projection','semanticFacets',
   'semanticConfidence','semanticReasons','semanticCluster','semanticRelated',
 ];

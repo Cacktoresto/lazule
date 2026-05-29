@@ -1,4 +1,5 @@
 import { shouldExposeInMainCatalog } from '../utils/commercialStatus.js';
+import { excludeInternalTestProducts } from '../domain/internalTestProduct.js';
 
 let referencePerfumesPromise;
 
@@ -13,7 +14,7 @@ export async function loadReferencePerfumes() {
 export async function loadRecommendationKnowledgeBase(catalogProducts = []) {
   const referencePerfumes = await loadReferencePerfumes();
   const seen = new Set();
-  return [...catalogProducts, ...referencePerfumes]
+  return [...excludeInternalTestProducts(catalogProducts), ...referencePerfumes]
     .filter(Boolean)
     .filter((product) => {
       const key = product.productSlug ?? product.id ?? `${product.brand}-${product.name}`;
@@ -24,5 +25,5 @@ export async function loadRecommendationKnowledgeBase(catalogProducts = []) {
 }
 
 export function filterMainCatalogExposure(products = []) {
-  return products.filter((product) => shouldExposeInMainCatalog(product));
+  return excludeInternalTestProducts(products).filter((product) => shouldExposeInMainCatalog(product));
 }

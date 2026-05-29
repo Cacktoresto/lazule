@@ -1,5 +1,6 @@
 import { normalizeSearchText } from '../utils/search.js';
 import { getLocalCatalogProducts } from '../data/localCatalogAdapter.js';
+import { excludeInternalTestProducts } from '../domain/internalTestProduct.js';
 import { products as rawProducts } from '../data/products.js';
 
 const GROUP_LIMIT = 8;
@@ -83,7 +84,7 @@ function pickByDiversity(items, base, limit = 4) {
 }
 
 export function buildSimilarPerfumesArtifact(catalog = getLocalCatalogProducts(rawProducts)) {
-  const publicCatalog = catalog.filter((p) => p && p.available !== false && p.catalogVisibility !== 'reference' && p.image);
+  const publicCatalog = excludeInternalTestProducts(catalog).filter((p) => p && p.available !== false && p.catalogVisibility !== 'reference' && p.image);
   const artifact = {};
 
   for (const base of publicCatalog) {

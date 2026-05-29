@@ -2,6 +2,7 @@ import { getAllProducts, getAllProductsAsync } from '../data/catalogRepository.j
 import { getLocalCatalogProducts } from '../data/localCatalogAdapter.js';
 import { normalizeSearchText } from './search.js';
 import { createBrandSlug, createProductSlug } from './productRouting.js';
+import { excludeInternalTestProducts, isInternalTestProduct } from '../domain/internalTestProduct.js';
 
 export function getCatalogProducts(sourceProducts) {
   return sourceProducts ? getLocalCatalogProducts(sourceProducts) : getAllProducts();
@@ -534,7 +535,8 @@ async function loadRecommendationEngine() {
 function getRelatedProductsFallback(currentProduct, allProducts = [], { limit = 8 } = {}) {
   const targetCount = Math.max(0, Math.min(limit, allProducts.length - 1));
   if (!targetCount) return [];
-  const scoredItems = allProducts
+  const publicProducts = excludeInternalTestProducts(allProducts);
+  const scoredItems = publicProducts
     .filter((candidate) => !isSameProduct(currentProduct, candidate))
     .map((candidate) => ({ product: candidate, score: getRecommendationScore(currentProduct, candidate) }))
     .sort(sortRecommendationItems);
@@ -543,6 +545,9 @@ function getRelatedProductsFallback(currentProduct, allProducts = [], { limit = 
 }
 
 export function getProductRecommendations(currentProduct, allProducts = getCatalogProducts(), { min = 4, max = 8, engine = 'dna' } = {}) {
+  const recommendationPool = excludeInternalTestProducts(allProducts);
+  if (isInternalTestProduct(currentProduct)) return [];
+  allProducts = recommendationPool;
   if (engine === 'dna') {
     const relatedProducts = getRelatedProductsFallback(currentProduct, allProducts, { limit: max });
     const enoughRelatedProducts = relatedProducts.length >= Math.min(min, Math.max(0, allProducts.length - 1));
@@ -798,6 +803,7 @@ function getWeeklySelectionScore(product, indexById) {
 }
 
 export function getFeaturedCollections(allProducts = getCatalogProducts()) {
+  allProducts = excludeInternalTestProducts(allProducts);
   const reservation = createHomeShowcaseReservation();
   const indexById = new Map(allProducts.map((product, index) => [product.id, index]));
 
@@ -828,7 +834,7 @@ export function getFeaturedCollections(allProducts = getCatalogProducts()) {
 
 export function getBrandBySlug(slug, allProducts = getCatalogProducts()) {
   const normalizedSlug = createBrandSlug(slug);
-  const brandProducts = allProducts.filter((product) => product.brandSlug === normalizedSlug);
+  const brandProducts = excludeInternalTestProducts(allProducts).filter((product) => product.brandSlug === normalizedSlug);
   const brandName = brandProducts[0]?.brand ?? '';
 
   return brandProducts.length > 0 ? { slug: normalizedSlug, name: brandName, products: brandProducts } : null;
@@ -844,7 +850,7 @@ export async function getProductRecommendationsAsync(currentProduct, allProducts
 
   try {
     const getRelatedProducts = await loadRecommendationEngine();
-    const relatedProducts = getRelatedProducts(currentProduct, allProducts, { limit: options.max ?? 8 });
+    const relatedProducts = getRelatedProducts(currentProduct, excludeInternalTestProducts(allProducts), { limit: options.max ?? 8 });
     return relatedProducts.length ? relatedProducts : recommendations;
   } catch {
     return recommendations;
