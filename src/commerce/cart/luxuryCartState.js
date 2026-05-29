@@ -59,6 +59,9 @@ export function addToLuxurySelection(product) {
       editorialPhrase: editorialLine(product),
     }];
   writeSelection(next);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('lazule:selection-added', { detail: { items: next, productId: product.id } }));
+  }
   return next;
 }
 
