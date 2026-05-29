@@ -9,6 +9,7 @@ import {
   optionallyLoadPrecomputedEmbeddings,
 } from './olfactiveEmbeddingAdapter.js';
 import { buildQueryUnderstandingExplainability, interpretUserIntent } from './semanticQueryUnderstanding.js';
+import { excludeInternalTestProducts } from '../domain/internalTestProduct.js';
 
 const SCORE_WEIGHTS = { accords: 0.33, vibes: 0.2, occasions: 0.13, weather: 0.08, families: 0.1, luxurySignature: 0.1, confidence: 0.06 };
 let semanticSessionProfile = { tokens: [], directions: { accords: [], vibes: [], families: [], occasions: [], weather: [] }, queries: 0 };
@@ -149,6 +150,7 @@ export const HYBRID_WEIGHTS = Object.freeze({
 });
 
 export function rankSemanticWithEmbeddings(query = '', products = [], options = {}) {
+  products = excludeInternalTestProducts(products);
   const interpretedIntent = interpretSemanticIntent(query, { updateSession: options.updateSession });
   const precomputed = optionallyLoadPrecomputedEmbeddings();
   const queryEmbedding = generateQueryEmbedding({ query, interpreted: interpretedIntent });

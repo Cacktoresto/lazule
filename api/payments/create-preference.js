@@ -91,7 +91,8 @@ function validateIncomingItems(items) {
 function recalculateCart(incomingItems, products) {
   return incomingItems.map((item) => {
     const product = products.find((candidate) => candidate.id === item.id && candidate.available);
-    if (!product || !Number.isFinite(Number(product.salePrice)) || Number(product.salePrice) <= 0) return null;
+    const stockLimit = product?.stockActive ? Math.max(0, Math.floor(Number(product.stock) || 0)) : Infinity;
+    if (!product || !Number.isFinite(Number(product.salePrice)) || Number(product.salePrice) <= 0 || item.quantity > stockLimit) return null;
     return {
       id: product.id,
       title: product.name,

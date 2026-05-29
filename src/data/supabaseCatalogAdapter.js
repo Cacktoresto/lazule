@@ -80,6 +80,12 @@ function mapSupabasePerfumeRow(row = {}) {
     olfactoryReference: getRowValue(row, ['olfactoryReference', 'olfactory_reference'], ''),
     available: available !== false,
     featured: Boolean(getRowValue(row, ['featured', 'is_featured'], false)),
+    stock: getRowValue(row, ['stock', 'quantity', 'inventory'], undefined),
+    stockActive: Boolean(getRowValue(row, ['stockActive', 'stock_active'], false)),
+    sku: getRowValue(row, ['sku'], ''),
+    type: getRowValue(row, ['type', 'product_type'], ''),
+    catalogVisibility: getRowValue(row, ['catalogVisibility', 'catalog_visibility'], undefined),
+    isInternalTestProduct: Boolean(getRowValue(row, ['isInternalTestProduct', 'is_internal_test_product'], false)),
   };
 }
 

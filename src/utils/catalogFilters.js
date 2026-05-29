@@ -1,5 +1,6 @@
 import { isAvailableForImmediateFilter } from './availability.js';
 import { matchesSmartSearch, normalizeSearchText } from './search.js';
+import { excludeInternalTestProducts, isInternalTestProduct } from '../domain/internalTestProduct.js';
 
 export const ALL_FILTER_VALUE = 'Todos';
 
@@ -177,7 +178,7 @@ export function inferCatalogType(product) {
 }
 
 export function countCatalogProductsByType(products) {
-  return products.reduce((counts, product) => {
+  return excludeInternalTestProducts(products).reduce((counts, product) => {
     const catalogType = product.catalogType ?? inferCatalogType(product);
 
     return {
@@ -188,6 +189,7 @@ export function countCatalogProductsByType(products) {
 }
 
 export function matchesCatalogFilters(product, filters, searchTerm = '') {
+  if (isInternalTestProduct(product)) return false;
   const normalizedSearch = normalizeSearchText(searchTerm);
   const priceRange = getPriceRange(filters.priceRange);
   const availabilityKey = product.availability?.key;
@@ -220,6 +222,9 @@ export function matchesCatalogFilters(product, filters, searchTerm = '') {
 }
 
 function getSoftMatchScore(product, filters, searchTerm = '') {
+  if (isInternalTestProduct(product)) {
+    return { strict: { internalTestProduct: false }, strictPass: false, score: 0 };
+  }
   const normalizedSearch = normalizeSearchText(searchTerm);
   const priceRange = getPriceRange(filters.priceRange);
   const availabilityKey = product.availability?.key;
@@ -248,7 +253,7 @@ function getSoftMatchScore(product, filters, searchTerm = '') {
 }
 
 export function getCatalogSearchReliabilityDiagnostics(products, filters, searchTerm = '') {
-  return products.map((product) => {
+  return excludeInternalTestProducts(products).map((product) => {
     const reliability = getSoftMatchScore(product, filters, searchTerm);
     const droppedBy = Object.entries(reliability.strict).filter(([, matched]) => !matched).map(([key]) => key);
     return { product, ...reliability, droppedBy };

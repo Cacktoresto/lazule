@@ -4,6 +4,7 @@ import { OlfactiveAssistant } from './OlfactiveAssistant';
 import { ProductCard } from './ProductCard';
 import { CatalogHighlights } from './CatalogHighlights';
 import { getAllProducts } from '../data/catalogRepository';
+import { excludeInternalTestProducts } from '../domain/internalTestProduct';
 import { getFeaturedCollections } from '../utils/catalog';
 import { createBrandPath } from '../utils/productRouting';
 import { applyHomeSeo } from '../utils/seo';
@@ -263,7 +264,7 @@ export function Home() {
   const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile: atmosphereProfile, events: [], wishlist: [] }), [atmosphereProfile]);
 
   const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
-    const products = getAllProducts();
+    const products = excludeInternalTestProducts(getAllProducts());
     const featuredCollections = getFeaturedCollections(products);
     const [firstHeroProduct] = featuredCollections.weeklySelection.length ? featuredCollections.weeklySelection : products;
     const availableBrandSet = new Set(products.map((product) => product.brand));

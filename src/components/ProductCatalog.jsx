@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { loadSearchRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
 import { createWhatsAppLink } from '../utils/whatsapp';
 import { getAllProducts } from '../data/catalogRepository';
+import { excludeInternalTestProducts } from '../domain/internalTestProduct';
 import { getFeaturedCollections } from '../utils/catalog';
 import { trackEvent, trackSearch, trackWhatsAppClick } from '../utils/analytics';
 import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
@@ -125,7 +126,7 @@ export function ProductCatalog() {
   const [enableSemanticHydration, setEnableSemanticHydration] = useState(false);
   const resultsRef = useRef(null);
 
-  const catalogProducts = useMemo(() => getAllProducts(), []);
+  const catalogProducts = useMemo(() => excludeInternalTestProducts(getAllProducts()), []);
   const featuredCollections = useMemo(() => getFeaturedCollections(catalogProducts), [catalogProducts]);
 
   const filterOptions = useMemo(() => {

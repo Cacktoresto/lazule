@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { getBrandBySlug, getCatalogProductsAsync } from '../src/utils/catalog.js';
 import { createBrandPath, createBrandSlug, createProductPath } from '../src/utils/productRouting.js';
+import { excludeInternalTestProducts } from '../src/domain/internalTestProduct.js';
 import {
   DEFAULT_ORIGIN,
   DEFAULT_SOCIAL_IMAGE_PATH,
@@ -149,7 +150,7 @@ function writeRouteHtmlFiles(baseDir) {
 }
 
 async function main() {
-  products = await getCatalogProductsAsync();
+  products = excludeInternalTestProducts(await getCatalogProductsAsync());
   uniqueBrands = [...new Map(products.map((product) => [product.brandSlug, product.brand])).values()].filter(Boolean);
 
   fs.mkdirSync(targetDir, { recursive: true });
