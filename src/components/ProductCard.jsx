@@ -69,7 +69,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
   const humanNarrative = product.narrative || createHumanContextNarrative(product, { seed: product.name?.length || 0 });
 
   return (
-    <article className={`lazule-product-card lazule-cinematic-card lazule-card-${variant} group h-full overflow-hidden rounded-[1.55rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem] ${isHero ? 'md:min-h-[30rem]' : ''}`}>
+    <article className={`lazule-product-card lazule-cinematic-card lazule-card-${variant} group h-full overflow-hidden rounded-[1.65rem] border border-[var(--laz-border-mineral)] surface-lazule-card shadow-mineral-soft backdrop-blur sm:rounded-[1.8rem] ${isHero ? 'md:min-h-[30rem]' : ''}`}>
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
@@ -118,7 +118,7 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
             ))}
           </div>
           {product.semanticConfidence < 0.66 ? <p className="mt-2 text-[0.62rem] uppercase tracking-[0.12em] text-slate-400">Perfil olfativo em curadoria</p> : null}
-          <strong className="mt-3 text-lg text-lazule-mist sm:mt-4 sm:text-xl">{priceLabel}</strong>
+          <span className="mt-4 text-sm font-semibold text-lazule-gold/86 sm:text-base">{priceLabel}</span>
         </div>
       </a>
     </article>
