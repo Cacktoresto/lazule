@@ -20,6 +20,8 @@ test('cart drawer dialog supports open and close interactions', () => {
   assert.match(drawerSource, /aria-labelledby="cart-drawer-title"/);
   assert.match(drawerSource, /inert=\{open \? undefined : ''\}/);
   assert.match(drawerSource, /data-testid="cart-backdrop"/);
+  assert.match(drawerSource, /createPortal\(/);
+  assert.match(drawerSource, /document\.body/);
   assert.match(drawerSource, /event\.key === 'Escape'/);
   assert.match(drawerSource, /document\.body\.style\.overflow = 'hidden'/);
 });
@@ -33,6 +35,10 @@ test('cart drawer CTAs are explicit and empty checkout is disabled', () => {
 });
 
 test('cart drawer uses opaque premium surface with iPhone-style blurred backdrop', () => {
+  assert.match(drawerSource, /fixed inset-0 bg-\[rgba\(2,6,18/);
+  assert.match(drawerSource, /fixed right-0 top-0/);
+  assert.match(drawerSource, /sm:w-\[min\(460px,100vw\)\]/);
+  assert.match(drawerSource, /height: '100dvh'/);
   assert.match(drawerSource, /backdrop-blur-\[14px\]/);
   assert.match(drawerSource, /backdrop-saturate-\[120%\]/);
   assert.match(drawerSource, /bg-\[linear-gradient\(155deg,#030713/);
