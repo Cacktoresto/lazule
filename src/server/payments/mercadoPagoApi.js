@@ -13,10 +13,10 @@ function getEnvironmentFromToken(token = '') {
 }
 
 function getAccessToken() {
-  const token = process.env.MP_ACCESS_TOKEN;
+  const token = process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN;
   if (isSafeDebugRuntime()) console.info('[MP] token configured', { hasToken: Boolean(token), env: process.env.VERCEL_ENV });
   if (!token) {
-    const error = new Error('MP_ACCESS_TOKEN missing');
+    const error = new Error('MERCADO_PAGO_ACCESS_TOKEN missing');
     error.code = 'mp_token_missing';
     error.status = 500;
     throw error;

@@ -27,11 +27,14 @@ test('cart drawer dialog supports open and close interactions', () => {
 });
 
 test('cart drawer CTAs are explicit and empty checkout is disabled', () => {
-  assert.match(drawerSource, /Finalizar atendimento/);
+  assert.match(drawerSource, /Finalizar compra/);
+  assert.match(drawerSource, /Falar com consultor/);
   assert.match(drawerSource, /Continuar explorando/);
   assert.match(drawerSource, /Limpar seleção/);
   assert.match(drawerSource, /disabled className='mt-4/);
+  assert.match(drawerSource, /startMercadoPagoCheckout\(items, \{ total, source: 'cart_drawer' \}\)/);
   assert.match(drawerSource, /createWhatsAppLink\(buildSelectionWhatsAppMessage\(items, total\)\)/);
+  assert.doesNotMatch(drawerSource, /Finalizar atendimento/);
 });
 
 test('cart drawer uses opaque premium surface with iPhone-style blurred backdrop', () => {

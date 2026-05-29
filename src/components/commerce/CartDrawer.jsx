@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatBRL } from '../../utils/currency';
 import { createWhatsAppLink } from '../../utils/whatsapp';
 import { clearLuxurySelection, removeFromLuxurySelection, upsertLuxuryQuantity } from '../../commerce/cart/luxuryCartState';
 import { buildSelectionWhatsAppMessage } from '../../commerce/checkout/selectionCheckout';
+import { CHECKOUT_ERROR_MESSAGE, startMercadoPagoCheckout } from '../../services/mercadoPagoCheckout';
+import { trackEvent } from '../../utils/analytics';
 
 const drawerRootClass = 'fixed inset-0 z-[120] pointer-events-none';
 const backdropClass = [
@@ -30,10 +32,34 @@ export function CartDrawer({ open, onClose, items = [], total }) {
   const hasItems = items.length > 0;
   const closeButtonRef = useRef(null);
   const previousFocusRef = useRef(null);
-  const checkoutHref = useMemo(
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+  const whatsappHref = useMemo(
     () => createWhatsAppLink(buildSelectionWhatsAppMessage(items, total)),
     [items, total],
   );
+
+  async function handleCheckoutClick() {
+    if (!hasItems || isCheckingOut) return;
+    setIsCheckingOut(true);
+    setCheckoutError('');
+    try {
+      await startMercadoPagoCheckout(items, { total, source: 'cart_drawer' });
+    } catch (error) {
+      setCheckoutError(error?.message || CHECKOUT_ERROR_MESSAGE);
+    } finally {
+      setIsCheckingOut(false);
+    }
+  }
+
+  function handleWhatsAppConsultationClick() {
+    trackEvent('whatsapp_consultation_from_cart', {
+      item_count: items.length,
+      total,
+      source: 'cart_drawer',
+      product_ids: items.map((item) => item.slug || item.id).filter(Boolean),
+    });
+  }
 
   useEffect(() => {
     if (!open) return undefined;
@@ -90,7 +116,7 @@ export function CartDrawer({ open, onClose, items = [], total }) {
               <div className="min-w-0">
                 <p className="text-[0.65rem] font-semibold uppercase tracking-[0.36em] text-lazule-gold/85">Seleção LAZULE</p>
                 <h2 id="cart-drawer-title" className="mt-1.5 font-display text-3xl leading-tight text-white">Sua seleção</h2>
-                <p className="mt-2 max-w-[20rem] text-sm leading-6 text-lazule-mist/68">Curated checkout concierge para revisar fragrâncias, quantidades e finalizar com atendimento dedicado.</p>
+                <p className="mt-2 max-w-[20rem] text-sm leading-6 text-lazule-mist/68">Curadoria concierge para revisar fragrâncias, quantidades e seguir para pagamento protegido.</p>
               </div>
               <button
                 ref={closeButtonRef}
@@ -147,7 +173,9 @@ export function CartDrawer({ open, onClose, items = [], total }) {
             </div>
             {hasItems ? (
               <>
-                <a href={checkoutHref} target="_blank" rel="noreferrer" className="lazule-premium-button lazule-cta-shimmer mt-4 block w-full rounded-full border border-[#d8bb72]/65 bg-[linear-gradient(135deg,#f1d991_0%,#c8a24d_42%,#8f6b2f_100%)] px-5 py-4 text-center text-sm font-bold uppercase tracking-[0.2em] text-[#07101f] shadow-[0_18px_48px_rgba(200,162,77,0.24),inset_0_1px_0_rgba(255,255,255,0.42)] transition hover:shadow-[0_22px_58px_rgba(200,162,77,0.32),inset_0_1px_0_rgba(255,255,255,0.50)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#030713]">Finalizar atendimento</a>
+                <button type="button" onClick={handleCheckoutClick} disabled={isCheckingOut} className="lazule-premium-button lazule-cta-shimmer mt-4 block w-full rounded-full border border-[#d8bb72]/65 bg-[linear-gradient(135deg,#f1d991_0%,#c8a24d_42%,#8f6b2f_100%)] px-5 py-4 text-center text-sm font-bold uppercase tracking-[0.2em] text-[#07101f] shadow-[0_18px_48px_rgba(200,162,77,0.24),inset_0_1px_0_rgba(255,255,255,0.42)] transition hover:shadow-[0_22px_58px_rgba(200,162,77,0.32),inset_0_1px_0_rgba(255,255,255,0.50)] disabled:cursor-wait disabled:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#030713]">{isCheckingOut ? 'Iniciando pagamento...' : 'Finalizar compra'}</button>
+                {checkoutError && <div className="mt-3 rounded-2xl border border-red-300/20 bg-red-950/25 px-4 py-3 text-sm leading-6 text-red-100" role="alert">{checkoutError}</div>}
+                <a href={whatsappHref} target="_blank" rel="noreferrer" onClick={handleWhatsAppConsultationClick} className="mt-3 block w-full rounded-full border border-white/[0.14] bg-white/[0.055] px-4 py-3 text-center text-sm font-semibold text-lazule-mist transition hover:border-lazule-gold/35 hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/65">Falar com consultor</a>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <button type="button" onClick={onClose} className="rounded-full border border-white/[0.14] bg-white/[0.055] px-4 py-3 text-sm font-semibold text-lazule-mist transition hover:border-lazule-gold/35 hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/65">Continuar explorando</button>
                   <button type="button" onClick={clearLuxurySelection} className="rounded-full border border-white/[0.1] px-4 py-3 text-sm font-semibold text-lazule-mist/60 transition hover:border-red-300/35 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/65">Limpar seleção</button>
@@ -155,7 +183,7 @@ export function CartDrawer({ open, onClose, items = [], total }) {
               </>
             ) : (
               <>
-                <button type="button" disabled className='mt-4 block w-full cursor-not-allowed rounded-full border border-white/[0.12] bg-white/[0.055] px-5 py-4 text-center text-sm font-bold uppercase tracking-[0.2em] text-lazule-mist/45'>Finalizar atendimento</button>
+                <button type="button" disabled className='mt-4 block w-full cursor-not-allowed rounded-full border border-white/[0.12] bg-white/[0.055] px-5 py-4 text-center text-sm font-bold uppercase tracking-[0.2em] text-lazule-mist/45'>Finalizar compra</button>
                 <button type="button" onClick={onClose} className="mt-3 w-full rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-4 py-3 text-sm font-semibold text-lazule-gold transition hover:border-lazule-gold/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold/65">Continuar explorando</button>
               </>
             )}

@@ -20,9 +20,9 @@ export function buildSelectionWhatsAppMessage(items = [], total = 0) {
   });
 
   return [
-    'Olá, LAZULE! Quero finalizar atendimento com esta seleção curada:',
+    'Olá, LAZULE! Quero falar com a curadoria sobre esta seleção:',
     ...productLines,
     `Total estimado: ${formatBRL(total)}`,
-    'Pode confirmar disponibilidade, pagamento e próximos passos pelo concierge?',
+    'Pode me ajudar com disponibilidade, dúvidas e orientação pelo concierge?',
   ].join('\n');
 }
