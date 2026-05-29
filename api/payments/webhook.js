@@ -69,7 +69,7 @@ async function handler(req, res) {
     console.info('[MP] webhook processed', {
       orderId: result.orderId,
       status: result.status || result.ignored || 'ok',
-      hasToken: Boolean(process.env.MP_ACCESS_TOKEN),
+      hasToken: Boolean(process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN),
       env: process.env.VERCEL_ENV,
     });
     return res.status(200).json({ ok: true, deduped: Boolean(result.deduped), ignored: result.ignored });

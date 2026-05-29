@@ -90,7 +90,7 @@ test('selection checkout WhatsApp message includes selected products and empty f
     { id: 'amber-01', name: 'Amber Concierge', brand: 'LAZULE', quantity: 2, price: 420 },
   ], 840);
 
-  assert.match(message, /Finalizar|finalizar/);
+  assert.match(message, /curadoria|consultoria|dúvidas/);
   assert.match(message, /Amber Concierge/);
   assert.match(message, /2x/);
   assert.match(message, /R\$\s?840,00/);

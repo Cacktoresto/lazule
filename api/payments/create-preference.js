@@ -95,11 +95,15 @@ function recalculateCart(incomingItems, products) {
     if (!product || !Number.isFinite(Number(product.salePrice)) || Number(product.salePrice) <= 0 || item.quantity > stockLimit) return null;
     return {
       id: product.id,
+      slug: product.slug || product.id,
       title: product.name,
+      name: product.name,
       quantity: item.quantity,
       currency_id: 'BRL',
       unit_price: Number(product.salePrice),
       picture_url: product.image,
+      image: product.image,
+      total: Number(product.salePrice) * item.quantity,
     };
   }).filter(Boolean);
 }
@@ -107,7 +111,14 @@ function recalculateCart(incomingItems, products) {
 function buildPreferencePayload({ req, orderId, items, customer }) {
   const baseUrl = resolveBaseUrl(req).replace(/\/$/, '');
   const payload = {
-    items: items.map(({ picture_url: pictureUrl, ...item }) => ({ ...item, picture_url: pictureUrl })),
+    items: items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      quantity: item.quantity,
+      currency_id: item.currency_id,
+      unit_price: item.unit_price,
+      picture_url: item.picture_url,
+    })),
     external_reference: orderId,
     metadata: { order_id: orderId },
     back_urls: {
@@ -131,8 +142,8 @@ async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: true, code: 'method_not_allowed' });
 
   try {
-    if (!process.env.MP_ACCESS_TOKEN) {
-      const error = new Error('MP_ACCESS_TOKEN missing');
+    if (!(process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN)) {
+      const error = new Error('MERCADO_PAGO_ACCESS_TOKEN missing');
       error.code = 'mp_token_missing';
       error.status = 500;
       throw error;
@@ -213,7 +224,7 @@ async function handler(req, res) {
     console.error('[MP] create-preference failed', {
       code: error?.code || 'create_preference_failed',
       status,
-      hasToken: Boolean(process.env.MP_ACCESS_TOKEN),
+      hasToken: Boolean(process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN),
       env: process.env.VERCEL_ENV,
     });
     return res.status(status).json(safeErrorPayload(error));
