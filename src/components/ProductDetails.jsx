@@ -947,7 +947,6 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold"
           onClick={() => {
             addToLuxurySelection(product);
-            window.location.href = '/selecao';
           }}
         >
           Adicionar à seleção
