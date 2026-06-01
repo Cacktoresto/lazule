@@ -115,6 +115,57 @@ function getProductEssence(product) {
 
 
 
+
+function normalizePdpCopy(value) {
+  const replacements = new Map([
+    ['elegant', 'Elegante'],
+    ['luxury', 'Luxo discreto'],
+    ['premium', 'Refinado'],
+    ['clean', 'Limpo'],
+    ['fresh', 'Fresco'],
+    ['designer', 'Urbano'],
+    ['signature', 'Assinatura'],
+    ['office', 'Trabalho'],
+    ['nightlife', 'Noite'],
+    ['beast mode', 'Intensa'],
+  ]);
+  const raw = String(value || '').trim();
+  const key = normalizeProductClassifier(raw);
+  return replacements.get(key) || raw.replace(/premium/gi, 'refinado').replace(/beast mode/gi, 'intensa');
+}
+
+function normalizePdpChipLabel(value) {
+  const normalized = normalizePdpCopy(value);
+  return normalized ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : '';
+}
+
+function getPerformanceSignalStyle(item = {}) {
+  const level = normalizeProductClassifier(item.level);
+  const value = Number(item.value) || 0;
+  if (level.includes('intens') || value >= 0.78) {
+    return {
+      label: 'Intensa',
+      meterClass: 'lazule-dna-meter lazule-performance-meter lazule-performance-meter--intense block h-full rounded-full',
+      barClass: 'h-2 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/5',
+      cardClass: 'lazule-performance-signal lazule-performance-signal--intense rounded-2xl border border-lazule-gold/24 bg-lazule-night/58 p-3.5',
+    };
+  }
+  if (level.includes('marcante') || value >= 0.62) {
+    return {
+      label: 'Marcante',
+      meterClass: 'lazule-dna-meter lazule-performance-meter lazule-performance-meter--marked block h-full rounded-full',
+      barClass: 'h-1.5 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/5',
+      cardClass: 'lazule-performance-signal lazule-performance-signal--marked rounded-2xl border border-lazule-gold/18 bg-lazule-night/48 p-3.5',
+    };
+  }
+  return {
+    label: level.includes('suave') ? 'Suave' : 'Moderada',
+    meterClass: 'lazule-dna-meter lazule-performance-meter lazule-performance-meter--moderate block h-full rounded-full',
+    barClass: 'h-1 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/5',
+    cardClass: 'lazule-performance-signal lazule-performance-signal--moderate rounded-2xl border border-white/10 bg-lazule-night/38 p-3.5',
+  };
+}
+
 function splitProductTerms(value) {
   if (Array.isArray(value)) return value.flatMap(splitProductTerms);
   if (value === undefined || value === null) return [];
@@ -254,7 +305,7 @@ function createOlfactiveProfileRows(product = {}, experience = null, humanReadin
     { label: 'Ocasião', value: uniqueText(signals.occasions).slice(0, 3).join(' · ') || experience?.idealUsage?.map((item) => item.label).slice(0, 2).join(' · ') || humanReading.humanOccasion },
     { label: 'Clima', value: uniqueText(signals.weather).slice(0, 3).join(' · ') || presenceReading.temperaturePerception || 'ameno' },
     { label: 'Projeção', value: product.projectionLabel || experience?.performance?.find((item) => item.id === 'projection')?.level || presenceReading.presenceDistance || 'moderada' },
-    { label: 'Vibe', value: uniqueText([...(signals.vibes || []), ...getVibeItems(product)]).slice(0, 3).join(' · ') || humanReading.personality },
+    { label: 'Atmosfera', value: uniqueText([...(signals.vibes || []), ...getVibeItems(product)]).slice(0, 3).join(' · ') || humanReading.personality },
   ];
 
   return rows.filter((row) => row.value);
@@ -366,7 +417,7 @@ function createEditorialGallery(product) {
     {
       id: 'detail',
       src: product.image,
-      alt: `Detalhe premium do perfume ${product.name}`,
+      alt: `Detalhe refinado do perfume ${product.name}`,
       label: 'Detalhe LAZULE',
       tone: 'from-lazule-night via-[#122b62] to-[#050816]',
     },
@@ -666,16 +717,16 @@ function getVibeItems(product) {
   const normalizedCategory = normalizeProductClassifier(product.category);
   const normalizedGender = normalizeProductClassifier(product.gender);
   const normalizedReference = normalizeProductClassifier(product.olfactoryReference);
-  const base = ['presença forte', 'elegante sem esforço'];
+  const base = ['presença forte', 'elegância natural'];
 
   if (normalizedCategory.includes('arabe')) {
     base.unshift('noite intensa', 'rastro opulento');
   } else {
-    base.unshift('assinatura sofisticada', 'rotina premium');
+    base.unshift('assinatura sofisticada', 'rotina refinada');
   }
 
   if (normalizedReference || normalizedGender === 'unissex') {
-    base.push('descoberta sensorial');
+    base.push('descoberta olfativa');
   }
 
   if (normalizedGender === 'feminino') {
@@ -718,7 +769,7 @@ function getAccordionItems(product, description, olfactoryReference) {
     },
     {
       title: 'Sobre a fragrância',
-      content: description || product.narrative || 'Uma escolha premium da LAZULE FRAGRANCES para quem prefere perfumes com identidade, presença e acabamento elegante.',
+      content: description || product.narrative || 'Uma escolha refinada da LAZULE FRAGRANCES para quem prefere perfumes com identidade, presença e acabamento elegante.',
     },
   ];
 }
@@ -740,16 +791,16 @@ function PerfumeExperienceLayer({ product, experience, whatsAppLink }) {
   }
 
   return (
-    <section className="lazule-reveal overflow-hidden rounded-[2.65rem] border border-lazule-gold/20 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.22),transparent_32rem),linear-gradient(145deg,rgba(10,20,42,0.94),rgba(4,8,18,0.88))] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section className="lazule-pdp-card lazule-reveal overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_30rem),linear-gradient(145deg,rgba(10,20,42,0.94),rgba(4,8,18,0.9))]">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Perfil olfativo</p>
           <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">DNA olfativo</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-            Um mapa sensorial da curadoria LAZULE — leitura estética do perfume, sem promessas científicas absolutas.
+            Uma leitura clara de presença, textura e contexto. Sem excesso técnico.
           </p>
         </div>
-        <div className="rounded-[1.4rem] border border-lazule-gold/20 bg-lazule-gold/10 p-4 text-sm leading-6 text-lazule-mist lg:max-w-sm">
+        <div className="rounded-[1.55rem] border border-lazule-gold/18 bg-lazule-gold/[0.075] p-4 text-sm leading-6 text-lazule-mist lg:max-w-sm">
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Assinatura LAZULE</p>
           <p className="mt-2 font-display text-2xl leading-tight">{experience.signature.text}</p>
           {experience.inCuration ? <p className="mt-2 text-xs text-slate-300">Perfil olfativo em curadoria.</p> : null}
@@ -762,18 +813,18 @@ function PerfumeExperienceLayer({ product, experience, whatsAppLink }) {
             <button
               key={dimension.id}
               type="button"
-              className="lazule-dna-row lazule-reveal-item w-full rounded-[1.35rem] border border-white/10 bg-white/[0.045] p-4 text-left transition hover:border-lazule-gold/35 hover:bg-white/[0.07]"
+              className="lazule-dna-row lazule-reveal-item w-full rounded-[1.55rem] border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-lazule-gold/30 hover:bg-white/[0.06]"
               style={{ '--item-delay': `${index * 55}ms`, '--dna-width': `${Math.round(dimension.value * 100)}%` }}
               onClick={() => trackExperienceEvent('dna_dimension_click', experience, { dimension: dimension.id, dimension_level: dimension.level })}
             >
               <span className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-semibold text-lazule-mist">{dimension.label}</span>
-                <span className="shrink-0 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold">{dimension.level}</span>
+                <span className="font-semibold text-lazule-mist">{normalizePdpCopy(dimension.label)}</span>
+                <span className="shrink-0 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold">{normalizePdpChipLabel(dimension.level)}</span>
               </span>
               <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
                 <span className="lazule-dna-meter block h-full rounded-full bg-gradient-to-r from-lazule-gold/75 via-[#dfbd68] to-white/80" />
               </span>
-              <span className="mt-2 block text-xs leading-5 text-slate-400">{dimension.tone}</span>
+              <span className="mt-2 block text-xs leading-5 text-slate-400">{normalizePdpCopy(dimension.tone)}</span>
             </button>
           ))}
         </div>
@@ -781,8 +832,8 @@ function PerfumeExperienceLayer({ product, experience, whatsAppLink }) {
         <div className="space-y-3">
           <ExperienceChipPanel title="Ideal para" eyebrow="Uso ideal" items={experience.idealUsage} experience={experience} eventName="ideal_usage_click" />
           <PerformancePanel performance={experience.performance} />
-          <div className="rounded-[1.6rem] border border-white/10 bg-lazule-night/45 p-5">
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Status comercial</p>
+          <div className="rounded-[1.65rem] border border-white/10 bg-white/[0.04] p-5">
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Disponibilidade</p>
             <p className="mt-3 text-sm leading-6 text-slate-300">{experience.statusCta.supportingCopy}</p>
             <a
               className="lazule-premium-button mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-lazule-gold px-5 text-sm font-semibold text-lazule-night shadow-aureate"
@@ -806,7 +857,7 @@ function ExperienceChipPanel({ title, eyebrow, items, experience, eventName }) {
   }
 
   return (
-    <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-5">
+    <div className="rounded-[1.65rem] border border-white/10 bg-white/[0.04] p-5">
       <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">{eyebrow}</p>
       <h3 className="mt-2 font-display text-2xl text-lazule-mist">{title}</h3>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -817,7 +868,7 @@ function ExperienceChipPanel({ title, eyebrow, items, experience, eventName }) {
             className="lazule-touch-card min-h-10 rounded-full border border-lazule-gold/20 bg-lazule-gold/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.13em] text-lazule-gold"
             onClick={() => trackExperienceEvent(eventName, experience, { usage_type: item.type, usage_label: item.label })}
           >
-            {item.label}
+            {normalizePdpChipLabel(item.label)}
           </button>
         ))}
       </div>
@@ -827,22 +878,26 @@ function ExperienceChipPanel({ title, eyebrow, items, experience, eventName }) {
 
 function PerformancePanel({ performance }) {
   return (
-    <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-5">
+    <div className="rounded-[1.65rem] border border-white/10 bg-white/[0.04] p-5">
       <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Presença</p>
-      <h3 className="mt-2 font-display text-2xl text-lazule-mist">Performance esperada</h3>
+      <h3 className="mt-2 font-display text-2xl text-lazule-mist">Performance na pele</h3>
+      <p className="mt-2 text-xs leading-5 text-slate-400">Sinais práticos para entender alcance, duração e impacto.</p>
       <div className="mt-4 space-y-3">
-        {performance.map((item) => (
-          <div key={item.id} className="rounded-2xl bg-lazule-night/45 p-3" style={{ '--dna-width': `${Math.round(item.value * 100)}%` }}>
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="font-semibold text-slate-200">{item.label}</span>
-              <span className="rounded-full bg-white/10 px-2 py-1 text-[0.64rem] uppercase tracking-[0.12em] text-lazule-gold">{item.level}</span>
+        {performance.map((item) => {
+          const signal = getPerformanceSignalStyle(item);
+          return (
+            <div key={item.id} className={signal.cardClass} style={{ '--dna-width': `${Math.round(item.value * 100)}%` }}>
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-semibold text-slate-200">{normalizePdpCopy(item.label).replace(' percebida', '')}</span>
+                <span className="rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[0.64rem] uppercase tracking-[0.12em] text-lazule-gold">{signal.label}</span>
+              </div>
+              <div className={`mt-2.5 ${signal.barClass}`} aria-hidden="true">
+                <span className={signal.meterClass} />
+              </div>
+              {item.disclaimer ? <p className="mt-2 text-[0.68rem] leading-4 text-slate-400">{normalizePdpCopy(item.disclaimer)}</p> : null}
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
-              <span className="lazule-dna-meter block h-full rounded-full bg-gradient-to-r from-lazule-gold/70 to-white/70" />
-            </div>
-            {item.disclaimer ? <p className="mt-2 text-[0.68rem] leading-4 text-slate-400">{item.disclaimer}</p> : null}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -854,7 +909,7 @@ function VibeSection({ product }) {
 
   return (
     <section className="lazule-reveal rounded-[1.8rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Vibe</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Atmosfera</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {vibeItems.map((item, index) => (
           <div
@@ -862,7 +917,7 @@ function VibeSection({ product }) {
             key={item}
             style={{ '--item-delay': `${index * 55}ms` }}
           >
-            {item}
+            {normalizePdpChipLabel(item)}
           </div>
         ))}
       </div>
@@ -919,7 +974,7 @@ function OlfactiveDiscoveryTerms({ product, runtimeModules }) {
   }
 
   return (
-    <section className="lazule-reveal rounded-[2.1rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5">
+    <section className="lazule-pdp-card lazule-reveal">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-lazule-gold">Mapa olfativo</p>
@@ -961,7 +1016,7 @@ function RelationshipBlocks({ sections, currentProduct, experience }) {
   const editorialSubtitle = atmosphere.profile === 'smoky-dark' ? 'Perfumes que conversam com a mesma presença.' : atmosphere.profile === 'amber-oriental' ? 'Leituras próximas da assinatura interpretada pela LAZ.' : 'Seleção guiada por vibe, DNA olfativo, performance e ocasião.';
 
   return (
-    <section className="lazule-reveal lazule-recommendation-atmosphere rounded-[2.6rem] border border-white/10 bg-white/[0.03] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section className="lazule-pdp-card lazule-reveal lazule-recommendation-atmosphere">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Relações olfativas</p>
@@ -1025,7 +1080,7 @@ function SimilarPerfumeSections({ groups = {} }) {
   if (!sections.length) return null;
 
   return (
-    <section ref={railRef} className="lazule-reveal rounded-[2.5rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section ref={railRef} className="lazule-pdp-card lazule-reveal">
       <div className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Consultoria olfativa</p>
       </div>
@@ -1060,7 +1115,7 @@ function Recommendations({ products, currentProduct }) {
   const editorialSubtitle = atmosphere.profile === 'smoky-dark' ? 'Perfumes que conversam com a mesma presença.' : atmosphere.profile === 'amber-oriental' ? 'Leituras próximas da assinatura interpretada pela LAZ.' : 'Seleção guiada por vibe, DNA olfativo, performance e ocasião.';
 
   return (
-    <section className="lazule-reveal lazule-recommendation-atmosphere rounded-[2.6rem] border border-white/10 bg-white/[0.03] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section className="lazule-pdp-card lazule-reveal lazule-recommendation-atmosphere">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Descoberta emocional</p>
@@ -1211,19 +1266,18 @@ function LazuleTrustLayer() {
   const items = [
     ['Seleção curada', 'Escolhas revisadas por intenção de uso, presença e acabamento.'],
     ['Pagamento seguro', 'Checkout via Mercado Pago com transição transparente.'],
-    ['Suporte especializado', 'Atendimento humano para dúvidas antes da compra.'],
-    ['Atendimento consultivo', 'Ajuda para comparar caminhos olfativos sem pressão.'],
+    ['Atendimento consultivo', 'Ajuda humana para comparar caminhos olfativos.'],
     ['Processo transparente', 'Preço, disponibilidade e próximos passos sempre claros.'],
   ];
 
   return (
-    <section className="lazule-reveal rounded-[2.35rem] border border-lazule-gold/15 bg-white/[0.04] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section className="lazule-pdp-card lazule-reveal">
       <div className="max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Curadoria LAZULE</p>
         <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Compra calma. Escolha bem orientada.</h2>
         <p className="mt-3 text-sm leading-6 text-slate-300">Uma camada de confiança para você decidir sem pressa, com segurança e suporte quando precisar.</p>
       </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {items.map(([title, copy]) => (
           <div key={title} className="rounded-[1.45rem] border border-white/10 bg-lazule-night/35 p-4">
             <h3 className="text-sm font-semibold text-lazule-mist">{title}</h3>
@@ -1239,13 +1293,13 @@ function SemanticSearchEntry({ product }) {
   const suggestions = ['cheiro de rico', 'assinatura elegante', 'praia chique', 'luxo discreto', 'perfume executivo'];
 
   return (
-    <section className="lazule-reveal rounded-[2.1rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5">
+    <section className="lazule-pdp-card lazule-reveal">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Buscando algo parecido?</p>
-          <h2 className="mt-2 font-display text-3xl text-lazule-mist">Entre por uma sensação</h2>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist">Busque por sensação</h2>
         </div>
-        <p className="max-w-xl text-sm leading-6 text-slate-300">Use a busca semântica para encontrar perfumes pela atmosfera, não só pelo nome.</p>
+        <p className="max-w-xl text-sm leading-6 text-slate-300">Encontre caminhos por atmosfera, não apenas por nome.</p>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
         {suggestions.map((suggestion) => (
@@ -1305,7 +1359,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
           className="inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
           onClick={handleAddToSelection}
         >
-          Adicionar à seleção
+          Adicionar
         </button>
         <button
           type="button"
@@ -1331,7 +1385,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
         rel="noreferrer"
         onClick={handleConsultationClick}
       >
-        Precisa de ajuda para escolher?
+        Solicitar atendimento
       </a>
     </div>
   );
@@ -1349,7 +1403,7 @@ function ProductUnderstandingSection({ product, experience }) {
   }
 
   return (
-    <section className="lazule-reveal rounded-[2.6rem] border border-lazule-gold/15 bg-white/[0.035] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section className="lazule-pdp-card lazule-reveal">
       <div className="mb-5 max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Entenda a escolha</p>
         <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Por que esta fragrância entra na sua jornada</h2>
@@ -1368,12 +1422,12 @@ function FinalPurchaseSection({ product, whatsAppLink, referralContext }) {
   const statusMeta = getCommercialStatusMeta(product);
 
   return (
-    <section className="lazule-reveal overflow-hidden rounded-[2.8rem] border border-lazule-gold/25 bg-[radial-gradient(circle_at_top_right,rgba(200,162,77,0.18),transparent_28rem),linear-gradient(145deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-5 shadow-mineral backdrop-blur sm:p-6 lg:p-7">
+    <section className="lazule-pdp-card lazule-pdp-card--decision lazule-reveal overflow-hidden">
       <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Decisão final</p>
-          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Pronto para transformar descoberta em assinatura?</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-300">Você já viu o perfil, os sinais de confiança e as alternativas. Agora escolha comprar com segurança ou pedir uma última orientação humana.</p>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Pronto para escolher com segurança?</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-300">Perfil, alternativas e confiança já estão claros. Finalize a compra ou peça uma última orientação.</p>
         </div>
         <div className="rounded-[1.8rem] border border-white/10 bg-lazule-night/45 p-5 lg:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -1381,7 +1435,7 @@ function FinalPurchaseSection({ product, whatsAppLink, referralContext }) {
               <p className="text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold">{getProductDisplayName(product)}</p>
               <strong className="mt-2 block text-3xl font-semibold text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : statusMeta.badge}</strong>
             </div>
-            <p className="max-w-xs text-xs leading-5 text-slate-400">{directBuy ? 'Checkout seguro via Mercado Pago, com suporte LAZULE se precisar.' : statusMeta.supportingCopy}</p>
+            <p className="max-w-xs text-xs leading-5 text-slate-400">{directBuy ? 'Checkout seguro via Mercado Pago. Suporte LAZULE se precisar.' : statusMeta.supportingCopy}</p>
           </div>
           <ManualReferralForm product={product} referralContext={referralContext} />
           <ProductCheckoutActions product={product} whatsAppLink={whatsAppLink} directBuy={directBuy} />
@@ -1507,7 +1561,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
           <div className="mt-3 flex flex-wrap gap-2">
             {[...chips, ...humanReading.discoveryTags].slice(0, 6).map((chip, index) => (
               <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold" style={{ '--item-delay': `${120 + index * 90}ms` }}>
-                {chip}
+                {normalizePdpChipLabel(chip)}
               </span>
             ))}
           </div>
@@ -1833,7 +1887,7 @@ export function ProductDetails({ slug }) {
         recommendations: true,
       }) || null}
 
-      <div className="mt-8 space-y-8 px-4 lg:mt-10 lg:space-y-12 lg:px-0">
+      <div className="mt-7 space-y-7 px-4 lg:mt-10 lg:space-y-10 lg:px-0">
         <ProductSectionErrorBoundary sectionName="understanding"><ProductUnderstandingSection product={product} experience={experience} /></ProductSectionErrorBoundary>
         {experience ? <ProductSectionErrorBoundary sectionName="experience_top"><ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} /></ProductSectionErrorBoundary> : null}
         <ProductSectionErrorBoundary sectionName="trust_layer"><LazuleTrustLayer /></ProductSectionErrorBoundary>
@@ -1846,7 +1900,7 @@ export function ProductDetails({ slug }) {
         {semanticRuntimeState === 'ready' && !experience ? (
           <SemanticEditorialFallback
             title="DNA em atualização editorial"
-            copy="A assinatura olfativa detalhada deste perfume está sendo consolidada. Enquanto isso, mantemos a leitura premium de marca, categoria e contexto para orientar sua escolha."
+            copy="A assinatura olfativa detalhada deste perfume está sendo consolidada. Enquanto isso, mantemos a leitura de marca, categoria e contexto para orientar sua escolha."
           />
         ) : null}
         {semanticRuntimeState === 'ready' && !safeRecommendations.length ? (

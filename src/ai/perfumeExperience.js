@@ -11,12 +11,12 @@ const DIMENSION_META = Object.freeze({
   fresh: { label: 'Frescor', tone: 'limpo luminoso', priority: 1.04 },
   woody: { label: 'Madeira', tone: 'estrutura seca', priority: 1.04 },
   seductive: { label: 'Sedução', tone: 'aproximação magnética', priority: 1.03 },
-  elegant: { label: 'Elegância', tone: 'acabamento premium', priority: 1.08 },
+  elegant: { label: 'Elegância', tone: 'acabamento refinado', priority: 1.08 },
   office: { label: 'Trabalho', tone: 'presença polida', priority: 0.98 },
   nightlife: { label: 'Noite', tone: 'impacto social', priority: 1.03 },
   projection: { label: 'Intensidade', tone: 'rastro percebido', priority: 1.07 },
   versatility: { label: 'Versatilidade', tone: 'uso fácil', priority: 1.01 },
-  shareability: { label: 'Compartilhabilidade', tone: 'leitura de uso, não regra de gênero.', priority: 1.06 },
+  shareability: { label: 'Uso compartilhado', tone: 'versátil, sem regra de gênero.', priority: 1.06 },
   arabic: { label: 'Âmbar', tone: 'calor oriental', priority: 1.02 },
   designer: { label: 'Urbano', tone: 'assinatura moderna', priority: 0.93 },
   luxury: { label: 'Luxo', tone: 'curadoria refinada', priority: 1.05 },
@@ -73,7 +73,7 @@ function safeValueFromText(value, fallback = 0.48) {
 
 function qualitativeLabel(value, { allowBeastMode = false } = {}) {
   const bounded = clamp(value);
-  if (allowBeastMode && bounded >= 0.92) return 'beast mode';
+  if (allowBeastMode && bounded >= 0.92) return 'intensa';
   if (bounded >= 0.78) return 'intensa';
   if (bounded >= 0.62) return 'marcante';
   if (bounded >= 0.42) return 'moderada';
@@ -245,7 +245,7 @@ export function createIdealUsageProfile(product = {}) {
   if (dimensionIds.has('sweet') || dimensionIds.has('woody') || dimensionIds.has('arabic')) push('Clima frio/ameno', 'clima');
   if (dimensionIds.has('seductive')) push('Encontros', 'ocasião');
   if (dimensionIds.has('projection')) push('Presença marcante', 'estilo');
-  if (dimensionIds.has('versatility')) push('Rotina premium', 'estilo');
+  if (dimensionIds.has('versatility')) push('Rotina refinada', 'estilo');
 
   push(humanizeSignature(enrichment.signature), 'assinatura');
   push(humanizeSemanticTag(enrichment.personality), 'personalidade');
