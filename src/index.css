@@ -2854,3 +2854,79 @@ body {
     height: 68%;
   }
 }
+
+/* Phase 11.3 — PDP Premium Polish & Conversion Refinement */
+.lazule-pdp-card {
+  border: 1px solid rgba(183, 146, 73, 0.16);
+  border-radius: clamp(2rem, 3.2vw, 2.65rem);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.046), rgba(255, 255, 255, 0.018) 52%, rgba(183, 146, 73, 0.026)),
+    rgba(5, 10, 25, 0.62);
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 250, 252, 0.055),
+    0 32px 90px rgba(1, 6, 18, 0.42),
+    0 0 0 1px rgba(248, 250, 252, 0.018);
+  backdrop-filter: blur(18px);
+}
+
+.lazule-pdp-card--decision {
+  border-color: rgba(183, 146, 73, 0.24);
+  background:
+    radial-gradient(circle at 86% 0%, rgba(183, 146, 73, 0.14), transparent 26rem),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.024));
+}
+
+.lazule-dna-row {
+  box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.035);
+}
+
+.lazule-dna-row .lazule-dna-meter {
+  background: linear-gradient(90deg, rgba(183, 146, 73, 0.74), rgba(223, 189, 104, 0.88), rgba(248, 243, 223, 0.76));
+}
+
+.lazule-performance-signal {
+  box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.035);
+}
+
+.lazule-performance-meter--moderate {
+  background: linear-gradient(90deg, rgba(159, 176, 207, 0.56), rgba(183, 146, 73, 0.52));
+}
+
+.lazule-performance-meter--marked {
+  background: linear-gradient(90deg, rgba(183, 146, 73, 0.74), rgba(223, 189, 104, 0.84));
+  box-shadow: 0 0 18px rgba(183, 146, 73, 0.13);
+}
+
+.lazule-performance-meter--intense {
+  background: linear-gradient(90deg, rgba(183, 146, 73, 0.88), rgba(248, 243, 223, 0.9));
+  box-shadow: 0 0 24px rgba(223, 189, 104, 0.24);
+}
+
+.lazule-performance-signal--intense {
+  background:
+    linear-gradient(145deg, rgba(183, 146, 73, 0.09), rgba(7, 13, 29, 0.58)),
+    rgba(7, 13, 29, 0.58);
+}
+
+@media (max-width: 767px) {
+  .lazule-pdp-card {
+    border-radius: 1.85rem;
+    padding: 1rem;
+  }
+
+  .lazule-pdp-card h2 {
+    font-size: clamp(1.85rem, 9vw, 2.35rem);
+    line-height: 0.96;
+  }
+
+  .lazule-dna-row,
+  .lazule-performance-signal {
+    border-radius: 1.25rem;
+  }
+
+  .lazule-recommendation-card {
+    width: 68vw;
+    max-width: 16.5rem;
+  }
+}
