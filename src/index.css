@@ -516,7 +516,8 @@ input {
 }
 
 .lazule-product-hero-frame {
-  min-height: clamp(18rem, 50svh, 27rem);
+  aspect-ratio: 4 / 5;
+  min-height: 0;
   isolation: isolate;
 }
 
@@ -570,15 +571,9 @@ input {
   padding: 1.35rem 1.15rem 1.15rem;
 }
 
-@supports not (height: 1svh) {
-  .lazule-product-hero-frame {
-    min-height: clamp(31.5rem, 78vh, 40.5rem);
-  }
-}
-
 @media (min-width: 640px) {
   .lazule-product-hero-frame {
-    min-height: 22rem;
+    aspect-ratio: 5 / 4;
   }
 
   .lazule-product-info-card {
@@ -589,13 +584,13 @@ input {
 
 @media (min-width: 1024px) {
   .lazule-product-hero-frame {
-    min-height: 25rem;
+    aspect-ratio: 4 / 3;
   }
 }
 
 @media (max-width: 639px) and (max-height: 740px) {
   .lazule-product-hero-frame {
-    min-height: clamp(17rem, 48svh, 22rem);
+    aspect-ratio: 5 / 6;
   }
 
   .lazule-product-hero .lazule-product-bottle {
@@ -618,7 +613,7 @@ input {
 
 @media (max-width: 380px) {
   .lazule-product-hero-frame {
-    min-height: clamp(16rem, 46svh, 21rem);
+    aspect-ratio: 5 / 6;
   }
 
   .lazule-product-hero .lazule-product-bottle {
@@ -1507,7 +1502,7 @@ textarea {
   }
 
   .lazule-product-hero-frame {
-    min-height: clamp(25.5rem, 68svh, 34rem);
+    aspect-ratio: 5 / 6;
   }
 
   .lazule-product-stage {
@@ -1876,7 +1871,7 @@ textarea {
   }
 
   .lazule-product-hero-frame {
-    min-height: 24rem;
+    aspect-ratio: 4 / 3;
   }
 }
 
@@ -1886,7 +1881,7 @@ textarea {
   }
 
   .lazule-product-hero-frame {
-    min-height: clamp(30rem, 70svh, 38rem);
+    aspect-ratio: 5 / 4;
   }
 }
 
@@ -2831,7 +2826,7 @@ body {
 /* Phase 11 PDP conversion framing */
 @media (min-width: 1024px) {
   .lazule-product-hero-frame {
-    min-height: clamp(34rem, 72vh, 46rem);
+    aspect-ratio: 4 / 3;
   }
 
   .lazule-product-bottle {
@@ -2851,7 +2846,7 @@ body {
 
 @media (max-width: 767px) {
   .lazule-product-hero-frame {
-    min-height: clamp(22rem, 58svh, 32rem);
+    aspect-ratio: 5 / 6;
   }
 
   .lazule-product-bottle {
