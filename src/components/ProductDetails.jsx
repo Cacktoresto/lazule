@@ -1729,7 +1729,7 @@ export function ProductDetails({ slug }) {
     revealItems.forEach((item) => observer.observe(item));
 
     return () => observer.disconnect();
-  }, [product]);
+  }, [product, experience, runtimeModules, safeRecommendations.length, Object.keys(similarGroups || {}).length, relationshipSections.length, semanticRuntimeState]);
 
 
   useEffect(() => {
@@ -1839,7 +1839,6 @@ export function ProductDetails({ slug }) {
         <ProductSectionErrorBoundary sectionName="trust_layer"><LazuleTrustLayer /></ProductSectionErrorBoundary>
         {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
         {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} currentProduct={product} /></ProductSectionErrorBoundary> : null}
-        <ProductSectionErrorBoundary sectionName="final_purchase"><FinalPurchaseSection product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} /></ProductSectionErrorBoundary>
         <ProductSectionErrorBoundary sectionName="semantic_entry"><SemanticSearchEntry product={product} /></ProductSectionErrorBoundary>
         {getVibeItems(product).length ? <ProductSectionErrorBoundary sectionName="vibe_top"><VibeSection product={product} /></ProductSectionErrorBoundary> : null}
         {discoveryTermsCount ? <ProductSectionErrorBoundary sectionName="discovery_terms"><ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} /></ProductSectionErrorBoundary> : null}
@@ -1856,6 +1855,7 @@ export function ProductDetails({ slug }) {
             copy="Nossas recomendações semânticas estão sendo refinadas para este item. Explore o catálogo por marca, assinatura e ocasião enquanto concluímos a seleção."
           />
         ) : null}
+        <ProductSectionErrorBoundary sectionName="final_purchase"><FinalPurchaseSection product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} /></ProductSectionErrorBoundary>
         <ProductFooterBridge />
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
