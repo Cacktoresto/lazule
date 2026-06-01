@@ -2618,13 +2618,13 @@ textarea {
 
 /* ProductDetails sensory engine: adaptive density + living recommendations + material lighting */
 .lazule-editorial-stage {
-  --editorial-gap: clamp(1.2rem, 2.2vw, 1.8rem);
-  --editorial-block-space: clamp(1.25rem, 2.5vw, 2.2rem);
+  --editorial-gap: clamp(1rem, 1.8vw, 1.45rem);
+  --editorial-block-space: clamp(1.15rem, 2vw, 1.75rem);
   --editorial-breathing: 11.8s;
   --editorial-drift: 7px;
 }
-.lazule-editorial-stage[data-compactness='dense'] { --editorial-gap: clamp(.95rem, 1.6vw, 1.25rem); --editorial-block-space: clamp(1rem, 1.8vw, 1.45rem); --editorial-breathing: 14s; --editorial-drift: 4px; }
-.lazule-editorial-stage[data-compactness='airy'] { --editorial-gap: clamp(1.4rem, 2.8vw, 2.35rem); --editorial-block-space: clamp(1.4rem, 3.3vw, 2.6rem); --editorial-breathing: 10.2s; --editorial-drift: 9px; }
+.lazule-editorial-stage[data-compactness='dense'] { --editorial-gap: clamp(.85rem, 1.35vw, 1.1rem); --editorial-block-space: clamp(1rem, 1.55vw, 1.3rem); --editorial-breathing: 14s; --editorial-drift: 4px; }
+.lazule-editorial-stage[data-compactness='airy'] { --editorial-gap: clamp(1.15rem, 2.05vw, 1.75rem); --editorial-block-space: clamp(1.2rem, 2.35vw, 1.95rem); --editorial-breathing: 10.2s; --editorial-drift: 9px; }
 .lazule-editorial-stage { gap: var(--editorial-gap); }
 .lazule-editorial-stage .lazule-hero-copy { padding: var(--editorial-block-space); }
 .lazule-editorial-stage .lazule-live-interpretation { margin-top: calc(var(--editorial-block-space) * .7); }
@@ -2846,11 +2846,11 @@ body {
 
 @media (max-width: 767px) {
   .lazule-product-hero-frame {
-    aspect-ratio: 5 / 6;
+    aspect-ratio: 1 / 1;
   }
 
   .lazule-product-bottle {
-    width: min(82%, 18rem);
-    height: 70%;
+    width: min(80%, 17rem);
+    height: 68%;
   }
 }
