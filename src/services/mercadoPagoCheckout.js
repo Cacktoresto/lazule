@@ -74,12 +74,15 @@ export async function startMercadoPagoCheckout(items = [], options = {}) {
   const productIds = payload.items.map((item) => item.slug || item.id).filter(Boolean);
   const redirect = options.redirect || ((url) => window.location.assign(url));
 
-  trackEvent('checkout_start', {
+  const checkoutAnalyticsPayload = {
     item_count: payload.items.length,
     total: payload.total,
     source: options.source || 'cart_drawer',
     product_ids: productIds,
-  });
+  };
+
+  trackEvent('start_checkout', checkoutAnalyticsPayload);
+  trackEvent('checkout_start', checkoutAnalyticsPayload);
 
   try {
     const checkout = await createMercadoPagoCheckout(items, { ...options, externalReference: payload.external_reference });

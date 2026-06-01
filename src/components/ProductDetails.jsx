@@ -27,6 +27,7 @@ import { deriveIdentityTension } from '../ai/identityTensionEngine.js';
 import { buildHumanPresenceReading } from '../ai/humanPresenceWritingEngine.js';
 import { createHumanObservationFragments } from '../ai/humanObservationFragmentsEngine.js';
 import { createEditorialOpinion } from '../ai/editorialOpinionEngine.js';
+import { CHECKOUT_ERROR_MESSAGE, startMercadoPagoCheckout } from '../services/mercadoPagoCheckout.js';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -110,6 +111,178 @@ function getProductEssence(product) {
   }
 
   return 'Elegante, intenso e viciante para noites especiais.';
+}
+
+
+
+function splitProductTerms(value) {
+  if (Array.isArray(value)) return value.flatMap(splitProductTerms);
+  if (value === undefined || value === null) return [];
+  return String(value).split(/[;,|]/).map((entry) => entry.trim()).filter(Boolean);
+}
+
+function getProductOlfactiveSignals(product = {}) {
+  const notes = splitProductTerms(product.notes);
+  const text = normalizeProductClassifier([
+    product.name,
+    product.brand,
+    product.category,
+    product.catalogType,
+    product.family,
+    product.description,
+    product.olfactoryReference,
+    product.performanceLabel,
+    product.projectionLabel,
+    product.gender,
+    product.badges,
+    product.keywords,
+    notes,
+  ].flat().filter(Boolean).join(' '));
+  const accordRules = [
+    ['âmbar', /ambar|amber|resina|labdano|benjoim/],
+    ['baunilha', /baunilha|vanilla|tonka/],
+    ['cítrico', /citr|bergamota|limao|laranja|grapefruit/],
+    ['fresco', /fresh|fresco|limpo|clean|azul|blue/],
+    ['madeiras', /madeira|amadeir|woody|cedro|sandal|vetiver|patchouli/],
+    ['floral', /floral|rosa|jasmim/],
+    ['doce', /doce|sweet|gourmand|caramelo/],
+    ['especiado', /spicy|especiad/],
+    ['oud', /oud/],
+    ['couro', /couro|leather/],
+    ['almiscarado', /musk|almis/],
+    ['aromático', /aromatic|aromatico|lavanda/],
+  ];
+  const accords = uniqueText([
+    ...splitProductTerms(product.accords),
+    ...splitProductTerms(product.keywords),
+    ...accordRules.filter(([, pattern]) => pattern.test(text)).map(([label]) => label),
+  ]).slice(0, 10);
+  const vibes = splitProductTerms(product.vibeTags || product.vibe || product.vibes || product.tags);
+  const occasions = splitProductTerms(product.occasionTags || product.occasions);
+  const weather = splitProductTerms(product.weatherTags || product.weather);
+  const family = uniqueText([product.family, product.category, product.catalogType].flatMap(splitProductTerms));
+  const directions = uniqueText([...accords, ...family, ...getVibeItems(product)]).slice(0, 8);
+
+  return { notes, accords, vibes, occasions, weather, family, directions };
+}
+
+function uniqueText(values = []) {
+  return [...new Set(values.map((value) => String(value ?? '').trim()).filter(Boolean))];
+}
+
+function inferProductVolume(product = {}) {
+  const source = [product.volume, product.size, product.name, product.description].filter(Boolean).join(' ');
+  const match = String(source).match(/(\d{2,3})\s?ml/i);
+  return match ? `${match[1]}ml` : 'Volume sob curadoria';
+}
+
+function inferProductConcentration(product = {}) {
+  const source = normalizeProductClassifier([product.concentration, product.name, product.category, product.description].filter(Boolean).join(' '));
+  if (/\b(xdp|extrait)\b/.test(source)) return 'Extrait de Parfum';
+  if (/\b(parfum|le parfum)\b/.test(source)) return 'Parfum';
+  if (/\b(edp|eau de parfum)\b/.test(source)) return 'Eau de Parfum';
+  if (/\b(edt|eau de toilette)\b/.test(source)) return 'Eau de Toilette';
+  return product.concentration || 'Concentração em curadoria';
+}
+
+function getCategoryLabel(product = {}) {
+  return uniqueText([product.category, shouldShowGender(product.category, product.gender) ? product.gender : null]).join(' · ') || 'Fragrância';
+}
+
+function buildLuxuryDescriptor(product = {}, atmosphere = buildSemanticAtmosphere(product)) {
+  const profileCopy = {
+    'mineral-aquatic': 'Frescor polido com presença limpa.',
+    'amber-oriental': 'Calor ambarado com profundidade elegante.',
+    'amber-nocturne': 'Rastro noturno de presença envolvente.',
+    'smoky-dark': 'Madeiras escuras com tensão refinada.',
+    'luxury-clean': 'Elegância silenciosa para assinatura diária.',
+    'floral-luminous': 'Luminosidade floral com acabamento macio.',
+    signature: 'Presença refinada com assinatura moderna.',
+  };
+  return product.luxuryDescriptor || profileCopy[atmosphere.profile] || profileCopy.signature;
+}
+
+function buildAtmosphericSignature(product = {}, humanReading = {}) {
+  return product.atmosphericSignature || humanReading.socialImpression || getProductEssence(product);
+}
+
+function buildOlfactiveIdentitySummary(product = {}, signature = '') {
+  const signals = getProductOlfactiveSignals(product);
+  const directions = uniqueText([...(signals.accords || []), ...(signals.directions || [])]).slice(0, 3);
+  if (directions.length) return `Identidade ${directions.join(', ')} com leitura ${signature || 'editorial'}.`;
+  return product.narrative || 'Uma leitura clara de presença, ocasião e assinatura.';
+}
+
+function buildWhyThisFragranceBullets(product = {}, experience = null, presenceReading = {}, humanReading = {}) {
+  const signals = getProductOlfactiveSignals(product);
+  const normalized = normalizeProductClassifier([
+    product.name,
+    product.category,
+    product.gender,
+    product.olfactoryReference,
+    ...(signals.accords || []),
+    ...(signals.vibes || []),
+    ...(signals.occasions || []),
+    ...(signals.weather || []),
+    ...(experience?.dominantDimensions || []),
+  ].flat().filter(Boolean).join(' '));
+
+  const bullets = [];
+  const add = (copy) => {
+    if (copy && !bullets.includes(copy)) bullets.push(copy);
+  };
+
+  if (/noite|night|sedutor|intenso|oud|ambar|amber|doce|gourmand/.test(normalized)) add('ideal para noites elegantes');
+  if (/office|trabalho|executivo|limpo|fresh|fresco|azul|citr/.test(normalized)) add('funciona bem em rotina executiva');
+  if (/luxo|premium|elegante|nicho|royal|sofistic/.test(normalized)) add('transmite sofisticação discreta');
+  if (/frio|ameno|madeira|woody|ambar|oriental/.test(normalized)) add('combina com clima ameno e ambientes refinados');
+  if (/fresco|citr|marine|ocean|aquatic|praia|verao|summer/.test(normalized)) add('entrega frescor com acabamento arrumado');
+  if (/floral|rosa|jasmim|feminino|luminos/.test(normalized)) add('traz presença luminosa sem excesso');
+  if (experience?.idealUsage?.[0]?.label) add(`boa escolha para ${String(experience.idealUsage[0].label).toLowerCase()}`);
+  if (presenceReading?.presenceDistance) add(`projeção de presença ${String(presenceReading.presenceDistance).toLowerCase()}`);
+  add('excelente assinatura pessoal');
+  add('leitura fácil para decidir com confiança');
+
+  return bullets.slice(0, 4);
+}
+
+function createOlfactiveProfileRows(product = {}, experience = null, humanReading = {}, presenceReading = {}) {
+  const signals = getProductOlfactiveSignals(product);
+  const rows = [
+    { label: 'Acordes', value: uniqueText(signals.accords).slice(0, 4).join(' · ') || humanizeSignature(product.signature || product.olfactoryReference || 'em curadoria') },
+    { label: 'Famílias', value: uniqueText(signals.family).slice(0, 3).join(' · ') || getCategoryLabel(product) },
+    { label: 'Ocasião', value: uniqueText(signals.occasions).slice(0, 3).join(' · ') || experience?.idealUsage?.map((item) => item.label).slice(0, 2).join(' · ') || humanReading.humanOccasion },
+    { label: 'Clima', value: uniqueText(signals.weather).slice(0, 3).join(' · ') || presenceReading.temperaturePerception || 'ameno' },
+    { label: 'Projeção', value: product.projectionLabel || experience?.performance?.find((item) => item.id === 'projection')?.level || presenceReading.presenceDistance || 'moderada' },
+    { label: 'Vibe', value: uniqueText([...(signals.vibes || []), ...getVibeItems(product)]).slice(0, 3).join(' · ') || humanReading.personality },
+  ];
+
+  return rows.filter((row) => row.value);
+}
+
+function createProductCheckoutItem(product = {}) {
+  const slug = product.productSlug || createProductSlug(product.name);
+  return {
+    id: product.id || slug,
+    slug,
+    name: getProductDisplayName(product),
+    brand: product.brand,
+    image: product.image,
+    quantity: 1,
+    unit_price: Number(product.salePrice || product.price || 0),
+  };
+}
+
+function buildProductAnalyticsPayload(product = {}, extra = {}) {
+  return {
+    product_id: product.id,
+    product_slug: product.productSlug || createProductSlug(product.name),
+    product_name: product.name,
+    brand: product.brand,
+    price: product.salePrice,
+    source_page: 'product',
+    ...extra,
+  };
 }
 
 function getMoodAtmosphereProfile(product = {}) {
@@ -859,9 +1032,9 @@ function SimilarPerfumeSections({ groups = {} }) {
   }, [isVisible]);
 
   const sections = [
-    { key: "highlySimilar", title: "Perfumes com DNA parecido" },
-    { key: "complementary", title: "Mesma vibe, outra assinatura" },
-    { key: "adventurousAlternatives", title: "Para explorar algo mais ousado" },
+    { key: "highlySimilar", title: "Perfumes com DNA parecido", subtitle: "Compartilham acordes, notas ou uma assinatura sensorial próxima." },
+    { key: "complementary", title: "Mesma vibe, outra assinatura", subtitle: "Exploram uma atmosfera semelhante com personalidade própria." },
+    { key: "adventurousAlternatives", title: "Para explorar algo mais ousado", subtitle: "Mantêm pontos de contato, mas ampliam intensidade, textura ou presença." },
   ].filter((section) => (groups[section.key] || []).length > 0);
 
   if (!sections.length) return null;
@@ -873,8 +1046,13 @@ function SimilarPerfumeSections({ groups = {} }) {
       </div>
       {!isVisible ? <div className="h-24 animate-pulse rounded-2xl bg-white/5" /> : sections.map((section) => (
         <div key={section.key} className="mb-8 last:mb-0">
-          <h3 className="mb-4 font-display text-2xl text-lazule-mist">{section.title}</h3>
-          <div className="mb-2 flex items-center justify-end text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400"><span>deslize para ver mais</span></div>
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h3 className="font-display text-2xl text-lazule-mist">{section.title}</h3>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">{section.subtitle}</p>
+            </div>
+            <span className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-400">deslize para ver mais</span>
+          </div>
       <div className="lazule-horizontal-rail lazule-rail-fade flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-2">
             {(groups[section.key] || []).map((item) => (
               <RecommendationCard key={item.slug} product={item} context={section.key} explanation={item.explanation} />
@@ -919,6 +1097,7 @@ function Recommendations({ products, currentProduct }) {
 
 function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   const [showBar, setShowBar] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   useEffect(() => {
     const onScroll = () => setShowBar(window.scrollY > 560);
     onScroll();
@@ -929,6 +1108,20 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   const directBuy = canDirectBuy(product);
   const statusMeta = getCommercialStatusMeta(product);
   const appliedCode = getAppliedReferralLabel(referralContext);
+
+  async function handleStickyCheckout() {
+    if (!directBuy || isCheckingOut) return;
+    setIsCheckingOut(true);
+    try {
+      await startMercadoPagoCheckout([createProductCheckoutItem(product)], {
+        total: Number(product.salePrice || product.price || 0),
+        source: 'product_sticky_cta',
+      });
+    } catch (error) {
+      console.warn('[ProductDetails] sticky checkout failed', error);
+      setIsCheckingOut(false);
+    }
+  }
 
   return (
     <div className={`lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-slate-950/72 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl transition duration-500 ${showBar ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'}`} role="region" aria-label="Compra rápida">
@@ -944,28 +1137,217 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
           ) : null}
         </div>
         <button
-          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold"
+          className="hidden min-h-11 shrink-0 items-center justify-center rounded-full border border-lazule-gold/40 bg-lazule-gold/10 px-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-lazule-gold sm:inline-flex"
           onClick={() => {
             addToLuxurySelection(product);
+            trackEvent('add_to_selection', buildProductAnalyticsPayload(product, { cta_location: 'sticky_cta' }));
           }}
+        >
+          Adicionar
+        </button>
+        {directBuy ? (
+          <button
+            type="button"
+            className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-xs font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
+            disabled={isCheckingOut}
+            aria-label={`Finalizar compra de ${product.name || 'fragrância LAZULE'} via Mercado Pago`}
+            onClick={() => {
+              trackEvent('sticky_cta_click', { product_id: product.id, product_name: product.name, source_page: 'product', cta_location: 'sticky_checkout' });
+              handleStickyCheckout();
+            }}
+          >
+            {isCheckingOut ? 'Pagamento seguro...' : 'Finalizar compra'}
+          </button>
+        ) : (
+          <a
+            className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-xs font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+            href={whatsAppLink || '#'}
+            aria-disabled={disabled}
+            aria-label={`Consultar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => {
+              trackEvent('whatsapp_consultation', buildProductAnalyticsPayload(product, { cta_location: 'sticky_cta' }));
+              trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'sticky_cta' });
+            }}
+          >
+            {statusMeta.shortCtaLabel}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+function WhyThisFragrancePanel({ bullets = [] }) {
+  if (!bullets.length) return null;
+
+  return (
+    <section className="mt-6 rounded-[1.8rem] border border-lazule-night/10 bg-white/55 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] lg:border-white/10 lg:bg-white/[0.045]">
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-royal lg:text-lazule-gold">Por que este perfume?</p>
+      <ul className="mt-4 grid gap-2 text-sm leading-6 text-slate-700 lg:text-slate-300 sm:grid-cols-2">
+        {bullets.map((bullet) => (
+          <li key={bullet} className="flex gap-2">
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-lazule-gold" aria-hidden="true" />
+            <span>{bullet}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function PremiumOlfactiveProfile({ rows = [] }) {
+  if (!rows.length) return null;
+
+  return (
+    <section className="mt-5 rounded-[1.8rem] border border-lazule-night/10 bg-white/45 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.07)] lg:border-white/10 lg:bg-white/[0.04]">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-royal lg:text-lazule-gold">Perfil olfativo</p>
+          <h2 className="mt-1 font-display text-2xl text-lazule-night lg:text-lazule-mist">Leitura editorial</h2>
+        </div>
+        <span className="hidden text-xs text-slate-500 lg:block">sem excesso técnico</span>
+      </div>
+      <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+        {rows.map((row) => (
+          <div key={row.label} className="rounded-2xl border border-lazule-night/10 bg-lazule-night/[0.03] p-4 lg:border-white/10 lg:bg-lazule-night/35">
+            <dt className="text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-slate-500 lg:text-slate-400">{row.label}</dt>
+            <dd className="mt-2 text-sm font-semibold leading-5 text-lazule-night lg:text-lazule-mist">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+function LazuleTrustLayer() {
+  const items = [
+    ['Seleção curada', 'Escolhas revisadas por intenção de uso, presença e acabamento.'],
+    ['Pagamento seguro', 'Checkout via Mercado Pago com transição transparente.'],
+    ['Suporte especializado', 'Atendimento humano para dúvidas antes da compra.'],
+    ['Atendimento consultivo', 'Ajuda para comparar caminhos olfativos sem pressão.'],
+    ['Processo transparente', 'Preço, disponibilidade e próximos passos sempre claros.'],
+  ];
+
+  return (
+    <section className="lazule-reveal mt-8 rounded-[2.35rem] border border-lazule-gold/15 bg-white/[0.04] p-5 shadow-mineral backdrop-blur sm:p-7 lg:mt-12 lg:p-8">
+      <div className="max-w-3xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Curadoria LAZULE</p>
+        <h2 className="mt-2 font-display text-3xl text-lazule-mist sm:text-4xl">Compra calma. Escolha bem orientada.</h2>
+        <p className="mt-3 text-sm leading-6 text-slate-300">Uma camada de confiança para você decidir sem pressa, com segurança e suporte quando precisar.</p>
+      </div>
+      <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {items.map(([title, copy]) => (
+          <div key={title} className="rounded-[1.45rem] border border-white/10 bg-lazule-night/35 p-4">
+            <h3 className="text-sm font-semibold text-lazule-mist">{title}</h3>
+            <p className="mt-2 text-xs leading-5 text-slate-400">{copy}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SemanticSearchEntry({ product }) {
+  const suggestions = ['cheiro de rico', 'assinatura elegante', 'praia chique', 'luxo discreto', 'perfume executivo'];
+
+  return (
+    <section className="lazule-reveal mt-8 rounded-[2.1rem] border border-lazule-gold/15 bg-white/[0.045] p-4 shadow-mineral backdrop-blur sm:p-5 lg:mt-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-lazule-gold">Buscando algo parecido?</p>
+          <h2 className="mt-2 font-display text-3xl text-lazule-mist">Entre por uma sensação</h2>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-slate-300">Use a busca semântica para encontrar perfumes pela atmosfera, não só pelo nome.</p>
+      </div>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {suggestions.map((suggestion) => (
+          <a
+            key={suggestion}
+            className="lazule-premium-button rounded-full border border-lazule-gold/25 bg-lazule-gold/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-lazule-gold transition hover:bg-lazule-gold hover:text-lazule-night"
+            href={`/catalogo?busca=${encodeURIComponent(suggestion)}&src=product_semantic`}
+            onClick={() => trackEvent('semantic_suggestion_click', {
+              ...buildProductAnalyticsPayload(product),
+              query: suggestion,
+              source_component: 'product_semantic_entry',
+              privacy: 'query_intent_only',
+            })}
+          >
+            {suggestion}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+
+  function handleAddToSelection() {
+    addToLuxurySelection(product);
+    trackEvent('add_to_selection', buildProductAnalyticsPayload(product, { cta_location: 'product_hero' }));
+  }
+
+  async function handleCheckoutClick() {
+    if (!directBuy || isCheckingOut) return;
+    setIsCheckingOut(true);
+    setCheckoutError('');
+    try {
+      await startMercadoPagoCheckout([createProductCheckoutItem(product)], {
+        total: Number(product.salePrice || product.price || 0),
+        source: 'product_page',
+      });
+    } catch (error) {
+      setCheckoutError(error?.message || CHECKOUT_ERROR_MESSAGE);
+      setIsCheckingOut(false);
+    }
+  }
+
+  function handleConsultationClick() {
+    trackEvent('whatsapp_consultation', buildProductAnalyticsPayload(product, { cta_location: 'product_hero_secondary' }));
+    trackWhatsappClick(buildProductAnalyticsPayload(product, { cta_location: 'product_hero_secondary' }));
+  }
+
+  return (
+    <div className="mt-5 space-y-3">
+      <div className="grid gap-2 sm:grid-cols-[0.95fr_1.05fr]">
+        <button
+          type="button"
+          className="inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
+          onClick={handleAddToSelection}
         >
           Adicionar à seleção
         </button>
-        <a
-          className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-xs font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
-          href={whatsAppLink || '#'}
-          aria-disabled={disabled}
-          aria-label={`${directBuy ? 'Comprar' : 'Consultar'} ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => {
-            trackEvent('sticky_cta_click', { product_id: product.id, product_name: product.name, source_page: 'product', cta_location: 'sticky_cta' });
-            trackWhatsappClick({ product_id: product.id, product_slug: createProductSlug(product.name), product_name: product.name, price: product.salePrice, source_page: 'product', cta_location: 'sticky_cta' });
-          }}
+        <button
+          type="button"
+          disabled={!directBuy || isCheckingOut}
+          className="lazule-premium-button lazule-cta-shimmer inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+          onClick={handleCheckoutClick}
         >
-          {directBuy ? 'Comprar agora' : statusMeta.shortCtaLabel}
-        </a>
+          {isCheckingOut ? 'Iniciando pagamento seguro...' : 'Finalizar compra'}
+        </button>
       </div>
+      <div className="flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-slate-600 lg:text-slate-300">
+        <span>Pagamento via Mercado Pago</span>
+        <span aria-hidden="true">·</span>
+        <span>Atendimento especializado</span>
+        <span aria-hidden="true">·</span>
+        <span>Seleção curada pela LAZULE</span>
+      </div>
+      {checkoutError ? <p className="text-xs leading-5 text-red-600 lg:text-red-200" role="alert">{checkoutError}</p> : null}
+      <a
+        className="inline-flex w-full items-center justify-center rounded-full border border-lazule-night/10 bg-white/45 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:border-lazule-gold/45 lg:border-white/10 lg:bg-white/[0.045] lg:text-lazule-mist"
+        href={whatsAppLink}
+        target="_blank"
+        rel="noreferrer"
+        onClick={handleConsultationClick}
+      >
+        Precisa de ajuda para escolher?
+      </a>
     </div>
   );
 }
@@ -1006,32 +1388,49 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const presenceReading = buildHumanPresenceReading(product);
   const observationFragments = createHumanObservationFragments({ profile: presenceProfile, context: 'pdp' });
   const editorialOpinion = createEditorialOpinion(product);
+  const categoryLabel = getCategoryLabel(product);
+  const concentration = inferProductConcentration(product);
+  const volume = inferProductVolume(product);
+  const luxuryDescriptor = buildLuxuryDescriptor(product, atmosphere);
+  const atmosphericSignature = buildAtmosphericSignature(product, humanReading);
+  const olfactiveIdentitySummary = buildOlfactiveIdentitySummary(product, signature);
+  const whyBullets = buildWhyThisFragranceBullets(product, experience, presenceReading, humanReading);
+  const profileRows = createOlfactiveProfileRows(product, experience, humanReading, presenceReading);
 
   return (
-    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-6 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
+    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
       <span className="lazule-depth-layer lazule-depth-layer-3" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-fog" aria-hidden="true" />
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.94] text-lazule-night shadow-mineral backdrop-blur lg:-ml-6 lg:mt-10 lg:rounded-[2.6rem] lg:bg-white/[0.06] lg:p-8 lg:text-lazule-mist">
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.94] text-lazule-night shadow-mineral backdrop-blur lg:-ml-10 lg:mt-12 lg:rounded-[2.8rem] lg:bg-white/[0.06] lg:p-9 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
-        <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.02] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
-        <div className="mt-4 flex items-end justify-between gap-5 py-2">
+        <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2.25rem,5.4vw,4rem)] leading-[0.98] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
+        <div className="mt-4 flex flex-wrap gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-600 lg:text-slate-300">
+          {[categoryLabel, concentration, volume].filter(Boolean).map((item) => (
+            <span key={item} className="rounded-full border border-lazule-night/10 bg-white/45 px-3 py-1.5 lg:border-white/10 lg:bg-white/[0.045]">{item}</span>
+          ))}
+        </div>
+        <div className="mt-6 space-y-3">
+          <p className="font-display text-[1.7rem] leading-tight text-lazule-night lg:text-lazule-mist">{luxuryDescriptor}</p>
+          <p className="text-sm leading-6 text-slate-700 lg:text-slate-300">{atmosphericSignature}</p>
+          <p className="text-sm leading-6 text-slate-700 lg:text-slate-300">{olfactiveIdentitySummary}</p>
+        </div>
+        <div className="mt-5 flex items-end justify-between gap-5 rounded-[1.45rem] border border-lazule-night/10 bg-white/45 p-4 lg:border-white/10 lg:bg-white/[0.045]">
           <div>
             <span className="text-[0.65rem] uppercase tracking-[0.25em] text-lazule-royal/90 lg:text-lazule-gold">Preço</span>
             <strong className="mt-1 block text-3xl font-semibold text-[#081937] drop-shadow-[0_2px_10px_rgba(226,198,126,0.25)] lg:text-[#f7f3e5]">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
-            <p className="mt-1 text-xs text-slate-600 lg:text-slate-300">até 6x sem juros · disponibilidade imediata</p>
+            <p className="mt-1 text-xs text-slate-600 lg:text-slate-300">{directBuy ? 'checkout seguro · disponibilidade imediata' : statusMeta.supportingCopy || 'consulta assistida pela curadoria'}</p>
           </div>
         </div>
         <div className="lazule-live-interpretation lazule-text-reveal mt-4 rounded-[1.2rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">LAZ interpreta</p>
-          <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">Assinatura olfativa: {signature}</p>
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Assinatura LAZULE</p>
+          <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">{signature}</p>
           <div className="mt-2 grid gap-2 text-sm leading-5 text-slate-700 lg:text-slate-300">
-            <p><strong>Energia:</strong> {humanReading.firstImpression}</p>
-            <p><strong>Funciona melhor:</strong> {presenceReading.whenItWorksBest?.[0] || humanReading.context}</p>
-            <p><strong>Pode cansar:</strong> {presenceReading.whenItCanFail?.[0] || humanReading.behavior}</p>
+            <p>{humanReading.firstImpression}</p>
+            <p>{presenceReading.whenItWorksBest?.[0] || humanReading.context}</p>
           </div>
           <details className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
             <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-lazule-gold">Ler interpretação completa</summary>
@@ -1077,19 +1476,10 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             {observationFragments.map((fragment) => <p key={fragment}>• {fragment}</p>)}
           </div>
         </div>
+        <WhyThisFragrancePanel bullets={whyBullets} />
+        <PremiumOlfactiveProfile rows={profileRows} />
         <ManualReferralForm product={product} referralContext={referralContext} />
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            className="inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
-            onClick={() => addToLuxurySelection(product)}
-          >
-            Adicionar à seleção
-          </button>
-          <a className="lazule-premium-button lazule-cta-shimmer lazule-cta-glass inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99]" href={whatsAppLink} target="_blank" rel="noreferrer">
-            Comprar agora
-          </a>
-        </div>
+        <ProductCheckoutActions product={product} whatsAppLink={whatsAppLink} directBuy={directBuy} />
       </article>
     </div>
   );
@@ -1402,6 +1792,8 @@ export function ProductDetails({ slug }) {
       }) || null}
 
       <div className="mt-8 space-y-6 px-4 lg:mt-12 lg:px-0">
+        <ProductSectionErrorBoundary sectionName="trust_layer"><LazuleTrustLayer /></ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="semantic_entry"><SemanticSearchEntry product={product} /></ProductSectionErrorBoundary>
         {experience ? <ProductSectionErrorBoundary sectionName="experience_top"><ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} /></ProductSectionErrorBoundary> : null}
         {getVibeItems(product).length ? <ProductSectionErrorBoundary sectionName="vibe_top"><VibeSection product={product} /></ProductSectionErrorBoundary> : null}
         {discoveryTermsCount ? <ProductSectionErrorBoundary sectionName="discovery_terms"><ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} /></ProductSectionErrorBoundary> : null}
