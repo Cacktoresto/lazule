@@ -2827,3 +2827,35 @@ body {
     opacity: 0.34;
   }
 }
+
+/* Phase 11 PDP conversion framing */
+@media (min-width: 1024px) {
+  .lazule-product-hero-frame {
+    min-height: clamp(34rem, 72vh, 46rem);
+  }
+
+  .lazule-product-bottle {
+    width: min(82%, 24rem);
+    height: 74%;
+  }
+
+  .lazule-product-bottle--hero {
+    height: 76%;
+  }
+
+  .lazule-product-bottle--mood,
+  .lazule-product-bottle--detail {
+    height: 78%;
+  }
+}
+
+@media (max-width: 767px) {
+  .lazule-product-hero-frame {
+    min-height: clamp(22rem, 58svh, 32rem);
+  }
+
+  .lazule-product-bottle {
+    width: min(82%, 18rem);
+    height: 70%;
+  }
+}
