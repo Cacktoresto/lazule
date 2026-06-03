@@ -22,14 +22,14 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
             trackEvent('search_focus', { source_page: 'catalog_search' });
             onFocus?.();
           }}
-          placeholder="Descreva sua atmosfera: noite mineral, assinatura limpa, presença marcante…"
+          placeholder="Busque por nome ou sensação…"
           autoComplete="off"
           inputMode="search"
         />
       </label>
 
-      <div className="mt-3 grid gap-3 sm:flex sm:items-center sm:justify-between">
-        <p className="text-xs leading-5 text-slate-400">Ex.: Sauvage, Hacivat, presente elegante, noite intensa…</p>
+      <div className="mt-3 grid gap-2 sm:flex sm:items-center sm:justify-between">
+        <p className="text-xs leading-5 text-slate-400">Ex.: presente elegante, noite intensa, assinatura limpa.</p>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
           {hasSearch && (
             <button

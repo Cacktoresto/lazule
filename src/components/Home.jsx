@@ -320,15 +320,15 @@ export function Home() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(200,162,77,0.14),transparent_24%),radial-gradient(circle_at_80%_4%,rgba(43,92,178,0.18),transparent_30%),linear-gradient(180deg,rgba(3,7,18,0.22)_0%,rgba(5,8,22,0.92)_100%)]" />
         <div className="pointer-events-none absolute inset-x-[8%] top-24 h-px bg-gradient-to-r from-transparent via-lazule-gold/30 to-transparent opacity-70" />
         <div className="pointer-events-none absolute right-[8%] top-[18%] hidden h-72 w-72 rounded-full bg-lazule-gold/10 blur-3xl lg:block" />
-        <div className="lazule-mobile-container relative mx-auto grid min-h-[min(760px,82svh)] max-w-7xl content-end gap-10 px-4 pb-10 pt-8 min-[390px]:px-5 sm:min-h-[86svh] sm:px-8 sm:pb-16 sm:pt-24 md:grid-cols-[0.9fr_1.1fr] md:items-center md:py-28 lg:gap-16 lg:py-32">
+        <div className="lazule-mobile-container relative mx-auto grid min-h-0 max-w-7xl content-start gap-6 px-3 pb-7 pt-5 min-[390px]:px-4 sm:min-h-[86svh] sm:px-8 sm:pb-16 sm:pt-24 md:grid-cols-[0.9fr_1.1fr] md:items-center md:py-28 lg:gap-16 lg:py-32">
           <div className="lazule-hero-copy relative z-10 max-w-2xl pb-1">
             <p className="mb-3 text-[0.62rem] font-medium uppercase tracking-[0.32em] text-slate-300/70">{sensoryPresence.reunion.microFragment}</p>
-            <p className="mb-5 text-[0.64rem] font-semibold uppercase tracking-[0.4em] text-lazule-gold sm:text-[0.7rem] sm:tracking-[0.5em]">LAZULE FRAGRANCES</p>
-            <h1 className="max-w-[11ch] font-display text-[clamp(3rem,13vw,4.35rem)] leading-[0.86] tracking-[-0.06em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-[6.3rem]">Perfume com percepção.</h1>
-            <p className="mt-6 max-w-[36rem] text-base leading-7 text-slate-200/82 sm:mt-8 sm:text-xl sm:leading-9">
+            <p className="mb-3 text-[0.64rem] font-semibold uppercase tracking-[0.32em] text-lazule-gold sm:mb-5 sm:text-[0.7rem] sm:tracking-[0.5em]">LAZULE FRAGRANCES</p>
+            <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,12vw,3.7rem)] leading-[0.88] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-[6.3rem]">Perfume com percepção.</h1>
+            <p className="mt-4 max-w-[34rem] text-[0.95rem] leading-6 text-slate-200/82 sm:mt-8 sm:text-xl sm:leading-9">
               Uma curadoria olfativa calma, precisa e editorial — fragrâncias escolhidas por atmosfera, ocasião e presença.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:items-center">
               <a
                 className="lazule-premium-button lazule-cta-shimmer lazule-hero-cta inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-7 text-center text-sm font-semibold uppercase tracking-[0.16em] text-lazule-night shadow-aureate min-[390px]:w-auto sm:px-8 sm:tracking-[0.2em]"
                 href="/catalogo"
@@ -343,19 +343,19 @@ export function Home() {
           </div>
 
           <a
-            className="lazule-hero-product lazule-featured-fragrance group relative mx-auto block w-full max-w-[min(24rem,88vw)] overflow-hidden rounded-[2.35rem] border border-white/10 bg-white/[0.045] p-3 shadow-mineral backdrop-blur-xl sm:max-w-[31rem] sm:rounded-[3rem] sm:p-4 md:mr-0"
+            className="lazule-hero-product lazule-featured-fragrance group relative mx-auto block w-full max-w-[min(22rem,92vw)] overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.045] p-2.5 shadow-mineral backdrop-blur-xl sm:max-w-[31rem] sm:rounded-[3rem] sm:p-4 md:mr-0"
             href={heroProduct ? `/catalogo?busca=${encodeURIComponent(heroProduct.name)}` : '/catalogo'}
             aria-label="Abrir curadoria em destaque LAZULE"
             onClick={() => heroProduct && trackProductSelect(heroProduct, { source_page: 'home_hero_product', section: 'home_hero_product', interaction_type: 'hero_product' })}
           >
             <div className="pointer-events-none absolute -right-16 -top-12 h-44 w-44 rounded-full bg-lazule-gold/18 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 left-4 h-64 w-64 rounded-full bg-lazule-blue/18 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[1.9rem] border border-white/10 bg-[linear-gradient(145deg,rgba(7,13,29,0.74),rgba(16,38,79,0.54))] p-4 sm:rounded-[2.45rem] sm:p-6">
-              <div className="mb-5 flex items-center justify-between gap-4">
+            <div className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[linear-gradient(145deg,rgba(7,13,29,0.74),rgba(16,38,79,0.54))] p-3 sm:rounded-[2.45rem] sm:p-6">
+              <div className="mb-3 flex items-center justify-between gap-3 sm:mb-5">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold">Curadoria em destaque</p>
                 <span className="rounded-full border border-lazule-gold/30 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#eedebd]">{getHeroBadge(heroProduct)}</span>
               </div>
-              <div className="lazule-featured-image-frame relative aspect-[4/5] overflow-hidden rounded-[1.55rem] border border-white/10 bg-lazule-night/70 sm:rounded-[2rem]">
+              <div className="lazule-featured-image-frame relative aspect-[5/4] overflow-hidden rounded-[1.15rem] border border-white/10 bg-lazule-night/70 sm:aspect-[4/5] sm:rounded-[2rem]">
                 {heroProduct?.image ? (
                   <img
                     className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-[1.035] group-active:scale-[1.015]"
@@ -367,24 +367,24 @@ export function Home() {
                 ) : <ProductImageFallback label="Curadoria LAZULE" />}
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,8,22,0.05)_0%,rgba(5,8,22,0.28)_52%,rgba(5,8,22,0.78)_100%)]" />
               </div>
-              <div className="relative mt-6">
+              <div className="relative mt-4 sm:mt-6">
                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-slate-300/70">{getHeroFamily(heroProduct)}</p>
                 <h2 className="mt-2 line-clamp-2 font-display text-[clamp(2rem,7vw,3.15rem)] leading-[0.88] tracking-[-0.04em] text-lazule-mist">{heroProduct?.name ?? 'Curadoria LAZULE'}</h2>
-                <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-200/74 sm:text-base">{getLuxuryDescriptor(heroProduct)}</p>
+                <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-200/74 sm:mt-4 sm:text-base sm:leading-6">{getLuxuryDescriptor(heroProduct)}</p>
               </div>
             </div>
           </a>
         </div>
       </section>
 
-      <div className="lazule-sticky-search sticky top-[calc(4.5rem+env(safe-area-inset-top,0px))] z-30 border-y border-white/10 bg-lazule-night/76 px-2.5 py-2 shadow-[0_18px_52px_rgba(2,6,23,0.24)] backdrop-blur-2xl sm:top-[7.35rem] sm:px-4 sm:py-3 md:top-[4.75rem]">
+      <div className="lazule-sticky-search sticky top-[calc(3.9rem+env(safe-area-inset-top,0px))] z-30 border-y border-white/10 bg-lazule-night/84 px-2 py-1.5 shadow-[0_18px_52px_rgba(2,6,23,0.24)] backdrop-blur-2xl sm:top-[7.35rem] sm:px-4 sm:py-3 md:top-[4.75rem]">
         <div className="mx-auto max-w-3xl">
           <ProductNavigationSearch className="lazule-home-search" compact />
         </div>
       </div>
 
       {editorialPulse.length ? (
-        <section className="mx-auto max-w-7xl px-3 py-5 min-[390px]:px-4 sm:px-8 sm:py-6">
+        <section className="mx-auto max-w-7xl px-3 py-4 min-[390px]:px-4 sm:px-8 sm:py-6">
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:rounded-[1.8rem] sm:p-6">
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Leitura editorial de hoje</p>
             <div className="mt-3 grid gap-2">
@@ -398,7 +398,7 @@ export function Home() {
 
 
       <div id="assistente">
-        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-6 min-[390px]:px-4 sm:px-8 sm:py-10" />
+        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-4 min-[390px]:px-4 sm:px-8 sm:py-10" />
       </div>
 
       <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} tasteNarrative={tasteEvolution.narrative} />

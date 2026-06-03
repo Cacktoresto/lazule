@@ -20,13 +20,13 @@ export function CheckoutExperiencePage() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-12 text-lazule-mist sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-3 py-6 text-lazule-mist sm:px-6 sm:py-12 lg:px-8">
       <p className="text-xs uppercase tracking-[0.28em] text-lazule-gold/80">{narrative.eyebrow}</p>
-      <h1 className="mt-3 text-4xl font-semibold text-white">{narrative.title}</h1>
+      <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{narrative.title}</h1>
       <p className="mt-3 max-w-2xl text-lazule-mist/75">{narrative.description}</p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <article className="rounded-3xl border border-white/10 bg-slate-950/60 p-6 backdrop-blur">
+      <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-[1.3fr_1fr]">
+        <article className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-4 backdrop-blur sm:rounded-3xl sm:p-6">
           <h2 className="text-lg text-white">Sua seleção</h2>
           <ul className="mt-4 space-y-4">
             {items.map((item) => (
@@ -35,18 +35,18 @@ export function CheckoutExperiencePage() {
                   <p className="text-white">{item.name}</p>
                   <p className="text-lazule-mist/70">{item.quantity}x · {formatBRL(item.price || 0)}</p>
                 </div>
-                <button className="text-lazule-gold/80" onClick={() => setItems(removeFromLuxurySelection(item.id))}>Remover</button>
+                <button className="min-h-10 rounded-full px-3 text-lazule-gold/80" onClick={() => setItems(removeFromLuxurySelection(item.id))}>Remover</button>
               </li>
             ))}
           </ul>
         </article>
 
-        <article className="rounded-3xl border border-lazule-gold/25 bg-lazule-night/80 p-6">
+        <article className="rounded-[1.5rem] border border-lazule-gold/25 bg-lazule-night/80 p-4 sm:rounded-3xl sm:p-6">
           <p className="text-xs uppercase tracking-[0.26em] text-lazule-gold/80">Pagamento</p>
           <p className="mt-3 text-2xl text-white">{formatBRL(total)}</p>
           <p className="mt-4 text-sm text-lazule-mist/80">{status.title}</p>
           <p className="mt-1 text-xs text-lazule-mist/60">{status.description}</p>
-          <button onClick={handleConfirmMock} className="mt-6 w-full rounded-full border border-lazule-gold/45 bg-lazule-gold/15 px-4 py-3 text-sm text-lazule-gold">
+          <button onClick={handleConfirmMock} className="mt-6 min-h-12 w-full rounded-full border border-lazule-gold/45 bg-lazule-gold/15 px-4 py-3 text-sm font-semibold text-lazule-gold">
             Confirmar presença
           </button>
         </article>
