@@ -61,13 +61,13 @@ export function ProductNavigationSearch({ className = '', compact = false }) {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onFocus={() => trackEvent('search_focus', { source_page: compact ? 'home_sticky_search' : 'product_navigation_search' })}
-              placeholder={compact ? 'Buscar perfume' : 'Digite Asad, Sauvage, Hacivat...'}
+              placeholder={compact ? 'Buscar' : 'Digite Asad, Sauvage, Hacivat...'}
               autoComplete="off"
               inputMode="search"
             />
           </div>
           <button
-            className={`lazule-premium-button lazule-cta-shimmer min-h-11 rounded-full bg-lazule-gold text-sm font-semibold text-lazule-night shadow-aureate sm:min-h-12 ${compact ? 'px-4 sm:px-5' : 'px-5 sm:px-6'}`}
+            className={`lazule-premium-button lazule-cta-shimmer min-h-11 rounded-full bg-lazule-gold text-sm font-semibold text-lazule-night shadow-aureate sm:min-h-12 ${compact ? 'px-3.5 sm:px-5' : 'px-5 sm:px-6'}`}
             type="submit"
             aria-label={compact ? 'Pesquisar perfume' : undefined}
           >

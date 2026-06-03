@@ -336,19 +336,19 @@ export function ProductCatalog() {
   }
 
   return (
-    <section id="catalogo" data-semantic-mood={resolveSemanticMood(searchTerm)} className="lazule-cinematic-section relative mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-20 lg:py-24">
-      <div className="mb-7 grid gap-5 sm:mb-8 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
+    <section id="catalogo" data-semantic-mood={resolveSemanticMood(searchTerm)} className="lazule-cinematic-section relative mx-auto max-w-7xl px-3 py-6 sm:px-8 sm:py-20 lg:py-24">
+      <div className="mb-5 grid gap-4 sm:mb-8 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
         <div className="max-w-3xl">
           <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold sm:mb-4 sm:text-xs sm:tracking-[0.38em]">
             Catálogo premium
           </p>
-          <h2 className="font-display text-[clamp(2.25rem,11vw,3rem)] leading-[1.02] text-lazule-mist sm:text-5xl">Descubra sua próxima assinatura olfativa.</h2>
-          <p className="mt-4 text-sm leading-6 text-slate-300 sm:mt-5 sm:text-base sm:leading-7">
+          <h2 className="font-display text-[clamp(2rem,9.5vw,2.65rem)] leading-[1.02] text-lazule-mist sm:text-5xl">Descubra sua próxima assinatura olfativa.</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-300 sm:mt-5 sm:text-base sm:leading-7">
             Uma seleção editorial de importados, árabes e nicho com apoio consultivo para escolher com segurança e desejo.
           </p>
         </div>
 
-        <div className="lazule-surface-premium rounded-[1.6rem] border border-lazule-gold/20 bg-lazule-depth/80 p-3.5 shadow-mineral backdrop-blur sm:rounded-[2rem] sm:p-5">
+        <div className="lazule-surface-premium rounded-[1.35rem] border border-lazule-gold/20 bg-lazule-depth/80 p-3 shadow-mineral backdrop-blur sm:rounded-[2rem] sm:p-5">
           <SearchBar
             value={draftSearchTerm}
             onChange={handleSearchChange}
@@ -367,7 +367,7 @@ export function ProductCatalog() {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-2 sm:mb-6">
+      <div className="lazule-horizontal-rail mb-4 flex snap-x gap-2 overflow-x-auto pb-1 sm:mb-6 sm:flex-wrap sm:overflow-visible">
         {discoveryChips.map((chip) => {
           const active = activeDiscoveryChipIds.includes(chip.id);
           return (
@@ -375,7 +375,7 @@ export function ProductCatalog() {
               key={chip.id}
               type="button"
               onClick={() => toggleDiscoveryChip(chip.id)}
-              className={`lazule-premium-button rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${active ? 'laz-pulse border-[var(--laz-border-premium)] bg-[#b7924924] text-[#f1e4c6]' : 'border-[var(--laz-border-mineral)] bg-[#0f1d38ad] text-[#cad8f2] hover:border-[#92afe57a] hover:text-lazule-mist'}`}
+              className={`lazule-premium-button min-h-10 shrink-0 snap-start rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition ${active ? 'laz-pulse border-[var(--laz-border-premium)] bg-[#b7924924] text-[#f1e4c6]' : 'border-[var(--laz-border-mineral)] bg-[#0f1d38ad] text-[#cad8f2] hover:border-[#92afe57a] hover:text-lazule-mist'}`}
             >
               {chip.label}
             </button>
@@ -383,7 +383,7 @@ export function ProductCatalog() {
         })}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[320px_1fr] lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-[320px_1fr] lg:items-start">
         <AdvancedFilters
           filters={filters}
           options={filterOptions}
@@ -394,7 +394,7 @@ export function ProductCatalog() {
         <div className="min-w-0" ref={resultsRef} id="catalog-results">
           <div className="mb-6 grid gap-4">
             <SemanticSearchLoading isActive={isSemanticLoading} interpretedChips={semanticSignalChips} />
-            <div className="lazule-feedback-card laz-reveal flex flex-col gap-3 rounded-[1.5rem] border border-[var(--laz-border-mineral)] bg-[#0e1b36c7] px-4 py-4 text-sm text-slate-300 shadow-mineral sm:px-5">
+            <div className="lazule-feedback-card laz-reveal flex flex-col gap-3 rounded-[1.25rem] border border-[var(--laz-border-mineral)] bg-[#0e1b36c7] px-3.5 py-3.5 text-sm text-slate-300 shadow-mineral sm:rounded-[1.5rem] sm:px-5 sm:py-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
                   <strong className="text-lazule-mist">{filteredProducts.length}</strong> resultado(s) {searchTerm ? 'encontrado(s)' : 'curado(s)'}
@@ -484,7 +484,7 @@ export function ProductCatalog() {
                 </section>
               )}
 
-              <div className="lazule-organic-grid grid gap-4 min-[520px]:grid-cols-2 md:gap-5 xl:grid-cols-6">
+              <div className="lazule-organic-grid grid grid-cols-2 gap-3 min-[520px]:grid-cols-2 md:gap-5 xl:grid-cols-6">
                 {visibleProducts.map((product, index) => (
                   <div key={product.id} className={index % 7 === 0 ? 'xl:col-span-3' : index % 5 === 0 ? 'xl:col-span-3' : 'xl:col-span-2'}>
                     <ProductCard product={product} analyticsSection="catalog_grid" highlightQuery={searchTerm} variant={index % 7 === 0 ? 'featured' : 'default'} />

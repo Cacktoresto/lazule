@@ -609,7 +609,7 @@ function DetailImage({ product }) {
   }
 
   return (
-    <div className="lazule-product-hero relative overflow-hidden rounded-b-[2.35rem] border-b border-lazule-gold/20 bg-lazule-night shadow-mineral lg:rounded-[3rem] lg:border">
+    <div className="lazule-product-hero relative overflow-hidden rounded-b-[1.65rem] border-b border-lazule-gold/20 bg-lazule-night shadow-mineral sm:rounded-b-[2.35rem] lg:rounded-[3rem] lg:border">
       <div
         ref={galleryRef}
         className="lazule-product-gallery flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
@@ -648,7 +648,7 @@ function DetailImage({ product }) {
                 <ProductImageFallback label="Imagem em atualização" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-lazule-night via-lazule-night/10 to-transparent" aria-hidden="true" />
-              <figcaption className="absolute bottom-7 left-6 text-[0.62rem] uppercase tracking-[0.34em] text-lazule-gold/80 sm:left-8">
+              <figcaption className="absolute bottom-4 left-4 text-[0.6rem] uppercase tracking-[0.24em] text-lazule-gold/80 sm:bottom-7 sm:left-8 sm:tracking-[0.34em]">
                 {slide.label}
               </figcaption>
             </figure>
@@ -656,10 +656,10 @@ function DetailImage({ product }) {
         })}
       </div>
       {gallery.length > 1 && (
-        <div className="absolute bottom-7 right-6 flex items-center gap-1.5 sm:right-8" role="group" aria-label="Selecionar imagem da galeria">
+        <div className="absolute bottom-4 right-4 flex items-center gap-2 sm:bottom-7 sm:right-8" role="group" aria-label="Selecionar imagem da galeria">
           {gallery.map((slide, index) => (
             <button
-              className={`lazule-product-dot h-1 rounded-full transition-all duration-300 ${activeSlide === index ? 'w-6 bg-lazule-gold' : 'w-1.5 bg-white/35'}`}
+              className={`lazule-product-dot h-2 rounded-full transition-all duration-300 ${activeSlide === index ? 'w-7 bg-lazule-gold' : 'w-2 bg-white/35'}`}
               key={slide.id}
               type="button"
               aria-label={`Ver ${slide.label}`}
@@ -1164,12 +1164,12 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
   }
 
   return (
-    <div className={`lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-slate-950/72 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl transition duration-500 ${showBar ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'}`} role="region" aria-label="Compra rápida">
-      <div className="mx-auto flex max-w-5xl items-center gap-3">
+    <div className={`lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-slate-950/82 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-2.5 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl transition duration-500 sm:px-4 sm:pt-3 ${showBar ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'}`} role="region" aria-label="Compra rápida">
+      <div className="mx-auto flex max-w-5xl items-center gap-2.5 sm:gap-3">
         {product.image ? <img src={product.image} alt={product.name} className="hidden h-12 w-12 rounded-xl border border-white/10 object-contain bg-black/20 p-1 sm:block" loading="lazy" /> : null}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">{getProductDisplayName(product)}</p>
-          <strong className="block truncate text-lg text-lazule-mist">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
+          <strong className="block truncate text-base text-lazule-mist sm:text-lg">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           {appliedCode ? (
             <p className="mt-1 truncate text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold/85">
               {appliedCode.label}: {appliedCode.value}
@@ -1188,7 +1188,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
         {directBuy ? (
           <button
             type="button"
-            className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-xs font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
+            className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-4 text-[0.68rem] font-bold uppercase tracking-[0.08em] text-lazule-night shadow-aureate transition active:scale-[0.98] disabled:cursor-wait disabled:opacity-70 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
             disabled={isCheckingOut}
             aria-label={`Finalizar compra de ${product.name || 'fragrância LAZULE'} via Mercado Pago`}
             onClick={() => {
@@ -1200,7 +1200,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
           </button>
         ) : (
           <a
-            className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-5 text-xs font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.98] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+            className={`lazule-premium-button lazule-cta-shimmer inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-lazule-gold px-4 text-[0.68rem] font-bold uppercase tracking-[0.08em] text-lazule-night shadow-aureate transition active:scale-[0.98] sm:px-5 sm:text-xs sm:tracking-[0.12em] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
             href={whatsAppLink || '#'}
             aria-disabled={disabled}
             aria-label={`Consultar ${product.name || 'fragrância LAZULE'} pelo WhatsApp`}
@@ -1356,7 +1356,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
       <div className="grid gap-2 sm:grid-cols-[0.95fr_1.05fr]">
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
           onClick={handleAddToSelection}
         >
           Adicionar
@@ -1364,7 +1364,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
         <button
           type="button"
           disabled={!directBuy || isCheckingOut}
-          className="lazule-premium-button lazule-cta-shimmer inline-flex w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+          className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
           onClick={handleCheckoutClick}
         >
           {isCheckingOut ? 'Iniciando pagamento seguro...' : 'Finalizar compra'}
@@ -1379,7 +1379,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
       </div>
       {checkoutError ? <p className="text-xs leading-5 text-red-600 lg:text-red-200" role="alert">{checkoutError}</p> : null}
       <a
-        className="inline-flex w-full items-center justify-center rounded-full border border-lazule-night/10 bg-white/45 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:border-lazule-gold/45 lg:border-white/10 lg:bg-white/[0.045] lg:text-lazule-mist"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-lazule-night/10 bg-white/45 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:border-lazule-gold/45 lg:border-white/10 lg:bg-white/[0.045] lg:text-lazule-mist"
         href={whatsAppLink}
         target="_blank"
         rel="noreferrer"
@@ -1498,23 +1498,23 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const olfactiveIdentitySummary = buildOlfactiveIdentitySummary(product, signature);
 
   return (
-    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
+    <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-3 px-0 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
       <span className="lazule-depth-layer lazule-depth-layer-3" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-fog" aria-hidden="true" />
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 overflow-hidden rounded-[2.35rem] border border-white/10 bg-[#f7f2e8]/[0.94] text-lazule-night shadow-mineral backdrop-blur lg:-ml-10 lg:mt-12 lg:rounded-[2.8rem] lg:bg-white/[0.06] lg:p-9 lg:text-lazule-mist">
+      <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-3 -mt-5 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#f7f2e8]/[0.96] text-lazule-night shadow-mineral backdrop-blur sm:mx-0 sm:rounded-[2.35rem] lg:-ml-10 lg:mt-12 lg:rounded-[2.8rem] lg:bg-white/[0.06] lg:p-9 lg:text-lazule-mist">
         <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
-        <h1 className="lazule-text-reveal mt-3 font-display text-[clamp(2.25rem,5.4vw,4rem)] leading-[0.98] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
+        <h1 className="lazule-text-reveal mt-2 font-display text-[clamp(2rem,10vw,3.15rem)] leading-[0.95] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
         <div className="mt-4 flex flex-wrap gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-600 lg:text-slate-300">
           {[categoryLabel, concentration, volume].filter(Boolean).map((item) => (
             <span key={item} className="rounded-full border border-lazule-night/10 bg-white/45 px-3 py-1.5 lg:border-white/10 lg:bg-white/[0.045]">{item}</span>
           ))}
         </div>
-        <div className="mt-6 space-y-3">
-          <p className="font-display text-[1.7rem] leading-tight text-lazule-night lg:text-lazule-mist">{luxuryDescriptor}</p>
+        <div className="mt-5 space-y-2.5">
+          <p className="font-display text-[1.38rem] leading-tight text-lazule-night sm:text-[1.7rem] lg:text-lazule-mist">{luxuryDescriptor}</p>
           <p className="text-sm leading-6 text-slate-700 lg:text-slate-300">{atmosphericSignature}</p>
           <p className="text-sm leading-6 text-slate-700 lg:text-slate-300">{olfactiveIdentitySummary}</p>
         </div>
@@ -1860,7 +1860,7 @@ export function ProductDetails({ slug }) {
   const whatsAppLink = createProductWhatsAppLink(product, { productUrl, referralContext });
 
   return (
-    <section className="mx-auto max-w-7xl pb-14 lg:px-8 lg:py-10">
+    <section className="mx-auto max-w-7xl pb-24 lg:px-8 lg:py-10">
       <div className="lg:hidden">
         <a className="absolute left-5 top-5 z-20 rounded-full border border-white/10 bg-lazule-night/45 px-4 py-2 text-xs font-semibold text-lazule-gold backdrop-blur transition hover:text-[#dfbd68]" href="/catalogo">
           ← catálogo
@@ -1887,7 +1887,7 @@ export function ProductDetails({ slug }) {
         recommendations: true,
       }) || null}
 
-      <div className="mt-7 space-y-7 px-4 lg:mt-10 lg:space-y-10 lg:px-0">
+      <div className="mt-5 space-y-5 px-3 lg:mt-10 lg:space-y-10 lg:px-0">
         <ProductSectionErrorBoundary sectionName="understanding"><ProductUnderstandingSection product={product} experience={experience} /></ProductSectionErrorBoundary>
         {experience ? <ProductSectionErrorBoundary sectionName="experience_top"><ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} /></ProductSectionErrorBoundary> : null}
         <ProductSectionErrorBoundary sectionName="trust_layer"><LazuleTrustLayer /></ProductSectionErrorBoundary>

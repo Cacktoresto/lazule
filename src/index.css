@@ -571,6 +571,38 @@ input {
   padding: 1.35rem 1.15rem 1.15rem;
 }
 
+
+@media (max-width: 639px) {
+  .lazule-product-hero-frame {
+    aspect-ratio: 4 / 4.3;
+    max-height: min(58svh, 28rem);
+  }
+
+  .lazule-product-hero .lazule-product-bottle {
+    top: 48%;
+    width: min(66%, 13.5rem);
+    height: 58%;
+  }
+
+  .lazule-product-stage {
+    top: 48%;
+    width: min(14rem, 62vw);
+    height: min(14rem, 62vw);
+    filter: blur(2rem);
+  }
+
+  .lazule-pdp-card {
+    border-radius: 1.45rem !important;
+    padding: 1rem !important;
+  }
+
+  .lazule-horizontal-rail {
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+    scroll-padding-inline: 0.75rem;
+  }
+}
+
 @media (min-width: 640px) {
   .lazule-product-hero-frame {
     aspect-ratio: 5 / 4;
@@ -590,7 +622,7 @@ input {
 
 @media (max-width: 639px) and (max-height: 740px) {
   .lazule-product-hero-frame {
-    aspect-ratio: 5 / 6;
+    aspect-ratio: 4 / 4.4;
   }
 
   .lazule-product-hero .lazule-product-bottle {
@@ -606,14 +638,14 @@ input {
   }
 
   .lazule-product-info-card {
-    margin-top: 0;
-    padding-top: 1.5rem;
+    margin-top: -1.25rem;
+    padding-top: 1.25rem;
   }
 }
 
 @media (max-width: 380px) {
   .lazule-product-hero-frame {
-    aspect-ratio: 5 / 6;
+    aspect-ratio: 4 / 4.4;
   }
 
   .lazule-product-hero .lazule-product-bottle {
@@ -623,7 +655,7 @@ input {
   }
 
   .lazule-product-info-card {
-    margin-top: 0;
+    margin-top: -1.25rem;
   }
 }
 

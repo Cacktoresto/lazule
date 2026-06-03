@@ -306,20 +306,20 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
 
   return (
     <section className={`${className} lazule-ai-section ${isLazVisible ? `lazule-curation-ritual lazule-phase-${loaderPhase}` : ""}`} aria-labelledby="olfactive-assistant-title">
-      <div className="lazule-ai-concierge lazule-surface-premium relative min-w-0 overflow-hidden rounded-[1.9rem] border border-white/6 bg-[radial-gradient(circle_at_83%_20%,rgba(202,161,89,0.12),transparent_42%),radial-gradient(circle_at_14%_72%,rgba(90,106,144,0.16),transparent_52%),linear-gradient(124deg,rgba(10,15,30,0.94),rgba(9,18,38,0.87)_44%,rgba(5,10,21,0.97))] p-4 shadow-[0_22px_60px_rgba(2,6,23,0.22)] min-[390px]:p-4.5 sm:rounded-[2.5rem] sm:p-7 lg:p-8">
+      <div className="lazule-ai-concierge lazule-surface-premium relative min-w-0 overflow-hidden rounded-[1.45rem] border border-white/6 sm:rounded-[1.9rem] bg-[radial-gradient(circle_at_83%_20%,rgba(202,161,89,0.12),transparent_42%),radial-gradient(circle_at_14%_72%,rgba(90,106,144,0.16),transparent_52%),linear-gradient(124deg,rgba(10,15,30,0.94),rgba(9,18,38,0.87)_44%,rgba(5,10,21,0.97))] p-3.5 shadow-[0_22px_60px_rgba(2,6,23,0.22)] min-[390px]:p-4 sm:rounded-[2.5rem] sm:p-7 lg:p-8">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.04),transparent)] opacity-20" />
         
-        <div className="relative grid min-w-0 gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start">
+        <div className="relative grid min-w-0 gap-4 sm:gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start">
           <div className="min-w-0">
             <p className="text-[0.6rem] tracking-[0.28em] text-lazule-gold/75 sm:text-[0.64rem]">Concierge olfativo</p>
             <h2 id="olfactive-assistant-title" className="mt-3 max-w-[12ch] font-display text-[clamp(1.95rem,9.5vw,2.45rem)] leading-[0.9] tracking-[-0.035em] text-lazule-mist sm:mt-4 sm:max-w-[10ch] sm:text-5xl">Curadoria com presença.</h2>
-            <p className="mt-5 max-w-xl text-[0.95rem] leading-7 text-slate-300/92 sm:mt-7">Continuando sua curadoria: descreva a intenção em poucas palavras. A leitura vem primeiro, depois o perfume que melhor sustenta esse clima.</p>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300/92 sm:mt-7 sm:text-[0.95rem] sm:leading-7">Continuando sua curadoria: descreva a intenção em poucas palavras. A leitura vem primeiro, depois o perfume que melhor sustenta esse clima.</p>
 
-            <form className={`lazule-ai-form mt-5 min-w-0 space-y-4 sm:mt-6 ${isLazVisible ? "lazule-query-converging" : ""}`} onSubmit={handleSubmit}>
+            <form className={`lazule-ai-form mt-4 min-w-0 space-y-3 sm:mt-6 sm:space-y-4 ${isLazVisible ? "lazule-query-converging" : ""}`} onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="olfactive-query">Descreva o perfume ideal</label>
               <textarea
                 id="olfactive-query"
-                className="lazule-ai-textarea lazule-input-premium min-h-[4.4rem] w-full max-w-full resize-none rounded-[1rem] border border-white/6 bg-lazule-night/35 px-3.5 py-2.5 text-[0.92rem] leading-6 text-lazule-mist outline-none transition placeholder:text-slate-500/80 hover:border-lazule-gold/16 focus:border-lazule-gold/36 focus:ring-1 focus:ring-lazule-gold/16 sm:min-h-[4.9rem] sm:rounded-[1.2rem] sm:px-4 sm:py-3 sm:text-[0.96rem]"
+                className="lazule-ai-textarea lazule-input-premium min-h-[3.8rem] w-full max-w-full resize-none rounded-[1rem] border border-white/6 bg-lazule-night/35 px-3.5 py-2.5 text-[0.92rem] leading-6 text-lazule-mist outline-none transition placeholder:text-slate-500/80 hover:border-lazule-gold/16 focus:border-lazule-gold/36 focus:ring-1 focus:ring-lazule-gold/16 sm:min-h-[4.9rem] sm:rounded-[1.2rem] sm:px-4 sm:py-3 sm:text-[0.96rem]"
                 value={query}
                 maxLength={180}
                 placeholder={DEFAULT_PROMPT}
@@ -355,9 +355,9 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
             </form>
           </div>
 
-          <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.35rem] border border-white/6 bg-white/[0.01] p-4 sm:translate-y-5 sm:rounded-[1.8rem] sm:p-6" aria-live="polite">
+          <div className="lazule-ai-stage relative min-w-0 overflow-hidden rounded-[1.15rem] border border-white/6 bg-white/[0.01] p-3 sm:translate-y-5 sm:rounded-[1.8rem] sm:p-6" aria-live="polite">
             {!result && !isLazVisible ? (
-              <div className="min-w-0 max-w-full overflow-hidden flex min-h-[9.5rem] flex-col justify-center text-center sm:min-h-[14rem] sm:text-left">
+              <div className="min-w-0 max-w-full overflow-hidden flex min-h-[7.5rem] flex-col justify-center text-center sm:min-h-[14rem] sm:text-left">
                 <p className="text-[0.66rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Curadoria em contexto</p>
                 <h3 className="mt-3 font-display text-[clamp(1.85rem,8vw,2.25rem)] leading-tight tracking-[-0.03em] text-lazule-mist sm:text-3xl">Como você quer ser percebido hoje?</h3>
                 <p className="mt-4 text-sm leading-6 text-slate-300">Comece por uma sensação: {initialExamples}.</p>
@@ -368,7 +368,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
             ) : null}
 
             {isLazVisible ? (
-              <div className="min-h-[9.5rem] min-w-0 max-w-full sm:min-h-[14rem]" role="status" aria-live="polite">
+              <div className="min-h-[7.5rem] min-w-0 max-w-full sm:min-h-[14rem]" role="status" aria-live="polite">
                 <SemanticSearchLoading isActive={isLazVisible} isVisible={isLazVisible} phase={loaderPhase} fadeDurationMs={LOADER_FADE_MS} interpretedChips={livingSuggestions.slice(0, 3)} query={query} loadingCopy={LOADING_RITUAL_COPY} className="max-w-full" />
               </div>
             ) : null}
@@ -378,7 +378,7 @@ export function OlfactiveAssistant({ products = [], sourcePage = 'home', classNa
         </div>
 
         {result && canRevealResults ? (
-          <div className="lazule-result-reveal mt-7 min-w-0 max-w-full overflow-hidden">
+          <div className="lazule-result-reveal mt-5 sm:mt-7 min-w-0 max-w-full overflow-hidden">
                 {(() => {
                   const narrative = getResultNarrative(result, hasRecommendations, query);
                   const actionSuggestions = narrative.state === 'clear' ? activeRefinements : (narrative.chips.length ? narrative.chips : activeRefinements);
