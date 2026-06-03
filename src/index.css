@@ -3052,3 +3052,44 @@ body {
     height: 76%;
   }
 }
+
+/* Mobile PDP conversion refinement — clearer header economy and product-first fold */
+@media (max-width: 767px) {
+  .lazule-header {
+    box-shadow: 0 10px 36px rgba(1, 6, 18, 0.22), inset 0 -1px 0 rgba(200, 162, 77, 0.03);
+  }
+
+  .lazule-product-hero-frame {
+    height: clamp(18.5rem, 48svh, 24rem);
+    max-height: 50svh;
+  }
+
+  .lazule-product-hero .lazule-product-bottle {
+    top: 48.5%;
+    width: min(92%, 20.75rem);
+    height: 82%;
+  }
+
+  .lazule-product-stage {
+    top: 48.5%;
+    width: min(19rem, 78vw);
+    height: min(19rem, 78vw);
+  }
+
+  .lazule-product-info-card,
+  .lazule-editorial-stage .lazule-hero-copy {
+    padding: 0.88rem 0.88rem 0.95rem;
+  }
+}
+
+@media (max-width: 767px) and (max-height: 740px) {
+  .lazule-product-hero-frame {
+    height: clamp(17rem, 43svh, 20rem);
+    max-height: 45svh;
+  }
+
+  .lazule-product-hero .lazule-product-bottle {
+    width: min(92%, 19rem);
+    height: 82%;
+  }
+}

@@ -1430,6 +1430,43 @@ function SemanticSearchEntry({ product }) {
   );
 }
 
+
+function buildReferenceLabel(product = {}) {
+  const reference = String(product.olfactoryReference || product.reference || '').trim();
+  const normalizedReference = normalizeProductClassifier(reference);
+
+  if (normalizedReference.includes('imagination')) {
+    return 'LV Imagination';
+  }
+
+  return reference || 'referência premium';
+}
+
+function OlfactiveQuickSummary({ product, conversionChips = [] }) {
+  const referenceLabel = buildReferenceLabel(product);
+  const featureItems = conversionChips.slice(0, 4);
+
+  return (
+    <div className="mt-2.5 rounded-[1.05rem] border border-lazule-gold/16 bg-gradient-to-br from-white/[0.055] via-white/[0.025] to-lazule-blue/20 p-3 shadow-[inset_0_1px_0_rgba(248,250,252,0.05)] lg:mt-4 lg:rounded-[1.25rem] lg:p-4">
+      <div className="grid gap-1.5 text-[0.82rem] font-semibold leading-5 text-lazule-mist lg:text-sm">
+        <p>🌊 Luxo clean e fresco</p>
+        <p>🍋 Cítrico aromático</p>
+        <p>☀️ Ideal para calor</p>
+        <p>✨ Similar ao {referenceLabel}</p>
+      </div>
+      {featureItems.length ? (
+        <div className="mt-2.5 flex flex-wrap gap-1.5 lg:mt-3 lg:gap-2" aria-label="Características principais">
+          {featureItems.map((chip, index) => (
+            <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/28 bg-lazule-gold/10 px-2.5 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.11em] text-lazule-gold/90 lg:px-3 lg:text-[0.62rem] lg:tracking-[0.14em]" style={{ '--item-delay': `${120 + index * 90}ms` }}>
+              {normalizePdpChipLabel(chip)}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
@@ -1460,25 +1497,25 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
   }
 
   return (
-    <div className="mt-3 space-y-2.5 lg:mt-5 lg:space-y-3">
+    <div className="mt-3 space-y-2 lg:mt-5 lg:space-y-3">
       <button
         type="button"
         disabled={!directBuy || isCheckingOut}
         className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70 lg:text-base lg:normal-case lg:tracking-normal"
         onClick={handleCheckoutClick}
       >
-        {isCheckingOut ? 'Iniciando pagamento seguro...' : 'Finalizar compra'}
+        {isCheckingOut ? (<> <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-lazule-night/30 border-t-lazule-night" aria-hidden="true" />Iniciando pagamento...</>) : 'Comprar com Segurança'}
       </button>
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-lazule-gold/30 bg-white/[0.045] px-4 py-2 text-xs font-semibold text-lazule-mist transition hover:bg-lazule-gold/15 lg:min-h-12 lg:bg-lazule-gold/10 lg:px-6 lg:py-3 lg:text-sm lg:text-lazule-gold"
+          className="inline-flex min-h-9 w-full items-center justify-center rounded-full border border-lazule-gold/18 bg-white/[0.025] px-4 py-2 text-[0.72rem] font-semibold text-slate-300 transition hover:border-lazule-gold/35 hover:bg-lazule-gold/10 hover:text-lazule-gold lg:min-h-11 lg:px-6 lg:py-2.5 lg:text-sm"
           onClick={handleAddToSelection}
         >
           Adicionar
         </button>
         <a
-          className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-lazule-mist transition hover:border-lazule-gold/45 lg:min-h-12 lg:px-6 lg:py-3 lg:text-sm"
+          className="inline-flex min-h-9 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.018] px-4 py-2 text-[0.72rem] font-semibold text-slate-400 transition hover:border-lazule-gold/30 hover:text-lazule-gold lg:min-h-11 lg:px-6 lg:py-2.5 lg:text-sm"
           href={whatsAppLink}
           target="_blank"
           rel="noreferrer"
@@ -1603,22 +1640,8 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             <p className="mt-0.5 text-[0.68rem] text-slate-300 lg:mt-1 lg:text-xs">{directBuy ? 'checkout seguro · pronta entrega' : statusMeta.supportingCopy || 'consulta assistida pela curadoria'}</p>
           </div>
         </div>
+        <OlfactiveQuickSummary product={product} conversionChips={[...conversionChips, ...chips, ...humanReading.discoveryTags]} />
         <ProductCheckoutActions product={product} whatsAppLink={whatsAppLink} directBuy={directBuy} />
-        <div className="mt-3 rounded-[1.05rem] border border-lazule-gold/18 bg-gradient-to-br from-white/[0.07] via-white/[0.035] to-lazule-blue/20 p-3 lg:mt-4 lg:rounded-[1.2rem] lg:p-4">
-          <p className="text-[0.58rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold lg:text-[0.62rem] lg:tracking-[0.28em]">Resumo olfativo</p>
-          <p className="mt-1.5 text-sm font-semibold leading-5 text-lazule-mist lg:mt-2">{signature}</p>
-          <div className="mt-1.5 grid gap-1 text-xs leading-5 text-slate-300 lg:mt-2 lg:gap-2 lg:text-sm">
-            <p>{humanReading.firstImpression}</p>
-            <p>{presenceReading.whenItWorksBest?.[0] || luxuryDescriptor}</p>
-          </div>
-          <div className="mt-2.5 flex flex-wrap gap-1.5 lg:mt-3 lg:gap-2">
-            {[...conversionChips, ...chips, ...humanReading.discoveryTags].slice(0, 6).map((chip, index) => (
-              <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-2.5 py-1 text-[0.58rem] font-semibold uppercase tracking-[0.12em] text-lazule-gold lg:px-3 lg:text-[0.62rem] lg:tracking-[0.14em]" style={{ '--item-delay': `${120 + index * 90}ms` }}>
-                {normalizePdpChipLabel(chip)}
-              </span>
-            ))}
-          </div>
-        </div>
         <div className="mt-3 hidden rounded-[1.2rem] border border-white/10 bg-white/[0.024] p-4 lg:block">
           <p className="font-display text-[1.38rem] leading-tight text-lazule-mist sm:text-[1.7rem]">{luxuryDescriptor}</p>
           <div className="mt-2 grid gap-2 text-sm leading-6 text-slate-300">
