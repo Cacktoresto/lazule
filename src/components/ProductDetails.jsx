@@ -1525,26 +1525,38 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             <p className="mt-1 text-xs text-slate-600 lg:text-slate-300">{directBuy ? 'checkout seguro · disponibilidade imediata' : statusMeta.supportingCopy || 'consulta assistida pela curadoria'}</p>
           </div>
         </div>
-        <div className="lazule-live-interpretation lazule-text-reveal mt-4 rounded-[1.2rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Assinatura LAZULE</p>
+        <div className="mt-4 rounded-[1.2rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Resumo olfativo</p>
           <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">{signature}</p>
           <div className="mt-2 grid gap-2 text-sm leading-5 text-slate-700 lg:text-slate-300">
             <p>{humanReading.firstImpression}</p>
             <p>{presenceReading.whenItWorksBest?.[0] || humanReading.context}</p>
           </div>
-          <details className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-lazule-gold">Ler interpretação completa</summary>
-            <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700 lg:text-slate-300">
-              <p>{tasteEvolution?.narrative || 'Esse perfume conversa com a direção recente da sua assinatura.'}</p>
-              <p>{identityTensionState?.identityTension?.narrative || 'Seu gosto recente mantém contraste entre conforto e presença.'}</p>
-              <p>Leitura social: {humanReading.socialImpression}</p>
-              <p>Personalidade: {humanReading.personality}</p>
-              <p>Ocasião humana: {humanReading.humanOccasion}</p>
-              <p>Leitura editorial: {humanReading.commentary[0]}</p>
-              <p>Opinião LAZULE: {editorialOpinion}</p>
-            </div>
-          </details>
-          <p className="mt-2 text-xs uppercase tracking-[0.2em] text-lazule-royal/80 lg:text-lazule-gold/80">Presença da sessão · {sessionAtmosphere.profile}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[...chips, ...humanReading.discoveryTags].slice(0, 5).map((chip, index) => (
+              <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold" style={{ '--item-delay': `${120 + index * 90}ms` }}>
+                {normalizePdpChipLabel(chip)}
+              </span>
+            ))}
+          </div>
+        </div>
+        <ProductCheckoutActions product={product} whatsAppLink={whatsAppLink} directBuy={directBuy} />
+        <details className="mt-3 rounded-[1.1rem] border border-lazule-night/10 bg-white/35 p-3 lg:border-white/10 lg:bg-white/[0.03]">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-lazule-royal lg:text-lazule-gold">Cupom ou código de indicação</summary>
+          <ManualReferralForm product={product} referralContext={referralContext} />
+        </details>
+        <details className="lazule-live-interpretation lazule-text-reveal mt-3 rounded-[1.2rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-lazule-gold">Abrir análise olfativa estendida</summary>
+          <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700 lg:text-slate-300">
+            <p>{tasteEvolution?.narrative || 'Esse perfume conversa com a direção recente da sua assinatura.'}</p>
+            <p>{identityTensionState?.identityTension?.narrative || 'Seu gosto recente mantém contraste entre conforto e presença.'}</p>
+            <p>Leitura social: {humanReading.socialImpression}</p>
+            <p>Personalidade: {humanReading.personality}</p>
+            <p>Ocasião humana: {humanReading.humanOccasion}</p>
+            <p>Leitura editorial: {humanReading.commentary[0]}</p>
+            <p>Opinião LAZULE: {editorialOpinion}</p>
+          </div>
+          <p className="mt-3 text-xs uppercase tracking-[0.2em] text-lazule-royal/80 lg:text-lazule-gold/80">Presença da sessão · {sessionAtmosphere.profile}</p>
           <div className="mt-2 space-y-1.5">
             {storyFragments.map((fragment) => (
               <p key={fragment} className="text-sm leading-6 text-slate-700 lg:text-slate-300">{fragment}</p>
@@ -1558,13 +1570,6 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
               </div>
             ))}
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {[...chips, ...humanReading.discoveryTags].slice(0, 6).map((chip, index) => (
-              <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold" style={{ '--item-delay': `${120 + index * 90}ms` }}>
-                {normalizePdpChipLabel(chip)}
-              </span>
-            ))}
-          </div>
           <div className="mt-5 grid gap-3 rounded-2xl border border-lazule-gold/20 bg-white/[0.04] p-4 text-sm leading-6 text-slate-700 lg:text-slate-300">
             <p><strong className="text-lazule-night lg:text-lazule-mist">Quando funciona melhor:</strong> {presenceReading.whenItWorksBest.join(' ')}</p>
             <p><strong className="text-lazule-night lg:text-lazule-mist">Quando pode falhar:</strong> {presenceReading.whenItCanFail.join(' ')}</p>
@@ -1575,7 +1580,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
             <p><strong className="text-lazule-night lg:text-lazule-mist">Fadiga/saturação:</strong> {presenceReading.fatigueSaturation}</p>
             {observationFragments.map((fragment) => <p key={fragment}>• {fragment}</p>)}
           </div>
-        </div>
+        </details>
       </article>
     </div>
   );
@@ -1888,28 +1893,27 @@ export function ProductDetails({ slug }) {
       }) || null}
 
       <div className="mt-5 space-y-5 px-3 lg:mt-10 lg:space-y-10 lg:px-0">
+        <ProductSectionErrorBoundary sectionName="trust_layer"><LazuleTrustLayer /></ProductSectionErrorBoundary>
         <ProductSectionErrorBoundary sectionName="understanding"><ProductUnderstandingSection product={product} experience={experience} /></ProductSectionErrorBoundary>
         {experience ? <ProductSectionErrorBoundary sectionName="experience_top"><ProductExperienceSection product={product} experience={experience} whatsAppLink={whatsAppLink} /></ProductSectionErrorBoundary> : null}
-        <ProductSectionErrorBoundary sectionName="trust_layer"><LazuleTrustLayer /></ProductSectionErrorBoundary>
-        {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
-        {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} currentProduct={product} /></ProductSectionErrorBoundary> : null}
-        <ProductSectionErrorBoundary sectionName="semantic_entry"><SemanticSearchEntry product={product} /></ProductSectionErrorBoundary>
-        {getVibeItems(product).length ? <ProductSectionErrorBoundary sectionName="vibe_top"><VibeSection product={product} /></ProductSectionErrorBoundary> : null}
-        {discoveryTermsCount ? <ProductSectionErrorBoundary sectionName="discovery_terms"><ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} /></ProductSectionErrorBoundary> : null}
-        {relationshipSectionsCount ? <ProductSectionErrorBoundary sectionName="relationships"><ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} /></ProductSectionErrorBoundary> : null}
         {semanticRuntimeState === 'ready' && !experience ? (
           <SemanticEditorialFallback
             title="DNA em atualização editorial"
             copy="A assinatura olfativa detalhada deste perfume está sendo consolidada. Enquanto isso, mantemos a leitura de marca, categoria e contexto para orientar sua escolha."
           />
         ) : null}
+        {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
+        {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} currentProduct={product} /></ProductSectionErrorBoundary> : null}
         {semanticRuntimeState === 'ready' && !safeRecommendations.length ? (
           <SemanticEditorialFallback
             title="Sugestões em curadoria ativa"
             copy="Nossas recomendações semânticas estão sendo refinadas para este item. Explore o catálogo por marca, assinatura e ocasião enquanto concluímos a seleção."
           />
         ) : null}
-        <ProductSectionErrorBoundary sectionName="final_purchase"><FinalPurchaseSection product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} /></ProductSectionErrorBoundary>
+        <ProductSectionErrorBoundary sectionName="semantic_entry"><SemanticSearchEntry product={product} /></ProductSectionErrorBoundary>
+        {getVibeItems(product).length ? <ProductSectionErrorBoundary sectionName="vibe_top"><VibeSection product={product} /></ProductSectionErrorBoundary> : null}
+        {discoveryTermsCount ? <ProductSectionErrorBoundary sectionName="discovery_terms"><ProductDiscoveryTermsSection product={product} runtimeModules={runtimeModules} /></ProductSectionErrorBoundary> : null}
+        {relationshipSectionsCount ? <ProductSectionErrorBoundary sectionName="relationships"><ProductRelationshipsSection sections={relationshipSections} currentProduct={product} experience={experience} /></ProductSectionErrorBoundary> : null}
         <ProductFooterBridge />
       </div>
       <StickyWhatsAppBar product={product} whatsAppLink={whatsAppLink} referralContext={referralContext} />
