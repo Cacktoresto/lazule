@@ -2962,3 +2962,93 @@ body {
     max-width: 16.5rem;
   }
 }
+
+/* Phase 12.6 — mobile PDP first-fold reconstruction */
+.lazule-mobile-conversion-card {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(200, 162, 77, 0.13), transparent 16rem),
+    radial-gradient(circle at 12% 10%, rgba(37, 99, 235, 0.18), transparent 18rem),
+    linear-gradient(145deg, rgba(16, 38, 79, 0.82), rgba(5, 10, 25, 0.96) 58%, rgba(7, 13, 29, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(248, 250, 252, 0.08),
+    0 22px 64px rgba(1, 6, 18, 0.48),
+    0 0 0 1px rgba(200, 162, 77, 0.05);
+}
+
+@media (max-width: 767px) {
+  .lazule-product-hero {
+    border-bottom-left-radius: 1.45rem;
+    border-bottom-right-radius: 1.45rem;
+  }
+
+  .lazule-product-hero-frame {
+    aspect-ratio: auto;
+    height: clamp(16.75rem, 41svh, 22rem);
+    max-height: 45svh;
+  }
+
+  .lazule-product-hero .lazule-product-bottle {
+    top: 49%;
+    width: min(86%, 18.75rem);
+    height: 74%;
+  }
+
+  .lazule-product-bottle--hero {
+    height: 76%;
+  }
+
+  .lazule-product-bottle--mood,
+  .lazule-product-bottle--detail {
+    height: 78%;
+  }
+
+  .lazule-product-stage {
+    top: 49%;
+    width: min(17rem, 72vw);
+    height: min(17rem, 72vw);
+    filter: blur(1.85rem);
+  }
+
+  .lazule-product-info-card {
+    padding: 1rem 0.95rem 0.95rem;
+  }
+
+  .lazule-editorial-stage .lazule-hero-copy {
+    padding: 1rem 0.95rem 0.95rem;
+  }
+
+  .lazule-product-gallery + div,
+  .lazule-product-hero figcaption {
+    transform: translateY(0.35rem);
+  }
+}
+
+@media (max-width: 767px) and (max-height: 740px) {
+  .lazule-product-hero-frame {
+    height: clamp(15.5rem, 37svh, 18.25rem);
+    max-height: 39svh;
+  }
+
+  .lazule-product-info-card {
+    padding: 0.85rem 0.85rem 0.9rem;
+  }
+
+  .lazule-editorial-stage .lazule-hero-copy {
+    padding: 0.85rem 0.85rem 0.9rem;
+  }
+
+  .lazule-mobile-conversion-card h1 {
+    font-size: clamp(1.38rem, 6.4vw, 2rem);
+  }
+}
+
+@media (max-width: 380px) {
+  .lazule-product-hero-frame {
+    height: clamp(15rem, 36svh, 17.75rem);
+  }
+
+  .lazule-product-hero .lazule-product-bottle {
+    width: min(88%, 17rem);
+    height: 76%;
+  }
+}

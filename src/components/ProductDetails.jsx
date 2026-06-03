@@ -264,6 +264,36 @@ function buildOlfactiveIdentitySummary(product = {}, signature = '') {
   return product.narrative || 'Uma leitura clara de presença, ocasião e assinatura.';
 }
 
+
+function buildMobileConversionChips(product = {}, atmosphere = buildSemanticAtmosphere(product), humanReading = {}) {
+  const normalizedCategory = normalizeProductClassifier(product.category);
+  const normalizedGender = normalizeProductClassifier(product.gender);
+  const atmosphereLabels = {
+    'mineral-aquatic': 'Luxo Clean',
+    'amber-oriental': 'Âmbar Moderno',
+    'amber-nocturne': 'Noite Elegante',
+    'smoky-dark': 'Madeiras Escuras',
+    'luxury-clean': 'Luxo Clean',
+    'floral-luminous': 'Floral Luminoso',
+    signature: 'Assinatura LAZULE',
+  };
+  const genderLabel = normalizedGender === 'masculino'
+    ? 'Masculino'
+    : normalizedGender === 'feminino'
+      ? 'Feminino'
+      : normalizedGender === 'unissex'
+        ? 'Unissex'
+        : '';
+  const originLabel = normalizedCategory.includes('arabe') ? 'Importado Árabe' : 'Importado';
+
+  return uniqueText([
+    originLabel,
+    genderLabel,
+    atmosphereLabels[atmosphere.profile] || 'Luxo Clean',
+    humanReading.humanOccasion ? normalizePdpChipLabel(humanReading.humanOccasion) : 'Assinatura Diária',
+  ]).slice(0, 4);
+}
+
 function buildWhyThisFragranceBullets(product = {}, experience = null, presenceReading = {}, humanReading = {}) {
   const signals = getProductOlfactiveSignals(product);
   const normalized = normalizeProductClassifier([
@@ -1352,41 +1382,41 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
   }
 
   return (
-    <div className="mt-5 space-y-3">
-      <div className="grid gap-2 sm:grid-cols-[0.95fr_1.05fr]">
+    <div className="mt-3 space-y-2.5 lg:mt-5 lg:space-y-3">
+      <button
+        type="button"
+        disabled={!directBuy || isCheckingOut}
+        className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70 lg:text-base lg:normal-case lg:tracking-normal"
+        onClick={handleCheckoutClick}
+      >
+        {isCheckingOut ? 'Iniciando pagamento seguro...' : 'Finalizar compra'}
+      </button>
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:bg-lazule-gold/20 lg:text-lazule-gold"
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-lazule-gold/30 bg-white/[0.045] px-4 py-2 text-xs font-semibold text-lazule-mist transition hover:bg-lazule-gold/15 lg:min-h-12 lg:bg-lazule-gold/10 lg:px-6 lg:py-3 lg:text-sm lg:text-lazule-gold"
           onClick={handleAddToSelection}
         >
           Adicionar
         </button>
-        <button
-          type="button"
-          disabled={!directBuy || isCheckingOut}
-          className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 font-semibold text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
-          onClick={handleCheckoutClick}
+        <a
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-lazule-mist transition hover:border-lazule-gold/45 lg:min-h-12 lg:px-6 lg:py-3 lg:text-sm"
+          href={whatsAppLink}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleConsultationClick}
         >
-          {isCheckingOut ? 'Iniciando pagamento seguro...' : 'Finalizar compra'}
-        </button>
+          Atendimento
+        </a>
       </div>
-      <div className="flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-slate-600 lg:text-slate-300">
+      <div className="hidden flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-slate-300 lg:flex">
         <span>Pagamento via Mercado Pago</span>
         <span aria-hidden="true">·</span>
         <span>Atendimento especializado</span>
         <span aria-hidden="true">·</span>
         <span>Seleção curada pela LAZULE</span>
       </div>
-      {checkoutError ? <p className="text-xs leading-5 text-red-600 lg:text-red-200" role="alert">{checkoutError}</p> : null}
-      <a
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-lazule-night/10 bg-white/45 px-6 py-3 text-sm font-semibold text-lazule-night transition hover:border-lazule-gold/45 lg:border-white/10 lg:bg-white/[0.045] lg:text-lazule-mist"
-        href={whatsAppLink}
-        target="_blank"
-        rel="noreferrer"
-        onClick={handleConsultationClick}
-      >
-        Solicitar atendimento
-      </a>
+      {checkoutError ? <p className="text-xs leading-5 text-red-200" role="alert">{checkoutError}</p> : null}
     </div>
   );
 }
@@ -1496,6 +1526,7 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
   const luxuryDescriptor = buildLuxuryDescriptor(product, atmosphere);
   const atmosphericSignature = buildAtmosphericSignature(product, humanReading);
   const olfactiveIdentitySummary = buildOlfactiveIdentitySummary(product, signature);
+  const conversionChips = buildMobileConversionChips(product, atmosphere, humanReading);
 
   return (
     <div className={`lazule-editorial-stage lazule-atmospheric-crossfade grid gap-3 px-0 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8 lazule-mood-surface lazule-mood-${moodProfile} lazule-atmo-${atmosphere.profile}`} data-mood={moodProfile} data-compactness={cadence.compactness}>
@@ -1503,44 +1534,46 @@ function ProductDetailsSafeShell({ product, whatsAppLink, referralContext, exper
       <span className="lazule-depth-layer lazule-depth-layer-6" aria-hidden="true" />
       <span className="lazule-depth-layer lazule-depth-layer-fog" aria-hidden="true" />
       <DetailImage product={product} />
-      <article className="lazule-hero-copy lazule-product-info-card relative z-10 mx-3 -mt-5 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#f7f2e8]/[0.96] text-lazule-night shadow-mineral backdrop-blur sm:mx-0 sm:rounded-[2.35rem] lg:-ml-10 lg:mt-12 lg:rounded-[2.8rem] lg:bg-white/[0.06] lg:p-9 lg:text-lazule-mist">
-        <a className="text-xs font-semibold uppercase tracking-[0.34em] text-lazule-royal transition hover:text-lazule-gold lg:text-lazule-gold" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
+      <article className="lazule-hero-copy lazule-product-info-card lazule-mobile-conversion-card relative z-10 mx-3 -mt-4 overflow-hidden rounded-[1.45rem] border border-white/10 bg-lazule-night/90 text-lazule-mist shadow-mineral backdrop-blur sm:mx-0 sm:rounded-[2.35rem] lg:-ml-10 lg:mt-12 lg:rounded-[2.8rem] lg:bg-white/[0.06] lg:p-9">
+        <a className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold transition hover:text-[#dfbd68] lg:text-xs lg:tracking-[0.34em]" href={createBrandPath(product.brand)} onClick={() => trackBrandClick(product.brand, { source_page: 'product_details' })}>
           {product.brand}
         </a>
-        <h1 className="lazule-text-reveal mt-2 font-display text-[clamp(2rem,10vw,3.15rem)] leading-[0.95] text-lazule-night lg:text-lazule-mist">{getProductDisplayName(product)}</h1>
-        <div className="mt-4 flex flex-wrap gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-600 lg:text-slate-300">
+        <h1 className="lazule-text-reveal mt-1.5 font-display text-[clamp(1.55rem,7vw,2.35rem)] leading-[0.98] text-lazule-mist lg:mt-2 lg:text-[clamp(2.4rem,5vw,3.7rem)]">{getProductDisplayName(product)}</h1>
+        <div className="mt-2.5 flex flex-wrap gap-1.5 text-[0.58rem] font-semibold uppercase tracking-[0.13em] text-slate-300 lg:mt-4 lg:gap-2 lg:text-[0.62rem] lg:tracking-[0.16em]">
           {[categoryLabel, concentration, volume].filter(Boolean).map((item) => (
-            <span key={item} className="rounded-full border border-lazule-night/10 bg-white/45 px-3 py-1.5 lg:border-white/10 lg:bg-white/[0.045]">{item}</span>
+            <span key={item} className="rounded-full border border-white/10 bg-white/[0.055] px-2.5 py-1 lg:px-3 lg:py-1.5">{item}</span>
           ))}
         </div>
-        <div className="mt-5 space-y-2.5">
-          <p className="font-display text-[1.38rem] leading-tight text-lazule-night sm:text-[1.7rem] lg:text-lazule-mist">{luxuryDescriptor}</p>
-          <p className="text-sm leading-6 text-slate-700 lg:text-slate-300">{atmosphericSignature}</p>
-          <p className="text-sm leading-6 text-slate-700 lg:text-slate-300">{olfactiveIdentitySummary}</p>
-        </div>
-        <div className="mt-5 flex items-end justify-between gap-5 rounded-[1.45rem] border border-lazule-night/10 bg-white/45 p-4 lg:border-white/10 lg:bg-white/[0.045]">
+        <div className="mt-3 flex items-end justify-between gap-4 rounded-[1.1rem] border border-lazule-gold/20 bg-gradient-to-br from-lazule-blue/45 via-lazule-night/70 to-lazule-night/90 p-3 shadow-[inset_0_1px_0_rgba(248,250,252,0.07)] lg:mt-5 lg:rounded-[1.45rem] lg:p-4">
           <div>
-            <span className="text-[0.65rem] uppercase tracking-[0.25em] text-lazule-royal/90 lg:text-lazule-gold">Preço</span>
-            <strong className="mt-1 block text-3xl font-semibold text-[#081937] drop-shadow-[0_2px_10px_rgba(226,198,126,0.25)] lg:text-[#f7f3e5]">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
-            <p className="mt-1 text-xs text-slate-600 lg:text-slate-300">{directBuy ? 'checkout seguro · disponibilidade imediata' : statusMeta.supportingCopy || 'consulta assistida pela curadoria'}</p>
+            <span className="text-[0.6rem] uppercase tracking-[0.22em] text-lazule-gold">Preço</span>
+            <strong className="mt-0.5 block text-2xl font-semibold text-[#f7f3e5] drop-shadow-[0_2px_10px_rgba(226,198,126,0.25)] lg:mt-1 lg:text-3xl">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
+            <p className="mt-0.5 text-[0.68rem] text-slate-300 lg:mt-1 lg:text-xs">{directBuy ? 'checkout seguro · pronta entrega' : statusMeta.supportingCopy || 'consulta assistida pela curadoria'}</p>
           </div>
         </div>
-        <div className="mt-4 rounded-[1.2rem] border border-lazule-gold/20 bg-lazule-night/[0.03] p-4 lg:bg-white/[0.028]">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-lazule-gold">Resumo olfativo</p>
-          <p className="mt-2 text-sm font-semibold text-lazule-night lg:text-lazule-mist">{signature}</p>
-          <div className="mt-2 grid gap-2 text-sm leading-5 text-slate-700 lg:text-slate-300">
+        <ProductCheckoutActions product={product} whatsAppLink={whatsAppLink} directBuy={directBuy} />
+        <div className="mt-3 rounded-[1.05rem] border border-lazule-gold/18 bg-gradient-to-br from-white/[0.07] via-white/[0.035] to-lazule-blue/20 p-3 lg:mt-4 lg:rounded-[1.2rem] lg:p-4">
+          <p className="text-[0.58rem] font-semibold uppercase tracking-[0.24em] text-lazule-gold lg:text-[0.62rem] lg:tracking-[0.28em]">Resumo olfativo</p>
+          <p className="mt-1.5 text-sm font-semibold leading-5 text-lazule-mist lg:mt-2">{signature}</p>
+          <div className="mt-1.5 grid gap-1 text-xs leading-5 text-slate-300 lg:mt-2 lg:gap-2 lg:text-sm">
             <p>{humanReading.firstImpression}</p>
-            <p>{presenceReading.whenItWorksBest?.[0] || humanReading.context}</p>
+            <p>{presenceReading.whenItWorksBest?.[0] || luxuryDescriptor}</p>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {[...chips, ...humanReading.discoveryTags].slice(0, 5).map((chip, index) => (
-              <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-lazule-royal lg:text-lazule-gold" style={{ '--item-delay': `${120 + index * 90}ms` }}>
+          <div className="mt-2.5 flex flex-wrap gap-1.5 lg:mt-3 lg:gap-2">
+            {[...conversionChips, ...chips, ...humanReading.discoveryTags].slice(0, 6).map((chip, index) => (
+              <span key={chip} className="lazule-semantic-chip rounded-full border border-lazule-gold/35 bg-lazule-gold/10 px-2.5 py-1 text-[0.58rem] font-semibold uppercase tracking-[0.12em] text-lazule-gold lg:px-3 lg:text-[0.62rem] lg:tracking-[0.14em]" style={{ '--item-delay': `${120 + index * 90}ms` }}>
                 {normalizePdpChipLabel(chip)}
               </span>
             ))}
           </div>
         </div>
-        <ProductCheckoutActions product={product} whatsAppLink={whatsAppLink} directBuy={directBuy} />
+        <div className="mt-3 hidden rounded-[1.2rem] border border-white/10 bg-white/[0.028] p-4 lg:block">
+          <p className="font-display text-[1.38rem] leading-tight text-lazule-mist sm:text-[1.7rem]">{luxuryDescriptor}</p>
+          <div className="mt-2 grid gap-2 text-sm leading-6 text-slate-300">
+            <p>{atmosphericSignature}</p>
+            <p>{olfactiveIdentitySummary}</p>
+          </div>
+        </div>
         <details className="mt-3 rounded-[1.1rem] border border-lazule-night/10 bg-white/35 p-3 lg:border-white/10 lg:bg-white/[0.03]">
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-lazule-royal lg:text-lazule-gold">Cupom ou código de indicação</summary>
           <ManualReferralForm product={product} referralContext={referralContext} />
