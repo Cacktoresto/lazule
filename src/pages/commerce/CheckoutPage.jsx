@@ -68,14 +68,13 @@ export function CheckoutPage() {
     }
   }
 
-  return <section className='mx-auto w-full max-w-[1180px] px-4 py-10 text-lazule-mist sm:px-6 lg:px-8'>
-    <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10'>
-      <article className='min-w-0 space-y-5'>
-        <p className='text-xs uppercase tracking-[0.28em] text-lazule-gold/75'>{checkoutCopy.finalizing}</p>
-        <h1 className='text-3xl font-semibold leading-tight text-white sm:text-4xl'>{checkoutCopy.headline}</h1>
-        <p className='max-w-2xl text-lazule-mist/75'>{checkoutCopy.reinforcement}</p>
-        <p className='text-sm text-lazule-mist/65'>{checkoutCopy.cadence}</p>
-        <div className='rounded-3xl border border-white/10 bg-slate-950/45 p-5'>
+  return <section className='mx-auto w-full max-w-[1180px] px-4 py-6 pb-24 text-lazule-mist sm:px-6 sm:py-10 lg:px-8'>
+    <div className='grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10'>
+      <article className='min-w-0 space-y-4'>
+        <p className='text-xs uppercase tracking-[0.24em] text-lazule-gold/75'>{checkoutCopy.finalizing}</p>
+        <h1 className='text-3xl font-semibold leading-tight text-white sm:text-4xl'>Revise seu pedido</h1>
+        <p className='max-w-2xl text-sm leading-6 text-lazule-mist/75 sm:text-base'>{checkoutCopy.reinforcement}</p>
+        <div className='rounded-3xl border border-white/10 bg-slate-950/45 p-4 sm:p-5'>
           <p className='text-base text-white'>{renderState.title}</p>
           <p className='mt-2 text-sm text-lazule-mist/70'>{renderState.description}</p>
         </div>
@@ -86,13 +85,14 @@ export function CheckoutPage() {
           <p className='text-xs uppercase tracking-[0.24em] text-lazule-gold/80'>Resumo do pedido</p>
           {hasItems ? <ul className='mt-5 space-y-3'>{items.map((item)=><CheckoutCartItem key={item.id} item={item} />)}</ul> : <div className='mt-5 rounded-2xl border border-dashed border-white/15 p-4 text-sm text-lazule-mist/70'>Seu carrinho está vazio no momento.</div>}
           <div className='mt-5 border-t border-white/10 pt-4'>
-            <p className='text-sm text-lazule-mist/70'>Total</p>
-            <p className='text-2xl text-white'>{formatBRL(total)}</p>
+            <div className='flex items-center justify-between gap-4'><p className='text-sm text-lazule-mist/70'>Subtotal</p><p className='text-sm text-white'>{formatBRL(total)}</p></div>
+            <div className='mt-2 flex items-center justify-between gap-4'><p className='text-sm text-lazule-mist/70'>Entrega</p><p className='text-sm text-lazule-mist/70'>Calculada no Mercado Pago</p></div>
+            <div className='mt-4 flex items-end justify-between gap-4 border-t border-white/10 pt-4'><p className='text-sm text-lazule-mist/70'>Total</p><p className='text-2xl text-white'>{formatBRL(total)}</p></div>
           </div>
-          <button onClick={handleFinalizeSelection} disabled={!hasItems || isSubmitting} className='mt-5 w-full rounded-full border border-lazule-gold/40 bg-lazule-gold/15 px-5 py-3 text-sm font-medium text-lazule-gold disabled:cursor-not-allowed disabled:opacity-55'>{isSubmitting ? 'Preparando pagamento...' : 'Pagar com Mercado Pago'}</button>
-          <p className='mt-2 text-center text-xs text-lazule-mist/60'>Pagamento protegido via Mercado Pago</p>
+          <button onClick={handleFinalizeSelection} disabled={!hasItems || isSubmitting} className='mt-5 w-full rounded-full border border-lazule-gold/40 bg-lazule-gold px-5 py-3.5 text-sm font-bold text-lazule-night shadow-aureate disabled:cursor-not-allowed disabled:opacity-55'>{isSubmitting ? 'Preparando pagamento...' : 'Pagar com Mercado Pago'}</button>
+          <p className='mt-2 text-center text-xs text-lazule-mist/60'>Você será direcionado ao Mercado Pago para pagar com segurança.</p>
           {new URLSearchParams(window.location.search).get('recover') && <p className='mt-4 rounded-2xl border border-lazule-gold/20 bg-lazule-gold/10 p-3 text-sm text-lazule-gold'>Sua seleção ainda está aqui. Você pode continuar de onde parou.</p>}
-          {submitError && <p className='mt-4 text-sm text-red-300'>Não conseguimos iniciar agora</p>}
+          {submitError && <p className='mt-4 rounded-2xl border border-red-300/20 bg-red-950/25 p-3 text-sm text-red-200'>Não conseguimos iniciar agora. Tente novamente em instantes.</p>}
         </div>
       </article>
     </div>

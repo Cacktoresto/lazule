@@ -1195,10 +1195,10 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
 
   return (
     <div className={`lazule-sticky-whatsapp fixed inset-x-0 bottom-0 z-[70] border-t border-lazule-gold/20 bg-slate-950/82 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-2.5 shadow-[0_-18px_60px_rgba(2,6,23,0.52)] backdrop-blur-xl transition duration-500 sm:px-4 sm:pt-3 ${showBar ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'}`} role="region" aria-label="Compra rápida">
-      <div className="mx-auto flex max-w-5xl items-center gap-2.5 sm:gap-3">
+      <div className="mx-auto flex max-w-5xl items-center gap-2 sm:gap-3">
         {product.image ? <img src={product.image} alt={product.name} className="hidden h-12 w-12 rounded-xl border border-white/10 object-contain bg-black/20 p-1 sm:block" loading="lazy" /> : null}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">{getProductDisplayName(product)}</p>
+          <p className="truncate text-[0.62rem] uppercase tracking-[0.18em] text-slate-400">{getProductDisplayName(product)}</p>
           <strong className="block truncate text-base text-lazule-mist sm:text-lg">{directBuy ? formatBRL(product.salePrice) : 'Sob consulta'}</strong>
           {appliedCode ? (
             <p className="mt-1 truncate text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-lazule-gold/85">
@@ -1213,7 +1213,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
             trackEvent('add_to_selection', buildProductAnalyticsPayload(product, { cta_location: 'sticky_cta' }));
           }}
         >
-          Adicionar
+          Guardar
         </button>
         {directBuy ? (
           <button
@@ -1226,7 +1226,7 @@ function StickyWhatsAppBar({ product, whatsAppLink, referralContext }) {
               handleStickyCheckout();
             }}
           >
-            {isCheckingOut ? 'Pagamento seguro...' : 'Finalizar compra'}
+            {isCheckingOut ? 'Abrindo pagamento…' : 'Comprar'}
           </button>
         ) : (
           <a
@@ -1504,7 +1504,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
         className="lazule-premium-button lazule-cta-shimmer inline-flex min-h-12 w-full items-center justify-center rounded-full bg-lazule-gold px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-lazule-night shadow-aureate transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70 lg:text-base lg:normal-case lg:tracking-normal"
         onClick={handleCheckoutClick}
       >
-        {isCheckingOut ? (<> <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-lazule-night/30 border-t-lazule-night" aria-hidden="true" />Iniciando pagamento...</>) : 'Comprar com Segurança'}
+        {isCheckingOut ? (<> <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-lazule-night/30 border-t-lazule-night" aria-hidden="true" />Iniciando pagamento...</>) : 'Comprar agora'}
       </button>
       <div className="grid grid-cols-2 gap-2">
         <button
@@ -1512,7 +1512,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
           className="inline-flex min-h-9 w-full items-center justify-center rounded-full border border-lazule-gold/18 bg-white/[0.025] px-4 py-2 text-[0.72rem] font-semibold text-slate-300 transition hover:border-lazule-gold/35 hover:bg-lazule-gold/10 hover:text-lazule-gold lg:min-h-11 lg:px-6 lg:py-2.5 lg:text-sm"
           onClick={handleAddToSelection}
         >
-          Adicionar
+          Guardar
         </button>
         <a
           className="inline-flex min-h-9 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.018] px-4 py-2 text-[0.72rem] font-semibold text-slate-400 transition hover:border-lazule-gold/30 hover:text-lazule-gold lg:min-h-11 lg:px-6 lg:py-2.5 lg:text-sm"
@@ -1521,7 +1521,7 @@ function ProductCheckoutActions({ product, whatsAppLink, directBuy }) {
           rel="noreferrer"
           onClick={handleConsultationClick}
         >
-          Atendimento
+          Tirar dúvida
         </a>
       </div>
       <div className="hidden flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-slate-300 lg:flex">
@@ -2009,8 +2009,8 @@ export function ProductDetails({ slug }) {
             copy="A assinatura olfativa detalhada deste perfume está sendo consolidada. Enquanto isso, mantemos a leitura de marca, categoria e contexto para orientar sua escolha."
           />
         ) : null}
-        {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
         {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} currentProduct={product} /></ProductSectionErrorBoundary> : null}
+        {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
         {semanticRuntimeState === 'ready' && !safeRecommendations.length ? (
           <SemanticEditorialFallback
             title="Sugestões em curadoria ativa"

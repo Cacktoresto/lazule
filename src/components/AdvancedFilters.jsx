@@ -16,12 +16,6 @@ function getOrderedCatalogTypeOptions(availableCategories) {
   return [ALL_VALUE, ...preferredOptions, ...extraOptions];
 }
 
-const IMAGE_OPTIONS = [
-  { label: 'Todas', value: 'all' },
-  { label: 'Com imagem', value: 'with' },
-  { label: 'Sem imagem', value: 'without' },
-];
-
 function SelectField({ id, label, value, onChange, options, helper }) {
   return (
     <label className="block">
@@ -53,7 +47,7 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
           value={filters.category}
           onChange={(value) => onFilterChange('category', value)}
           options={getOrderedCatalogTypeOptions(options.categories)}
-          helper="Organização por curadoria: importados, árabes, nicho e designers."
+          helper="Importados: clássicos internacionais. Árabes: mais presença e rastro."
         />
         <SelectField
           id="gender-filter"
@@ -90,13 +84,6 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
           onChange={(value) => onFilterChange('sortBy', value)}
           options={SORT_OPTIONS}
         />
-        <SelectField
-          id="image-filter"
-          label="Imagem"
-          value={filters.imageMode}
-          onChange={(value) => onFilterChange('imageMode', value)}
-          options={IMAGE_OPTIONS}
-        />
       </div>
 
       <button
@@ -112,7 +99,20 @@ function FilterContent({ filters, options, onFilterChange, onReset }) {
 
 export { ALL_VALUE, PRICE_RANGES };
 
+function countActiveFilters(filters) {
+  return [
+    filters.category !== ALL_VALUE,
+    filters.gender !== ALL_VALUE,
+    filters.brand !== ALL_VALUE,
+    filters.availabilityStatus !== 'all',
+    filters.priceRange !== 'all',
+    filters.sortBy !== 'featured',
+  ].filter(Boolean).length;
+}
+
 export function AdvancedFilters({ filters, options, onFilterChange, onReset }) {
+  const activeCount = countActiveFilters(filters);
+
   return (
     <aside className="lazule-surface-premium laz-reveal rounded-[1.55rem] border bg-gradient-to-br from-[#0e1a34d9] via-[#101f3bd1] to-[#16366a94] p-3.5 backdrop-blur sm:rounded-[2rem] sm:p-5 lg:sticky lg:top-28 lg:p-6">
       <div className="mb-5 hidden lg:block">
@@ -125,7 +125,7 @@ export function AdvancedFilters({ filters, options, onFilterChange, onReset }) {
 
       <details className="lazule-product-accordion group lg:hidden">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-2xl border border-lazule-gold/20 bg-lazule-night/70 px-4 py-3 text-sm font-semibold text-lazule-mist shadow-inner shadow-lazule-blue/10 transition duration-200 hover:border-lazule-gold/45 hover:text-lazule-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night">
-          Filtros avançados
+          <span>Filtros {activeCount ? `(${activeCount})` : ''}</span>
           <span className="text-lazule-gold transition group-open:rotate-45">+</span>
         </summary>
         <div className="lazule-product-accordion-panel mt-4 sm:mt-5">

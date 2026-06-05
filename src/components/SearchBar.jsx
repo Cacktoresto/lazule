@@ -1,6 +1,6 @@
 import { trackEvent } from '../utils/analytics';
 
-export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = false, onFocus }) {
+export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = false, onFocus, resultCount = null, isSearching = false }) {
   function handleSubmit(event) {
     event.preventDefault();
     onSubmit(value.trim());
@@ -9,8 +9,9 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
   return (
     <form className="lazule-search-journey w-full" role="search" aria-label="Refinar fragrâncias no catálogo" onSubmit={handleSubmit}>
       <label className="block w-full" htmlFor="catalog-search">
-        <span className="mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#a9bbe0] sm:tracking-[0.24em]">
-          Busca
+        <span className="mb-2 flex items-center justify-between gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#a9bbe0] sm:tracking-[0.24em]">
+          <span>Busca rápida</span>
+          {typeof resultCount === 'number' ? <span className="normal-case tracking-normal text-lazule-gold/90" aria-live="polite">{isSearching ? 'Buscando…' : `${resultCount} resultado${resultCount === 1 ? '' : 's'}`}</span> : null}
         </span>
         <input
           id="catalog-search"
@@ -22,13 +23,13 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
             trackEvent('search_focus', { source_page: 'catalog_search' });
             onFocus?.();
           }}
-          placeholder="Busque por nome ou sensação…"
+          placeholder="Nome, marca ou sensação…"
           autoComplete="off"
           inputMode="search"
         />
       </label>
 
-      <div className="mt-3 grid gap-2 sm:flex sm:items-center sm:justify-between">
+      <div className="mt-2 grid gap-2 sm:mt-3 sm:flex sm:items-center sm:justify-between">
         <p className="text-xs leading-5 text-slate-400">Ex.: presente elegante, noite intensa, assinatura limpa.</p>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
           {hasSearch && (
@@ -44,7 +45,7 @@ export function SearchBar({ value, onChange, onSubmit, onClear, hasSearch = fals
             className="lazule-premium-button lazule-cta-shimmer min-h-11 rounded-full border-mineral surface-lazule-card laz-hover-lift px-5 text-sm font-semibold text-[#ecf2ff] shadow-mineral hover:border-[#b79249aa] hover:text-[#f8f2e4]"
             type="submit"
           >
-            <span className="relative z-10">Refinar</span>
+            <span className="relative z-10">Buscar</span>
           </button>
         </div>
       </div>
