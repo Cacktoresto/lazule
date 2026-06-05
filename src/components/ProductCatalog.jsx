@@ -298,16 +298,18 @@ export function ProductCatalog() {
     const startedAt = Date.now();
     setIsSemanticLoading(true);
 
+    let settleId = 0;
     const completionId = window.setTimeout(() => {
       const elapsed = Date.now() - startedAt;
       const remaining = Math.max(0, 420 - elapsed);
-      window.setTimeout(() => setIsSemanticLoading(false), remaining);
+      settleId = window.setTimeout(() => setIsSemanticLoading(false), remaining);
     }, 140);
 
     const safetyId = window.setTimeout(() => setIsSemanticLoading(false), 1200);
 
     return () => {
       window.clearTimeout(completionId);
+      window.clearTimeout(settleId);
       window.clearTimeout(safetyId);
     };
   }, [searchTerm, filters, activeDiscoveryChipIds]);

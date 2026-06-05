@@ -6,6 +6,7 @@ import {
   clearLuxurySelection,
   getLuxurySelection,
   removeFromLuxurySelection,
+  restoreLuxurySelection,
   upsertLuxuryQuantity,
 } from '../src/commerce/cart/luxuryCartState.js';
 
@@ -98,4 +99,51 @@ test('selection checkout WhatsApp message includes selected products and empty f
   const emptyMessage = buildSelectionWhatsAppMessage([], 0);
   assert.match(emptyMessage, /montar minha seleção olfativa/);
   assert.doesNotMatch(emptyMessage, /undefined|null|NaN/);
+});
+
+test('cart survives unavailable or quota-limited storage without crashing mobile navigation', () => {
+  const previousWindow = global.window;
+  const events = [];
+  global.window = {
+    localStorage: {
+      getItem() { throw new Error('Mobile Safari storage unavailable'); },
+      setItem() { throw new Error('QuotaExceededError'); },
+      removeItem() {},
+    },
+    sessionStorage: {
+      getItem() { return null; },
+      setItem() {},
+    },
+    dispatchEvent(event) {
+      events.push(event);
+      return true;
+    },
+  };
+
+  try {
+    assert.doesNotThrow(() => addToLuxurySelection(product));
+    assert.equal(getLuxurySelection().length, 1);
+    assert.equal(events.at(-1).type, 'lazule:selection-added');
+  } finally {
+    if (previousWindow === undefined) delete global.window;
+    else global.window = previousWindow;
+    clearLuxurySelection();
+  }
+});
+
+test('cart persistence normalizes duplicates and caps pathological quantities', () => {
+  const env = setupBrowserLikeGlobals();
+  try {
+    restoreLuxurySelection([
+      { ...product, price: 420, quantity: 9999 },
+      { ...product, price: 420, quantity: 2 },
+    ]);
+
+    const selection = getLuxurySelection();
+    assert.equal(selection.length, 1);
+    assert.equal(selection[0].quantity, 99);
+    assert.ok(JSON.stringify(selection).length < 48 * 1024);
+  } finally {
+    env.restore();
+  }
 });

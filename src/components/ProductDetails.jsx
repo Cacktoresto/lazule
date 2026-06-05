@@ -28,6 +28,7 @@ import { buildHumanPresenceReading } from '../ai/humanPresenceWritingEngine.js';
 import { createHumanObservationFragments } from '../ai/humanObservationFragmentsEngine.js';
 import { createEditorialOpinion } from '../ai/editorialOpinionEngine.js';
 import { CHECKOUT_ERROR_MESSAGE, startMercadoPagoCheckout } from '../services/mercadoPagoCheckout.js';
+import { recordMobileDiagnostic } from '../utils/mobileCrashDiagnostics.js';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -1771,7 +1772,7 @@ export function ProductDetails({ slug }) {
   }, [catalogProducts, product, runtimeModules]);
 
   const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
-  const tasteStore = useMemo(() => loadTasteMemoryStore(window.localStorage), []);
+  const tasteStore = useMemo(() => loadTasteMemoryStore(), []);
   const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile: tasteStore.profile || {}, events: tasteStore.events || [], wishlist: [] }), [tasteStore]);
   const identityTensionState = useMemo(() => deriveIdentityTension({ profile: tasteStore.profile || {}, events: tasteStore.events || [], wishlist: [] }), [tasteStore]);
   const semanticRecommendationsCount = safeRecommendations.length;
@@ -1853,6 +1854,7 @@ export function ProductDetails({ slug }) {
       return undefined;
     }
 
+    recordMobileDiagnostic('product_open', { productId: product.id, slug: product.productSlug || normalizedSlug, name: product.name });
     applyProductSeo(product);
     trackProductView(product, { source_page: 'product' });
 

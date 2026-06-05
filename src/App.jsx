@@ -28,6 +28,7 @@ import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPro
 import { captureReferralParams } from './utils/referral';
 import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRoutes';
 import { resolveCartUiRendering } from './commerce/checkout/cartUiRouting';
+import { recordMobileDiagnostic } from './utils/mobileCrashDiagnostics';
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
@@ -287,7 +288,9 @@ function App() {
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
-      setRoute(getCurrentRoute());
+      const nextRoute = getCurrentRoute();
+      recordMobileDiagnostic('route_change', { route: `${nextRoute.pathname}${nextRoute.search}${nextRoute.hash}` });
+      setRoute(nextRoute);
 
       if (scrollToTop) {
         window.requestAnimationFrame(() => scrollToHashOrTop());
@@ -301,6 +304,13 @@ function App() {
     function handleDocumentClick(event) {
       const clickedElement = event.target instanceof Element ? event.target : null;
       const anchor = clickedElement?.closest('a[href]');
+      if (clickedElement) {
+        recordMobileDiagnostic('click', {
+          tag: clickedElement.tagName,
+          text: clickedElement.textContent,
+          href: anchor?.getAttribute('href') || '',
+        });
+      }
 
       if (!anchor || anchor.target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return;
