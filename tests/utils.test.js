@@ -100,7 +100,8 @@ test('analytics normalizes product payloads and handles incomplete products safe
 test('analytics creates search payloads with consistent fields', () => {
   const payload = createSearchAnalyticsPayload({ searchTerm: 'sauvage', resultCount: 3, sourcePage: 'catalog' });
 
-  assert.equal(payload.search_term, 'consulta curta (1 termo)');
+  assert.equal(payload.search_term, 'sauvage');
+  assert.equal(payload.search_bucket, 'consulta curta (1 termo)');
   assert.equal(payload.query_terms, 1);
   assert.equal(payload.privacy, 'anonymized_search_signal');
   assert.equal(payload.result_count, 3);
@@ -116,7 +117,7 @@ test('analytics deduplicates events and falls back safely without configured pix
 
   resetAnalyticsForTests();
   const event = trackProductView({ name: 'Produto incompleto' });
-  assert.equal(event.name, 'product_view');
+  assert.equal(event.name, 'PRODUCT_VIEW');
   assert.equal(event.gaEventName, 'view_item');
   assert.equal(event.metaStandardName, 'ViewContent');
 });

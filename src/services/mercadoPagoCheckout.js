@@ -1,5 +1,5 @@
 import { createCheckoutPreference } from '../commerce/payment/mercadoPagoCheckoutClient.js';
-import { trackEvent } from '../utils/analytics.js';
+import { trackBeginCheckout, trackEvent } from '../utils/analytics.js';
 
 const CHECKOUT_ERROR_MESSAGE = 'Não conseguimos iniciar o pagamento agora. Tente novamente ou fale com a curadoria.';
 
@@ -81,6 +81,7 @@ export async function startMercadoPagoCheckout(items = [], options = {}) {
     product_ids: productIds,
   };
 
+  trackBeginCheckout({ items: payload.items, total: payload.total, source_page: options.source || 'cart_drawer' });
   trackEvent('start_checkout', checkoutAnalyticsPayload);
   trackEvent('checkout_start', checkoutAnalyticsPayload);
 

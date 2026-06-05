@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useOrderConsistency } from '../../commerce/orders/useOrderConsistency';
 import { restoreCheckoutSession } from '../../commerce/checkout/checkoutSessionEngine';
+import { trackPurchase } from '../../utils/analytics';
 
 const content = {
   success: ['Sua seleção foi confirmada.', 'Agora essa atmosfera passa a fazer parte da sua presença.'],
@@ -22,6 +23,12 @@ export function CheckoutResultPage({ mode = 'pending' }) {
   const pageMode = status === 'paid' ? 'finalizing' : (uiState || fallbackMode);
   const [title, body] = content[pageMode] || content[fallbackMode] || content.pending;
   const showPendingPix = ['awaiting_confirmation', 'syncing', 'reconciling'].includes(pageMode);
+
+  useEffect(() => {
+    if (mode === 'success' || status === 'paid') {
+      trackPurchase({ order_id: orderId, total: restoredSession?.total, item_count: restoredSession?.cartSnapshot?.length ?? restoredSession?.items?.length, source_page: 'checkout_result' });
+    }
+  }, [mode, orderId, restoredSession, status]);
 
   return <section className='mx-auto flex min-h-[60vh] max-w-4xl items-center px-6 py-20'>
     <article className='w-full rounded-[2rem] border border-white/10 bg-slate-950/70 p-8 text-center'>

@@ -1,10 +1,16 @@
+import { useEffect } from 'react';
 import { formatBRL } from '../../utils/currency';
 import { removeFromLuxurySelection, upsertLuxuryQuantity } from '../../commerce/cart/luxuryCartState';
 import { useLuxuryCart } from '../../commerce/checkout/useLuxuryCart';
+import { trackCartView } from '../../utils/analytics';
 
 export function CartPage() {
   const { items, total } = useLuxuryCart();
   const hasItems = items.length > 0;
+
+  useEffect(() => {
+    trackCartView({ items, total, source_page: 'cart_page' });
+  }, [items, total]);
 
   return <section className='mx-auto max-w-5xl px-4 py-6 pb-24 text-lazule-mist sm:px-6 sm:py-10'>
     <div className='flex items-end justify-between gap-4'>
