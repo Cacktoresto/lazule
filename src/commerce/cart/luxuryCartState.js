@@ -1,5 +1,6 @@
 import { safeReadJson, safeWriteJson } from '../../utils/safeStorage.js';
 import { recordMobileDiagnostic } from '../../utils/mobileCrashDiagnostics.js';
+import { trackAddToCart, trackRemoveFromCart } from '../../utils/analytics.js';
 
 const STORAGE_KEY = 'lazule_luxury_selection_v2';
 const MAX_CART_ITEMS = 40;
@@ -39,6 +40,7 @@ function normalizeSelectionItem(item = {}) {
     brand: sanitizeText(item.brand, 96),
     image: sanitizeText(item.image, 360),
     price: Math.max(0, Number(item.price ?? item.unit_price ?? item.salePrice) || 0),
+    category: sanitizeText(item.category || item.catalogType || item.type, 96),
     quantity: Math.max(1, sanitizeQuantity(item.quantity || 1)),
     editorialPhrase: sanitizeText(item.editorialPhrase || item.description || 'Guardamos sua seleção por aqui. Se ainda fizer sentido, você pode continuar.', 220),
   };
@@ -109,7 +111,8 @@ export function addToLuxurySelection(product) {
     name: product.name,
     brand: product.brand,
     image: product.image,
-    price: product.salePrice,
+    price: product.salePrice ?? product.price,
+    category: product.catalogType || product.category || product.type,
     quantity: 1,
     editorialPhrase: editorialLine(product),
   });
@@ -122,6 +125,7 @@ export function addToLuxurySelection(product) {
     ? current.map((item) => (item.id === normalizedProduct.id ? { ...item, quantity: Math.max(1, sanitizeQuantity(item.quantity + 1)) } : item))
     : [...current, normalizedProduct];
   writeSelection(next);
+  trackAddToCart(normalizedProduct, { source_page: 'cart_state' });
   if (typeof window !== 'undefined') {
     recordMobileDiagnostic('cart_add', { productId: normalizedProduct.id, name: normalizedProduct.name, items: normalizeSelection(next).length });
     window.dispatchEvent(new CustomEvent('lazule:selection-added', { detail: { items: normalizeSelection(next), productId: normalizedProduct.id } }));
@@ -130,8 +134,13 @@ export function addToLuxurySelection(product) {
 }
 
 export function removeFromLuxurySelection(productId) {
-  const next = readSelection().filter((item) => item.id !== productId);
+  const current = readSelection();
+  const removedItem = current.find((item) => item.id === productId);
+  const next = current.filter((item) => item.id !== productId);
   writeSelection(next);
+  if (removedItem) {
+    trackRemoveFromCart(removedItem, { source_page: 'cart_state' });
+  }
   return next;
 }
 

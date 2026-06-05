@@ -24,7 +24,7 @@ import { CheckoutResultPage } from './pages/commerce/CheckoutResultPage';
 import { OrderDetailPage } from './pages/commerce/OrderDetailPage';
 import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
-import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
+import { trackCouponDetected, trackHomeView, trackInfluencerRouteVisit, trackPageExit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
 import { captureReferralParams } from './utils/referral';
 import { applyPromoReferralRoute, isPromoReferralRoute } from './utils/promoRoutes';
 import { resolveCartUiRendering } from './commerce/checkout/cartUiRouting';
@@ -282,8 +282,14 @@ function App() {
     }
 
     if (!isProtectedDashboardRoute && !isInfluencerInviteRoute && !isPromoReferralRouteActive && !isAdminLoginRoute && !isInfluencerLoginRoute) {
-      trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
+      const pagePath = `${route.pathname}${route.search}${route.hash}`;
+      trackPageView({ path: pagePath, routeName });
+      if (routeName === 'home') {
+        trackHomeView({ page_path: pagePath, route_name: routeName });
+      }
+      return () => trackPageExit({ page_path: pagePath, route_name: routeName, exit_reason: 'route_change' });
     }
+    return undefined;
   }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isOrderDetailRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {

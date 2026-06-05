@@ -5,6 +5,7 @@ import {
   aggregateAICommerceIntelligence,
   aggregateFunnel,
   aggregateMetrics,
+  aggregateNoResultSearchReport,
   aggregateTopProducts,
   aggregateTopSearches,
   aggregateInfluencerMetrics,
@@ -25,6 +26,13 @@ test('analytics dashboard aggregates empty metrics safely', () => {
     brandClicks: 0,
     categoryClicks: 0,
     recommendationClicks: 0,
+    addToCart: 0,
+    cartViews: 0,
+    beginCheckout: 0,
+    purchases: 0,
+    pageExits: 0,
+    productToCartRate: 0,
+    checkoutPurchaseRate: 0,
   });
 });
 
@@ -39,6 +47,7 @@ test('analytics dashboard ranks viewed products and WhatsApp intent', () => {
     { name: 'product_view', timestamp: '2026-05-15T10:01:00.000Z', payload: { product_id: 'asad', product_name: 'Asad', brand: 'Lattafa' } },
     { name: 'product_view', timestamp: '2026-05-15T10:02:00.000Z', payload: { product_id: 'turathi', product_name: 'Turathi', brand: 'Afnan' } },
     { name: 'whatsapp_click', timestamp: '2026-05-15T10:03:00.000Z', payload: { product_id: 'turathi', product_name: 'Turathi', brand: 'Afnan' } },
+    { name: 'ADD_TO_CART', timestamp: '2026-05-15T10:04:00.000Z', payload: { product_id: 'asad', product_name: 'Asad', brand: 'Lattafa' } },
   ];
 
   const ranking = aggregateTopProducts(events);
@@ -47,6 +56,8 @@ test('analytics dashboard ranks viewed products and WhatsApp intent', () => {
   assert.equal(ranking.viewed[0].views, 2);
   assert.equal(ranking.whatsapp[0].product_name, 'Turathi');
   assert.equal(ranking.whatsapp[0].whatsapp_clicks, 1);
+  assert.equal(ranking.added[0].product_name, 'Asad');
+  assert.equal(ranking.added[0].add_to_cart, 1);
 });
 
 test('analytics dashboard ranks searches without result', () => {
@@ -64,16 +75,18 @@ test('analytics dashboard ranks searches without result', () => {
 
 test('analytics dashboard aggregates a basic commercial funnel', () => {
   const funnel = aggregateFunnel([
-    { name: 'page_view', timestamp: '2026-05-15T10:00:00.000Z', payload: {} },
-    { name: 'page_view', timestamp: '2026-05-15T10:01:00.000Z', payload: {} },
+    { name: 'HOME_VIEW', timestamp: '2026-05-15T10:00:00.000Z', payload: {} },
+    { name: 'CATALOG_VIEW', timestamp: '2026-05-15T10:01:00.000Z', payload: {} },
     { name: 'product_card_click', timestamp: '2026-05-15T10:02:00.000Z', payload: { product_name: 'Asad' } },
     { name: 'product_view', timestamp: '2026-05-15T10:03:00.000Z', payload: { product_name: 'Asad' } },
-    { name: 'whatsapp_click', timestamp: '2026-05-15T10:04:00.000Z', payload: { product_name: 'Asad' } },
+    { name: 'ADD_TO_CART', timestamp: '2026-05-15T10:04:00.000Z', payload: { product_name: 'Asad' } },
+    { name: 'BEGIN_CHECKOUT', timestamp: '2026-05-15T10:05:00.000Z', payload: { product_name: 'Asad' } },
+    { name: 'PURCHASE', timestamp: '2026-05-15T10:06:00.000Z', payload: { order_id: 'o1' } },
   ]);
 
-  assert.deepEqual(funnel.map((step) => step.value), [2, 1, 1, 1]);
-  assert.equal(funnel[1].progressRate, 0.5);
-  assert.equal(funnel[3].progressRate, 1);
+  assert.deepEqual(funnel.map((step) => step.value), [1, 1, 1, 1, 1, 1]);
+  assert.equal(funnel[1].progressRate, 1);
+  assert.equal(funnel[5].progressRate, 1);
 });
 
 test('analytics dashboard ignores malformed events and deduplicates identical snapshots', () => {
@@ -124,4 +137,17 @@ test('analytics dashboard aggregates AI commerce intelligence without raw query'
   assert.equal(ai.dominantIntents[0].label, 'nightlife');
   assert.equal(ai.recommendedProducts[0].product_name, 'asad');
   assert.equal(ai.clickedProducts[0].product_name, 'Asad');
+});
+
+
+test('analytics dashboard builds no-result search report by source page', () => {
+  const report = aggregateNoResultSearchReport([
+    { name: 'SEARCH', timestamp: '2026-05-15T10:00:00.000Z', payload: { search_term: 'iris raro', result_count: 0, source_page: 'catalog' } },
+    { name: 'empty_search_result', timestamp: '2026-05-15T10:01:00.000Z', payload: { search_term: 'iris raro', result_count: 0, source_page: 'home' } },
+    { name: 'SEARCH', timestamp: '2026-05-15T10:02:00.000Z', payload: { search_term: 'oud', result_count: 4, source_page: 'catalog' } },
+  ]);
+
+  assert.equal(report[0].search_term, 'iris raro');
+  assert.equal(report[0].frequency, 2);
+  assert.equal(report[0].source_pages.length, 2);
 });

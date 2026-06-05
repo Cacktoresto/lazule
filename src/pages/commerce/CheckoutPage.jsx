@@ -6,6 +6,7 @@ import { createCheckoutPreference } from '../../commerce/payment/mercadoPagoChec
 import { trackCommerceEvent } from '../../commerce/analytics/commerceAnalytics';
 import { markCheckoutStarted, markPreferenceCreated, recoverAbandonedCheckout } from '../../commerce/checkout/checkoutAbandonmentEngine';
 import { restoreLuxurySelection } from '../../commerce/cart/luxuryCartState';
+import { trackBeginCheckout } from '../../utils/analytics';
 
 const DEV = import.meta.env.DEV;
 
@@ -26,6 +27,7 @@ export function CheckoutPage() {
   useEffect(() => {
     if (!hasItems) return undefined;
     const session = markCheckoutStarted({ items, total, source: 'checkout_page' });
+    trackBeginCheckout({ items, total, source_page: 'checkout_page' });
     return () => {
       window.setTimeout(() => {}, 0);
     };
