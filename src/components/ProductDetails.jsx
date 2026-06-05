@@ -11,6 +11,7 @@ import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus
 import { applyManualReferralCode, getReferralChangeEventName, getReferralContext, removeReferralField } from '../utils/referral';
 import { applyProductSeo, createCanonicalUrl } from '../utils/seo';
 import { ProductImageFallback } from './ProductCard';
+import { ProductCompareEntry } from './PerfumeComparison';
 import { loadProductExperienceRuntime, preloadSemanticRuntime } from '../ai/semanticRuntimeLoader';
 import { humanizeSignature as importedHumanizeSignature } from '../utils/semanticPresentation';
 import {
@@ -2012,6 +2013,7 @@ export function ProductDetails({ slug }) {
           />
         ) : null}
         {safeRecommendations.length ? <ProductSectionErrorBoundary sectionName="recommendations"><ProductRecommendationsSection products={safeRecommendations} currentProduct={product} /></ProductSectionErrorBoundary> : null}
+        <ProductSectionErrorBoundary sectionName="compare_entry"><ProductCompareEntry product={product} catalogProducts={catalogProducts} /></ProductSectionErrorBoundary>
         {similarGroupsCount ? <ProductSectionErrorBoundary sectionName="similar"><SimilarPerfumeSections groups={similarGroups} /></ProductSectionErrorBoundary> : null}
         {semanticRuntimeState === 'ready' && !safeRecommendations.length ? (
           <SemanticEditorialFallback

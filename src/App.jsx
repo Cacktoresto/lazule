@@ -9,6 +9,7 @@ import { ProductCatalog } from './components/ProductCatalog';
 import { ProductDetails } from './components/ProductDetails';
 import { ProductNotFound } from './components/ProductNotFound';
 import { ProductSuggestion } from './components/ProductSuggestion';
+import { PerfumeComparisonPage } from './components/PerfumeComparison';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import { AuthProvider } from './auth/AuthProvider';
@@ -22,7 +23,7 @@ import { CheckoutPage } from './pages/commerce/CheckoutPage';
 import { CartPage } from './pages/commerce/CartPage';
 import { CheckoutResultPage } from './pages/commerce/CheckoutResultPage';
 import { OrderDetailPage } from './pages/commerce/OrderDetailPage';
-import { getBrandSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
+import { getBrandSlugFromPath, getCompareSlugFromPath, getProductSlugFromPath, normalizeSpaPath } from './utils/productRouting';
 import { navigateSpa } from './utils/navigation';
 import { trackCouponDetected, trackInfluencerRouteVisit, trackPageView, trackPromoRouteVisit, trackReferralApplied, trackReferralVisit } from './utils/analytics';
 import { captureReferralParams } from './utils/referral';
@@ -32,7 +33,7 @@ import { recordMobileDiagnostic } from './utils/mobileCrashDiagnostics';
 
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then((module) => ({ default: module.AnalyticsDashboard })));
 
-const SPA_ROUTE_PATTERN = /^(\/|\/pedido\/[^/]+\/?|\/minha-selecao\/[^/]+\/?|\/checkout\/recuperar\/[^/]+\/?|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
+const SPA_ROUTE_PATTERN = /^(\/|\/pedido\/[^/]+\/?|\/minha-selecao\/[^/]+\/?|\/checkout\/recuperar\/[^/]+\/?|\/catalogo\/?|\/faq\/?|\/identidade\/?|\/selecao\/?|\/checkout(?:\/(?:success|pending|failure))?\/?|\/carrinho\/?|\/produto-nao-encontrado\/?|\/produto-sugerido\/?|\/compare\/[^/]+\/?|\/admin\/(?:analytics|login)\/?|\/influencer(?:\/login|\/invite\/[^/]+)?\/?|\/promo\/[^/]+\/?|\/(?:i|indica)\/[^/]+\/?|\/produto\/[^/]+\/?|\/marca\/[^/]+\/?)$/;
 
 function isSafeSpaPath(path) {
   const normalizedPath = normalizeSpaPath(path || '/').split(/[?#]/)[0];
@@ -141,6 +142,7 @@ function getCurrentRoute() {
     hash: window.location.hash,
     productSlug: getProductSlugFromPath(window.location.pathname),
     brandSlug: getBrandSlugFromPath(window.location.pathname),
+    compareSlug: getCompareSlugFromPath(window.location.pathname),
   };
 }
 
@@ -148,6 +150,7 @@ function App() {
   const [route, setRoute] = useState(getCurrentRoute);
   const isProductRoute = route.pathname.startsWith('/produto/');
   const isBrandRoute = route.pathname.startsWith('/marca/');
+  const isCompareRoute = route.pathname.startsWith('/compare/');
   const isCatalogRoute = route.pathname === '/catalogo';
   const isFaqRoute = route.pathname === '/faq';
   const isIdentityRoute = route.pathname === '/identidade';
@@ -261,6 +264,8 @@ function App() {
       routeName = 'influencer_dashboard';
     } else if (isInfluencerInviteRoute) {
       routeName = 'influencer_invite';
+    } else if (isCompareRoute) {
+      routeName = 'perfume_compare';
     } else if (isBrandRoute) {
       routeName = 'brand';
     } else if (isCatalogRoute) {
@@ -284,7 +289,7 @@ function App() {
     if (!isProtectedDashboardRoute && !isInfluencerInviteRoute && !isPromoReferralRouteActive && !isAdminLoginRoute && !isInfluencerLoginRoute) {
       trackPageView({ path: `${route.pathname}${route.search}${route.hash}`, routeName });
     }
-  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isOrderDetailRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
+  }, [isProtectedDashboardRoute, isAnalyticsDashboardRoute, isBrandRoute, isCompareRoute, isCatalogRoute, isFaqRoute, isIdentityRoute, isCheckoutExperienceRoute, isOrderDetailRoute, isProductNotFoundRoute, isProductRoute, isInfluencerDashboardRoute, isInfluencerInviteRoute, isProductSuggestionRoute, isPromoReferralRouteActive, isAdminLoginRoute, isInfluencerLoginRoute, route.hash, route.pathname, route.search]);
 
   useEffect(() => {
     function updateRoute({ scrollToTop = true } = {}) {
@@ -359,7 +364,7 @@ function App() {
       <div className="relative flex min-h-screen flex-col overflow-x-clip bg-lazule-night text-lazule-mist">
       <MineralBackground />
       <div className="relative z-10 flex min-h-screen flex-col">
-        <Header immersiveProduct={isProductRoute} suppressCartUi={!cartUiRendering.renderCartDrawer} />
+        <Header immersiveProduct={isProductRoute || isCompareRoute} suppressCartUi={!cartUiRendering.renderCartDrawer} />
         <main key={`${route.pathname}${route.search}`} className="lazule-route-shell flex-1">
           {isPromoReferralRouteActive ? (
             <PromoReferralLanding route={route} />
@@ -382,6 +387,10 @@ function App() {
           ) : isProductRoute ? (
             <AppErrorBoundary>
               <ProductDetails slug={route.productSlug} />
+            </AppErrorBoundary>
+          ) : isCompareRoute ? (
+            <AppErrorBoundary>
+              <PerfumeComparisonPage compareSlug={route.compareSlug} />
             </AppErrorBoundary>
           ) : isBrandRoute ? (
             <BrandPage slug={route.brandSlug} />
@@ -415,7 +424,7 @@ function App() {
         </main>
         <Footer />
       </div>
-        <WhatsAppButton hidden={isProductRoute || isProtectedDashboardRoute || isPromoReferralRouteActive || isInfluencerInviteRoute} />
+        <WhatsAppButton hidden={isProductRoute || isCompareRoute || isProtectedDashboardRoute || isPromoReferralRouteActive || isInfluencerInviteRoute} />
       </div>
     </AuthProvider>
   );
