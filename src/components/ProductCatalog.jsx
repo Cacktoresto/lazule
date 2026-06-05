@@ -149,7 +149,8 @@ export function ProductCatalog() {
     if (!enableSemanticHydration) return [];
     return getContextualRecommendations({ catalogProducts, filteredProducts, searchTerm, activeChipIds: activeDiscoveryChipIds });
   }, [activeDiscoveryChipIds, catalogProducts, enableSemanticHydration, filteredProducts, searchTerm]);
-  const heroRecommendation = relatedRecommendations[0] ?? filteredProducts[0] ?? null;
+  const hasActiveSearch = Boolean(searchTerm.trim() || activeDiscoveryChipIds.length || filters.category !== ALL_VALUE || filters.gender !== ALL_VALUE || filters.brand !== ALL_VALUE || filters.availabilityStatus !== 'all' || filters.priceRange !== 'all' || filters.sortBy !== 'featured');
+  const heroRecommendation = hasActiveSearch ? null : (relatedRecommendations[0] ?? filteredProducts[0] ?? null);
   const spotlightProducts = useMemo(() => {
     const source = [...relatedRecommendations, ...filteredProducts].filter(Boolean);
     const deduped = [];
@@ -281,7 +282,7 @@ export function ProductCatalog() {
       const normalizedTerm = draftSearchTerm.trim();
       setSearchTerm(normalizedTerm);
       setVisibleCount(PRODUCTS_PER_PAGE);
-    }, 280);
+    }, 120);
 
     return () => window.clearTimeout(timeoutId);
   }, [draftSearchTerm]);
@@ -299,11 +300,11 @@ export function ProductCatalog() {
 
     const completionId = window.setTimeout(() => {
       const elapsed = Date.now() - startedAt;
-      const remaining = Math.max(0, 1700 - elapsed);
+      const remaining = Math.max(0, 420 - elapsed);
       window.setTimeout(() => setIsSemanticLoading(false), remaining);
-    }, 320);
+    }, 140);
 
-    const safetyId = window.setTimeout(() => setIsSemanticLoading(false), 5000);
+    const safetyId = window.setTimeout(() => setIsSemanticLoading(false), 1200);
 
     return () => {
       window.clearTimeout(completionId);
@@ -336,15 +337,15 @@ export function ProductCatalog() {
   }
 
   return (
-    <section id="catalogo" data-semantic-mood={resolveSemanticMood(searchTerm)} className="lazule-cinematic-section relative mx-auto max-w-7xl px-3 py-6 sm:px-8 sm:py-20 lg:py-24">
+    <section id="catalogo" data-semantic-mood={resolveSemanticMood(searchTerm)} className="lazule-cinematic-section relative mx-auto max-w-7xl px-3 py-5 sm:px-8 sm:py-20 lg:py-24">
       <div className="mb-5 grid gap-4 sm:mb-8 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
         <div className="max-w-3xl">
           <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold sm:mb-4 sm:text-xs sm:tracking-[0.38em]">
             Catálogo premium
           </p>
-          <h2 className="font-display text-[clamp(2rem,9.5vw,2.65rem)] leading-[1.02] text-lazule-mist sm:text-5xl">Descubra sua próxima assinatura olfativa.</h2>
+          <h2 className="font-display text-[clamp(1.9rem,9vw,2.55rem)] leading-[1.02] text-lazule-mist sm:text-5xl">Encontre seu perfume em poucos toques.</h2>
           <p className="mt-3 text-sm leading-6 text-slate-300 sm:mt-5 sm:text-base sm:leading-7">
-            Uma seleção editorial de importados, árabes e nicho com apoio consultivo para escolher com segurança e desejo.
+            Busque por nome, marca ou sensação. Use filtros apenas quando quiser afinar a escolha.
           </p>
         </div>
 
@@ -355,6 +356,8 @@ export function ProductCatalog() {
             onSubmit={handleApplySearch}
             onClear={clearSearch}
             hasSearch={Boolean(draftSearchTerm.trim() || searchTerm.trim())}
+            resultCount={filteredProducts.length}
+            isSearching={isSemanticLoading || semanticRuntimeState === 'loading'}
             onFocus={() => {
               if (semanticRuntimeState === 'idle') {
                 setSemanticRuntimeState('loading');
@@ -391,20 +394,20 @@ export function ProductCatalog() {
           onReset={resetFilters}
         />
 
-        <div className="min-w-0" ref={resultsRef} id="catalog-results">
+        <div className="min-w-0 scroll-mt-28" ref={resultsRef} id="catalog-results">
           <div className="mb-6 grid gap-4">
             <SemanticSearchLoading isActive={isSemanticLoading} interpretedChips={semanticSignalChips} />
             <div className="lazule-feedback-card laz-reveal flex flex-col gap-3 rounded-[1.25rem] border border-[var(--laz-border-mineral)] bg-[#0e1b36c7] px-3.5 py-3.5 text-sm text-slate-300 shadow-mineral sm:rounded-[1.5rem] sm:px-5 sm:py-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <span>
-                  <strong className="text-lazule-mist">{filteredProducts.length}</strong> resultado(s) {searchTerm ? 'encontrado(s)' : 'curado(s)'}
+              <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                <span aria-live="polite">
+                  <strong className="text-lazule-mist">{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'perfume encontrado' : 'perfumes encontrados'}
                 </span>
-                <span>
-                  Total no catálogo: <strong className="text-lazule-gold">{catalogProducts.length}</strong>
-                </span>
+                {!hasActiveSearch ? (
+                  <span>Total no catálogo: <strong className="text-lazule-gold">{catalogProducts.length}</strong></span>
+                ) : null}
               </div>
 
-              {searchTerm && <p className="text-lazule-gold">Resultados para: <strong>"{searchTerm}"</strong></p>}
+              {searchTerm && <p className="text-lazule-gold">Mostrando primeiro o que combina com: <strong>"{searchTerm}"</strong></p>}
 
 
               {activeDiscoveryChipIds.length > 0 && (
@@ -473,8 +476,8 @@ export function ProductCatalog() {
               {spotlightProducts.length > 0 && (
                 <section className="lazule-editorial-flow lazule-flow-bridge mb-8">
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <h4 className="font-display text-2xl text-lazule-mist">Streaming de descoberta</h4>
-                    <p className="text-[0.62rem] uppercase tracking-[0.2em] text-slate-400">handoff contextual</p>
+                    <h4 className="font-display text-2xl text-lazule-mist">Comece por aqui</h4>
+                    <p className="text-[0.62rem] uppercase tracking-[0.2em] text-slate-400">atalhos rápidos</p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {spotlightProducts.map((product, index) => (

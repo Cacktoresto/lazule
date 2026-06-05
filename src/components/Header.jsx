@@ -6,8 +6,6 @@ import { useLuxuryCart } from '../commerce/checkout/useLuxuryCart';
 const navigationItems = [
   { href: '/', label: 'Início' },
   { href: '/catalogo', label: 'Curadoria' },
-  { href: '/faq', label: 'Ritual' },
-  { href: '/identidade', label: 'Assinatura olfativa' },
   { href: '/carrinho', label: 'Seleção' },
 ];
 
@@ -55,7 +53,7 @@ function CartEntryPoint() {
       aria-haspopup='dialog'
       aria-expanded={cartOpen}
     >
-      🛍 Sua seleção ({quantity})
+      Sua seleção ({quantity})
     </button>
     <button
       type='button'
@@ -66,7 +64,7 @@ function CartEntryPoint() {
       aria-expanded={cartOpen}
       tabIndex={hasItems && !cartOpen ? 0 : -1}
     >
-      🛍 Sua seleção ({quantity})
+      Sua seleção ({quantity})
     </button>
     <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} items={items} total={total} />
   </>;

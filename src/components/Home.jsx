@@ -16,9 +16,7 @@ import { resolveEmotionalRhythm, resolveAdaptiveMotionIntensity } from '../ai/em
 import { resolvePresenceTimeline } from '../ai/presenceTimelineEngine';
 import { buildPresenceCompanionLayer } from '../ai/presenceCompanionLayer';
 import { resolveAdaptiveMomentHome, resolveAtmosphericReunionSequence } from '../ai/adaptiveAtmosphericHome';
-import { applyEditorialAntiRepetition } from '../ai/editorialIntelligenceSystem';
 import { deriveTasteEvolution } from '../ai/tasteEvolutionEngine';
-import { createHumanObservationFragments } from '../ai/humanObservationFragmentsEngine';
 
 const discoveryPaths = [
   {
@@ -145,15 +143,6 @@ function getLuxuryDescriptor(product) {
   return 'Presença silenciosa e sofisticada para uma assinatura olfativa memorável.';
 }
 
-function buildHomeEditorialPulse(atmosphereProfile = {}, sensoryPresence = {}) {
-  const lines = [
-    sensoryPresence?.adaptiveHome?.headline,
-    sensoryPresence?.reunion?.headline,
-    atmosphereProfile?.density === 'dense' ? 'Hoje o clima pede projeção mais próxima e textura densa.' : 'Hoje o clima favorece perfumes mais respiráveis e com saída limpa.',
-    atmosphereProfile?.motionCadence === 'dynamic' ? 'Seu padrão recente está mais exploratório, com alternância entre dia e noite.' : 'Seu padrão recente está estável e consistente, com escolhas mais cirúrgicas.',
-  ].filter(Boolean);
-  return applyEditorialAntiRepetition(lines);
-}
 function UnifiedDiscovery({ brands, curatedProducts, discoveryItems, tasteNarrative }) {
   const spotlightProducts = curatedProducts.slice(0, 3);
 
@@ -288,8 +277,6 @@ export function Home() {
     return { moment, rhythm, timeline, companion, adaptiveHome, reunion, motionIntensity: resolveAdaptiveMotionIntensity(rhythm, window.matchMedia('(prefers-reduced-motion: reduce)').matches) };
   }, [atmosphereProfile]);
 
-  const editorialPulse = useMemo(() => buildHomeEditorialPulse(atmosphereProfile, sensoryPresence), [atmosphereProfile, sensoryPresence]);
-  const observationFragments = useMemo(() => createHumanObservationFragments({ profile: atmosphereProfile, context: 'home' }), [atmosphereProfile]);
   const tasteEvolution = useMemo(() => deriveTasteEvolution({ profile: atmosphereProfile, events: [], wishlist: [] }), [atmosphereProfile]);
 
   const { collections, heroProduct, brands, products, discoveryItems } = useMemo(() => {
@@ -324,9 +311,9 @@ export function Home() {
           <div className="lazule-hero-copy relative z-10 max-w-2xl pb-1">
             <p className="mb-3 text-[0.62rem] font-medium uppercase tracking-[0.32em] text-slate-300/70">{sensoryPresence.reunion.microFragment}</p>
             <p className="mb-3 text-[0.64rem] font-semibold uppercase tracking-[0.32em] text-lazule-gold sm:mb-5 sm:text-[0.7rem] sm:tracking-[0.5em]">LAZULE FRAGRANCES</p>
-            <h1 className="max-w-[11ch] font-display text-[clamp(2.55rem,12vw,3.7rem)] leading-[0.88] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-[6.3rem]">Perfume com percepção.</h1>
+            <h1 className="max-w-[12ch] font-display text-[clamp(2.35rem,11vw,3.45rem)] leading-[0.9] tracking-[-0.055em] text-lazule-mist sm:max-w-[10ch] sm:text-7xl lg:text-[6.3rem]">Perfumes escolhidos para você.</h1>
             <p className="mt-4 max-w-[34rem] text-[0.95rem] leading-6 text-slate-200/82 sm:mt-8 sm:text-xl sm:leading-9">
-              Uma curadoria olfativa calma, precisa e editorial — fragrâncias escolhidas por atmosfera, ocasião e presença.
+              Importados, árabes e nicho com leitura simples de cheiro, ocasião e presença para comprar sem dúvida.
             </p>
             <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:items-center">
               <a
@@ -383,49 +370,17 @@ export function Home() {
         </div>
       </div>
 
-      {editorialPulse.length ? (
-        <section className="mx-auto max-w-7xl px-3 py-4 min-[390px]:px-4 sm:px-8 sm:py-6">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:rounded-[1.8rem] sm:p-6">
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Leitura editorial de hoje</p>
-            <div className="mt-3 grid gap-2">
-              {editorialPulse.map((line) => (
-                <p key={line} className="text-sm leading-6 text-slate-300">{line}</p>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
+      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} tasteNarrative={tasteEvolution.narrative} />
 
       <div id="assistente">
-        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-4 min-[390px]:px-4 sm:px-8 sm:py-10" />
+        <OlfactiveAssistant products={products} sourcePage="home" className="mx-auto max-w-7xl px-3 py-4 min-[390px]:px-4 sm:px-8 sm:py-8" />
       </div>
 
-      <UnifiedDiscovery brands={brands} curatedProducts={collections.weeklySelection} discoveryItems={discoveryItems} tasteNarrative={tasteEvolution.narrative} />
-      <section className="mx-auto max-w-7xl px-3 pb-2 min-[390px]:px-4 sm:px-8">
-        <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 sm:rounded-[1.8rem] sm:p-6">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-lazule-gold">Observações em tempo real</p>
-          <div className="mt-3 grid gap-2">
-            {observationFragments.map((line) => (
-              <p key={line} className="text-sm leading-6 text-slate-300">{line}</p>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <main className="mx-auto max-w-7xl px-3 pb-14 min-[390px]:px-4 sm:px-8 lg:pb-28">
-        <ProductRail eyebrow="Mais desejados" title="Ícones em rotação" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />
-        <ProductRail eyebrow="Árabes" title="Intensidade limpa" products={collections.arabicHighlights.slice(0, 6)} actionHref="/catalogo?tipo=%C3%81rabe" />
+        <ProductRail eyebrow="Mais desejados" title="Escolhas seguras" products={collections.mostWanted.slice(0, 6)} actionHref="/catalogo?busca=importado" />
+        <ProductRail eyebrow="Árabes" title="Mais presença" products={collections.arabicHighlights.slice(0, 6)} actionHref="/catalogo?tipo=%C3%81rabe" />
 
-        <Reveal className="lazule-surface-premium mt-9 overflow-hidden rounded-[2rem] border border-lazule-gold/20 bg-white/[0.04] p-5 shadow-mineral backdrop-blur-xl sm:mt-12 sm:rounded-[2.7rem] sm:p-10">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.34em] text-lazule-gold">Curadoria humana</p>
-          <h2 className="mt-3 max-w-2xl font-display text-[clamp(2rem,10vw,2.6rem)] leading-none text-lazule-mist sm:text-4xl">Luxo sem excesso.</h2>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300">
-            Uma experiência deliberadamente contida: mais atmosfera, menos ruído, e uma curadoria que transforma desejo em assinatura olfativa.
-          </p>
-        </Reveal>
-
-        <CatalogHighlights collections={collections} className="mt-14 sm:mt-16 lg:mt-20" />
+        <CatalogHighlights collections={collections} className="mt-10 sm:mt-16 lg:mt-20" />
       </main>
     </div>
   );
