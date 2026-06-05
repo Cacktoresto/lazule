@@ -1,8 +1,23 @@
 import { sendSupabaseAnalyticsEvent } from '../data/supabaseAnalyticsProvider.js';
 import { enrichPayloadWithReferral } from './referral.js';
 const STORAGE_KEY = 'lazule.analytics.v2';
-const MAX_STORED_EVENTS = 250;
+const MAX_STORED_EVENTS = 1000;
 const MAX_STORED_SEARCHES = 100;
+const FUNNEL_EVENT_NAMES = Object.freeze({
+  HOME_VIEW: 'HOME_VIEW',
+  CATALOG_VIEW: 'CATALOG_VIEW',
+  SEARCH: 'SEARCH',
+  PRODUCT_VIEW: 'PRODUCT_VIEW',
+  ADD_TO_CART: 'ADD_TO_CART',
+  REMOVE_FROM_CART: 'REMOVE_FROM_CART',
+  CART_VIEW: 'CART_VIEW',
+  BEGIN_CHECKOUT: 'BEGIN_CHECKOUT',
+  WHATSAPP_CLICK: 'WHATSAPP_CLICK',
+  RECOMMENDATION_CLICK: 'RECOMMENDATION_CLICK',
+  PURCHASE: 'PURCHASE',
+  PAGE_EXIT: 'PAGE_EXIT',
+  MICROCONVERSION_CLICK: 'MICROCONVERSION_CLICK',
+});
 const DEFAULT_DEDUPE_MS = 800;
 const ROUTE_DEDUPE_MS = 1200;
 const PRODUCT_VIEW_DEDUPE_MS = 2500;
@@ -228,23 +243,30 @@ function normalizeText(value) {
   return String(value || '').trim();
 }
 
+function sanitizeFreeTextSignal(value, { maxLength = 120 } = {}) {
+  return normalizeText(value)
+    .normalize('NFKC')
+    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, ' ')
+    .replace(/(?:\+?\d[\s().-]*){8,}/g, ' ')
+    .replace(/[<>]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
 function stripSensitivePayloadFields(payload = {}) {
   return Object.fromEntries(Object.entries(payload).filter(([key]) => !['search_term', 'searchTerm', 'query', 'invite_token', 'token'].includes(key)));
 }
 
 function createPrivacySafeQuerySignal(value) {
   const normalizedQuery = normalizeText(value).normalize('NFKC').replace(/\s+/g, ' ');
-  const withoutSensitiveTokens = normalizedQuery
-    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, ' ')
-    .replace(/(?:\+?\d[\s().-]*){8,}/g, ' ')
-    .replace(/[<>]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const withoutSensitiveTokens = sanitizeFreeTextSignal(normalizedQuery);
   const tokenCount = withoutSensitiveTokens ? withoutSensitiveTokens.split(/\s+/).length : 0;
   const lengthBucket = withoutSensitiveTokens.length <= 12 ? 'curta' : withoutSensitiveTokens.length <= 32 ? 'média' : 'longa';
 
   return compactObject({
-    search_term: withoutSensitiveTokens ? `consulta ${lengthBucket} (${tokenCount} termo${tokenCount === 1 ? '' : 's'})` : 'consulta protegida',
+    search_term: withoutSensitiveTokens || 'consulta protegida',
+    search_bucket: withoutSensitiveTokens ? `consulta ${lengthBucket} (${tokenCount} termo${tokenCount === 1 ? '' : 's'})` : 'consulta protegida',
     query_length: normalizedQuery.length,
     query_terms: tokenCount,
     privacy: 'anonymized_search_signal',
@@ -274,16 +296,29 @@ export function createProductAnalyticsPayload(product = {}, extraPayload = {}) {
   });
 }
 
-export function createSearchAnalyticsPayload({ searchTerm, resultCount, sourcePage, ...extraPayload } = {}) {
+export function createSearchAnalyticsPayload({ searchTerm, resultCount, sourcePage, timeToResultMs, ...extraPayload } = {}) {
   const rawQuery = searchTerm ?? extraPayload.search_term ?? extraPayload.query;
 
   return compactObject({
     ...Object.fromEntries(Object.entries(stripSensitivePayloadFields(extraPayload)).filter(([key]) => !['search_term', 'searchTerm', 'query'].includes(key))),
     ...createPrivacySafeQuerySignal(rawQuery),
     result_count: Number.isFinite(Number(resultCount)) ? Number(resultCount) : undefined,
+    time_to_result_ms: Number.isFinite(Number(timeToResultMs ?? extraPayload.time_to_result_ms ?? extraPayload.timeToResultMs)) ? Number(timeToResultMs ?? extraPayload.time_to_result_ms ?? extraPayload.timeToResultMs) : undefined,
     source_page: normalizeText(sourcePage) || sanitizeAnalyticsPagePath(getCurrentPagePath()),
     page_path: sanitizeAnalyticsPagePath(getCurrentPagePath()),
     canonical_url: getCanonicalUrl(),
+  });
+}
+
+function getViewportPayload() {
+  if (!canUseWindow()) {
+    return {};
+  }
+
+  return compactObject({
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight,
+    device: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop',
   });
 }
 
@@ -297,11 +332,11 @@ function createIntentPayload(payload = {}) {
 }
 
 export function normalizeAnalyticsPayload(eventName, payload = {}) {
-  if (eventName === 'view_item' || eventName === 'product_view' || eventName === 'select_item' || eventName === 'product_card_click') {
+  if (eventName === 'view_item' || eventName === 'product_view' || eventName === 'PRODUCT_VIEW' || eventName === 'ADD_TO_CART' || eventName === 'REMOVE_FROM_CART' || eventName === 'select_item' || eventName === 'product_card_click') {
     return createProductAnalyticsPayload(payload);
   }
 
-  if (eventName === 'search' || eventName === 'search_submit' || eventName === 'empty_search_result') {
+  if (eventName === 'search' || eventName === 'SEARCH' || eventName === 'search_submit' || eventName === 'empty_search_result') {
     return createSearchAnalyticsPayload(payload);
   }
 
@@ -367,11 +402,11 @@ function updateLocalState(event) {
     updatedAt: event.timestamp,
   };
 
-  if (event.name === 'whatsapp_click' || event.name === 'generate_lead') {
+  if (event.name === 'whatsapp_click' || event.name === 'WHATSAPP_CLICK' || event.name === 'generate_lead') {
     nextState.counters = { ...(nextState.counters ?? {}), whatsappClicks: (nextState.counters?.whatsappClicks ?? 0) + 1 };
   }
 
-  if (event.name === 'view_item' || event.name === 'product_view') {
+  if (event.name === 'view_item' || event.name === 'product_view' || event.name === 'PRODUCT_VIEW') {
     nextState.counters = { ...(nextState.counters ?? {}), productViews: (nextState.counters?.productViews ?? 0) + 1 };
     nextState.productsViewed = incrementMap(nextState.productsViewed ?? {}, event.payload.product_id ?? event.payload.product_name);
   }
@@ -380,12 +415,12 @@ function updateLocalState(event) {
     nextState.brandsViewed = incrementMap(nextState.brandsViewed ?? {}, event.payload.brand_slug ?? event.payload.brand_name ?? event.payload.brand);
   }
 
-  if (event.name === 'product_card_click' || event.name === 'select_item') {
+  if (event.name === 'product_card_click' || event.name === 'select_item' || event.name === 'MICROCONVERSION_CLICK') {
     nextState.counters = { ...(nextState.counters ?? {}), cardClicks: (nextState.counters?.cardClicks ?? 0) + 1 };
     nextState.cardCtr = incrementMap(nextState.cardCtr ?? {}, event.payload.product_id ?? event.payload.product_name);
   }
 
-  if ((event.name === 'search' || event.name === 'search_submit') && event.payload.search_term) {
+  if ((event.name === 'search' || event.name === 'SEARCH' || event.name === 'search_submit') && event.payload.search_term) {
     nextState.counters = { ...(nextState.counters ?? {}), searches: (nextState.counters?.searches ?? 0) + 1 };
     nextState.searches = [
       ...(nextState.searches ?? []),
@@ -449,7 +484,12 @@ function forwardToSupabaseAnalytics(event) {
 
 function shouldEnrichWithReferral(eventName) {
   return eventName === 'whatsapp_click'
+    || eventName === 'WHATSAPP_CLICK'
     || eventName === 'product_view'
+    || eventName === 'PRODUCT_VIEW'
+    || eventName === 'ADD_TO_CART'
+    || eventName === 'BEGIN_CHECKOUT'
+    || eventName === 'RECOMMENDATION_CLICK'
     || eventName === 'product_card_click'
     || eventName === 'influencer_route_visit'
     || eventName === 'referral_applied'
@@ -466,7 +506,7 @@ function mapEventForDestinations(eventName, payload) {
     mapped.metaStandardName = 'PageView';
   }
 
-  if (eventName === 'product_view') {
+  if (eventName === 'product_view' || eventName === 'PRODUCT_VIEW') {
     mapped.gaEventName = 'view_item';
     mapped.metaStandardName = 'ViewContent';
     mapped.metaPayload = {
@@ -479,16 +519,16 @@ function mapEventForDestinations(eventName, payload) {
     };
   }
 
-  if (eventName === 'product_card_click' || eventName === 'recommendation_click') {
-    mapped.gaEventName = eventName === 'recommendation_click' ? 'recommendation_click' : 'select_item';
+  if (eventName === 'product_card_click' || eventName === 'recommendation_click' || eventName === 'RECOMMENDATION_CLICK') {
+    mapped.gaEventName = (eventName === 'recommendation_click' || eventName === 'RECOMMENDATION_CLICK') ? 'recommendation_click' : 'select_item';
   }
 
-  if (eventName === 'whatsapp_click') {
+  if (eventName === 'whatsapp_click' || eventName === 'WHATSAPP_CLICK') {
     mapped.gaEventName = 'generate_lead';
     mapped.metaStandardName = 'Contact';
   }
 
-  if (eventName === 'search') {
+  if (eventName === 'search' || eventName === 'SEARCH') {
     mapped.gaEventName = 'search';
     mapped.metaStandardName = 'Search';
     mapped.metaPayload = { search_string: payload.search_term, ...payload };
@@ -541,6 +581,31 @@ export function trackEvent(eventName, payload = {}, options = {}) {
   return event;
 }
 
+export function trackHomeView(payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.HOME_VIEW, {
+    origin: canUseWindow() ? document.referrer || 'direct' : 'direct',
+    source_page: 'home',
+    ...getViewportPayload(),
+    ...payload,
+  }, { dedupeKey: `HOME_VIEW|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackCatalogView(payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.CATALOG_VIEW, payload, { dedupeKey: `CATALOG_VIEW|${JSON.stringify(payload.active_filters || payload.filters || {})}|${payload.category || ''}|${payload.product_count ?? payload.result_count ?? ''}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: 1500 });
+}
+
+export function trackCartView({ items = [], total = 0, ...payload } = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.CART_VIEW, { item_count: items.length, total, ...payload }, { dedupeKey: `CART_VIEW|${items.length}|${total}|${payload.page_path || getCurrentPagePath()}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackBeginCheckout({ items = [], total = 0, ...payload } = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.BEGIN_CHECKOUT, { item_count: items.length, total, products: items.map((item) => compactObject({ product_id: item.id, product_slug: item.slug, product_name: item.name, brand: item.brand, category: item.category, price: item.price ?? item.unit_price, quantity: item.quantity })), product_ids: items.map((item) => item.id || item.slug).filter(Boolean), ...payload }, { dedupeKey: `BEGIN_CHECKOUT|${items.map((item) => `${item.id || item.slug}:${item.quantity}`).join(',')}|${total}`, dedupeMs: ROUTE_DEDUPE_MS });
+}
+
+export function trackPageExit(payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.PAGE_EXIT, createIntentPayload(payload), { dedupeMs: 0 });
+}
+
 export function trackPageView({ path, title, routeName } = {}) {
   const pagePath = path || getCurrentPagePath();
   const dedupeKey = `page_view|${pagePath}`;
@@ -565,7 +630,7 @@ export function trackPageView({ path, title, routeName } = {}) {
 
 export function trackProductView(product, extraPayload = {}) {
   const payload = createProductAnalyticsPayload(product, extraPayload);
-  return trackEvent('product_view', payload, { dedupeKey: `product_view|${payload.product_id || payload.product_slug || payload.product_name}|${payload.page_path}`, dedupeMs: PRODUCT_VIEW_DEDUPE_MS });
+  return trackEvent(FUNNEL_EVENT_NAMES.PRODUCT_VIEW, payload, { dedupeKey: `PRODUCT_VIEW|${payload.product_id || payload.product_slug || payload.product_name}|${payload.page_path}`, dedupeMs: PRODUCT_VIEW_DEDUPE_MS });
 }
 
 export function trackProductSelect(product, extraPayload = {}) {
@@ -574,7 +639,7 @@ export function trackProductSelect(product, extraPayload = {}) {
 
 export function trackWhatsappClick(payload = {}) {
   // Privacidade: não coletamos nome, telefone, endereço ou conteúdo da conversa no WhatsApp.
-  return trackEvent('whatsapp_click', createIntentPayload(payload));
+  return trackEvent(FUNNEL_EVENT_NAMES.WHATSAPP_CLICK, createIntentPayload(payload));
 }
 
 export function trackReferralVisit(payload = {}) {
@@ -656,19 +721,37 @@ export function trackInfluencerSignupCompleted(payload = {}) {
 }
 
 export function trackSearch(payload = {}) {
-  return trackEvent('search', createSearchAnalyticsPayload(payload), { dedupeMs: 1200 });
+  return trackEvent(FUNNEL_EVENT_NAMES.SEARCH, createSearchAnalyticsPayload(payload), { dedupeMs: 1200 });
 }
 
 export function trackBrandClick(brandName, payload = {}) {
+  trackMicroconversion('brand_click', { brand_name: normalizeText(brandName), ...payload });
   return trackEvent('brand_click', createIntentPayload({ brand_name: normalizeText(brandName), ...payload }));
 }
 
 export function trackCategoryClick(categoryName, payload = {}) {
+  trackMicroconversion('category_click', { category_name: normalizeText(categoryName), ...payload });
   return trackEvent('category_click', createIntentPayload({ category_name: normalizeText(categoryName), ...payload }));
 }
 
 export function trackRecommendationClick(product, payload = {}) {
-  return trackEvent('recommendation_click', createProductAnalyticsPayload(product, payload));
+  return trackEvent(FUNNEL_EVENT_NAMES.RECOMMENDATION_CLICK, createProductAnalyticsPayload(product, payload));
+}
+
+export function trackAddToCart(product, payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.ADD_TO_CART, createProductAnalyticsPayload(product, payload));
+}
+
+export function trackRemoveFromCart(product, payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.REMOVE_FROM_CART, createProductAnalyticsPayload(product, payload));
+}
+
+export function trackPurchase(payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.PURCHASE, createIntentPayload(payload), { dedupeKey: `PURCHASE|${payload.order_id || payload.orderId || ''}|${payload.total || ''}`, dedupeMs: 30000 });
+}
+
+export function trackMicroconversion(type, payload = {}) {
+  return trackEvent(FUNNEL_EVENT_NAMES.MICROCONVERSION_CLICK, createIntentPayload({ interaction_type: type, ...payload }));
 }
 
 export const trackWhatsAppClick = trackWhatsappClick;

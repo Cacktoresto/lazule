@@ -3,6 +3,19 @@ const DEFAULT_ANALYTICS_SELECT = '*';
 const DEFAULT_TIMEOUT_MS = 5000;
 
 export const REMOTE_ANALYTICS_ALLOWED_EVENTS = new Set([
+  'HOME_VIEW',
+  'CATALOG_VIEW',
+  'SEARCH',
+  'PRODUCT_VIEW',
+  'ADD_TO_CART',
+  'REMOVE_FROM_CART',
+  'CART_VIEW',
+  'BEGIN_CHECKOUT',
+  'WHATSAPP_CLICK',
+  'RECOMMENDATION_CLICK',
+  'PURCHASE',
+  'PAGE_EXIT',
+  'MICROCONVERSION_CLICK',
   'influencer_route_visit',
   'referral_applied',
   'product_view',
@@ -28,6 +41,7 @@ const METADATA_ALLOWLIST = new Set([
   'utm_campaign',
   'utm_content',
   'utm_term',
+  'search_term',
   'source_page',
   'page_path',
   'canonical_url',
@@ -56,6 +70,32 @@ const METADATA_ALLOWLIST = new Set([
   'related_product_slug',
   'relationship_block',
   'relationship_score',
+  'origin',
+  'device',
+  'viewport_width',
+  'viewport_height',
+  'active_filters',
+  'filters',
+  'filter_name',
+  'filter_value',
+  'category_name',
+  'brand_name',
+  'product_count',
+  'result_count',
+  'time_to_result_ms',
+  'search_bucket',
+  'query_length',
+  'query_terms',
+  'item_count',
+  'total',
+  'products',
+  'product_ids',
+  'position',
+  'recommendation_origin',
+  'page_title',
+  'exit_reason',
+  'order_id',
+  'preference_id',
 ]);
 
 function readRuntimeEnv(name) {
@@ -107,7 +147,19 @@ function sanitizeMetadataValue(key, value) {
     return value;
   }
 
-  if (key === 'price') {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeText(item, { maxLength: 80 })).filter(Boolean).join(',').slice(0, key === 'products' ? 1200 : 500);
+  }
+
+  if (value && typeof value === 'object') {
+    try {
+      return JSON.stringify(value).slice(0, key === 'products' ? 1200 : 500);
+    } catch {
+      return undefined;
+    }
+  }
+
+  if (key === 'price' || key === 'total') {
     const numericValue = Number(value);
     return Number.isFinite(numericValue) && numericValue >= 0 ? numericValue : undefined;
   }

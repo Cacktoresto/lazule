@@ -3,7 +3,7 @@ import { formatBRL } from '../utils/currency';
 import { getAllProducts, getProductBySlug } from '../data/catalogRepository';
 import { getProductRecommendations, getProductRecommendationsAsync } from '../utils/catalog';
 import { similarPerfumes } from '../data/generated/similarPerfumes.js';
-import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
+import { trackBrandClick, trackCouponManualApply, trackCouponRemoved, trackEvent, trackMicroconversion, trackProductView, trackRecommendationClick, trackReferralManualApply, trackWhatsappClick } from '../utils/analytics';
 import { createBrandPath, createProductPath, createProductSlug } from '../utils/productRouting';
 import { addToLuxurySelection } from '../commerce/cart/luxuryCartState';
 import { createProductWhatsAppLink } from '../utils/whatsapp';
@@ -729,6 +729,7 @@ function ProductAccordion({ title, children, defaultOpen = false, product }) {
   function handleToggle(event) {
     if (event.currentTarget.open) {
       trackEvent('accordion_open', { product_id: product?.id, product_name: product?.name, accordion_title: title, source_page: 'product' });
+      trackMicroconversion('accord_click', { product_id: product?.id, product_name: product?.name, accordion_title: title, source_page: 'product' });
     }
   }
 
@@ -965,7 +966,7 @@ function RecommendationCard({ product, context = 'recommendations', explanation,
       data-mood={moodProfile}
       data-atmosphere={atmosphereProfile}
       style={{ '--item-delay': `${120 + (index * 85)}ms` }}
-      onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: context })}
+      onClick={() => trackRecommendationClick(product, { source_page: 'product_recommendations', section: context, recommendation_origin: context, position: index + 1 })}
     >
       <div className="relative h-36 overflow-hidden bg-lazule-depth">
         {product.image ? (

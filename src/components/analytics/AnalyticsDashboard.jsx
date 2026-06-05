@@ -3,10 +3,12 @@ import {
   aggregateAICommerceIntelligence,
   aggregateFunnel,
   aggregateMetrics,
+  aggregateNoResultSearchReport,
   aggregateTopBrands,
   aggregateTopCategories,
   aggregateTopProducts,
   aggregateTopRecommendations,
+  aggregateTopExitPages,
   aggregateTopSearches,
   getAnalyticsEvents,
 } from '../../utils/analyticsDashboard';
@@ -43,6 +45,8 @@ function useLocalAnalyticsDashboard() {
       brands: aggregateTopBrands(events),
       categories: aggregateTopCategories(events),
       recommendations: aggregateTopRecommendations(events),
+      noResultSearchReport: aggregateNoResultSearchReport(events),
+      exitPages: aggregateTopExitPages(events),
       aiCommerce: aggregateAICommerceIntelligence(events),
       funnel: aggregateFunnel(events),
     };
@@ -52,14 +56,19 @@ function useLocalAnalyticsDashboard() {
 }
 
 export function AnalyticsDashboard() {
-  const { events, metrics, products, searches, brands, categories, recommendations, aiCommerce, funnel, refresh } = useLocalAnalyticsDashboard();
+  const { events, metrics, products, searches, brands, categories, recommendations, noResultSearchReport, exitPages, aiCommerce, funnel, refresh } = useLocalAnalyticsDashboard();
   const hasEvents = events.length > 0;
 
   const summaryCards = [
     { label: 'Visitas', value: formatNumber(metrics.pageViews), helper: 'Sessões e páginas vistas na experiência.' },
     { label: 'Fragrâncias vistas', value: formatNumber(metrics.productViews), helper: 'Interesse por produto e assinatura olfativa.' },
     { label: 'Cliques WhatsApp', value: formatNumber(metrics.whatsappClicks), helper: 'Sinais de intenção comercial.', tone: 'gold' },
+    { label: 'Add-to-cart', value: formatNumber(metrics.addToCart), helper: 'Produtos adicionados à seleção.', tone: 'gold' },
+    { label: 'Checkout iniciado', value: formatNumber(metrics.beginCheckout), helper: 'Tentativas de compra iniciadas.' },
+    { label: 'Compras', value: formatNumber(metrics.purchases), helper: 'Retornos de pagamento aprovado/sucesso.' },
     { label: 'Produto → WhatsApp', value: formatPercent(metrics.productToWhatsappRate), helper: 'Conversão de intenção para conversa.' },
+    { label: 'PDP → Add-to-cart', value: formatPercent(metrics.productToCartRate), helper: 'Conversão da PDP para carrinho.' },
+    { label: 'Checkout → Compra', value: formatPercent(metrics.checkoutPurchaseRate), helper: 'Conversão do checkout para compra.' },
     { label: 'Buscas', value: formatNumber(metrics.searches), helper: 'Termos pesquisados no catálogo.' },
     { label: 'Desejos sem match', value: formatNumber(metrics.emptySearches), helper: 'Oportunidades de sortimento e curadoria.' },
     { label: 'Marcas clicadas', value: formatNumber(metrics.brandClicks), helper: 'Interesse por maison/marca.' },
@@ -95,7 +104,7 @@ export function AnalyticsDashboard() {
       {!hasEvents ? <div className="mt-8"><EmptyAnalyticsState /></div> : null}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <AnalyticsSection title="Funil comercial" eyebrow="Home / catálogo / produto / WhatsApp">
+        <AnalyticsSection title="Funil comercial" eyebrow="Home / catálogo / PDP / add-to-cart / checkout / compra">
           <FunnelSummary steps={funnel} />
         </AnalyticsSection>
 
@@ -109,11 +118,25 @@ export function AnalyticsDashboard() {
               getValue={(item) => `${formatNumber(item.views)} views`}
             />
             <RankingList
+              title="Top add-to-cart"
+              items={products.added}
+              getPrimary={(item) => item.product_name}
+              getSecondary={(item) => item.brand}
+              getValue={(item) => `${formatNumber(item.add_to_cart)} adds`}
+            />
+            <RankingList
               title="Top WhatsApp"
               items={products.whatsapp}
               getPrimary={(item) => item.product_name}
               getSecondary={(item) => item.brand}
               getValue={(item) => `${formatNumber(item.whatsapp_clicks)} cliques`}
+            />
+            <RankingList
+              title="Mais abandonados"
+              items={products.abandoned}
+              getPrimary={(item) => item.product_name}
+              getSecondary={(item) => `${formatPercent(item.conversion_rate)} add → checkout`}
+              getValue={(item) => `${formatNumber(item.abandoned_count)} aband.`}
             />
           </div>
         </AnalyticsSection>
@@ -135,7 +158,7 @@ export function AnalyticsDashboard() {
             title="Top categorias"
             items={categories}
             getPrimary={(item) => item.category_name}
-            getValue={(item) => `${formatNumber(item.clicks)} cliques`}
+            getValue={(item) => `${formatNumber(item.count)} sinais`}
           />
         </AnalyticsSection>
 
@@ -201,6 +224,15 @@ export function AnalyticsDashboard() {
         </div>
       </AnalyticsSection>
 
+      <AnalyticsSection className="mt-6" title="Saída e abandono" eyebrow="Páginas onde a jornada termina">
+        <RankingList
+          title="Top páginas de saída"
+          items={exitPages}
+          getPrimary={(item) => item.page_path}
+          getValue={(item) => `${formatNumber(item.exits)} saídas`}
+        />
+      </AnalyticsSection>
+
       <AnalyticsSection className="mt-6" title="Inteligência de busca" eyebrow="Desejo declarado">
         <div className="grid gap-6 lg:grid-cols-2">
           <AnalyticsTable
@@ -217,6 +249,16 @@ export function AnalyticsDashboard() {
               { key: 'count', label: 'Ocorrências', render: (row) => formatNumber(row.count) },
             ]}
             rows={searches.empty}
+          />
+        </div>
+        <div className="mt-6">
+          <AnalyticsTable
+            columns={[
+              { key: 'search_term', label: 'Termo sem resultado' },
+              { key: 'frequency', label: 'Frequência', render: (row) => formatNumber(row.frequency) },
+              { key: 'top_source_page', label: 'Página de origem' },
+            ]}
+            rows={noResultSearchReport}
           />
         </div>
       </AnalyticsSection>

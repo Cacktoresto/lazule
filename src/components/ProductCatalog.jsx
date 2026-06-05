@@ -4,7 +4,7 @@ import { createWhatsAppLink } from '../utils/whatsapp';
 import { getAllProducts } from '../data/catalogRepository';
 import { excludeInternalTestProducts } from '../domain/internalTestProduct';
 import { getFeaturedCollections } from '../utils/catalog';
-import { trackEvent, trackSearch, trackWhatsAppClick } from '../utils/analytics';
+import { trackCatalogView, trackEvent, trackSearch, trackWhatsAppClick } from '../utils/analytics';
 import { filterAndSortCatalogProducts } from '../utils/catalogFilters';
 import { AdvancedFilters, ALL_VALUE } from './AdvancedFilters';
 import { ProductCard } from './ProductCard';
@@ -125,6 +125,7 @@ export function ProductCatalog() {
   const [interpretedIntent, setInterpretedIntent] = useState({ matchedSignals: [], semanticEntity: null });
   const [enableSemanticHydration, setEnableSemanticHydration] = useState(false);
   const resultsRef = useRef(null);
+  const searchStartedAtRef = useRef(0);
 
   const catalogProducts = useMemo(() => excludeInternalTestProducts(getAllProducts()), []);
   const featuredCollections = useMemo(() => getFeaturedCollections(catalogProducts), [catalogProducts]);
@@ -230,6 +231,7 @@ export function ProductCatalog() {
     setSearchTerm(normalizedTerm);
     setVisibleCount(PRODUCTS_PER_PAGE);
     syncCatalogUrl(filters, normalizedTerm);
+    searchStartedAtRef.current = performance.now();
     trackEvent('search_submit', { searchTerm: normalizedTerm, sourcePage: 'catalog' });
   }
 
@@ -256,8 +258,16 @@ export function ProductCatalog() {
   }, [filteredProducts.length, filters, searchTerm]);
 
   useEffect(() => {
+    const activeFilters = getAppliedFilterChips(filters, searchTerm).reduce((acc, chip) => ({ ...acc, [chip.label]: chip.value }), {});
+    trackCatalogView({
+      active_filters: activeFilters,
+      category: filters.category !== ALL_VALUE ? filters.category : 'all',
+      product_count: filteredProducts.length,
+      result_count: filteredProducts.length,
+      source_page: 'catalog',
+    });
     trackEvent('catalog_view', { result_count: filteredProducts.length, source_page: 'catalog' }, { dedupeKey: `catalog_view|${window.location.search}|${filteredProducts.length}`, dedupeMs: 1500 });
-  }, [filteredProducts.length]);
+  }, [filteredProducts.length, filters, searchTerm]);
 
   useEffect(() => {
     const normalizedQuery = searchTerm.trim();
@@ -267,7 +277,7 @@ export function ProductCatalog() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      trackSearch({ searchTerm: normalizedQuery, resultCount: filteredProducts.length, sourcePage: 'catalog' });
+      trackSearch({ searchTerm: normalizedQuery, resultCount: filteredProducts.length, sourcePage: 'catalog', timeToResultMs: searchStartedAtRef.current ? Math.round(performance.now() - searchStartedAtRef.current) : undefined });
       if (filteredProducts.length === 0) {
         trackEvent('empty_search_result', { searchTerm: normalizedQuery, resultCount: 0, sourcePage: 'catalog' });
       }

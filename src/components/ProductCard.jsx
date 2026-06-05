@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { formatBRL } from '../utils/currency';
 import { getAvailabilityStatus } from '../utils/availability';
 import { canDirectBuy, getCommercialStatusMeta } from '../utils/commercialStatus';
-import { trackProductSelect } from '../utils/analytics';
+import { trackMicroconversion, trackProductSelect } from '../utils/analytics';
 import { createProductPath } from '../utils/productRouting';
 import { formatSemanticLabels } from '../utils/semanticPresentation';
 import { createHumanContextNarrative } from '../ai/editorialIntelligenceSystem';
@@ -73,7 +73,10 @@ export function ProductCard({ product, analyticsSection = 'catalog_grid', highli
       <a
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lazule-gold focus-visible:ring-offset-2 focus-visible:ring-offset-lazule-night"
         href={productPath}
-        onClick={() => trackProductSelect(product, { source_page: analyticsSection, section: analyticsSection, interaction_type: 'card' })}
+        onClick={() => {
+          trackMicroconversion('perfume_click', { product_id: product.id, product_slug: product.productSlug, product_name: product.name, brand: product.brand, category: product.catalogType, source_page: analyticsSection });
+          trackProductSelect(product, { source_page: analyticsSection, section: analyticsSection, interaction_type: 'card' });
+        }}
       >
         <div className={`relative overflow-hidden bg-gradient-to-br from-lazule-royal via-lazule-night to-lazule-blue ${isHero ? 'aspect-[4/3] sm:aspect-[16/9]' : isFeatured ? 'aspect-[5/6]' : 'aspect-[1/1] sm:aspect-[4/5]'}`}>
           {product.image && !hasImageFailed ? (
