@@ -43,6 +43,11 @@ export function getBrandSlugFromPath(pathname) {
   return match ? createBrandSlug(safelyDecodePathSegment(match[1])) : null;
 }
 
+export function getCompareSlugFromPath(pathname) {
+  const match = String(pathname || '').match(/^\/compare\/([^/]+)\/?$/);
+  return match ? safelyDecodePathSegment(match[1]) : null;
+}
+
 export function normalizeSpaPath(path = '/') {
   try {
     const url = new URL(String(path || '/'), 'https://lazule.local');
