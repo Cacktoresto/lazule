@@ -17,7 +17,7 @@
 
   const LOG_PREFIX = '[LAZULE browser extractor]';
   const MAX_LOG_LENGTH = 1000;
-  const CATEGORY_NAMES = new Set(['All', 'Masculinos', 'Femininos', 'Kit', 'Árabe', 'Nicho', 'Pastas Isabelle']);
+  const CATEGORY_NAMES = new Set(['All', 'Masculinos', 'Femininos', 'Unissex', 'Kit', 'Árabe', 'Árabes', 'Nicho', 'Pastas Isabelle']);
   const IGNORED_IMAGE_PATTERN = /logo|icon|favicon|banner|placeholder|sprite|brand|avatar|whatsapp|facebook|instagram/i;
   const STRICT_PRODUCT_CARD_SELECTOR = [
     'article[class*="product" i]',
@@ -28,7 +28,12 @@
     '[class*="catalog" i] li',
     '[class*="product-grid" i] > *',
   ].join(',');
-  const INVALID_UI_PHRASES = ['we use cookies', 'cookies', 'improve the services', 'developed by', 'back to top', 'create a website', 'kyte', 'loading', 'order by', 'masculino', 'feminino'];
+  const INVALID_UI_PHRASES = ['we use cookies', 'cookies', 'improve the services', 'developed by', 'back to top', 'create a website', 'kyte', 'loading', 'order by', 'ordenar por', 'voltar ao topo'];
+  const PRICE_TEXT_PATTERN = /R\$\s*\d/;
+  const RETAIL_PRICE_PATTERN = /Varejo\s*:\s*R\$/i;
+  const SIZE_PATTERN = /\b(?:\d{1,3}(?:[,.]\d+)?\s*(?:ml|l|g|kg)|30ml|50ml|75ml|80ml|90ml|100ml|125ml|150ml|200ml)\b/i;
+  const CATEGORY_PATTERN = /\b(?:Masculinos?|Femininos?|Unissex|Árabes?|Arabes?|Nicho|Kit|Kits|Pastas? Isabelle)\b/i;
+  const FALLBACK_UI_LINE_PATTERN = /^(?:tudo|ordenar por|voltar ao topo|menu|filtros?|buscar|pesquisar|categorias?|entrar|carrinho|comprar|adicionar|ver mais|loading|carregando)$/i;
   const truncateLogText = (value) => {
     const text = String(value ?? '');
     return text.length > MAX_LOG_LENGTH ? `${text.slice(0, MAX_LOG_LENGTH)}… [truncated]` : text;
@@ -201,8 +206,8 @@
   function buildIdentityKey(product) {
     return [
       normalizeIdentityPart(product.name),
-      normalizeIdentityPart(product.category),
-      normalizeIdentityPart(product.retailLine),
+      normalizeIdentityPart(product.price ?? product.costPrice ?? ''),
+      normalizeIdentityPart(product.retailPrice ?? product.supplierRetailPrice ?? ''),
       normalizeIdentityPart(product.image),
       normalizeIdentityPart(product.sourceUrl),
     ].join('|');
@@ -223,6 +228,8 @@
 
     if (!Number.isFinite(merged.costPrice) && Number.isFinite(incoming.costPrice)) merged.costPrice = incoming.costPrice;
     if (!Number.isFinite(merged.supplierRetailPrice) && Number.isFinite(incoming.supplierRetailPrice)) merged.supplierRetailPrice = incoming.supplierRetailPrice;
+    if (!Number.isFinite(merged.price) && Number.isFinite(incoming.price)) merged.price = incoming.price;
+    if (!Number.isFinite(merged.retailPrice) && Number.isFinite(incoming.retailPrice)) merged.retailPrice = incoming.retailPrice;
 
     merged.allImages = [...new Set([...(base.allImages || []), ...(incoming.allImages || [])])];
     merged.alternatePrices = [...new Set([...(base.alternatePrices || []), ...(incoming.alternatePrices || [])])];
@@ -281,6 +288,8 @@
       name,
       category,
       retailLine,
+      price: prices[0] ?? null,
+      retailPrice: prices.at(-1) ?? null,
       supplierRetailPrice: prices.at(-1) ?? null,
       costPrice: prices[0] ?? null,
       description,
@@ -308,6 +317,222 @@
     return product;
   }
 
+
+  function isVisibleElement(element) {
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) return false;
+    const style = window.getComputedStyle(element);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function textLines(text) {
+    return normalizeText(text)
+      .split('\n')
+      .map((line) => line.replace(/\s{2,}/g, ' ').trim())
+      .filter(Boolean);
+  }
+
+  function getElementLines(element) {
+    return textLines(visibleText(element));
+  }
+
+  function isLikelyUiLine(line) {
+    const normalized = normalizeText(line);
+    if (!normalized) return true;
+    if (FALLBACK_UI_LINE_PATTERN.test(normalized)) return true;
+    if (/^(?:R\$\s*)?\d+[.,]?\d*$/.test(normalized) && !PRICE_TEXT_PATTERN.test(normalized)) return true;
+    if (/^[-+]?\d+%\s*off$/i.test(normalized)) return true;
+    return false;
+  }
+
+  function isLikelyProductNameLine(line) {
+    const normalized = normalizeText(line);
+    if (!normalized || normalized.length < 5 || normalized.length > 180) return false;
+    if (PRICE_TEXT_PATTERN.test(normalized) || RETAIL_PRICE_PATTERN.test(normalized)) return false;
+    if (CATEGORY_PATTERN.test(normalized) && normalized.length < 30 && !SIZE_PATTERN.test(normalized)) return false;
+    if (isLikelyUiLine(normalized) || isInvalidUiText(normalized)) return false;
+    const hasBrandSeparator = /\s[|/]\s/.test(normalized);
+    const hasSize = SIZE_PATTERN.test(normalized);
+    const hasProductToken = /\b(?:EDT|EDP|Parfum|Elixir|Cologne|Perfume|Deo|Body|Splash|Extrait)\b/i.test(normalized);
+    const hasLettersAndNumber = /[A-Za-zÀ-ÿ]{2,}.*\d/.test(normalized);
+    return hasBrandSeparator || hasSize || hasProductToken || hasLettersAndNumber;
+  }
+
+  function findCategoryFromLines(lines, fallbackCategory) {
+    const fromLines = lines.find((line) => CATEGORY_PATTERN.test(line) && !PRICE_TEXT_PATTERN.test(line));
+    if (fromLines) return normalizeText(fromLines.match(CATEGORY_PATTERN)?.[0] || fromLines);
+    return fallbackCategory || '';
+  }
+
+  function scoreFallbackContainer(element) {
+    const lines = getElementLines(element);
+    const text = lines.join('\n');
+    const hasPrice = PRICE_TEXT_PATTERN.test(text);
+    const hasName = lines.some(isLikelyProductNameLine);
+    const hasCategory = lines.some((line) => CATEGORY_PATTERN.test(line));
+    const hasRetail = RETAIL_PRICE_PATTERN.test(text);
+    const hasImage = Boolean(getImageData(element).image);
+    return Number(hasPrice) * 4 + Number(hasName) * 4 + Number(hasImage) * 2 + Number(hasCategory) + Number(hasRetail);
+  }
+
+  function findFallbackContainer(priceElement) {
+    let best = priceElement;
+    let bestScore = scoreFallbackContainer(priceElement);
+    let current = priceElement;
+
+    for (let depth = 0; depth < 6 && current?.parentElement; depth += 1) {
+      current = current.parentElement;
+      const text = visibleText(current);
+      if (!text || text.length > CONFIG.maxProductTextLength) break;
+      const score = scoreFallbackContainer(current);
+      if (score > bestScore) {
+        best = current;
+        bestScore = score;
+      }
+      if (score >= 10) break;
+    }
+
+    return best;
+  }
+
+  function findNearbyImageData(container) {
+    const scopes = [
+      container,
+      container.previousElementSibling,
+      container.nextElementSibling,
+      container.parentElement,
+      container.parentElement?.previousElementSibling,
+      container.parentElement?.nextElementSibling,
+    ].filter(Boolean);
+
+    for (const scope of scopes) {
+      const imageData = getImageData(scope);
+      if (imageData.image) return imageData;
+    }
+
+    return { image: '', allImages: [], imageMissing: true };
+  }
+
+  function getFallbackPriceNodes() {
+    const elements = [...document.querySelectorAll('body *')].filter(isVisibleElement);
+    return elements.filter((element) => {
+      const text = visibleText(element);
+      if (!text || text.length > 220) return false;
+      if (!PRICE_TEXT_PATTERN.test(text)) return false;
+      if (isLikelyUiLine(text)) return false;
+      const childWithPrice = [...element.children].some((child) => PRICE_TEXT_PATTERN.test(visibleText(child)));
+      return !childWithPrice;
+    });
+  }
+
+  function extractFallbackProductFromPriceNode(priceElement, fallbackCategory) {
+    const container = findFallbackContainer(priceElement);
+    const lines = getElementLines(container);
+    const rawText = lines.join('\n');
+    if (!rawText || isInvalidUiText(rawText)) return null;
+
+    const priceLines = lines.filter((line) => PRICE_TEXT_PATTERN.test(line));
+    const retailLine = normalizeText(lines.find((line) => RETAIL_PRICE_PATTERN.test(line)) || '');
+    const prices = extractMoneyValues(rawText);
+    const mainPriceLine = priceLines.find((line) => !RETAIL_PRICE_PATTERN.test(line)) || priceLines[0] || '';
+    const retailPrices = extractMoneyValues(retailLine);
+    const mainPrice = parseMoneyToNumber(mainPriceLine) ?? prices.find(Number.isFinite) ?? null;
+    const retailPrice = retailPrices[0] ?? (prices.length > 1 ? prices.at(-1) : null);
+    const category = findCategoryFromLines(lines, fallbackCategory);
+    const nameLine = lines.find(isLikelyProductNameLine) || lines.find((line) => !PRICE_TEXT_PATTERN.test(line) && !CATEGORY_PATTERN.test(line) && !isLikelyUiLine(line));
+    const name = cleanupName(nameLine || '', category);
+
+    if (!name || !Number.isFinite(mainPrice)) return null;
+    if (isInvalidUiText(name) || FALLBACK_UI_LINE_PATTERN.test(name)) return null;
+
+    const imageData = findNearbyImageData(container);
+    const product = {
+      name,
+      category,
+      retailLine,
+      price: mainPrice,
+      retailPrice,
+      supplierRetailPrice: retailPrice,
+      costPrice: mainPrice,
+      description: normalizeText(lines.filter((line) => line !== nameLine).join('\n')).slice(0, 400),
+      olfactoryReference: '',
+      image: imageData.image,
+      allImages: imageData.allImages,
+      imageMissing: imageData.imageMissing,
+      sourceUrl: window.location.href,
+      alternateSourceUrls: [window.location.href],
+      rawText,
+      rawCardSnapshot: toSnapshot(container),
+      extractionSource: 'browserExtractor:v2:textFallback',
+      extractionTimestamp: new Date().toISOString(),
+      alternatePrices: prices,
+      duplicateCount: 1,
+      fallbackConfidenceSignals: {
+        hasNameSize: SIZE_PATTERN.test(name),
+        hasCategory: Boolean(category),
+        hasRetailPrice: Number.isFinite(retailPrice),
+        hasImage: Boolean(imageData.image),
+      },
+    };
+
+    product.extractionConfidence = computeConfidence(product);
+    product.needsReview = product.extractionConfidence === 'low';
+    product.missingFields = ['name', 'category', 'supplierRetailPrice', 'costPrice', 'image'].filter((field) => {
+      if (field === 'image') return !product.image;
+      return !product[field] && !Number.isFinite(product[field]);
+    });
+
+    return product;
+  }
+
+  function extractFallbackProducts(fallbackCategory) {
+    const priceNodes = getFallbackPriceNodes();
+    const products = [];
+
+    for (const priceNode of priceNodes) {
+      const product = extractFallbackProductFromPriceNode(priceNode, fallbackCategory);
+      if (product) products.push(product);
+    }
+
+    return { products, textPriceNodesFound: priceNodes.length };
+  }
+
+
+  function addProduct(product, productsByKey, uniqueKeys, report, validCounter = 'validCards') {
+    if (!product || !product.name) return false;
+    if (isInvalidUiText(product.name) || isInvalidUiText(product.rawText)) {
+      report.invalidUiElementsDiscarded += 1;
+      report.imageDownloadsPrevented += product.image ? 1 : 0;
+      return false;
+    }
+    if (/^-?\d+%\s*off$/i.test(product.name)) {
+      report.promoCardsDiscarded += 1;
+      report.imageDownloadsPrevented += product.image ? 1 : 0;
+      return false;
+    }
+    const tokenCount = normalizeIdentityPart(product.name).split(' ').filter((t) => t.length > 2).length;
+    const minimalConfidence = tokenCount >= 2 || Number.isFinite(product.supplierRetailPrice) || Number.isFinite(product.costPrice) || Boolean(product.image) || SIZE_PATTERN.test(product.rawText);
+    if (!minimalConfidence) {
+      report.invalidUiElementsDiscarded += 1;
+      report.imageDownloadsPrevented += product.image ? 1 : 0;
+      return false;
+    }
+
+    report[validCounter] += 1;
+    const identity = buildIdentityKey(product);
+    if (!uniqueKeys.has(identity)) {
+      uniqueKeys.add(identity);
+      productsByKey.set(identity, product);
+      return true;
+    }
+
+    const current = productsByKey.get(identity);
+    productsByKey.set(identity, mergeProductRecords(current, product));
+    report.duplicateMerges += 1;
+    return false;
+  }
+
   async function run() {
     const startedAt = Date.now();
     const productsByKey = new Map();
@@ -330,10 +555,14 @@
       stopReason: 'unknown',
       runtimeMs: 0,
       newProductsPerCycle: [],
+      fallbackUsed: false,
+      textPriceNodesFound: 0,
+      fallbackCandidates: 0,
+      fallbackValidProducts: 0,
     };
 
     const scrollContainer = getScrollContainer();
-    const fallbackCategory = document.querySelector('[aria-current="page"]')?.textContent?.trim() || document.title || '';
+    const fallbackCategory = document.querySelector('[aria-current="page"]')?.textContent?.trim() || window.location.pathname.split('/').filter(Boolean).at(-1)?.replace(/[-_]/g, ' ') || document.title || '';
     const history = [];
 
     for (let cycle = 1; cycle <= CONFIG.maxScrollCycles; cycle += 1) {
@@ -355,36 +584,17 @@
         const cardsInPass = findProductElements();
 
         for (const card of cardsInPass) {
-          const product = extractFromCard(card, fallbackCategory);
-          if (!product || !product.name) continue;
-          if (isInvalidUiText(product.name) || isInvalidUiText(product.rawText)) {
-            report.invalidUiElementsDiscarded += 1;
-            report.imageDownloadsPrevented += product.image ? 1 : 0;
-            continue;
-          }
-          if (/^-?\d+%\s*off$/i.test(product.name)) {
-            report.promoCardsDiscarded += 1;
-            report.imageDownloadsPrevented += product.image ? 1 : 0;
-            continue;
-          }
-          const tokenCount = normalizeIdentityPart(product.name).split(' ').filter((t) => t.length > 2).length;
-          const minimalConfidence = tokenCount >= 2 || Number.isFinite(product.supplierRetailPrice) || Boolean(product.image) || /\b\d{2,4}\s*ml\b/i.test(product.rawText);
-          if (!minimalConfidence) {
-            report.invalidUiElementsDiscarded += 1;
-            report.imageDownloadsPrevented += product.image ? 1 : 0;
-            continue;
-          }
-          report.validCards += 1;
+          addProduct(extractFromCard(card, fallbackCategory), productsByKey, uniqueKeys, report);
+        }
+      }
 
-          const identity = buildIdentityKey(product);
-          if (!uniqueKeys.has(identity)) {
-            uniqueKeys.add(identity);
-            productsByKey.set(identity, product);
-          } else {
-            const current = productsByKey.get(identity);
-            productsByKey.set(identity, mergeProductRecords(current, product));
-            report.duplicateMerges += 1;
-          }
+      if (report.candidateCards === 0 || report.validCards === 0) {
+        report.fallbackUsed = true;
+        const fallbackExtraction = extractFallbackProducts(fallbackCategory);
+        report.textPriceNodesFound += fallbackExtraction.textPriceNodesFound;
+        report.fallbackCandidates += fallbackExtraction.products.length;
+        for (const product of fallbackExtraction.products) {
+          addProduct(product, productsByKey, uniqueKeys, report, 'fallbackValidProducts');
         }
       }
 
